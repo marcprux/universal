@@ -1,5 +1,7 @@
 # Bric-à-brac
 
+[![Join the chat at https://gitter.im/glimpseio/BricBrac](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glimpseio/BricBrac?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/glimpseio/BricBrac.svg?branch=master)](https://travis-ci.org/glimpseio/BricBrac)
 
 Complete cross-platform JSON Toolkit for Swift

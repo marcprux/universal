@@ -642,62 +642,62 @@ public extension RawRepresentable where Self.RawValue : BricableDoubleConvertibl
     }
 }
 
-/// RawRepresentable Bric methods that enable an Double enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables a Double to automatically bric & brac
 extension Double : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an Float enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables a Float to automatically bric & brac
 extension Float : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an Int enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables an Int to automatically bric & brac
 extension Int : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an Int8 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables an Int8 to automatically bric & brac
 extension Int8 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an Int16 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables an Int16 to automatically bric & brac
 extension Int16 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an Int32 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables an Int32 to automatically bric & brac
 extension Int32 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an Int64 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables an Int64 to automatically bric & brac
 extension Int64 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an UInt enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables a UInt to automatically bric & brac
 extension UInt : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an UInt8 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables a UInt8 to automatically bric & brac
 extension UInt8 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an UInt16 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables a UInt16 to automatically bric & brac
 extension UInt16 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an UInt32 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables a UInt32 to automatically bric & brac
 extension UInt32 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }
 
-/// RawRepresentable Bric methods that enable an UInt64 enum to automatically bric & brac
+/// BricableDoubleConvertible conformance that enables a UInt64 to automatically bric & brac
 extension UInt64 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
 }

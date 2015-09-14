@@ -803,6 +803,7 @@
 		7E8E745F1B9F31E8004EA61F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
 				EXECUTABLE_NAME = curio;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_NAME = "${TARGET_NAME}";
@@ -812,6 +813,7 @@
 		7E8E74601B9F31E8004EA61F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
 				EXECUTABLE_NAME = curio;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_NAME = "${TARGET_NAME}";

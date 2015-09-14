@@ -321,56 +321,6 @@ public enum FidelityBricolage : Bricolage {
     }
 }
 
-//public protocol FluentBricolageType : Bricolage {
-//}
-//
-//public extension FluentBricolageType where ArrType : RangeReplaceableCollectionType, ArrType.Generator.Element == Self {
-//    static func putElement(var arr: ArrType, element: Self) -> ArrType {
-//        arr.append(element)
-//        return arr
-//    }
-//}
-//
-//public enum FluentBricolage<BolType : BooleanLiteralConvertible, StrType : StringLiteralConvertible, ArrType : RangeReplaceableCollectionType where BolType.BooleanLiteralType == Bool, StrType.StringLiteralType == String> : FluentBricolageType {
-//    public typealias NulType = Void
-//    public typealias NumType = Array<UnicodeScalar>
-//    public typealias ObjType = Array<(StrType, FluentBricolage)>
-//
-//    case Nul(NulType)
-//    case Bol(BolType)
-//    case Str(StrType)
-//    case Num(NumType)
-//    case Arr(ArrType)
-//    case Obj(ObjType)
-//
-//    public init(nul: NulType) { self = .Nul(nul) }
-//    public init(bol: BolType) { self = .Bol(bol) }
-//    public init(str: StrType) { self = .Str(str) }
-//    public init(num: NumType) { self = .Num(num) }
-//    public init(arr: ArrType) { self = .Arr(arr) }
-//    public init(obj: ObjType) { self = .Obj(obj) }
-//
-//    public static func createNull() -> NulType { }
-//    public static func createTrue() -> BolType { return BolType(booleanLiteral: true) }
-//    public static func createFalse() -> BolType { return BolType(booleanLiteral: false) }
-//    public static func createObject() -> ObjType { return ObjType() }
-//    public static func createArray() -> ArrType { return ArrType() }
-//    public static func createString(scalars: [UnicodeScalar]) -> StrType? { return StrType(stringLiteral: String(String.UnicodeScalarView() + scalars)) }
-//    public static func createNumber(scalars: [UnicodeScalar]) -> NumType? { return scalars }
-//
-////    public static func putElement(var arr: ArrType, element: FluentBricolage) -> ArrType {
-////        arr.append(element)
-//////        arr.append(element)
-////        return arr
-////    }
-//
-//    public static func putKeyValue(var obj: ObjType, key: StrType, value: FluentBricolage) -> ObjType {
-//        obj.append((key, value))
-//        return obj
-//    }
-//}
-//
-//public typealias FluentBric = FluentBricolage<Bool, String, Array<FluentBric>>
 
 /// Storage for JSON that is tailored for Swift-fluent access
 extension Bric: Bricolage {
@@ -556,11 +506,6 @@ extension Bricolage {
 extension String {
     /// Convenience for creating a string from an array of UnicodeScalars
     init(scalars: [UnicodeScalar]) {
-//        var view = String.UnicodeScalarView()
-//        view.reserveCapacity(scalars.count)
-//        view.extend(scalars)
-//        self = String(view)
         self = String(String.UnicodeScalarView() + scalars) // seems a tiny bit faster
     }
 }
-

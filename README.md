@@ -3,9 +3,6 @@
 [![Build Status](https://travis-ci.org/glimpseio/BricBrac.svg?branch=master)](https://travis-ci.org/glimpseio/BricBrac)
 [![Join the chat at https://gitter.im/glimpseio/BricBrac](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glimpseio/BricBrac?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-
-Complete cross-platform JSON Toolkit for Swift
-
 Bric-à-brac is a lightweight, clean and efficient JSON toolkit for Swift 2.
 
 It sports the following features:
@@ -17,7 +14,7 @@ It sports the following features:
  * 100% Pure Swift
 
 
-### Quick Tour
+## Quick Tour
 
 ````swift
 import BricBrac
@@ -224,7 +221,7 @@ order.bric() // {"type":"direct","location":{"y":433,"x":1043},"date":"2015-09-1
 
 ````
 
-### Integrating in the Build process
+### Integrating Curio into the Build process
 
  * Build Rules
  * Change the name to "JSON Schema Compiler"
@@ -243,7 +240,19 @@ Now any file with the suffix ".jsonschema" will automatiucally have a Swift file
 
 
 
-### Setting up BricBrac
+##Installation
+
+###[Carthage](https://github.com/Carthage/Carthage#installing-carthage)
+
+Add the following line to your [Cartfile](https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile).
+
+````
+github "glimpseio/BricBrac"
+````
+
+Then do `carthage update`. After that, add the framework to your project.
+
+###Manually
 
 `BricBrac` is a single cross-platform iOS & Mac Framework. To set it up in your project, simply add it as a github submodule, drag the `BricBrac.xcodeproj` into your own project file, add `BricBrac.framework` to your target's dependencies, and `import BricBrac` from any Swift file that should use it.
 

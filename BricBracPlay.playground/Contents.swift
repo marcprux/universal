@@ -85,13 +85,13 @@ points.bric().stringify() // {"first":[{"y":2,"x":1},{"y":5,"x":4}],"second":[{"
 do {
     try CGPoint.brac(["x": 1])
 } catch {
-    print(error) // Missing key for Double: «y»
+    error // Missing key for Double: «y»
 }
 
 do {
     try CGPoint.brac(["x": 1, "y": false])
 } catch {
-    print(error) // Invalid type: expected Double, found Bool at /y
+    error // Invalid type: expected Double, found Bool at /y
 }
 
 import Foundation
@@ -128,7 +128,7 @@ try NSDate.brac("2015-09-14T13:31:20-04:00") // "Sep 14, 2015, 1:31 PM"
 do {
     try NSDate.brac("2015-13-14T99:31:20-04:00")
 } catch {
-    print(String(error)) // Error Domain=NSCocoaErrorDomain Code=2048 "The value “2015-13-14T99:31:20-04:00” is invalid." UserInfo={NSInvalidValue=2015-13-14T99:31:20-04:00}
+    String(error) // Error Domain=NSCocoaErrorDomain Code=2048 "The value “2015-13-14T99:31:20-04:00” is invalid." UserInfo={NSInvalidValue=2015-13-14T99:31:20-04:00}
 }
 
 
@@ -200,5 +200,6 @@ order.bric() // {"type":"direct","location":null,"date":"2015-09-14T13:31:40-04:
 order.location = CGPoint(x: 1043, y: 433)
 order.bric() // {"type":"direct","location":{"y":433,"x":1043},"date":"2015-09-14T13:33:16-04:00","products":[{"name":"MacBook","weight":2,"tags":["laptop","computer"],"description":"A Nice Laptop"}]}
 
-
+// {"args":{},"origin":"61.46.1.98","headers":{"Accept-Encoding":"gzip, deflate","Accept-Language":"en-us","Accept":"*/*","User-Agent":"BricBracPlay/1 CFNetwork/760.0.5 Darwin/15.0.0 (x86_64)","Host":"httpbin.org"},"url":"http://httpbin.org/get"}
+let rest = try Bric.parse(String(contentsOfURL: NSURL(string: "http://httpbin.org/get")!, encoding: NSUTF8StringEncoding))
 

@@ -1,11 +1,21 @@
 import BricBrac
 
+//: The core element of the Bric-a-Brac framework is the `Bric` type, which is an enumeration that represents a piece of valid JSON. 
+
+//: ### Reading from a JSON String
+//: A bit of `Bric` can be created from a Swift String with the `parse` function, which will throw an error if the JSON is malformed.
 let parsed: Bric = try Bric.parse("[1, 2.3, true, false, null, {\"key\": \"value\"}]") // parsing a string
+
+//: You can also create a bit of `Bric` manually using a Swift-fluent API, where literal strings, numbers, booleans, arrays, and dictionaries are specified inline.
 var bric: Bric = [1, 2.3, true, false, nil, ["key": "value"]] // fluent API for building the same as above
 
 assert(bric == parsed)
 
+//: Elements of `Bric` arrays and objects can be accessed via their numeric and string keys, respectively.
 let e0: Int? = bric[0] // 1
+
+//: Note that accessing an array index that is out-of-bounds returns `nil` rather than raising an error
+let missingElement: Bric? = bric[999] // nil (not an error when index out of bounds)
 
 let e1: Double? = bric[1] // 2.3
 
@@ -24,25 +34,66 @@ bric[5]?["key"] = "newValue" // same API can be used to modify Bric
 
 let keyValue2: String? = bric[5]?["key"] // "newValue"
 
-let missingElement: Bric? = bric[6] // nil (not an error when index out of bounds)
+//: ### Writing to a JSON String
+//: A bit of `Bric` can be saved out to a JSON-compliant string with the `stringify` function, outputting:
+//: `[1,2.3,true,false,null,{"key":"newValue"}]`
 
-
-let compact: String = bric.stringify() // compact: "[1,2.3,true,false,null,{"key":"value"}]"
+let compact: String = bric.stringify() // compact: "[1,2.3,true,false,null,{"key":"newValue"}]"
 let compact2 = String(bric) // same as above (Bric conforms to Streamable)
 
+/*:
+You can also pretty-print the bric with the `space` parameter.
+*/
 let pretty: String = bric.stringify(space: 2) // pretty-printed
 
 
+/*:
+Collections and Optionals are automatically wrapped when parsing `Bric`.
+*/
+
+let arrayOfOptionalNumbers = try Array<Optional<UInt8>>.brac(Bric.parse("[1, 2, null]"))
+let arrayOfOptionalNumbers2 = try [UInt8?].brac(Bric.parse("[1, 2, null]")) // same as above
+
+/*:
+Optionality must be explicitly included in the type, or else an error will be thrown.
+*/
+do {
+    let arrayOfNonOptionalNumbers = try [UInt8].brac(Bric.parse("[1, 2, null]"))
+} catch {
+    String(error) // "Invalid type: expected Int8, found nil"
+}
+
+/*:
+When a numeric type is out of range, it will throw an error.
+*/
+do {
+    let arrayOfUnsignedInts = try [UInt8].brac(Bric.parse("[-2]"))
+} catch {
+    String(error) // "Numeric overflow: UInt8 cannot contain -2.0"
+}
+
+/*:
+Automatic rounding, however, is performed:
+*/
+let arrayOfRoundedUInts = try [UInt8].brac(Bric.parse("[2.345]")) // [2]
+
+
+/*:
+### Serializing custom types
+
+Many of the built-in Swift types can be read/written to/from Bric via the framework adopting
+the `Bricable` and `Bracable` protocols for raw types (`String`, `Int`, `Bool`, etc.)
+
+User-defined types can also handle JSON (de-)serialization by adopting these protocols. No
+requirements are made about the optionality or mutability of the given properties.
+*/
 /// A custom struct; no requirements about optionality or mutability of properties
-struct Product {
+struct Product : BricBrac {
     let name: String
     let weight: Double
     var description: String?
     var tags: Set<String>
-}
 
-/// Endowing the struct with BricBrac: just implement bric() and brac()
-extension Product : BricBrac {
     func bric() -> Bric {
         return ["name": name.bric(), "weight": weight.bric(), "description": description.bric(), "tags": tags.bric()]
     }
@@ -164,12 +215,12 @@ enum OrderType : String { case direct, web, phone }
 extension OrderType : BricBrac { }
 
 
-let directOrder = try OrderType.brac("direct")
+let orders = try [OrderType?].brac(["direct", "web", nil]) // direct, web, nil
 
 do {
-    let badOrder = try OrderType.brac("fax")
+    let badOrder = try [OrderType?].brac(["phone", "fax", nil])
 } catch let error as BracError {
-    // error: "Invalid value for OrderType: fax"
+    String(error) // error: "Invalid value for OrderType: fax"
 }
 
 struct Order {

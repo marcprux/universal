@@ -2,7 +2,6 @@ osx_image: xcode7
 language: objective-c
 xcode_project: BricBrac.xcodeproj
 xcode_scheme: BricBrac
-# xcode_sdk: iphonesimulator8.3
-# script: xctool -project ChannelZ.xcodeproj -scheme ChannelZ -sdk iphonesimulator -destination platform='iOS Simulator',name='iPad Retina',OS='8.1' clean test
-# script: xcodebuild test -project ChannelZ.xcodeproj -scheme ChannelZ -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO
-script: xcodebuild test -project BricBrac.xcodeproj -scheme BricBrac
+script: 
+  - xcodebuild test -project BricBrac.xcodeproj -scheme BricBrac
+  - xcodebuild test -project BricBrac.xcodeproj -scheme Curio

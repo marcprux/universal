@@ -1,0 +1,17 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Food",
+    "type": "object",
+    "required": ["title", "type"],
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "calories": {
+        "type": "integer"
+      },
+      "type": {
+        "enum": ["protein", "carbohydrate", "fat"]
+      }
+    }
+}

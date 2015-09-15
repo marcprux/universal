@@ -3,8 +3,6 @@ language: objective-c
 xcode_project: BricBrac.xcodeproj
 xcode_scheme: BricBrac
 script:
-  - xcodebuild clean -project BricBrac.xcodeproj -scheme BricBrac
-  - xcodebuild build -project BricBrac.xcodeproj -scheme BricBrac
-# - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme BricBrac
-# - xcodebuild test -project BricBrac.xcodeproj -sdk iphonesimulator -scheme BricBrac
-# - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme Curio
+  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme BricBrac
+  - xcodebuild test -project BricBrac.xcodeproj -sdk iphonesimulator -scheme BricBrac
+  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme Curio

@@ -6,3 +6,4 @@ script:
   - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme BricBrac
   - xcodebuild test -project BricBrac.xcodeproj -sdk iphonesimulator -scheme BricBrac
   - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme Curio
+

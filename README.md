@@ -1,17 +1,23 @@
-# Bric-à-brac
+Bric-à-brac
+=======
 
+[![Swift 2.0](https://img.shields.io/badge/Swift-2.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
+[![Platforms OS X | iOS](https://img.shields.io/badge/Platforms-OS%20X%20%7C%20iOS-lightgray.svg?style=flat)](https://developer.apple.com/swift/)
+[![Carthage Compatible](https://img.shields.io/badge/Carthage-Compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![License MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Build Status](https://travis-ci.org/glimpseio/BricBrac.svg?branch=master)](https://travis-ci.org/glimpseio/BricBrac)
 [![Join the chat at https://gitter.im/glimpseio/BricBrac](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glimpseio/BricBrac?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![codecov.io](http://codecov.io/github/glimpseio/BricBrac/coverage.svg?branch=master)](http://codecov.io/github/glimpseio/BricBrac?branch=master)
 
-Bric-à-brac is a lightweight, clean and efficient JSON toolkit for Swift 2.
+**Bric-à-brac** is a lightweight, clean and efficient JSON toolkit for **Swift 2**.
 
-It sports the following features:
+## Features
 
- * A simple immutable model of the JSON language elements
- * An efficient streaming JSON parser
- * Type-based (de)serialization of custom objects (no reflection, no intrusion)
- * No dependencies on Foundation or any other external framework
- * 100% Pure Swift
+- [x] A simple immutable model of the JSON language elements
+- [x] An efficient streaming JSON parser
+- [x] Type-based (de)serialization of custom objects (no reflection, no intrusion)
+- [x] No dependencies on `Foundation` or any other external framework (**Linux ready**)
+- [x] 100% Pure Swift
 
 
 ## Quick Tour

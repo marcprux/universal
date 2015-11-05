@@ -29,6 +29,7 @@
 		7E7F9B3D1B3615AB0058706A /* BricBracTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B3C1B3615AB0058706A /* BricBracTests.swift */; };
 		7E7F9B3F1B3615B00058706A /* test in Resources */ = {isa = PBXBuildFile; fileRef = 7E7F9B3E1B3615B00058706A /* test */; };
 		7E8930151BEA570A00F245C5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8930141BEA570A00F245C5 /* Structures.swift */; };
+		7E8930161BEBE7A000F245C5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8930141BEA570A00F245C5 /* Structures.swift */; };
 		7E8E745D1B9F31E8004EA61F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8E745C1B9F31E8004EA61F /* main.swift */; };
 		7E8E74671B9F35A2004EA61F /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
 		7E8E74701B9F3643004EA61F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
@@ -273,8 +274,8 @@
 				7E7F9B381B36159A0058706A /* BricIO.swift */,
 				7EFA1FFC1B5D72DC00B2F12E /* BricIO+Cocoa.swift */,
 				7E10201F1B858F6000171AFE /* JSONParser.swift */,
-				7E7F9B211B3615850058706A /* Info.plist */,
 				7E8930141BEA570A00F245C5 /* Structures.swift */,
+				7E7F9B211B3615850058706A /* Info.plist */,
 			);
 			path = BricBrac;
 			sourceTree = "<group>";
@@ -556,6 +557,7 @@
 				7E8E74751B9F36DF004EA61F /* JSONParser.swift in Sources */,
 				7E8E74741B9F36CD004EA61F /* BricIO.swift in Sources */,
 				7E8E74701B9F3643004EA61F /* SwiftCode.swift in Sources */,
+				7E8930161BEBE7A000F245C5 /* Structures.swift in Sources */,
 				7E348EE11B9F3CFE00945F86 /* Schema.swift in Sources */,
 				7E5DA2CF1B9F401A0013FCB9 /* Curio.swift in Sources */,
 				7E8E745D1B9F31E8004EA61F /* main.swift in Sources */,

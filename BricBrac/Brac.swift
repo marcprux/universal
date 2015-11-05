@@ -166,8 +166,8 @@ public extension Bric {
 //    }
 
     /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error
-    public func bracAny<T: Bracable>(anyOf: [() throws -> T]) throws -> [T] {
-        return try bracRange(1...anyOf.count, bracers: anyOf)
+    public func bracAny<T: Bracable>(anyOf: [() throws -> T]) throws -> T {
+        return try bracRange(1...anyOf.count, bracers: anyOf)[0]
     }
 
     /// Reads all of the given Brics, throwing an error if any of the closures threw an error

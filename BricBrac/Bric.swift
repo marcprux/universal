@@ -425,75 +425,6 @@ extension Bool: Bricable {
     public func bric() -> Bric { return .Bol(self) }
 }
 
-/// A FlatMappable is able to map itself through an optional
-public protocol FlatMappable {
-    typealias Wrapped
-    init(_ some: Wrapped)
-    func flatMap<U>(@noescape f: (Wrapped) throws -> U?) rethrows -> U?
-}
-
-/// Wrappable can contain zero or one instances (covers both `Optional` and `Indirect`)
-public protocol Wrappable : NilLiteralConvertible {
-    typealias Wrapped
-    init(_ some: Wrapped)
-}
-
-
-extension Optional : FlatMappable { }
-extension Optional : Wrappable { }
-
-/// Behaves exactly the same a an Optional except the .Some case is indirect, allowing for recursive value types
-public enum Indirect<Wrapped> : FlatMappable, Wrappable, NilLiteralConvertible {
-    case None
-    indirect case Some(Wrapped)
-
-    /// Construct a `nil` instance.
-    public init() {
-        self = .None
-    }
-
-    /// Create an instance initialized with `nil`.
-    public init(nilLiteral: ()) {
-        self = .None
-    }
-
-    /// Construct a non-`nil` instance that stores `some`.
-    public init(_ some: Wrapped) {
-        self = .Some(some)
-    }
-
-    public var value: Wrapped? {
-        get {
-            switch self {
-            case .None: return nil
-            case .Some(let v): return v
-            }
-        }
-
-        set {
-            if let v = newValue {
-                self = .Some(v)
-            } else {
-                self = .None
-            }
-        }
-    }
-
-    /// If `self == nil`, returns `nil`.  Otherwise, returns `f(self!)`.
-    @warn_unused_result
-    public func map<U>(@noescape f: (Wrapped) throws -> U) rethrows -> U? {
-        return try value.map(f)
-
-    }
-
-
-    /// Returns `nil` if `self` is nil, `f(self!)` otherwise.
-    @warn_unused_result
-    public func flatMap<U>(@noescape f: (Wrapped) throws -> U?) rethrows -> U? {
-        return try value.flatMap(f)
-    }
-}
-
 
 // MARK: BricLayer wrapper Bric
 
@@ -700,4 +631,47 @@ extension UInt32 : BricableDoubleConvertible {
 /// BricableDoubleConvertible conformance that enables a UInt64 to automatically bric & brac
 extension UInt64 : BricableDoubleConvertible {
     public var bricNum: Double { return Double(self) }
+}
+
+extension Mirror : Bricable {
+    /// A mirror can bric using reflection on all the child structures; note that any reference cycles will cause a stack overflow
+    public func bric() -> Bric {
+        switch displayStyle {
+        case .None:
+            return Bric.Nul
+        case .Some(.Collection), .Some(.Set), .Some(.Tuple):
+            var arr: [Bric] = []
+            for (_, value) in self.children {
+                if let bricable = value as? Bricable {
+                    arr.append(bricable.bric())
+                } else {
+                    arr.append(Mirror(reflecting: value).bric())
+                }
+            }
+            return Bric.Arr(arr)
+        case .Some(.Optional):
+            assert(self.children.count <= 1)
+            if let (_, value) = self.children.first {
+                if let bricable = value as? Bricable {
+                    return bricable.bric()
+                } else {
+                    return Mirror(reflecting: value).bric()
+                }
+            } else {
+                return Bric.Nul
+            }
+        case .Some(.Struct), .Some(.Class), .Some(.Enum), .Some(.Dictionary):
+            var bric: Bric = [:]
+            for (label, value) in self.children {
+                if let label = label {
+                    if let bricable = value as? Bricable {
+                        bric[label] = bricable.bric()
+                    } else {
+                        bric[label] = Mirror(reflecting: value).bric()
+                    }
+                }
+            }
+            return bric
+        }
+    }
 }

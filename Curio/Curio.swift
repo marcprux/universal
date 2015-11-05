@@ -24,6 +24,9 @@ public struct Curio {
     /// time to compile
     public var indirectCountThreshold = 20
 
+    /// The prefix for private internal indirect implementations
+    public var indirectPrefix = "_"
+
     public var accessor: ([CodeTypeName])->(CodeAccess) = { _ in .Default }
     public var renamer: ([CodeTypeName], String)->(CodeTypeName?) = { (parents, id) in nil }
 
@@ -183,7 +186,7 @@ public struct Curio {
 
         let comments = [schema.title, schema.description].filter({ $0 != nil }).map({ $0! })
 
-        func createComplexEnumeration(multi: [Schema]) throws -> CodeEnum {
+        func createComplexEnumeration(multi: [Schema], any: Bool) throws -> CodeEnum {
             let ename = typeName(parents, id)
             var code = CodeEnum(name: ename, access: accessor(parents))
             code.comments = comments
@@ -192,7 +195,11 @@ public struct Curio {
             var bracbody : [String] = []
 
             bricbody.append("switch self {")
-            bracbody.append("return try bric.bracOne([")
+            if any {
+                bracbody.append("return try bric.bracAny([")
+            } else {
+                bracbody.append("return try bric.bracOne([")
+            }
 
             var casenames = Set<String>()
             for sub in multi {
@@ -385,6 +392,8 @@ public struct Curio {
                     }
                 }
 
+                var indirect: CodeType?
+
                 if !required {
                     let structProps = props.filter({ (name, required, prop, anon) in
                         switch prop.type?.types.first {
@@ -395,15 +404,29 @@ public struct Curio {
                     })
 
                     if structProps.count >= self.indirectCountThreshold {
-                        proptype = indirectType(proptype)
-                    } else {
-                        proptype = optionalType(proptype)
+                        indirect = indirectType(proptype)
                     }
+                    proptype = optionalType(proptype)
                 }
 
+
                 let propn = propName(parents + [typename], name)
-                let propd = CodeProperty.Declaration(name: propn, type: proptype, access: accessor(parents))
-                let propi = propd.implementation
+                var propd = CodeProperty.Declaration(name: propn, type: proptype, access: accessor(parents))
+
+                var propi = propd.implementation
+
+                if let indirect = indirect {
+                    let ipropn = propName(parents + [typename], indirectPrefix + name)
+                    var ipropd = CodeProperty.Declaration(name: ipropn, type: indirect, access: .Private)
+                    let ipropi = ipropd.implementation
+                    code.props.append(ipropi)
+
+                    propi.body = [
+                        "get { return " + ipropn + ".value }",
+                        "set { " + ipropn + " = Indirect(fromOptional: newValue) }",
+                    ]
+                }
+
                 propd.comments = [prop.title, prop.description].filter({ $0 != nil }).map({ $0! })
                 
                 code.props.append(propi)
@@ -418,7 +441,7 @@ public struct Curio {
             case .None:
                 hasAdditionalProps = nil // TODO: make a global default for whether unspecified additionalProperties means yes or no
             case .Some(.A(false)):
-                hasAdditionalProps = false // FIXME: when this is false, allOf union types won't validate
+                hasAdditionalProps = nil // FIXME: when this is false, allOf union types won't validate
             case .Some(.A(true)), .Some(.B): // TODO: generate object types for B
                 hasAdditionalProps = true
                 addPropType = ObjectType // additionalProperties default to [String:Bric]
@@ -456,14 +479,24 @@ public struct Curio {
             func makeInit(merged: Bool) {
                 var elements: [CodeTupleElement] = []
                 var initbody: [String] = []
+                var wasIndirect = false
                 for p1 in code.props {
-                    // allOf merged will take any sub-states and create initializers with all of their arguments
-                    let sub = merged ? p1.declaration.type as? CodeStateType : nil
-                    for p in (sub?.props ?? [p1]) {
-                        let d = p.declaration
-                        let e = CodeTupleElement(name: d.name, type: d.type, value: d.type.defaultValue, anon: merge)
-                        elements.append(e)
-                        initbody.append("self.\(d.name) = \(d.name)")
+                    if p1.declaration.name.hasPrefix(indirectPrefix) {
+                        wasIndirect = true
+                    } else {
+                        // allOf merged will take any sub-states and create initializers with all of their arguments
+                        let sub = merged ? p1.declaration.type as? CodeStateType : nil
+                        for p in (sub?.props ?? [p1]) {
+                            let d = p.declaration
+                            let e = CodeTupleElement(name: d.name, type: d.type, value: d.type.defaultValue, anon: merge)
+                            elements.append(e)
+                            if wasIndirect {
+                                initbody.append("self.\(indirectPrefix)\(d.name) = Indirect(fromOptional: \(d.name))")
+                                wasIndirect = false
+                            } else {
+                                initbody.append("self.\(d.name) = \(d.name)")
+                            }
+                        }
                     }
                 }
 
@@ -636,14 +669,14 @@ public struct Curio {
             // represent allOf as a struct with non-optional properties
             var props: [PropInfo] = []
             for propSchema in allOf {
-//                // an internal nested state type can be safely collapsed into the owning object
-//                // not working for a few reasons, one of which is bric merge info
+                // an internal nested state type can be safely collapsed into the owning object
+                // not working for a few reasons, one of which is bric merge info
 //                if let subProps = propSchema.properties where !subProps.isEmpty {
-//                    props.extend(getPropInfo(subProps))
+//                    props.appendContentsOf(getPropInfo(subProps))
+//                    // TODO: sub-schema "required" array
 //                } else {
-//                    props.append(PropInfo(name: nil, required: true, schema: propSchema))
+                    props.append(PropInfo(name: nil, required: true, schema: propSchema))
 //                }
-                props.append(PropInfo(name: nil, required: true, schema: propSchema))
             }
             return try createObject(typename, properties: props, mode: .AllOf)
         } else if let anyOf = schema.anyOf {
@@ -655,10 +688,18 @@ public struct Curio {
 //            return CodeTypeAlias(name: allOfId, type: tuple, access: accessor(parents), peers: [oneOf])
 
             // represent anyOf as a struct with optional properties
-            let props: [PropInfo] = anyOf.map({ (name: nil, required: false, schema: $0 ) })
-            return try createObject(typename, properties: props, mode: .AnyOf)
+//            let props: [PropInfo] = anyOf.map({ (name: nil, required: false, schema: $0 ) })
+//            return try createObject(typename, properties: props, mode: .AnyOf)
+
+            // FIXME anyOf requires that at least one element be valid; there are a few ways to
+            // represent this:
+            // 1. as a oneOf (which is what we do here), and just ignore further successful validations
+            // 2. as a tuple of optionals, but then the runtime model can be invalid (since you could set all the optionals to nil)
+            // 3. as a collection of oneOf cases, but that has the same drawback as #2
+            return try createComplexEnumeration(anyOf, any: true)
+
         } else if let oneOf = schema.oneOf { // TODO: allows properties in addition to oneOf
-            return try createComplexEnumeration(oneOf)
+            return try createComplexEnumeration(oneOf, any: false)
         } else if let ref = schema.ref { // create a typealias to the reference
             return CodeTypeAlias(name: typename, type: CodeExternalType(typeName(parents, ref), access: accessor(parents)), access: accessor(parents))
         } else if let not = schema.not.value { // a "not" generates a validator against an inverse schema

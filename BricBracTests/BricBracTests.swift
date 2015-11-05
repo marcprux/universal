@@ -1296,44 +1296,120 @@ class BricBracTests : XCTestCase {
         }
     }
 
+    func testNonEmptyCollection() {
+        var nec = NonEmptyCollection("foo", tail: [])
+
+        nec.appendContentsOf(["bar", "baz"])
+        XCTAssertEqual(Array(nec), ["foo", "bar", "baz"])
+
+        nec.removeFirst()
+        XCTAssertEqual(Array(nec), ["bar", "baz"])
+
+        nec.removeLast()
+        XCTAssertEqual(Array(nec), ["bar"])
+        XCTAssertEqual(nec.head, "bar")
+
+        nec.insertContentsOf(["z", "x"], at: 0)
+        XCTAssertEqual(Array(nec), ["z", "x", "bar"])
+        XCTAssertEqual(nec.head, "z")
+
+        nec[0] = "0"
+        nec[1] = "1"
+        nec[2] = "2"
+
+        XCTAssertEqual(Array(nec), ["0", "1", "2"])
+        XCTAssertEqual(nec.reverse(), ["2", "1", "0"])
+
+        nec.removeAll()
+        XCTAssertEqual(nec.count, 1)
+
+        typealias ThreeOrMoreStrings = NonEmptyCollection<String, NonEmptyCollection<String, NonEmptyCollection<String, Array<String>>>>
+        var nec2: ThreeOrMoreStrings = NonEmptyCollection("foo", tail: NonEmptyCollection("bar", tail: NonEmptyCollection("baz", tail: [])))
+        XCTAssertEqual(Array(nec2), ["foo", "bar", "baz"])
+        nec2.append("buzz")
+        XCTAssertEqual(Array(nec2), ["foo", "bar", "baz", "buzz"])
+        nec2.removeFirst()
+        XCTAssertEqual(Array(nec2), ["bar", "baz", "buzz"])
+
+
+        nec2.insert("fizz", atIndex: 0)
+        XCTAssertEqual(Array(nec2), ["fizz", "bar", "baz", "buzz"])
+
+        nec2.removeLast()
+        XCTAssertEqual(Array(nec2), ["fizz", "bar", "baz"])
+        
+    }
+
     /// Generates code for the experimental AutoBric type
     func XXXtestAutobricerMaker() {
-        for i in 2...25 {
-            let typeList = (1...i).map({ "T\($0)" }).joinWithSeparator(", ")
-            let keyList = Array(count: i, repeatedValue: "R").joinWithSeparator(", ")
-            let mediatorList = (1...i).map({ "(bricer: (T\($0) -> Bric), bracer: (Bric throws -> T\($0)))" }).joinWithSeparator(", ")
+        for i in 2...21 {
+            let typeList = (1...i).map({ "F\($0)" }).joinWithSeparator(", ")
+//            let keyList = Array(count: i, repeatedValue: "R").joinWithSeparator(", ")
+//            let mediatorList = (1...i).map({ "(bricer: (T\($0) -> Bric), bracer: (Bric throws -> T\($0)))" }).joinWithSeparator(", ")
 
+            let arglist = (1...i).map({ "_ key\($0): (key: R, getter: Self -> F\($0), writer: F\($0) -> Bric, reader: Bric throws -> F\($0))" }).joinWithSeparator(", ")
 
-            print("/// Support for AutoBricBrac types with \(i) properties")
-            print("public extension AutoBricBrac {")
+            // (factory: (F1, F2) -> Self, _ key1: (key: String, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: String, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2))
 
-            print("    /// Returns a pair of functions that will bric and brac this type based on the passes in factory, keys, accessors, and mediators")
-            print("    public static func abricbrac<\(typeList), R: RawRepresentable where R.RawValue == String>(factory: (\(typeList)) -> Self)(_ keys: (\(keyList)))(_ mediators: (\(mediatorList)))(_ accessors: Self -> (\(typeList))) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {")
+            print("    /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators")
+            print("        @warn_unused_result public static func abricbrac<\(typeList), R: RawRepresentable where R.RawValue == String>(factory: (\(typeList)) -> Self, \(arglist)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {")
             print("")
+
+
+//            let bricer: (Self -> Bric) = { value in
+//                return Bric(object: [
+//                    (key1.key, key1.writer(key1.getter(value))),
+//                    (key2.key, key2.writer(key2.getter(value)))
+//                    ])
+//            }
+//
+//            let bracer: (Bric throws -> Self) = { bric in
+//                try factory(
+//                    key1.reader(bric.bracKey(key1.key)),
+//                    key2.reader(bric.bracKey(key2.key))
+//                )
+//            }
+
             print("        let bricer: (Self -> Bric) = { value in")
-            print("            let vals = accessors(value)")
             print("            return Bric(object: [", terminator: " ")
-            for j in 0..<i {
-                print("(keys.\(j), mediators.\(j).bricer(vals.\(j)))" + (j == i-1 ? "" : ","), terminator: " ")
+            for j in 1...i {
+                print("(key\(j).key, key\(j).writer(key\(j).getter(value)))" + (j == i ? "" : ","), terminator: " ")
             }
             print("])")
             print("        }")
             print("")
             print("        let bracer: (Bric throws -> Self) = { bric in")
             print("            try factory(", terminator: "")
-            for j in 0..<i {
-                print("mediators.\(j).bracer(bric.bracKey(keys.\(j)))" + (j == i-1 ? "" : ","), terminator: " ")
+            for j in 1...i {
+                print("key\(j).reader(bric.bracKey(key\(j).key))" + (j == i ? "" : ","), terminator: " ")
             }
             print(")")
             print("        }")
             print("")
             print("        return (bricer, bracer)")
             print("    }")
-            print("}")
             print("")
 
         }
     }
+
+    func testMirrorBric() {
+        do {
+            struct Foo { var bar: String; var num: Double?; var arr: [Foo] }
+            let foo = Foo(bar: "xxx", num: 12.34, arr: [Foo(bar: "yyy", num: nil, arr: [])])
+            let mirror = Mirror(reflecting: foo)
+            let bric = mirror.bric()
+            XCTAssertEqual(bric, ["bar": "xxx", "num": 12.34, "arr": [["bar": "yyy", "num": nil, "arr": []]]])
+        }
+
+        do {
+            let tuple = (1, 23.4, true, ([1, 2, 3], 23.4, true))
+            let mirror = Mirror(reflecting: tuple)
+            let bric = mirror.bric()
+            XCTAssertEqual(bric, [1, 23.4, true, [[1, 2, 3], 23.4, true]])
+        }
+    }
+
 }
 
 /// Parses the given stream of elements with the associated codec
@@ -1510,11 +1586,34 @@ struct Car {
     enum Class : String { case subcompact, compact, midsize, suv, minivan, pickup }
 }
 
+
 extension Car : AutoBricBrac {
-    private static let keys = ("manufacturer", "model", "displ", "year", "cyl", "trans", "drv", "cty", "hwy", "fl", "class")
-    private static let creator = Car.abricbrac(Car.init)(keys)
-    private static let mediator = creator(((abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac), (abric, abrac)))
-    static let autobricbrac = mediator({ x in (x.manufacturer, x.model, x.displacement, x.year, x.cylinders, x.transmissionType, x.drive, x.cityMileage, x.highwayMileage, x.fuel, x.`class`) })
+    /// type annotations as workaround for expression taking too long to solve (we can only get away with about 4 unannotated arguments)
+    static let autobricbrac = Car.abricbrac(Car.init,
+        Car.bbkey("manufacturer", { $0.manufacturer }) as (String, (Car) -> (String), (String -> Bric), (Bric throws -> String)),
+        Car.bbkey("model", { $0.model }) as (String, (Car) -> (String?), (String? -> Bric), (Bric throws -> String?)),
+        Car.bbkey("displ", { $0.displacement }) as (String, (Car) -> (Double), (Double -> Bric), (Bric throws -> Double)),
+        Car.bbkey("year", { $0.year }) as (String, (Car) -> (UInt16), (UInt16 -> Bric), (Bric throws -> UInt16)),
+        Car.bbkey("cyl", { $0.cylinders }) as (String, (Car) -> (Car.Cylinders), (Car.Cylinders -> Bric), (Bric throws -> Car.Cylinders)),
+        Car.bbkey("trans", { $0.transmissionType }) as (String, (Car) -> (String), (String -> Bric), (Bric throws -> String)),
+        Car.bbkey("drv", { $0.drive }) as (String, (Car) -> (Car.Drive), (Car.Drive -> Bric), (Bric throws -> Car.Drive)),
+        Car.bbkey("cty", { $0.cityMileage }) as (String, (Car) -> (Int), (Int -> Bric), (Bric throws -> Int)),
+        Car.bbkey("hwy", { $0.highwayMileage }) as (String, (Car) -> (Int), (Int -> Bric), (Bric throws -> Int)),
+        Car.bbkey("fl", { $0.fuel }) as (String, (Car) -> (Car.Fuel), (Car.Fuel -> Bric), (Bric throws -> Car.Fuel)),
+        Car.bbkey("class", { $0.`class` }) as (String, (Car) -> (Car.Class), (Car.Class -> Bric), (Bric throws -> Car.Class))
+    )
+}
+
+struct Foo {
+    var str: String
+    var num: Array<Int?>?
+}
+
+extension Foo : AutoBricBrac {
+    static let autobricbrac = Foo.abricbrac(Foo.init,
+        Foo.bbkey("str", { $0.str }),
+        Foo.bbkey("num", { $0.num })
+    )
 }
 
 extension Car.Cylinders : BricBrac { }
@@ -1531,16 +1630,19 @@ struct CarReport {
 }
 
 extension CarReport : AutoBricBrac {
-    static let autobricbrac = CarReport.abricbrac(CarReport.init)(("year", "type", "cars"))(((abric, abrac), (abric, abrac), (abric, abrac)))({ x in (x.year, x.type, x.cars) })
+    static let autobricbrac = CarReport.abricbrac(CarReport.init,
+        CarReport.bbkey("year", { $0.year }),
+        CarReport.bbkey("type", { $0.type }),
+        CarReport.bbkey("cars", { $0.cars })
+    )
 }
 
 extension CarReport.ReportType : BricBrac { }
 
 //extension CGPoint : AutoBricBrac {
-//    private static let keys = ("x", "y")
-//    private static let constructor = CGPoint.abricbrac({ (x: Int, y: Int) in CGPoint(x: x, y: y) })(keys)
-//    private static let mediator = constructor(((abric, abrac), (abric, abrac)))
-//    public static let autobricbrac = ({ x in (x.x, x.y) })
+//    static let autobricbrac = CGPoint.abricbrac({ (x: CGFloat, y: CGFloat) in CGPoint(x: x, y: x) },
+//        CGPoint.bbkey("x", { $0.x }),
+//        CGPoint.bbkey("y", { $0.y }))
 //}
 
 extension CGPoint : Bricable, Bracable {

@@ -17,17 +17,18 @@
 		7E28A5DD1B5ADD3500A5F27F /* SampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */; };
 		7E348EE11B9F3CFE00945F86 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
 		7E5DA2CF1B9F401A0013FCB9 /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
-		7E75A8FA1BA46894002BA7F8 /* Food.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F51BA46894002BA7F8 /* Food.jsonschema */; settings = {ASSET_TAGS = (); }; };
-		7E75A8FB1BA46894002BA7F8 /* Person.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F61BA46894002BA7F8 /* Person.jsonschema */; settings = {ASSET_TAGS = (); }; };
-		7E75A8FC1BA46894002BA7F8 /* Products.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F71BA46894002BA7F8 /* Products.jsonschema */; settings = {ASSET_TAGS = (); }; };
-		7E75A8FD1BA46894002BA7F8 /* schema.json in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F81BA46894002BA7F8 /* schema.json */; settings = {ASSET_TAGS = (); }; };
-		7E75A8FE1BA46894002BA7F8 /* Stuff.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F91BA46894002BA7F8 /* Stuff.jsonschema */; settings = {ASSET_TAGS = (); }; };
+		7E75A8FA1BA46894002BA7F8 /* Food.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F51BA46894002BA7F8 /* Food.jsonschema */; };
+		7E75A8FB1BA46894002BA7F8 /* Person.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F61BA46894002BA7F8 /* Person.jsonschema */; };
+		7E75A8FC1BA46894002BA7F8 /* Products.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F71BA46894002BA7F8 /* Products.jsonschema */; };
+		7E75A8FD1BA46894002BA7F8 /* schema.json in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F81BA46894002BA7F8 /* schema.json */; };
+		7E75A8FE1BA46894002BA7F8 /* Stuff.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F91BA46894002BA7F8 /* Stuff.jsonschema */; };
 		7E7F9B271B3615860058706A /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
 		7E7F9B391B36159A0058706A /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
 		7E7F9B3A1B36159A0058706A /* Brac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B371B36159A0058706A /* Brac.swift */; };
 		7E7F9B3B1B36159A0058706A /* BricIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B381B36159A0058706A /* BricIO.swift */; };
 		7E7F9B3D1B3615AB0058706A /* BricBracTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B3C1B3615AB0058706A /* BricBracTests.swift */; };
 		7E7F9B3F1B3615B00058706A /* test in Resources */ = {isa = PBXBuildFile; fileRef = 7E7F9B3E1B3615B00058706A /* test */; };
+		7E8930151BEA570A00F245C5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8930141BEA570A00F245C5 /* Structures.swift */; };
 		7E8E745D1B9F31E8004EA61F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8E745C1B9F31E8004EA61F /* main.swift */; };
 		7E8E74671B9F35A2004EA61F /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
 		7E8E74701B9F3643004EA61F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
@@ -36,14 +37,14 @@
 		7E8E74731B9F36AC004EA61F /* BricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */; };
 		7E8E74741B9F36CD004EA61F /* BricIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B381B36159A0058706A /* BricIO.swift */; };
 		7E8E74751B9F36DF004EA61F /* JSONParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E10201F1B858F6000171AFE /* JSONParser.swift */; };
-		7EB235BE1BA7000500377FBB /* Food.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BA1BA7000500377FBB /* Food.swift */; settings = {ASSET_TAGS = (); }; };
-		7EB235BF1BA7000500377FBB /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BB1BA7000500377FBB /* Person.swift */; settings = {ASSET_TAGS = (); }; };
-		7EB235C01BA7000500377FBB /* Products.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BC1BA7000500377FBB /* Products.swift */; settings = {ASSET_TAGS = (); }; };
-		7EB235C11BA7000500377FBB /* Stuff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BD1BA7000500377FBB /* Stuff.swift */; settings = {ASSET_TAGS = (); }; };
+		7EB235BE1BA7000500377FBB /* Food.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BA1BA7000500377FBB /* Food.swift */; };
+		7EB235BF1BA7000500377FBB /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BB1BA7000500377FBB /* Person.swift */; };
+		7EB235C01BA7000500377FBB /* Products.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BC1BA7000500377FBB /* Products.swift */; };
+		7EB235C11BA7000500377FBB /* Stuff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BD1BA7000500377FBB /* Stuff.swift */; };
 		7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */; };
 		7EFA1FFD1B5D72DC00B2F12E /* BricIO+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFC1B5D72DC00B2F12E /* BricIO+Cocoa.swift */; };
 		7EFA1FFF1B5D735400B2F12E /* Curio+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */; };
-		7EFD4F341BA5D98200802D99 /* AutoBricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */; settings = {ASSET_TAGS = (); }; };
+		7EFD4F341BA5D98200802D99 /* AutoBricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -133,6 +134,7 @@
 		7E7F9B381B36159A0058706A /* BricIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricIO.swift; sourceTree = "<group>"; };
 		7E7F9B3C1B3615AB0058706A /* BricBracTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricBracTests.swift; sourceTree = "<group>"; };
 		7E7F9B3E1B3615B00058706A /* test */ = {isa = PBXFileReference; lastKnownFileType = folder; path = test; sourceTree = "<group>"; };
+		7E8930141BEA570A00F245C5 /* Structures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Structures.swift; sourceTree = "<group>"; };
 		7E8E745A1B9F31E8004EA61F /* curio */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = curio; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E8E745C1B9F31E8004EA61F /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		7EB235BA1BA7000500377FBB /* Food.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Food.swift; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -272,6 +274,7 @@
 				7EFA1FFC1B5D72DC00B2F12E /* BricIO+Cocoa.swift */,
 				7E10201F1B858F6000171AFE /* JSONParser.swift */,
 				7E7F9B211B3615850058706A /* Info.plist */,
+				7E8930141BEA570A00F245C5 /* Structures.swift */,
 			);
 			path = BricBrac;
 			sourceTree = "<group>";
@@ -529,6 +532,7 @@
 				7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */,
 				7E7F9B3A1B36159A0058706A /* Brac.swift in Sources */,
 				7E7F9B3B1B36159A0058706A /* BricIO.swift in Sources */,
+				7E8930151BEA570A00F245C5 /* Structures.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

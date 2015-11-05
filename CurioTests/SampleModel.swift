@@ -23,7 +23,6 @@ struct SampleModel : BricBrac {
     }
 
     static func brac(bric: Bric) throws -> SampleModel {
-        try bric.prohibitExtraKeys(Keys) 
         return try SampleModel( 
         allOfField: bric.bracKey(Keys.allOfField), 
         anyOfField: bric.bracKey(Keys.anyOfField), 
@@ -125,29 +124,22 @@ struct SampleModel : BricBrac {
         }
     }
 
-    struct AnyOfFieldType : BricBrac {
-        /// FirstAny
-        var p0: Optional<FirstAny>
-        /// SecondAny
-        var p1: Optional<SecondAny>
-
-        init(_ p0: Optional<FirstAny> = nil, _ p1: Optional<SecondAny> = nil) {
-            self.p0 = p0 
-            self.p1 = p1 
-        }
+    enum AnyOfFieldType : BricBrac {
+        case FirstAnyCase(FirstAny)
+        case SecondAnyCase(SecondAny)
 
         func bric() -> Bric {
-            return Bric(merge: [ 
-            p0.bric(), 
-            p1.bric(), 
-            ]) 
+            switch self { 
+            case .FirstAnyCase(let x): return x.bric() 
+            case .SecondAnyCase(let x): return x.bric() 
+            } 
         }
 
         static func brac(bric: Bric) throws -> SampleModel.AnyOfFieldType {
-            return try SampleModel.AnyOfFieldType( 
-            Optional<FirstAny>.brac(bric), 
-            Optional<SecondAny>.brac(bric) 
-            ) 
+            return try bric.bracAny([ 
+            { try .FirstAnyCase(FirstAny.brac(bric)) }, 
+            { try .SecondAnyCase(SecondAny.brac(bric)) }, 
+            ]) 
         }
 
         /// FirstAny
@@ -327,7 +319,6 @@ struct SampleModel : BricBrac {
             }
 
             static func brac(bric: Bric) throws -> SampleModel.NotFieldType.P0Type {
-                try bric.prohibitExtraKeys(Keys) 
                 return try SampleModel.NotFieldType.P0Type( 
                 str: bric.bracKey(Keys.str) 
                 ) 
@@ -353,7 +344,6 @@ struct SampleModel : BricBrac {
             }
 
             static func brac(bric: Bric) throws -> SampleModel.NotFieldType.NotP1Type {
-                try bric.prohibitExtraKeys(Keys) 
                 return try SampleModel.NotFieldType.NotP1Type( 
                 str: bric.bracKey(Keys.str) 
                 ) 

@@ -187,6 +187,78 @@ class CurioTests: XCTestCase {
 
 
 public class TestSampleModel : XCTestCase {
+    func testAnyOfField() {
+        var bric: Bric = [
+            "allOfField": [
+                "a1": 1,
+                "a2": "a2",
+                "a3": true,
+                "a4": 1.2
+            ],
+            "oneOfField": [
+                "c1": 1,
+                "c2": "b2",
+            ],
+            "notField": [
+                "str": "str"
+            ]
+        ]
+
+        bric["anyOfField"] = [:]
+        do {
+            try SampleModel.brac(bric)
+            XCTFail("should not have bracd")
+        } catch {
+        }
+
+        bric["anyOfField"] = [
+            "b1": 1,
+            "b2": "b2",
+        ]
+        do {
+            let sample = try SampleModel.brac(bric)
+            XCTAssertEqual(bric, sample.bric())
+        } catch {
+            XCTFail(String(error))
+        }
+
+        bric["anyOfField"] = [
+            "b3": true,
+            "b4": 1.2
+        ]
+        do {
+            let sample = try SampleModel.brac(bric)
+            XCTAssertEqual(bric, sample.bric())
+        } catch {
+            XCTFail(String(error))
+        }
+
+        bric["anyOfField"] = [
+            "b3": true,
+        ]
+        do {
+            try SampleModel.brac(bric)
+            XCTFail("should not have bracd")
+        } catch {
+        }
+
+
+        bric["anyOfField"] = [
+            "b1": 1,
+            "b2": "b2",
+            "b3": true,
+            "b4": 1.2
+        ]
+        do {
+            let sample = try SampleModel.brac(bric)
+            // this is where we need NonEmptyCollection in order to maintain fidelity
+            XCTAssertEqual(bric, sample.bric())
+        } catch {
+            XCTFail(String(error))
+        }
+
+    }
+
     func testVerifyNotFieldFiles() {
         let bric: Bric = [
             "allOfField": [

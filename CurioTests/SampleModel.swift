@@ -136,7 +136,7 @@ struct SampleModel : BricBrac {
         }
 
         static func brac(bric: Bric) throws -> SampleModel.AnyOfFieldType {
-            return try bric.bracAny([ 
+            return try bric.bracOne([ 
             { try .FirstAnyCase(FirstAny.brac(bric)) }, 
             { try .SecondAnyCase(SecondAny.brac(bric)) }, 
             ]) 

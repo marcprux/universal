@@ -160,14 +160,10 @@ public extension Bric {
         return try bracRange(1...1, bracers: oneOf)[0]
     }
 
-//    /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error or more than one succeeded
-//    public func bracOne<T: Bracable>(@autoclosure(escaping) f1: () throws -> T, @autoclosure(escaping) _ f2: () throws -> T) throws -> T {
-//        return try bracRange(1...1, bracers: [{ try f1() }, { try f2() }])[0]
-//    }
-
     /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error
-    public func bracAny<T: Bracable>(anyOf: [() throws -> T]) throws -> T {
-        return try bracRange(1...anyOf.count, bracers: anyOf)[0]
+    public func bracAny<T: Bracable>(anyOf: [() throws -> T]) throws -> NonEmptyCollection<T, [T]> {
+        let elements = try bracRange(1...anyOf.count, bracers: anyOf)
+        return NonEmptyCollection(elements[0], tail: Array(elements.dropFirst()))
     }
 
     /// Reads all of the given Brics, throwing an error if any of the closures threw an error
@@ -343,19 +339,19 @@ extension RangeReplaceableCollectionType {
 }
 
 extension Array : BracLayer {
-    public typealias BracSub = Generator.Element // inherits bracMap via RangeReplaceableCollectionType conformance
+    public typealias BracSub = Element // inherits bracMap via default RangeReplaceableCollectionType conformance
 }
 
 extension ArraySlice : BracLayer {
-    public typealias BracSub = Generator.Element // inherits bracMap via RangeReplaceableCollectionType conformance
+    public typealias BracSub = Element // inherits bracMap via default RangeReplaceableCollectionType conformance
 }
 
 extension ContiguousArray : BracLayer {
-    public typealias BracSub = Generator.Element // inherits bracMap via RangeReplaceableCollectionType conformance
+    public typealias BracSub = Element // inherits bracMap via default RangeReplaceableCollectionType conformance
 }
 
 extension CollectionOfOne : BracLayer {
-    public typealias BracSub = Generator.Element
+    public typealias BracSub = Element
 
     public static func bracMap(bric: Bric, f: Bric throws -> BracSub) throws -> CollectionOfOne {
         if case .Arr(let x) = bric {
@@ -365,6 +361,35 @@ extension CollectionOfOne : BracLayer {
         return try bric.invalidType()
     }
 }
+
+extension EmptyCollection : BracLayer {
+    public typealias BracSub = Element
+
+    public static func bracMap(bric: Bric, f: Bric throws -> BracSub) throws -> EmptyCollection {
+        if case .Arr(let x) = bric {
+            // really kind of pointless: why would anyone mandate an array size zero?
+            if x.count != 0 { throw BracError.InvalidArrayLength(required: 0...0, actual: x.count, path: []) }
+            return EmptyCollection()
+        }
+        return try bric.invalidType()
+    }
+}
+
+extension NonEmptyCollection : BracLayer {
+    public typealias BracSub = Element
+
+    /// Returns this collection around the bracMaps, or throws an error if the parameter is not `Bric.Arr` or the array does not have at least a single element
+    public static func bracMap(bric: Bric, f: Bric throws -> Element) throws -> NonEmptyCollection {
+        if case .Arr(let arr) = bric {
+            guard let first = arr.first else {
+                throw BracError.InvalidArrayLength(required: 1..<Int.max, actual: 0, path: [])
+            }
+            return try NonEmptyCollection(f(first), tail: Tail.bracMap(Bric.Arr(Array(arr.dropFirst())), f: f))
+        }
+        return try bric.invalidType()
+    }
+}
+
 
 extension Dictionary : BracLayer {
     public typealias BracSub = Value
@@ -562,7 +587,7 @@ public enum BracError: ErrorType, CustomDebugStringConvertible {
         case .InvalidType(let type, let actual, let path): return "Invalid type: expected \(type), found \(actual)\(atPath(path))"
         case .InvalidRawValue(let type, let value, let path): return "Invalid value for \(type): \(value)\(atPath(path))"
         case .NumericOverflow(let type, let value, let path): return "Numeric overflow: \(type) cannot contain \(value)\(atPath(path))"
-        case .InvalidArrayLength(let range, let actual, let path): return "Invalid array length: array with count \(actual) not within required range\(range)\(atPath(path))"
+        case .InvalidArrayLength(let range, let actual, let path): return "Invalid array length: array with count \(actual) not within required range \(range)\(atPath(path))"
         case .KeyWithoutObject(let key, let path): return "Object key «\(key)» requested in non-object\(atPath(path))"
         case .BadEnum(let bric, let path): return "Invalid enum value «\(bric)»\(atPath(path))"
         case .ShouldNotBracError(let type, let path): return "Should not have parsed «\(type)»\(atPath(path))"

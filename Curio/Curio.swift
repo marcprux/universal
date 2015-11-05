@@ -161,7 +161,11 @@ public struct Curio {
         func notBracType(type: CodeType) -> CodeExternalType {
             return CodeExternalType("NotBrac", generics: [type], access: accessor(parents))
         }
-        
+
+        func nonEmptyType(type: CodeType) -> CodeExternalType {
+            return CodeExternalType("NonEmptyCollection", generics: [type, arrayType(type)], access: accessor(parents))
+        }
+
 
         let BricType = CodeExternalType("Bric", access: accessor(parents))
         let StringType = CodeExternalType("String", access: accessor(parents))
@@ -186,7 +190,7 @@ public struct Curio {
 
         let comments = [schema.title, schema.description].filter({ $0 != nil }).map({ $0! })
 
-        func createComplexEnumeration(multi: [Schema], any: Bool) throws -> CodeEnum {
+        func createComplexEnumeration(multi: [Schema]) throws -> CodeEnum {
             let ename = typeName(parents, id)
             var code = CodeEnum(name: ename, access: accessor(parents))
             code.comments = comments
@@ -195,11 +199,7 @@ public struct Curio {
             var bracbody : [String] = []
 
             bricbody.append("switch self {")
-            if any {
-                bracbody.append("return try bric.bracAny([")
-            } else {
-                bracbody.append("return try bric.bracOne([")
-            }
+            bracbody.append("return try bric.bracOne([")
 
             var casenames = Set<String>()
             for sub in multi {
@@ -683,9 +683,10 @@ public struct Curio {
             // anyOf is one or more Xs, so make it a tuple of (CollectionOfOne<X>, Array<X>)
             // FIXME: compiler hang, maybe because the tuple can't be de-brac'd
 //            let oneOf = try createComplexEnumeration(anyOf)
-//            let tuple = CodeTuple(elements: [(name: nil, type: collectionOfOneType(oneOf), value: nil, anon: false), (name: nil, type: arrayType(oneOf), value: nil, anon: false)])
-//            let allOfId = typename + "Tuple"
-//            return CodeTypeAlias(name: allOfId, type: tuple, access: accessor(parents), peers: [oneOf])
+////            let tuple = CodeTuple(elements: [(name: nil, type: collectionOfOneType(oneOf), value: nil, anon: false), (name: nil, type: arrayType(oneOf), value: nil, anon: false)])
+//            let anyOfId = typename + "Array"
+//            let anyOfType = nonEmptyType(oneOf)
+//            return CodeTypeAlias(name: anyOfId, type: anyOfType, access: accessor(parents), peers: [oneOf])
 
             // represent anyOf as a struct with optional properties
 //            let props: [PropInfo] = anyOf.map({ (name: nil, required: false, schema: $0 ) })
@@ -696,10 +697,10 @@ public struct Curio {
             // 1. as a oneOf (which is what we do here), and just ignore further successful validations
             // 2. as a tuple of optionals, but then the runtime model can be invalid (since you could set all the optionals to nil)
             // 3. as a collection of oneOf cases, but that has the same drawback as #2
-            return try createComplexEnumeration(anyOf, any: true)
+            return try createComplexEnumeration(anyOf)
 
         } else if let oneOf = schema.oneOf { // TODO: allows properties in addition to oneOf
-            return try createComplexEnumeration(oneOf, any: false)
+            return try createComplexEnumeration(oneOf)
         } else if let ref = schema.ref { // create a typealias to the reference
             return CodeTypeAlias(name: typename, type: CodeExternalType(typeName(parents, ref), access: accessor(parents)), access: accessor(parents))
         } else if let not = schema.not.value { // a "not" generates a validator against an inverse schema

@@ -1300,24 +1300,24 @@ class BricBracTests : XCTestCase {
         var nec = NonEmptyCollection("foo", tail: [])
 
         nec.appendContentsOf(["bar", "baz"])
-        XCTAssertEqual(Array(nec), ["foo", "bar", "baz"])
+        XCTAssertEqual(nec.bric(), ["foo", "bar", "baz"])
 
         nec.removeFirst()
-        XCTAssertEqual(Array(nec), ["bar", "baz"])
+        XCTAssertEqual(nec.bric(), ["bar", "baz"])
 
         nec.removeLast()
-        XCTAssertEqual(Array(nec), ["bar"])
+        XCTAssertEqual(nec.bric(), ["bar"])
         XCTAssertEqual(nec.head, "bar")
 
         nec.insertContentsOf(["z", "x"], at: 0)
-        XCTAssertEqual(Array(nec), ["z", "x", "bar"])
+        XCTAssertEqual(nec.bric(), ["z", "x", "bar"])
         XCTAssertEqual(nec.head, "z")
 
         nec[0] = "0"
         nec[1] = "1"
         nec[2] = "2"
 
-        XCTAssertEqual(Array(nec), ["0", "1", "2"])
+        XCTAssertEqual(nec.bric(), ["0", "1", "2"])
         XCTAssertEqual(nec.reverse(), ["2", "1", "0"])
 
         nec.removeAll()
@@ -1325,19 +1325,43 @@ class BricBracTests : XCTestCase {
 
         typealias ThreeOrMoreStrings = NonEmptyCollection<String, NonEmptyCollection<String, NonEmptyCollection<String, Array<String>>>>
         var nec2: ThreeOrMoreStrings = NonEmptyCollection("foo", tail: NonEmptyCollection("bar", tail: NonEmptyCollection("baz", tail: [])))
-        XCTAssertEqual(Array(nec2), ["foo", "bar", "baz"])
+        XCTAssertEqual(nec2.bric(), ["foo", "bar", "baz"])
         nec2.append("buzz")
-        XCTAssertEqual(Array(nec2), ["foo", "bar", "baz", "buzz"])
+        XCTAssertEqual(nec2.bric(), ["foo", "bar", "baz", "buzz"])
         nec2.removeFirst()
-        XCTAssertEqual(Array(nec2), ["bar", "baz", "buzz"])
+        XCTAssertEqual(nec2.bric(), ["bar", "baz", "buzz"])
 
 
         nec2.insert("fizz", atIndex: 0)
-        XCTAssertEqual(Array(nec2), ["fizz", "bar", "baz", "buzz"])
+        XCTAssertEqual(nec2.bric(), ["fizz", "bar", "baz", "buzz"])
 
         nec2.removeLast()
-        XCTAssertEqual(Array(nec2), ["fizz", "bar", "baz"])
-        
+        XCTAssertEqual(nec2.bric(), ["fizz", "bar", "baz"])
+
+        do {
+            let _ = try NonEmptyCollection<String, [String]>.brac(["foo"])
+        } catch {
+            XCTFail(String(error))
+        }
+
+        do {
+            let _ = try NonEmptyCollection<String, [String]>.brac([])
+            XCTFail("should not have been able to brac an empty array")
+        } catch {
+        }
+
+//        do {
+//            let _ = try NonEmptyCollection<String, NonEmptyCollection<String, [String]>>.brac(["foo", "bar"])
+//        } catch {
+//            XCTFail(String(error))
+//        }
+//
+//        do {
+//            let _ = try NonEmptyCollection<String, NonEmptyCollection<String, [String]>>.brac(["foo"])
+//            XCTFail("should not have been able to brac an empty array")
+//        } catch {
+//        }
+
     }
 
     /// Generates code for the experimental AutoBric type

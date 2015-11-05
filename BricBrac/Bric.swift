@@ -527,6 +527,14 @@ extension CollectionOfOne : BricLayer {
     public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
 }
 
+extension EmptyCollection : BricLayer {
+    public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
+}
+
+extension NonEmptyCollection : BricLayer {
+    public typealias BricSub = Element // inherits bricMap via SequenceType conformance
+}
+
 extension Dictionary : BricLayer {
     public typealias BricSub = Value
 

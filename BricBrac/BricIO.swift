@@ -327,8 +327,8 @@ extension FidelityBricolage : Bricable {
         switch self {
         case .Nul: return .Nul
         case .Bol(let bol): return .Bol(bol ? Bric.createTrue() : Bric.createFalse())
-        case .Str(let str): return Bric.createString(str).flatMap(Bric.Str) ?? .Nul
-        case .Num(let num): return Bric.createNumber(num).flatMap(Bric.Num) ?? .Nul
+        case .Str(let str): return Bric.createString(str).flatMap({ Bric.Str($0) }) ?? .Nul
+        case .Num(let num): return Bric.createNumber(num).flatMap({ Bric.Num($0) }) ?? .Nul
         case .Arr(let arr): return .Arr(Bric.createArray() + arr.map({ $0.bric() }))
         case .Obj(let obj):
             var dict: [String: Bric] = [:]

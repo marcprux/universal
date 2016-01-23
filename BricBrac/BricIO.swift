@@ -321,6 +321,43 @@ public enum FidelityBricolage : Bricolage {
     }
 }
 
+extension FidelityBricolage : Bricable {
+    /// Converts `FidelityBricolage` to `Bric`
+    public func bric() -> Bric {
+        switch self {
+        case .Nul: return .Nul
+        case .Bol(let bol): return .Bol(bol ? Bric.createTrue() : Bric.createFalse())
+        case .Str(let str): return Bric.createString(str).flatMap(Bric.Str) ?? .Nul
+        case .Num(let num): return Bric.createNumber(num).flatMap(Bric.Num) ?? .Nul
+        case .Arr(let arr): return .Arr(Bric.createArray() + arr.map({ $0.bric() }))
+        case .Obj(let obj):
+            var dict: [String: Bric] = [:]
+            for (key, value) in obj {
+                dict[String(String.UnicodeScalarView() + key)] = value.bric()
+            }
+            return .Obj(dict)
+        }
+    }
+}
+
+extension FidelityBricolage : NilLiteralConvertible {
+    public init(nilLiteral: ()) { self = .Nul() }
+}
+
+extension FidelityBricolage : StringLiteralConvertible {
+    public init(stringLiteral value: String) {
+        self = .Str(Array(value.unicodeScalars))
+    }
+
+    public init(extendedGraphemeClusterLiteral value: StringLiteralType) {
+        self = .Str(Array(value.unicodeScalars))
+    }
+
+    public init(unicodeScalarLiteral value: StringLiteralType) {
+        self = .Str(Array(value.unicodeScalars))
+    }
+}
+
 
 /// Storage for JSON that is tailored for Swift-fluent access
 extension Bric: Bricolage {
@@ -357,22 +394,22 @@ extension Bric: Bricolage {
     }
 }
 
-extension Bric {
+extension Bricolage {
     /// Parses the given JSON string and returns some Bric
-    public static func parse(string: String, options: JSONParser.Options = .Strict) throws -> Bric {
-        return try Bric.parseBricolage(Array(string.unicodeScalars), options: options)
+    public static func parse(string: String, options: JSONParser.Options = .Strict) throws -> Self {
+        return try parseBricolage(Array(string.unicodeScalars), options: options)
         // the following also works fine, but converting to an array first is dramatically faster (over 2x faster for caliper.json)
         // return try Bric.parseBricolage(string.unicodeScalars, options: options)
     }
 
     /// Parses the given JSON array of unicode scalars and returns some Bric
-    public static func parse(scalars: [UnicodeScalar], options: JSONParser.Options = .Strict) throws -> Bric {
-        return try Bric.parseJSON(scalars, options: options)
+    public static func parse(scalars: [UnicodeScalar], options: JSONParser.Options = .Strict) throws -> Self {
+        return try parseJSON(scalars, options: options)
     }
 }
 
 
-extension Bric {
+extension Bricolage {
     /// Validates the given JSON string and throws an error if there was a problem
     public static func validate(string: String, options: JSONParser.Options) throws {
         try JSONParser(options: options).parse(Array(string.unicodeScalars), complete: true)

@@ -160,6 +160,16 @@ public extension Bric {
         return try bracRange(1...1, bracers: oneOf)[0]
     }
 
+//    /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error or more than one succeeded
+//    public func bracOne<T: Bracable>(@autoclosure oneOf: () throws -> T) throws -> T {
+//        return try bracRange(1...1, bracers: [oneOf])[0]
+//    }
+
+//    /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error or more than one succeeded
+//    public func bracOne<T: Bracable>(@autoclosure oneOf: () throws -> T, @autoclosure _ oneOf2: () throws -> T) throws -> T {
+//        return try bracRange(1...1, bracers: [oneOf, oneOf2])[0]
+//    }
+
     /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error
     public func bracAny<T: Bracable>(anyOf: [() throws -> T]) throws -> NonEmptyCollection<T, [T]> {
         let elements = try bracRange(1...anyOf.count, bracers: anyOf)

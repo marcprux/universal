@@ -343,7 +343,7 @@ class BricBracTests : XCTestCase {
     func testOutputNulls() {
         let bric: Bric = ["num": 1, "nul": nil]
         // note that key order differs on MacOS and iOS, probably due to different hashing
-        #if os(MacOS)
+        #if os(OSX)
             XCTAssertEqual("{\"num\":1,\"nul\":null}", bric.stringify())
         #endif
 
@@ -359,7 +359,7 @@ class BricBracTests : XCTestCase {
             let bric: Bric = ["name": "Apple", "ceo": ["name": "Tim", "age": 50, "male": true, "children": []], "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]]]
             let str = bric.stringify()
             // note that key order differs on MacOS and iOS, probably due to different hashing
-            #if os(MacOS)
+            #if os(OSX)
                 XCTAssertEqual(str, json)
             #endif
         }

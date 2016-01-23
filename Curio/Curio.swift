@@ -33,6 +33,9 @@ public struct Curio {
     /// special prefixes to trim (adheres to the convention that top-level types go in the "defintions" level)
     public var trimPrefixes = ["#/definitions/"]
 
+    /// The suffix to append to generated types
+    public var typeSuffix = "Type"
+
     public var propOrdering: ([CodeTypeName], String)->(Array<String>?) = { (parents, id) in nil }
 
     public init() {
@@ -173,6 +176,7 @@ public struct Curio {
         let DoubleType = CodeExternalType("Double", access: accessor(parents))
         let BoolType = CodeExternalType("Bool", access: accessor(parents))
         let VoidType = CodeExternalType("Void", access: accessor(parents))
+        let ArrayType = CodeExternalType("Array", generics: [BricType], access: accessor(parents))
         let ObjectType = dictionaryType(StringType, BricType)
 
         /// Calculate the fully-qualified name of the given type
@@ -294,15 +298,19 @@ public struct Curio {
                     assoc.cases.append(CodeEnum.Case(name: "Integer", type: IntType))
                     bricbody.append("case .Integer(let x): return x.bric()")
                     bracbody.append("{ try .Integer(Int.brac(bric)) },")
-                case .Null:
-                    assoc.cases.append(CodeEnum.Case(name: "None", type: nil))
-                    bricbody.append("case .None: return .Nul")
-                    bracbody.append("{ .Nul },")
-                default:
+                case .Array:
+                    assoc.cases.append(CodeEnum.Case(name: "List", type: ArrayType))
+                    bricbody.append("case .List(let x): return x.bric()")
+                    bracbody.append("{ try .List(Array<Bric>.brac(bric)) },")
+                case .Object:
                     //print("warning: making Bric for key: \(name)")
                     assoc.cases.append(CodeEnum.Case(name: "Object", type: BricType))
                     bricbody.append("case .Object(let x): return x.bric()")
                     bracbody.append("{ .Object(bric) },")
+                case .Null:
+                    assoc.cases.append(CodeEnum.Case(name: "None", type: nil))
+                    bricbody.append("case .None: return .Nul")
+                    bracbody.append("{ .Nul },")
                 }
             }
 
@@ -386,7 +394,7 @@ public struct Curio {
 
                     default:
                         // generate the type for the object
-                        let subtype = try reify(prop, id: prop.title ?? (name + "Type"), parents: parents + [code.name])
+                        let subtype = try reify(prop, id: prop.title ?? (name + typeSuffix), parents: parents + [code.name])
                         code.nestedTypes.append(subtype)
                         proptype = subtype
                     }
@@ -723,6 +731,17 @@ public struct Curio {
             return CodeTypeAlias(name: typename, type: BricType, access: accessor(parents))
         }
     }
+
+    /// Parses the given schema source into a module
+    public func parseSchema(json: String, rootName: String) throws -> CodeModule {
+        let module = CodeModule()
+        for (key, schema) in try Schema.parse(json, rootName: rootName) {
+            let code = try reify(schema, id: key, parents: [])
+            module.types.append(code)
+        }
+        return module
+    }
+
 }
 
 public extension Schema {
@@ -763,5 +782,54 @@ public extension Schema {
 
         return try Schema.brac(json)
     }
-}
 
+    /// Parse the given JSON info an array of resolved schema references, maintaining property order from the source JSON
+    public static func parse(source: String, rootName: String) throws -> [(String, Schema)] {
+        var fidelity = try FidelityBricolage.parse(source)
+        fidelity = imputePropertyOrdering(fidelity)
+        let json = fidelity.bric()
+
+        let refmap = try json.resolve()
+
+        var refschema : [String : Schema] = [:]
+
+        var schemas: [(String, Schema)] = []
+        for (key, value) in refmap {
+            let subschema = try Schema.brac(value)
+            refschema[key] = subschema
+            schemas.append(key, subschema)
+        }
+
+        let schema = try Schema.brac(json)
+        schemas.append(rootName, schema)
+        return schemas
+    }
+
+    /// Walk through the raw bricolage and add in the "propertyOrder" prop so that the schema generator
+    /// can use the same ordering that appears in the raw JSON schema
+    private static func imputePropertyOrdering(bc: FidelityBricolage) -> FidelityBricolage {
+        switch bc {
+        case .Arr(let arr):
+            return .Arr(arr.map(imputePropertyOrdering))
+        case .Obj(let obj):
+            var sub = FidelityBricolage.createObject()
+
+            for (key, value) in obj {
+                sub.append(key, imputePropertyOrdering(value))
+                // if the key is "properties" then also add a "propertyOrder" property with the order that the props appear in the raw JSON
+                if case .Obj(let dict) = value where !dict.isEmpty && String(String.UnicodeScalarView() + key) == "properties" {
+                    // ### FIXME: we hack in a check for "type" to determine if we are in a schema element and not,
+                    //  e.g., another properties list, but this will fail if there is an actual property named "type"
+                    if bc.bric()["type"] == "object" {
+                        let ordering = dict.map({ $0.0 })
+                        sub.append((FidelityBricolage.StrType("propertyOrder".unicodeScalars), FidelityBricolage.Arr(ordering.map(FidelityBricolage.Str))))
+                    }
+                }
+            }
+            return .Obj(sub)
+        default:
+            return bc
+        }
+    }
+
+}

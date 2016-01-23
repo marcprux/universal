@@ -535,7 +535,7 @@ extension NonEmptyCollection : BricLayer {
     public typealias BricSub = Element // inherits bricMap via SequenceType conformance
 }
 
-extension Dictionary : BricLayer {
+extension Dictionary : BricLayer { // TODO: Swift 3: where Key == String
     public typealias BricSub = Value
 
     /// A Dictionary brics to a `Bric.Obj` with stringifed keys

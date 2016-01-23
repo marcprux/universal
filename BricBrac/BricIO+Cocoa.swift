@@ -24,7 +24,7 @@ public extension Bric {
 
 
 public extension Bric {
-    static let ISO8601DateFormatter: NSDateFormatter = {
+    public static let ISO8601DateFormatter: NSDateFormatter = {
         let dateFormatter = NSDateFormatter()
         dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"

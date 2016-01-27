@@ -129,7 +129,7 @@ class CurioTests: XCTestCase {
     func testDerivedSchemas() {
         do {
             // Food-schema.json
-            let x = Food(title: "gruel", type: .Carbohydrate, calories: 120)
+            let x = Food(title: "gruel", calories: 120, type: .Carbohydrate)
             XCTAssertEqual(x.bric(), ["title": "gruel", "type": "carbohydrate", "calories": 120])
         }
 

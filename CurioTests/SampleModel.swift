@@ -1,12 +1,12 @@
 import BricBrac
 
 struct SampleModel : BricBrac {
-    var allOfField: AllOfFieldType
-    var anyOfField: AnyOfFieldType
-    var oneOfField: OneOfFieldType
-    var notField: NotFieldType
+    var allOfField: AllOfField
+    var anyOfField: AnyOfField
+    var oneOfField: OneOfField
+    var notField: NotField
 
-    init(allOfField: AllOfFieldType, anyOfField: AnyOfFieldType, oneOfField: OneOfFieldType, notField: NotFieldType) {
+    init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField) {
         self.allOfField = allOfField 
         self.anyOfField = anyOfField 
         self.oneOfField = oneOfField 
@@ -38,7 +38,7 @@ struct SampleModel : BricBrac {
         case notField = "notField"
     }
 
-    struct AllOfFieldType : BricBrac {
+    struct AllOfField : BricBrac {
         /// FirstAll
         var p0: FirstAll
         /// SecondAll
@@ -56,8 +56,8 @@ struct SampleModel : BricBrac {
             ]) 
         }
 
-        static func brac(bric: Bric) throws -> SampleModel.AllOfFieldType {
-            return try SampleModel.AllOfFieldType( 
+        static func brac(bric: Bric) throws -> SampleModel.AllOfField {
+            return try SampleModel.AllOfField( 
             FirstAll.brac(bric), 
             SecondAll.brac(bric) 
             ) 
@@ -80,8 +80,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.AllOfFieldType.FirstAll {
-                return try SampleModel.AllOfFieldType.FirstAll( 
+            static func brac(bric: Bric) throws -> SampleModel.AllOfField.FirstAll {
+                return try SampleModel.AllOfField.FirstAll( 
                 a1: bric.bracKey(Keys.a1), 
                 a2: bric.bracKey(Keys.a2) 
                 ) 
@@ -110,8 +110,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.AllOfFieldType.SecondAll {
-                return try SampleModel.AllOfFieldType.SecondAll( 
+            static func brac(bric: Bric) throws -> SampleModel.AllOfField.SecondAll {
+                return try SampleModel.AllOfField.SecondAll( 
                 a3: bric.bracKey(Keys.a3), 
                 a4: bric.bracKey(Keys.a4) 
                 ) 
@@ -124,7 +124,7 @@ struct SampleModel : BricBrac {
         }
     }
 
-    enum AnyOfFieldType : BricBrac {
+    enum AnyOfField : BricBrac {
         case FirstAnyCase(FirstAny)
         case SecondAnyCase(SecondAny)
 
@@ -135,7 +135,7 @@ struct SampleModel : BricBrac {
             } 
         }
 
-        static func brac(bric: Bric) throws -> SampleModel.AnyOfFieldType {
+        static func brac(bric: Bric) throws -> SampleModel.AnyOfField {
             return try bric.bracOne([ 
             { try .FirstAnyCase(FirstAny.brac(bric)) }, 
             { try .SecondAnyCase(SecondAny.brac(bric)) }, 
@@ -159,8 +159,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.AnyOfFieldType.FirstAny {
-                return try SampleModel.AnyOfFieldType.FirstAny( 
+            static func brac(bric: Bric) throws -> SampleModel.AnyOfField.FirstAny {
+                return try SampleModel.AnyOfField.FirstAny( 
                 b1: bric.bracKey(Keys.b1), 
                 b2: bric.bracKey(Keys.b2) 
                 ) 
@@ -189,8 +189,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.AnyOfFieldType.SecondAny {
-                return try SampleModel.AnyOfFieldType.SecondAny( 
+            static func brac(bric: Bric) throws -> SampleModel.AnyOfField.SecondAny {
+                return try SampleModel.AnyOfField.SecondAny( 
                 b3: bric.bracKey(Keys.b3), 
                 b4: bric.bracKey(Keys.b4) 
                 ) 
@@ -203,7 +203,7 @@ struct SampleModel : BricBrac {
         }
     }
 
-    enum OneOfFieldType : BricBrac {
+    enum OneOfField : BricBrac {
         case FirstOneCase(FirstOne)
         case SecondOneCase(SecondOne)
 
@@ -214,7 +214,7 @@ struct SampleModel : BricBrac {
             } 
         }
 
-        static func brac(bric: Bric) throws -> SampleModel.OneOfFieldType {
+        static func brac(bric: Bric) throws -> SampleModel.OneOfField {
             return try bric.bracOne([ 
             { try .FirstOneCase(FirstOne.brac(bric)) }, 
             { try .SecondOneCase(SecondOne.brac(bric)) }, 
@@ -238,8 +238,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.OneOfFieldType.FirstOne {
-                return try SampleModel.OneOfFieldType.FirstOne( 
+            static func brac(bric: Bric) throws -> SampleModel.OneOfField.FirstOne {
+                return try SampleModel.OneOfField.FirstOne( 
                 c1: bric.bracKey(Keys.c1), 
                 c2: bric.bracKey(Keys.c2) 
                 ) 
@@ -268,8 +268,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.OneOfFieldType.SecondOne {
-                return try SampleModel.OneOfFieldType.SecondOne( 
+            static func brac(bric: Bric) throws -> SampleModel.OneOfField.SecondOne {
+                return try SampleModel.OneOfField.SecondOne( 
                 c3: bric.bracKey(Keys.c3), 
                 c4: bric.bracKey(Keys.c4) 
                 ) 
@@ -282,11 +282,11 @@ struct SampleModel : BricBrac {
         }
     }
 
-    struct NotFieldType : BricBrac {
-        var p0: P0Type
-        var p1: P1Type
+    struct NotField : BricBrac {
+        var p0: P0
+        var p1: P1
 
-        init(_ p0: P0Type, _ p1: P1Type) {
+        init(_ p0: P0, _ p1: P1) {
             self.p0 = p0 
             self.p1 = p1 
         }
@@ -298,14 +298,14 @@ struct SampleModel : BricBrac {
             ]) 
         }
 
-        static func brac(bric: Bric) throws -> SampleModel.NotFieldType {
-            return try SampleModel.NotFieldType( 
-            P0Type.brac(bric), 
-            P1Type.brac(bric) 
+        static func brac(bric: Bric) throws -> SampleModel.NotField {
+            return try SampleModel.NotField( 
+            P0.brac(bric), 
+            P1.brac(bric) 
             ) 
         }
 
-        struct P0Type : BricBrac {
+        struct P0 : BricBrac {
             var str: String
 
             init(str: String) {
@@ -318,8 +318,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.NotFieldType.P0Type {
-                return try SampleModel.NotFieldType.P0Type( 
+            static func brac(bric: Bric) throws -> SampleModel.NotField.P0 {
+                return try SampleModel.NotField.P0( 
                 str: bric.bracKey(Keys.str) 
                 ) 
             }
@@ -329,11 +329,11 @@ struct SampleModel : BricBrac {
             }
         }
 
-        typealias P1Type = NotBrac<NotP1Type>
-        struct NotP1Type : BricBrac {
-            var str: StrType
+        typealias P1 = NotBrac<NotP1>
+        struct NotP1 : BricBrac {
+            var str: Str
 
-            init(str: StrType = .Illegal) {
+            init(str: Str = .Illegal) {
                 self.str = str 
             }
 
@@ -343,8 +343,8 @@ struct SampleModel : BricBrac {
                 ]) 
             }
 
-            static func brac(bric: Bric) throws -> SampleModel.NotFieldType.NotP1Type {
-                return try SampleModel.NotFieldType.NotP1Type( 
+            static func brac(bric: Bric) throws -> SampleModel.NotField.NotP1 {
+                return try SampleModel.NotField.NotP1( 
                 str: bric.bracKey(Keys.str) 
                 ) 
             }
@@ -353,7 +353,7 @@ struct SampleModel : BricBrac {
                 case str = "str"
             }
 
-            enum StrType : String, BricBrac {
+            enum Str : String, BricBrac {
                 case Illegal = "illegal"
             }
         }

@@ -135,7 +135,7 @@ class CurioTests: XCTestCase {
 
         do {
             // Products-schema.json
-            let x = ProductsItem(id: 10, name: "Stuff", price: 12.34, dimensions: ProductsItem.DimensionsType(length: 11, width: 12, height: 13), tags: ["thingy", "stuffy"], warehouseLocation: nil)
+            let x = ProductsItem(id: 10, name: "Stuff", price: 12.34, tags: ["thingy", "stuffy"], dimensions: ProductsItem.Dimensions(length: 11, width: 12, height: 13), warehouseLocation: nil)
             XCTAssertEqual(x.bric(), ["price":12.34,"dimensions":["length":11,"width":12,"height":13],"tags":["thingy","stuffy"],"id":10,"name":"Stuff"])
         }
     }

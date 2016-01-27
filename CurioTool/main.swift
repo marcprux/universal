@@ -93,16 +93,6 @@ if !done {
     default: throw UsageError("Unknown access type: \(accessType) (must be 'public', 'private', 'internal', or 'default')")
     }
 
-    //debugPrint("Reading schema file from standard input")
-    var src: String = ""
-    while let line = readLine(stripNewline: false) {
-        src += line
-    }
-
-    let bric = try Bric.parse(src)
-
-    let schema = try Schema.brac(bric)
-
     var curio = Curio()
     if let maxdirect = maxdirect {
         curio.indirectCountThreshold = maxdirect
@@ -123,22 +113,17 @@ if !done {
         return renames[id] ?? renames[key]
     }
 
-    let type = try curio.reify(schema, id: modelName, parents: [])
 
-    let module = CodeModule()
-    module.imports = imports
-
-    module.types.append(type)
-
-    let refmap = try bric.resolve()
-    var refschema : [String : Schema] = [:]
-    for (key, value) in refmap {
-        let subschema = try Schema.brac(value)
-        refschema[key] = subschema
-        let subtype = try curio.reify(subschema, id: key, parents: [])
-        module.types.append(subtype)
+    //debugPrint("Reading schema file from standard input")
+    var src: String = ""
+    while let line = readLine(stripNewline: false) {
+        src += line
     }
 
+    let module = try curio.parseSchema(src, rootName: modelName)
+    module.imports = imports
+
+    
     let emitter = CodeEmitter(stream: "")
     module.emit(emitter)
 

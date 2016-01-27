@@ -1434,6 +1434,29 @@ class BricBracTests : XCTestCase {
         }
     }
 
+    func testBracSwap() {
+        var x = 1, y = 2.2
+
+        XCTAssertEqual(x, 1)
+        XCTAssertEqual(y, 2.2)
+
+        do { try bracSwap(&x, &y) } catch { XCTFail(String(error)) }
+
+        XCTAssertEqual(x, 2)
+        XCTAssertEqual(y, 1.0)
+    }
+
+    func testFidelityBricolage() {
+        let fb: FidelityBricolage = ["a": 1, "b": 2, "c": 3, "d": 4]
+        if case .Obj(let obj) = fb {
+            XCTAssertEqual(Array(obj.map({ String(String.UnicodeScalarView() + $0.0) })), ["a", "b", "c", "d"])
+        } else {
+            XCTFail("FidelityBricolage not object")
+        }
+
+        let bric: Bric = fb.bric()
+        XCTAssertEqual(Array(bric.obj!.keys), ["b", "a", "d", "c"]) // note that we lose ordering when converting to standard Bric
+    }
 }
 
 /// Parses the given stream of elements with the associated codec

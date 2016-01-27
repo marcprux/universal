@@ -321,27 +321,49 @@ public enum FidelityBricolage : Bricolage {
     }
 }
 
-extension FidelityBricolage : Bricable {
-    /// Converts `FidelityBricolage` to `Bric`
-    public func bric() -> Bric {
+public protocol Bricolagable : Bricable {
+    func bricolage<B: Bricolage>() -> B
+}
+
+extension Bricolagable {
+    public func bric() -> Bric { return bricolage() }
+}
+
+extension FidelityBricolage : Bricolagable {
+    public func bricolage<B: Bricolage>() -> B {
         switch self {
-        case .Nul: return .Nul
-        case .Bol(let bol): return .Bol(bol ? Bric.createTrue() : Bric.createFalse())
-        case .Str(let str): return Bric.createString(str).flatMap({ Bric.Str($0) }) ?? .Nul
-        case .Num(let num): return Bric.createNumber(num).flatMap({ Bric.Num($0) }) ?? .Nul
-        case .Arr(let arr): return .Arr(Bric.createArray() + arr.map({ $0.bric() }))
-        case .Obj(let obj):
-            var dict: [String: Bric] = [:]
-            for (key, value) in obj {
-                dict[String(String.UnicodeScalarView() + key)] = value.bric()
+        case .Nul:
+            return B(nul: B.createNull())
+        case .Bol(let bol):
+            return B(bol: bol ? B.createTrue() : B.createFalse())
+        case .Str(let str):
+            return B.createString(str).flatMap({ B(str: $0) }) ?? B(nul: B.createNull())
+        case .Num(let num):
+            return B.createNumber(num).flatMap({ B(num: $0) }) ?? B(nul: B.createNull())
+        case .Arr(let arr):
+            var array = B.createArray()
+            for x in arr {
+                array = B.putElement(array, element: x.bricolage())
             }
-            return .Obj(dict)
+            return B(arr: array)
+        case .Obj(let obj):
+            var object = B.createObject()
+            for x in obj {
+                object = B.putKeyValue(object, key: B.createString(x.0)!, value: x.1.bricolage())
+            }
+            return B(obj: object)
         }
     }
 }
 
 extension FidelityBricolage : NilLiteralConvertible {
     public init(nilLiteral: ()) { self = .Nul() }
+}
+
+extension FidelityBricolage : BooleanLiteralConvertible {
+    public init(booleanLiteral value: Bool) {
+        self = .Bol(value ? FidelityBricolage.createTrue() : FidelityBricolage.createFalse())
+    }
 }
 
 extension FidelityBricolage : StringLiteralConvertible {
@@ -358,6 +380,29 @@ extension FidelityBricolage : StringLiteralConvertible {
     }
 }
 
+extension FidelityBricolage : IntegerLiteralConvertible {
+    public init(integerLiteral value: Int) {
+        self = .Num(Array(String(value).unicodeScalars))
+    }
+}
+
+extension FidelityBricolage : FloatLiteralConvertible {
+    public init(floatLiteral value: Double) {
+        self = .Num(Array(String(value).unicodeScalars))
+    }
+}
+
+extension FidelityBricolage : ArrayLiteralConvertible {
+    public init(arrayLiteral elements: FidelityBricolage...) {
+        self = .Arr(elements)
+    }
+}
+
+extension FidelityBricolage : DictionaryLiteralConvertible {
+    public init(dictionaryLiteral elements: (String, FidelityBricolage)...) {
+        self = .Obj(elements.map({ (key, value) in (Array(key.unicodeScalars), value) }))
+    }
+}
 
 /// Storage for JSON that is tailored for Swift-fluent access
 extension Bric: Bricolage {

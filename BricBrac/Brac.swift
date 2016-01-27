@@ -681,5 +681,24 @@ private func bracpath<T>(@autoclosure path: () -> Bric.Pointer, @autoclosure _ f
     }
 }
 
+/// Swaps the values of two Bricable & Bracable instances, throwing an error if any of the Brac fails.
+///
+/// - Requires: The two types be bric-serialization compatible.
+///
+/// - SeeAlso: `AnyObject`
+public func bracSwap<B1, B2 where B1 : Bricable, B2: Bricable, B1: Bracable, B2: Bracable>(inout b1: B1, inout _ b2: B2) throws {
+    let (brac1, brac2) = try (B1.brac(b2.bric()), B2.brac(b1.bric()))
+    (b1, b2) = (brac1, brac2) // only perform the assignment if both the bracs succeed
+}
+
+/// Swaps the values of two optional Bricable & Bracable instances, throwing an error if any of the Brac fails
+///
+/// - Requires: The two types be bric-serialization compatible.
+///
+/// - SeeAlso: `AnyObject`
+public func bracSwap<B1, B2 where B1 : Bricable, B2: Bricable, B1: Bracable, B2: Bracable>(inout b1: Optional<B1>, inout _ b2: Optional<B2>) throws {
+    let (brac1, brac2) = try (B1.brac(b2.bric()), B2.brac(b1.bric()))
+    (b1, b2) = (brac1, brac2) // only perform the assignment if both the bracs succeed
+}
 
 

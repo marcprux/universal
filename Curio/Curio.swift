@@ -34,7 +34,7 @@ public struct Curio {
     public var trimPrefixes = ["#/definitions/"]
 
     /// The suffix to append to generated types
-    public var typeSuffix = "Type"
+    public var typeSuffix = ""
 
     public var propOrdering: ([CodeTypeName], String)->(Array<String>?) = { (parents, id) in nil }
 

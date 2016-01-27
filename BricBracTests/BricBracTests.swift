@@ -1455,7 +1455,7 @@ class BricBracTests : XCTestCase {
         }
 
         let bric: Bric = fb.bric()
-        XCTAssertEqual(Array(bric.obj!.keys), ["b", "a", "d", "c"]) // note that we lose ordering when converting to standard Bric
+        XCTAssertNotEqual(Array(bric.obj!.keys), ["a", "b", "c", "d"]) // note that we lose ordering when converting to standard Bric
     }
 }
 

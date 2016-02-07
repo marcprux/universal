@@ -249,9 +249,6 @@ public struct Curio {
         let breqfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "breq", access: self.accessor(parents), instance: true, exception: false, arguments: CodeTuple(elements: [selfType($0, name: "other")]), returns: CodeTuple(elements: [(name: nil, type: BoolType, value: nil, anon: false)])) }
 
 
-        let bricbrac = CodeProtocol(name: "BricBrac", access: accessor(parents))
-
-
         let comments = [schema.title, schema.description].filter({ $0 != nil }).map({ $0! })
 
 
@@ -368,13 +365,15 @@ public struct Curio {
             bracbody.append("])")
             breqbody.append("}")
 
+            code.conforms.append(bricable)
             code.funcs.append(CodeFunction.Implementation(declaration: bricfun, body: bricbody, comments: []))
 
+            code.conforms.append(bracable)
             if bracbody.isEmpty { bracbody.append("fatalError()") }
             code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
 
-            code.conforms.append(bricbrac)
             if generateEquals {
+                code.conforms.append(breqable)
                 code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
             }
 
@@ -461,6 +460,7 @@ public struct Curio {
             assoc.funcs.append(CodeFunction.Implementation(declaration: bracfun(assoc), body: bracbody, comments: []))
 
             if generateEquals {
+                assoc.conforms.append(breqable)
                 assoc.funcs.append(CodeFunction.Implementation(declaration: breqfun(assoc), body: breqbody, comments: []))
             }
 
@@ -732,12 +732,15 @@ public struct Curio {
             }
 
             if bricbody.isEmpty { bricbody.append("fatalError()") }
+            code.conforms.append(bricable)
             code.funcs.append(CodeFunction.Implementation(declaration: bricfun, body: bricbody, comments: []))
+
             if bracbody.isEmpty { bracbody.append("fatalError()") }
+            code.conforms.append(bracable)
             code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
 
-            code.conforms.append(bricbrac)
             if generateEquals {
+                code.conforms.append(breqable)
                 code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
             }
 
@@ -799,14 +802,17 @@ public struct Curio {
 //            }
 //            bricbody.append("])")
 
-            code.conforms.append(bricbrac)
+//            code.conforms.append(bricbrac)
 
+            code.conforms.append(bricable)
             code.funcs.append(CodeFunction.Implementation(declaration: bricfun, body: bricbody, comments: []))
 
             if bracbody.isEmpty { bracbody.append("fatalError()") }
+            code.conforms.append(bracable)
             code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
 
             if generateEquals {
+                code.conforms.append(breqable)
                 code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
             }
 

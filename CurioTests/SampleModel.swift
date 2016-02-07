@@ -1,7 +1,7 @@
 import BricBrac
 
 
-public struct SampleModel : BricBrac {
+public struct SampleModel : Bricable, Bracable, Breqable {
     public var allOfField: AllOfField
     public var anyOfField: AnyOfField
     public var oneOfField: OneOfField
@@ -53,7 +53,7 @@ public struct SampleModel : BricBrac {
         case simpleOneOf = "simpleOneOf"
     }
 
-    public struct AllOfField : BricBrac {
+    public struct AllOfField : Bricable, Bracable, Breqable {
         /// FirstAll
         public var p0: FirstAll
         /// SecondAll
@@ -84,7 +84,7 @@ public struct SampleModel : BricBrac {
         }
 
         /// FirstAll
-        public struct FirstAll : BricBrac {
+        public struct FirstAll : Bricable, Bracable, Breqable {
             public var a1: Int
             public var a2: String
 
@@ -119,7 +119,7 @@ public struct SampleModel : BricBrac {
         }
 
         /// SecondAll
-        public struct SecondAll : BricBrac {
+        public struct SecondAll : Bricable, Bracable, Breqable {
             public var a3: Bool
             public var a4: Double
 
@@ -154,7 +154,7 @@ public struct SampleModel : BricBrac {
         }
     }
 
-    public enum AnyOfField : BricBrac {
+    public enum AnyOfField : Bricable, Bracable, Breqable {
         case FirstAnyCase(FirstAny)
         case SecondAnyCase(SecondAny)
 
@@ -189,7 +189,7 @@ public struct SampleModel : BricBrac {
         }
 
         /// FirstAny
-        public struct FirstAny : BricBrac {
+        public struct FirstAny : Bricable, Bracable, Breqable {
             public var b1: Int
             public var b2: String
 
@@ -224,7 +224,7 @@ public struct SampleModel : BricBrac {
         }
 
         /// SecondAny
-        public struct SecondAny : BricBrac {
+        public struct SecondAny : Bricable, Bracable, Breqable {
             public var b3: Bool
             public var b4: Double
 
@@ -259,7 +259,7 @@ public struct SampleModel : BricBrac {
         }
     }
 
-    public enum OneOfField : BricBrac {
+    public enum OneOfField : Bricable, Bracable, Breqable {
         case FirstOneCase(FirstOne)
         case SecondOneCase(SecondOne)
 
@@ -294,7 +294,7 @@ public struct SampleModel : BricBrac {
         }
 
         /// FirstOne
-        public struct FirstOne : BricBrac {
+        public struct FirstOne : Bricable, Bracable, Breqable {
             public var c1: Int
             public var c2: String
 
@@ -329,7 +329,7 @@ public struct SampleModel : BricBrac {
         }
 
         /// SecondOne
-        public struct SecondOne : BricBrac {
+        public struct SecondOne : Bricable, Bracable, Breqable {
             public var c3: Bool
             public var c4: Double
 
@@ -364,7 +364,7 @@ public struct SampleModel : BricBrac {
         }
     }
 
-    public struct NotField : BricBrac {
+    public struct NotField : Bricable, Bracable, Breqable {
         public var p0: P0
         public var p1: P1
 
@@ -392,7 +392,7 @@ public struct SampleModel : BricBrac {
             p1.breq(other.p1) 
         }
 
-        public struct P0 : BricBrac {
+        public struct P0 : Bricable, Bracable, Breqable {
             public var str: String
 
             public init(str: String) {
@@ -421,7 +421,7 @@ public struct SampleModel : BricBrac {
         }
 
         public typealias P1 = NotBrac<NotP1>
-        public struct NotP1 : BricBrac {
+        public struct NotP1 : Bricable, Bracable, Breqable {
             public var str: Str
 
             public init(str: Str = .Illegal) {
@@ -448,7 +448,7 @@ public struct SampleModel : BricBrac {
                 case str = "str"
             }
 
-            public enum Str : String, BricBrac {
+            public enum Str : String, Bricable, Bracable, Breqable {
                 case Illegal = "illegal"
             }
         }

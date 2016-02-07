@@ -279,7 +279,14 @@ public class TestSampleModel : XCTestCase {
         ]
 
         do {
-            try SampleModel.brac(bric)
+            let sample = try SampleModel.brac(bric)
+            XCTAssertTrue(sample.allOfField.breq(sample.allOfField))
+            XCTAssertTrue(sample.anyOfField.breq(sample.anyOfField))
+            XCTAssertTrue(sample.oneOfField.breq(sample.oneOfField))
+            XCTAssertTrue(sample.notField.breq(sample.notField))
+            XCTAssertTrue(sample.simpleOneOf.breq(sample.simpleOneOf))
+            XCTAssertTrue(sample.breq(sample))
+            XCTAssertTrue(sample == sample)
         } catch {
             XCTFail(String(error))
         }

@@ -89,26 +89,21 @@ public extension BreqLayer where Self.BricSub : BreqLayer, Self.BricSub.BricSub 
 }
 
 
-
-extension Optional : BreqLayer {
-    public func breqMap(other: Optional, eq: (Wrapped, Wrapped) -> Bool) -> Bool {
-        if let lhs = self, rhs = other {
+extension FlatMappable {
+    /// All flat mappables breq through their unwrapped instances
+    public func breqMap(other: Self, eq: (Wrapped, Wrapped) -> Bool) -> Bool {
+        let lhs = self.flatMap({ $0 })
+        let rhs = other.flatMap({ $0 })
+        if let lhs = lhs, rhs = rhs {
             return eq(lhs, rhs)
         } else {
-            return false
+            return lhs == nil && rhs == nil
         }
     }
 }
 
-extension Indirect : BreqLayer {
-    public func breqMap(other: Indirect, eq: (Wrapped, Wrapped) -> Bool) -> Bool {
-        if let lhs = self, rhs = other {
-            return eq(lhs, rhs)
-        } else {
-            return false
-        }
-    }
-}
+extension Optional : BreqLayer { }
+extension Indirect : BreqLayer { }
 
 extension SequenceType {
     /// All sequences breq sub-equality

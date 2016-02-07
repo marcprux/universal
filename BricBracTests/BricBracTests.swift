@@ -1457,6 +1457,101 @@ class BricBracTests : XCTestCase {
         let bric: Bric = fb.bric()
         XCTAssertNotEqual(Array(bric.obj!.keys), ["a", "b", "c", "d"]) // note that we lose ordering when converting to standard Bric
     }
+
+    func testOneOfStruct() {
+        do {
+            let one = OneOf2<String, String>(t1: "xxx")
+            let two = OneOf2<String, String>(t1: "xxx")
+            XCTAssertEqual(one, two)
+        }
+
+        do {
+            let one = OneOf2<String, String>(t2: "xxx")
+            let two = OneOf2<String, String>(t2: "xxx")
+            XCTAssertEqual(one, two)
+        }
+
+        do {
+            let one = OneOf2<String, String>(t1: "xxx")
+            let two = OneOf2<String, String>(t2: "xxx")
+            XCTAssertNotEqual(one, two)
+        }
+    }
+
+    let RefPerformanceCount = 100000
+
+    /// Tests to see the performance impact of using a simple Indirect ref vs. a direct Optional
+    func testIndirectPerformance() {
+        var array = Array<Indirect<Bool>>()
+        array.reserveCapacity(RefPerformanceCount)
+        measureBlock { // 0.209
+            for _ in 1...self.RefPerformanceCount { array.append(.Some(true)) }
+            let allTrue = array.reduce(true, combine: { (x, y) in x && (y.value ?? false) })
+            XCTAssertEqual(allTrue, true)
+        }
+    }
+
+    func testOptionalPerformance() {
+        var array = Array<Optional<Bool>>()
+        array.reserveCapacity(RefPerformanceCount)
+        measureBlock { // 0.160
+            for _ in 1...self.RefPerformanceCount { array.append(.Some(true)) }
+            let allTrue = array.reduce(true, combine: { (x, y) in x && (y ?? false) })
+            XCTAssertEqual(allTrue, true)
+        }
+    }
+
+    func testBreqable() {
+        var bc = Person.Breqs
+        let p1 = Person(name: "Marc", male: true, age: 42, children: [])
+        var p2 = p1
+
+        XCTAssertTrue(p1.breq(p2))
+        XCTAssertEqual(bc + 1, Person.Breqs); bc = Person.Breqs
+
+        XCTAssertTrue(p1 == p2)
+        XCTAssertEqual(bc + 1, Person.Breqs); bc = Person.Breqs
+
+        p2.name = "Marcus"
+        XCTAssertTrue(p1 != p2)
+        XCTAssertEqual(bc + 1, Person.Breqs); bc = Person.Breqs
+
+        var p3 = p2
+        p3.age = nil
+
+        let ap1 = [p1, p2, p3]
+        var ap2 = [p1, p2, p3]
+
+        XCTAssertTrue(ap1 == ap2)
+        XCTAssertEqual(bc + 3, Person.Breqs); bc = Person.Breqs
+
+        ap2[1] = p1
+        XCTAssertTrue(ap1 != ap2) // only 2 calls should be made because it should stop at 2
+        XCTAssertEqual(bc + 2, Person.Breqs); bc = Person.Breqs
+
+//        let brq = Person.breq
+
+        // now try with an array of optionals, which should utilize the BricLayer implementation
+        let aoap1: Array<Optional<Array<Person>>> = [ap1, ap2, ap1]
+        var aoap2 = aoap1
+        XCTAssertTrue(aoap1.breq(aoap2))
+        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
+
+        aoap2.append(nil)
+        XCTAssertFalse(aoap1.breq(aoap2)) // should fail due to different number of elements
+        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
+
+        aoap2[1] = nil
+        XCTAssertFalse(aoap1.breq(aoap2)) // should short-circuit after 3
+        XCTAssertEqual(bc + 3, Person.Breqs); bc = Person.Breqs
+
+//        XCTAssertTrue(aoap1 == aoap2)
+//        XCTAssertEqual(bc + 6, Person.Breqs); bc = Person.Breqs
+
+        let x: Array<Optional<Array<Array<Int>>>> = [[[1]], [[2, 3]]]
+        XCTAssertTrue(x.breq(x))
+        XCTAssertTrue(x == x) // also check to see if the equals implementation works
+    }
 }
 
 /// Parses the given stream of elements with the associated codec
@@ -1499,7 +1594,9 @@ struct Person {
 }
 
 /// Example of using an enum in a type extension for BricBrac with automatic hashability and equatability
-extension Person : BricBrac, Hashable, Equatable {
+extension Person : BricBrac, Equatable {
+    private static var Breqs = 0
+
     enum Keys: String {
         case name, male, age, children
     }
@@ -1520,6 +1617,13 @@ extension Person : BricBrac, Hashable, Equatable {
             age: bric.bracKey(Keys.age),
             children: bric.bracKey(Keys.children)
         )
+    }
+
+    /// A more efficient implementation of Breqable that perform direct field comparison
+    /// ordered by the fastest comparisons to the slowest
+    func breq(other: Person) -> Bool {
+        Person.Breqs++ // for testing whether brequals is called
+        return male == other.male && age == other.age && name == other.name && children == other.children
     }
 }
 
@@ -1651,6 +1755,10 @@ extension Car : AutoBricBrac {
     )
 }
 
+extension Car: Hashable {
+    var hashValue: Int { return bric().hashValue }
+}
+
 struct Foo {
     var str: String
     var num: Array<Int?>?
@@ -1715,3 +1823,10 @@ extension NSDate : Bricable, Bracable {
     }
 
 }
+
+
+
+
+
+
+

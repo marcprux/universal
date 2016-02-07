@@ -7,31 +7,23 @@
 //
 
 /// A BricBrac is a user-defined type that can serialize/deserialize to/from some Bric
-/// In addition to conforming to Bricable and Bracable, it also provides Equatable and Hashable implementations
+/// In addition to conforming to Bricable and Bracable, it also provides Equatable implementations
 /// and the ability to perform a deep copy with `bricbrac()`; note that standard primitives like String and Bool
 /// conform to both Bricable and Bracable but not to BricBrac because we don't want to conflict with their own
 /// Equatable and Hashable implementations
-public protocol BricBrac: Bricable, Bracable, Equatable, Hashable {
+public protocol BricBrac: Bricable, Bracable, Breqable {
 //    /// Perform semantic validation of the BricBrac; this could verify requirements that
 //    /// cannot be addressed by the type system, such as string and array length requirements
 //    func validate() throws
 }
 
 public extension BricBrac {
-    /// A Bricable hash value is just the hash of its Bric
-    var hashValue: Int { return bric().hashValue }
-
     /// Returns a deep copy of this instance
     func bricbrac() throws -> Self { return try Self.brac(self.bric()) }
 
 //    /// The default validation method does nothing
 //    func validate() { }
 }
-
-/// Bricable conformance means that you can compare two instances by comparing their serialized forms
-/// Note that this only comes from adopting `BricBrac`, and is not conferred by merely adopting `Bricable` and `Bracable`,
-/// because some types may want to be bricable and bracable but have their own equality logic
-public func == <J1: BricBrac, J2: BricBrac>(j1: J1, j2: J2) -> Bool { return j1.bric() == j2.bric() }
 
 
 /// A BricBrac that only bracs elements that do not conform to the underlying type

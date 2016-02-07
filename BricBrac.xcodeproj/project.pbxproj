@@ -16,6 +16,8 @@
 		7E28A5D81B5AD66A00A5F27F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
 		7E28A5DD1B5ADD3500A5F27F /* SampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */; };
 		7E348EE11B9F3CFE00945F86 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
+		7E34B16A1C67B68300E50A71 /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
+		7E34B16B1C67E4B400E50A71 /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
 		7E5DA2CF1B9F401A0013FCB9 /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		7E75A8FA1BA46894002BA7F8 /* Food.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F51BA46894002BA7F8 /* Food.jsonschema */; };
 		7E75A8FB1BA46894002BA7F8 /* Person.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F61BA46894002BA7F8 /* Person.jsonschema */; };
@@ -119,6 +121,7 @@
 		7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftCode.swift; sourceTree = "<group>"; };
 		7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleModel.swift; sourceTree = "<group>"; };
 		7E348EE21B9F3DD700945F86 /* Curio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Curio.h; sourceTree = "<group>"; };
+		7E34B1691C67B68300E50A71 /* Breq.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Breq.swift; sourceTree = "<group>"; };
 		7E5BC8991BA711A300E98CA6 /* BricBracPlay.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = BricBracPlay.playground; sourceTree = "<group>"; };
 		7E5DA2D11B9F5F1E0013FCB9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7E75A8F51BA46894002BA7F8 /* Food.jsonschema */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Food.jsonschema; sourceTree = "<group>"; };
@@ -269,6 +272,7 @@
 			children = (
 				7E7F9B361B36159A0058706A /* Bric.swift */,
 				7E7F9B371B36159A0058706A /* Brac.swift */,
+				7E34B1691C67B68300E50A71 /* Breq.swift */,
 				7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */,
 				7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */,
 				7E7F9B381B36159A0058706A /* BricIO.swift */,
@@ -531,6 +535,7 @@
 				7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */,
 				7E1020201B858F6000171AFE /* JSONParser.swift in Sources */,
 				7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */,
+				7E34B16A1C67B68300E50A71 /* Breq.swift in Sources */,
 				7E7F9B3A1B36159A0058706A /* Brac.swift in Sources */,
 				7E7F9B3B1B36159A0058706A /* BricIO.swift in Sources */,
 				7E8930151BEA570A00F245C5 /* Structures.swift in Sources */,
@@ -551,9 +556,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E8E74671B9F35A2004EA61F /* Bric.swift in Sources */,
-				7E8E74721B9F3651004EA61F /* BricPointer.swift in Sources */,
 				7E8E74711B9F364B004EA61F /* Brac.swift in Sources */,
+				7E34B16B1C67E4B400E50A71 /* Breq.swift in Sources */,
 				7E8E74731B9F36AC004EA61F /* BricBrac.swift in Sources */,
+				7E8E74721B9F3651004EA61F /* BricPointer.swift in Sources */,
 				7E8E74751B9F36DF004EA61F /* JSONParser.swift in Sources */,
 				7E8E74741B9F36CD004EA61F /* BricIO.swift in Sources */,
 				7E8E74701B9F3643004EA61F /* SwiftCode.swift in Sources */,

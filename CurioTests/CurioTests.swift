@@ -108,6 +108,12 @@ class CurioTests: XCTestCase {
                             ]
                         ]
                     ]
+                ],
+                "simpleOneOf": [
+                    "description": "Should generate a simple OneOf enum",
+                    "oneOf": [
+                        [ "type": "string" ], [ "type": "number" ]
+                    ]
                 ]
             ],
             "additionalProperties": false,
@@ -116,11 +122,12 @@ class CurioTests: XCTestCase {
 
         do {
             let schema = try Schema.brac(schemaBric)
-            let gen = Curio()
+            var gen = Curio()
+            gen.generateEquals = true
             let code = try gen.reify(schema, id: "SampleModel", parents: [])
             let module = CodeModule()
             module.types.append(code)
-            try gen.createSwiftModule(module, name: "SampleModel.swift", dir: (__FILE__ as NSString).stringByDeletingLastPathComponent)
+            try gen.emit(module, name: "SampleModel.swift", dir: (__FILE__ as NSString).stringByDeletingLastPathComponent)
         } catch {
             XCTFail(String(error))
         }
@@ -172,7 +179,7 @@ class CurioTests: XCTestCase {
 //                        // TODO: schema doesn't compile yet
 //                        if file != "schema.json" {
 //                            let id = (file as NSString).stringByDeletingPathExtension
-//                            try curio.createSwiftModule(module, name: id + ".swift", dir: (__FILE__ as NSString).stringByDeletingLastPathComponent)
+//                            try curio.emit(module, name: id + ".swift", dir: (__FILE__ as NSString).stringByDeletingLastPathComponent)
 //                        }
 //                    }
 //                } catch {
@@ -204,59 +211,48 @@ public class TestSampleModel : XCTestCase {
             ]
         ]
 
+        
+        func assertBracable(bric: Bric, file: String = __FILE__, line: UInt = __LINE__) {
+            do {
+                let sample = try SampleModel.brac(bric)
+                XCTAssertEqual(bric, sample.bric())
+            } catch {
+                XCTFail(String(error), file: file, line: line)
+            }
+        }
+
+        func assertNotBracable(bric: Bric, file: String = __FILE__, line: UInt = __LINE__) {
+            do {
+                let _ = try SampleModel.brac(bric)
+                XCTFail("should not have bracd", file: __FILE__, line: __LINE__)
+            } catch {
+            }
+        }
+
+
         bric["anyOfField"] = [:]
-        do {
-            try SampleModel.brac(bric)
-            XCTFail("should not have bracd")
-        } catch {
-        }
+        assertNotBracable(bric)
 
-        bric["anyOfField"] = [
-            "b1": 1,
-            "b2": "b2",
-        ]
-        do {
-            let sample = try SampleModel.brac(bric)
-            XCTAssertEqual(bric, sample.bric())
-        } catch {
-            XCTFail(String(error))
-        }
+        bric["anyOfField"] = [ "b1": 1, "b2": "b2" ]
+        assertBracable(bric)
 
-        bric["anyOfField"] = [
-            "b3": true,
-            "b4": 1.2
-        ]
-        do {
-            let sample = try SampleModel.brac(bric)
-            XCTAssertEqual(bric, sample.bric())
-        } catch {
-            XCTFail(String(error))
-        }
+        bric["anyOfField"] = [ "b3": true, "b4": 1.2 ]
+        assertBracable(bric)
 
-        bric["anyOfField"] = [
-            "b3": true,
-        ]
-        do {
-            try SampleModel.brac(bric)
-            XCTFail("should not have bracd")
-        } catch {
-        }
+        bric["anyOfField"] = [ "b3": true ]
+        assertNotBracable(bric)
 
+        bric["anyOfField"] = [ "b3": true, "b4": 1.2 ]
+        assertBracable(bric)
 
-//        bric["anyOfField"] = [
-//            "b1": 1,
-//            "b2": "b2",
-//            "b3": true,
-//            "b4": 1.2
-//        ]
-//        do {
-//            let sample = try SampleModel.brac(bric)
-//            // this is where we need NonEmptyCollection in order to maintain fidelity
-//            XCTAssertEqual(bric, sample.bric())
-//        } catch {
-//            XCTFail(String(error))
-//        }
+        bric["simpleOneOf"] = 1
+        assertBracable(bric)
 
+        bric["simpleOneOf"] = true
+        assertNotBracable(bric)
+
+        bric["simpleOneOf"] = "x"
+        assertBracable(bric)
     }
 
     func testVerifyNotFieldFiles() {

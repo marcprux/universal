@@ -31,7 +31,22 @@ extension Bric {
     public var obj: [String : Bric]? { if case .Obj(let x) = self { return x } else { return nil } }
 }
 
-extension Bric : Equatable, Hashable {
+extension Bric : Equatable { }
+
+/// Two Brics are the same when they represent the same type and have the same contents
+public func ==(lhs: Bric, rhs: Bric) -> Bool {
+    switch (lhs, rhs) {
+    case let (.Arr(arr1), .Arr(arr2)): return arr1 == arr2
+    case let (.Obj(obj1), .Obj(obj2)): return obj1 == obj2
+    case let (.Str(str1), .Str(str2)): return str1 == str2
+    case let (.Num(num1), .Num(num2)): return num1 == num2
+    case let (.Bol(bol1), .Bol(bol2)): return bol1 == bol2
+    case (.Nul, .Nul): return true
+    default: return false
+    }
+}
+
+extension Bric : Hashable {
     public var hashValue: Int {
         switch self {
         case .Arr(let a): return a.reduce(0, combine: { sum, bric in Int.multiplyWithOverflow(37, Int.addWithOverflow(sum, bric.hashValue).0).0 })
@@ -41,19 +56,6 @@ extension Bric : Equatable, Hashable {
         case .Bol(let b): return b.hashValue
         case .Nul: return 0
         }
-    }
-}
-
-/// Two JSON objects are the same when they represent the same type and have the same contents
-public func == (lhs: Bric, rhs: Bric) -> Bool {
-    switch (lhs, rhs) {
-    case let (.Arr(arr1), .Arr(arr2)): return arr1 == arr2
-    case let (.Obj(obj1), .Obj(obj2)): return obj1 == obj2
-    case let (.Str(str1), .Str(str2)): return str1 == str2
-    case let (.Num(num1), .Num(num2)): return num1 == num2
-    case let (.Bol(bol1), .Bol(bol2)): return bol1 == bol2
-    case (.Nul, .Nul): return true
-    default: return false
     }
 }
 
@@ -357,6 +359,11 @@ extension Bric : DictionaryLiteralConvertible {
         self = .Obj(d)
     }
 
+    /// Creates a Bric.Obj with the given dictionary where the key is a String RawRepresentable
+    public init<R: RawRepresentable where R.RawValue == String>(obj: [R: Bric]) {
+        self.init(object: Array(obj))
+    }
+
     /// Creates a Bric.Obj by merging any sub-objects into a single Bric Object
     public init(merge: [Bric]) {
         var d: Dictionary<String, Bric> = [:]
@@ -501,7 +508,7 @@ extension RawRepresentable where RawValue : Bricable {
 }
 
 extension SequenceType {
-    /// All sequence bric to a `Bric.Arr` array
+    /// All sequences bric to a `Bric.Arr` array
     public func bricMap(f: Generator.Element -> Bric) -> Bric {
         return Bric.Arr(map(f))
     }

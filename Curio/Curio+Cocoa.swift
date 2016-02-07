@@ -9,7 +9,7 @@
 import Foundation
 
 public extension Curio {
-    public func createSwiftModule(module: CodeModule, name: String, dir: String) throws {
+    public func emit(module: CodeModule, name: String, dir: String) throws {
         let locpath = (dir as NSString).stringByAppendingPathComponent(name)
         module.imports.append("BricBrac")
 

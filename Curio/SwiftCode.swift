@@ -50,15 +50,38 @@ public class CodeEmitter<T: OutputStreamType> : CodeEmitterType {
     }
 }
 
+private class KeyCodeEmitter : CodeEmitterType {
+    private var string = ""
+
+    private func emit(tokens: String?...) {
+        for token in tokens {
+            if let token = token {
+                string.appendContentsOf(token)
+                string.appendContentsOf(" ")
+            }
+        }
+        string.appendContentsOf("\n")
+    }
+}
+
 public protocol CodeEmittable {
     var comments: [String] { get set }
     func emit(emitter: CodeEmitterType)
 }
 
-public class CodeModule : CodeEmittable {
-    public var types: [CodeNamedType] = []
+public class CodeModule : CodeImplementationType {
+    public var types: [CodeNamedType] {
+        get { return nestedTypes }
+        set { nestedTypes = newValue }
+    }
+
+    public var nestedTypes: [CodeNamedType] = []
     public var comments: [String] = []
     public var imports: [String] = []
+    /// Global functions in this module
+    public var funcs: [CodeFunction.Implementation] = []
+    /// No-op at the module level (needed for CodeImplementationType : CodeConformantType)
+    public var conforms: [CodeProtocol] = []
 
     public init() {
     }
@@ -72,9 +95,14 @@ public class CodeModule : CodeEmittable {
             emitter.emit()
         }
 
-        for type in types {
-            type.emit(emitter)
-            emitter.emit()
+        for f in funcs {
+            emitter.emit("")
+            f.emit(emitter)
+        }
+
+        for inner in nestedTypes {
+            emitter.emit("")
+            inner.emit(emitter)
         }
     }
 }
@@ -356,7 +384,8 @@ public protocol CodeConformantType : CodeUnit {
 }
 
 /// An implementation type can contain function implementations (struct, class, enum)
-public protocol CodeImplementationType : CodeConformantType {
+public protocol CodeImplementationType : CodeConformantType, CodeEmittable {
+    var nestedTypes: [CodeNamedType] { get set }
     var funcs: [CodeFunction.Implementation] { get set }
 }
 
@@ -375,6 +404,7 @@ public struct CodeSimpleEnum<T> : CodeNamedType, CodeImplementationType {
     public var funcs: [CodeFunction.Implementation] = []
     public var comments: [String] = []
     public var defaultValue: String?
+    public var nestedTypes: [CodeNamedType] = []
 
     public init(name: CodeTypeName, access: CodeAccess, cases: [CodeCaseSimple<T>] = []) {
         self.access = access
@@ -408,6 +438,12 @@ public struct CodeSimpleEnum<T> : CodeNamedType, CodeImplementationType {
         for c in cases {
             emitter.emit("case", c.name, c.value.flatMap({ "= " + quotedString($0) }))
         }
+
+        for inner in nestedTypes {
+            emitter.emit("")
+            inner.emit(emitter)
+        }
+
         emitter.emit("}")
     }
 
@@ -489,16 +525,18 @@ public struct CodeEnum : CodeNamedType, CodeImplementationType {
 
 }
 
-public struct CodeExtension : CodeImplementationType {
-    public let extends: CodeNamedType
-    public var conforms: [CodeProtocol] = []
-    public var funcs: [CodeFunction.Implementation] = []
-    public var comments: [String] = []
-
-    public init(extends: CodeNamedType) {
-        self.extends = extends
-    }
-}
+// currently unused
+//public struct CodeExtension : CodeImplementationType {
+//    public let extends: CodeNamedType
+//    public var conforms: [CodeProtocol] = []
+//    public var funcs: [CodeFunction.Implementation] = []
+//    public var comments: [String] = []
+//    public var nestedTypes: [CodeNamedType] = []
+//
+//    public init(extends: CodeNamedType) {
+//        self.extends = extends
+//    }
+//}
 
 public struct CodeProtocol : CodeNamedType, CodeConformantType {
     public var name: CodeTypeName
@@ -547,8 +585,6 @@ public protocol CodeStateType : CodePropertyImplementationType, CodeImplementati
     var conforms: [CodeProtocol] { get set }
     var props: [CodeProperty.Implementation] { get set }
     var funcs: [CodeFunction.Implementation] { get set }
-    var nestedTypes: [CodeNamedType] { get set }
-
 }
 
 public struct CodeStruct : CodeStateType {

@@ -23,7 +23,7 @@ public struct Curio {
     /// Not yet supported due to inability to equate nested types (e.g.: binary operator '==' cannot be applied to two 'Optional<Array<ValuesItem>>' (aka 'Optional<Array<Dictionary<String, Bric>>>') operands)
     /// Unless we want to write a ton more code for equatability, we'll need to wait for Swift 3's
     /// ability to declare constrained protocol conformance
-    public var generateEquals = false
+    public var generateEquals = true
 
     /// Whether to output simple union types as a typealias to a BricBrac.OneOf<T1, T2, ...> enum
     public var useOneOfEnums = true

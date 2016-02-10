@@ -135,11 +135,9 @@ extension Dictionary : BreqLayer { // TODO: Swift 3: where Key == String
 
     public func breqMap(other: Dictionary, eq: (BricSub, BricSub) -> Bool) -> Bool {
         if self.count != other.count { return false }
-
-        let selfKeys = Array(self.keys), otherKeys = Array(other.keys)
-        if selfKeys != otherKeys { return false }
-
-        let selfValues = selfKeys.map({ self[$0]! }), otherValues = otherKeys.map({ other[$0]! })
+        let keys = Set(self.keys)
+        if keys != Set(other.keys) { return false }
+        let selfValues = keys.map({ self[$0]! }), otherValues = keys.map({ other[$0]! })
         return selfValues.breqMap(otherValues, eq: eq)
     }
 }

@@ -56,6 +56,7 @@ public struct Curio {
         case DefaultValueNotInStringEnum
         case NonStringEnumsNotSupported // TODO
         case TupleTypeingNotSupported // TODO
+        case ComplexTypesNotAllowedInMultiType
         case IllegalState(String)
         case Unsupported(String)
         case IllegalProperty(Schema)
@@ -68,6 +69,7 @@ public struct Curio {
             case DefaultValueNotInStringEnum: return "DefaultValueNotInStringEnum"
             case NonStringEnumsNotSupported: return "NonStringEnumsNotSupported"
             case TupleTypeingNotSupported: return "TupleTypeingNotSupported"
+            case ComplexTypesNotAllowedInMultiType: return "ComplexTypesNotAllowedInMultiType"
             case IllegalState(let x): return "IllegalState(\(x))"
             case Unsupported(let x): return "Unsupported(\(x))"
             case IllegalProperty(let x): return "IllegalProperty(\(x))"
@@ -169,6 +171,18 @@ public struct Curio {
         }
     }
 
+    /// Returns true if the schema will be serialized as a raw Bric instance
+    func isBricType(var schema: Schema) -> Bool {
+        // trim out extranneous values
+        schema.description = nil
+
+        let bric = schema.bric()
+        if bric == [:] { return true }
+        if bric == ["type": "object"] { return true }
+
+        return false
+    }
+
     typealias PropInfo = (name: String?, required: Bool, schema: Schema)
 
     func getPropInfo(schema: Schema, id: String, parents: [CodeTypeName]) -> [PropInfo] {
@@ -228,6 +242,7 @@ public struct Curio {
         let VoidType = CodeExternalType("Void", access: accessor(parents))
         let ArrayType = CodeExternalType("Array", generics: [BricType], access: accessor(parents))
         let ObjectType = dictionaryType(StringType, BricType)
+        let HollowBricType = CodeExternalType("HollowBric", access: accessor(parents))
 
         /// Calculate the fully-qualified name of the given type
         func fullName(type: CodeType) -> String {
@@ -471,9 +486,8 @@ public struct Curio {
         enum StateMode { case Standard, AllOf, AnyOf }
 
         /// Creates a schema instance for an "object" type with all the listed properties
-        func createObject(typename: CodeTypeName, properties: [PropInfo], mode: StateMode) throws -> CodeStateType {
-
-            let merge = mode == .AllOf || mode == .AnyOf
+        func createObject(typename: CodeTypeName, properties: [PropInfo], var mode: StateMode) throws -> CodeStateType {
+            let isUnionType = mode == .AllOf || mode == .AnyOf
 
             var code: CodeStateType
             if generateValueTypes {
@@ -634,7 +648,7 @@ public struct Curio {
                         let sub = merged ? p1.declaration.type as? CodeStateType : nil
                         for p in (sub?.props ?? [p1]) {
                             let d = p.declaration
-                            let e = CodeTupleElement(name: d.name, type: d.type, value: d.type.defaultValue, anon: merge)
+                            let e = CodeTupleElement(name: d.name, type: d.type, value: d.type.defaultValue, anon: isUnionType)
                             elements.append(e)
                             if wasIndirect {
                                 // unescape is a hack because we don't preserve the original property name, so we need to
@@ -656,65 +670,89 @@ public struct Curio {
             }
 
             let keysName = "Keys"
-            if !merge {
+            if !isUnionType {
                 // create an enumeration of "Keys" for all the object's properties
                 makeKeys(keysName)
             }
 
             makeInit(false)
-//            if merge { makeInit(true) } // TODO: make convenience initializers for merged (i.e., allOf) nested properties
+//            if isUnionType { makeInit(true) } // TODO: make convenience initializers for merged (i.e., allOf) nested properties
 
-            var bricbody : [String] = []
-            var bracbody : [String] = []
             var breqbody : [String] = []
 
-            if mode == .AllOf || mode == .AnyOf {
+            // breq implementation is the same for allOf/anyOf/standard
+            for (i, pt) in props.enumerate() {
+                let pname = propName(parents + [typename], pt.name)
+
+                let ret = (i == 0 ? "return " : "    && ")
+                breqbody.append(ret + pname + ".breq(other." + pname + ")")
+            }
+            if hasAdditionalProps == true {
+                breqbody.append((props.isEmpty ? "return " : "    && ") + addPropName + ".breq(other." + addPropName + ")")
+            }
+
+            var bricbody : [String] = []
+            switch mode {
+            case .AllOf, .AnyOf:
                 bricbody.append("return Bric(merge: [")
                 for (i, pt) in props.enumerate() {
                     let pname = propName(parents + [typename], pt.name)
-
                     let sep = (i == props.count-1 ? "" : ",")
                     bricbody.append(pname + ".bric()" + sep)
-
-                    let ret = (i == 0 ? "return " : "")
-                    let and = (i == props.count-1 ? "" : " &&")
-                    breqbody.append(ret + pname + ".breq(other." + pname + ")" + and)
                 }
                 bricbody.append("])")
 
-                if mode == .AllOf {
-                    bracbody.append("return try \(fullName(code))(")
-                } else if mode == .AnyOf {
-                    bracbody.append("return try \(fullName(code))(")
+            case .Standard:
+                bricbody.append("return Bric(obj: [")
+                if hasAdditionalProps == true { // empty key for additional properties; first so addprop keys don't clobber state keys
+                    bricbody.append("\(keysName).\(addPropName): \(addPropName).bric(),")
                 }
 
+                for (_, pt) in props.enumerate() {
+                    let pname = propName(parents + [typename], pt.name)
+                    bricbody.append("\(keysName).\(pname): \(pname).bric(),")
+                }
+
+                bricbody.append("])")
+            }
+
+
+            var bracbody : [String] = []
+            switch mode {
+            case .AllOf:
+                bracbody.append("return try \(fullName(code))(")
                 for (i, pt) in proptypes.enumerate() {
                     let sep = (i == props.count-1 ? "" : ",")
                     let ti: String = pt.type.identifier
                     bracbody.append("\(ti).brac(bric)" + sep)
                 }
                 bracbody.append(")")
-            } else {
-                bricbody.append("return Bric(obj: [")
-                if hasAdditionalProps == true { // empty key for additional properties; first so addprop keys don't clobber state keys
-                    bricbody.append("\(keysName).\(addPropName): \(addPropName).bric(),")
+
+            case .AnyOf:
+                var anydec = "let anyOf: ("
+                for (i, pt) in proptypes.enumerate() {
+                    anydec += (i > 0 ? ", " : "") + pt.type.identifier
                 }
-
-                for (i, pt) in props.enumerate() {
-                    let pname = propName(parents + [typename], pt.name)
-
-                    bricbody.append("\(keysName).\(pname): \(pname).bric(),")
-
-                    let ret = (i == 0 ? "return " : "    && ")
-                    breqbody.append(ret + pname + ".breq(other." + pname + ")")
+                anydec += ") = try bric.bracAny("
+                for (i, pt) in proptypes.enumerate() {
+                    var wrapped = pt.type
+                    if let opt = wrapped as? CodeExternalType where opt.name == "Optional" {
+                        wrapped = opt.generics[0]
+                    }
+                    anydec += (i > 0 ? ", " : "") + wrapped.identifier + ".brac"
                 }
+                anydec += ")"
 
-                if hasAdditionalProps == true {
-                    breqbody.append((props.isEmpty ? "return " : "    && ") + addPropName + ".breq(other." + addPropName + ")")
+                bracbody.append(anydec)
+
+                bracbody.append("return \(fullName(code))(")
+                for (i, _) in proptypes.enumerate() {
+                    let sep = (i == proptypes.count-1 ? "" : ", ")
+                    bracbody.append("anyOf.\(i)" + sep)
                 }
+                bracbody.append(")")
 
-                bricbody.append("])")
-
+            case .Standard:
                 if hasAdditionalProps == false {
                     bracbody.append("try bric.prohibitExtraKeys(\(keysName))")
                 }
@@ -730,6 +768,7 @@ public struct Curio {
                 }
                 bracbody.append(")")
             }
+
 
             if bricbody.isEmpty { bricbody.append("fatalError()") }
             code.conforms.append(bricable)
@@ -824,6 +863,22 @@ public struct Curio {
 
         if let values = schema._enum {
             return try createStringEnum(typename, values: values)
+        } else if case .Some(.B(let multiType)) = type {
+            // "type": ["string", "number"]
+            var subTypes: [CodeType] = []
+            for type in multiType {
+                switch type {
+                case .Array: throw CodegenErrors.ComplexTypesNotAllowedInMultiType
+                case .Boolean: subTypes.append(BoolType)
+                case .Integer: subTypes.append(IntType)
+                case .Null: throw CodegenErrors.ComplexTypesNotAllowedInMultiType
+                case .Number: subTypes.append(DoubleType)
+                case .Object: throw CodegenErrors.ComplexTypesNotAllowedInMultiType
+                case .String: subTypes.append(StringType)
+                }
+            }
+            let oneOf = oneOfType(subTypes)
+            return CodeTypeAlias(name: typename, type: oneOf, access: accessor(parents))
         } else if case .Some(.A(.String)) = type {
             return CodeTypeAlias(name: typename, type: StringType, access: accessor(parents))
         } else if case .Some(.A(.Integer)) = type {
@@ -853,25 +908,15 @@ public struct Curio {
             }
             return try createObject(typename, properties: props, mode: .AllOf)
         } else if let anyOf = schema.anyOf {
-            // anyOf is one or more Xs, so make it a tuple of (CollectionOfOne<X>, Array<X>)
-            // FIXME: compiler hang, maybe because the tuple can't be de-brac'd
-//            let oneOf = try createOneOf(anyOf)
-////            let tuple = CodeTuple(elements: [(name: nil, type: collectionOfOneType(oneOf), value: nil, anon: false), (name: nil, type: arrayType(oneOf), value: nil, anon: false)])
-//            let anyOfId = typename + "Array"
-//            let anyOfType = nonEmptyType(oneOf)
-//            return CodeTypeAlias(name: anyOfId, type: anyOfType, access: accessor(parents), peers: [oneOf])
+            var props: [PropInfo] = []
+            for propSchema in anyOf {
+                // if !isBricType(propSchema) { continue } // anyOfs disallow misc Bric types // disabled because this is sometimes used in an allOf to validate peer properties
+                props.append(PropInfo(name: nil, required: false, schema: propSchema))
+            }
+            if props.count == 1 { props[0].required = true }
 
-            // represent anyOf as a struct with optional properties
-//            let props: [PropInfo] = anyOf.map({ (name: nil, required: false, schema: $0 ) })
-//            return try createObject(typename, properties: props, mode: .AnyOf)
-
-            // FIXME anyOf requires that at least one element be valid; there are a few ways to
-            // represent this:
-            // 1. as a oneOf (which is what we do here), and just ignore further successful validations
-            // 2. as a tuple of optionals, but then the runtime model can be invalid (since you could set all the optionals to nil)
-            // 3. as a collection of oneOf cases, but that has the same drawback as #2
-            return try createOneOf(anyOf)
-
+            // AnyOfs with only 1 property are AllOf
+            return try createObject(typename, properties: props, mode: props.count > 1 ? .AnyOf : .AllOf)
         } else if let oneOf = schema.oneOf { // TODO: allows properties in addition to oneOf
             return try createOneOf(oneOf)
         } else if let ref = schema.ref { // create a typealias to the reference
@@ -880,7 +925,12 @@ public struct Curio {
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)
             return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peers: [inverseSchema])
-        } else if schema.bric() == [:] { // an empty schema just generates pure Bric
+            // TODO
+//        } else if let req = schema.required where !req.isEmpty { // a sub-bric with only required properties just validates
+//            let reqId = "Req" + typename
+//            let reqSchema = try reify(not, id: reqId, parents: parents)
+//            return CodeTypeAlias(name: typename, type: notBracType(reqSchema), access: accessor(parents), peers: [reqSchema])
+        } else if isBricType(schema) { // an empty schema just generates pure Bric
             return CodeTypeAlias(name: typename, type: BricType, access: accessor(parents))
         } else if case .Some(.A(.Object)) = type, .Some(.B(.Some(let adp))) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Type]
@@ -892,8 +942,8 @@ public struct Curio {
             return CodeTypeAlias(name: typename, type: ObjectType, access: accessor(parents))
         } else {
             // throw CodegenErrors.IllegalState("No code to generate for: \(schema.bric().stringify())")
-            //print("warning: making Bric for code: \(schema.bric().stringify())")
-            return CodeTypeAlias(name: typename, type: BricType, access: accessor(parents))
+            print("warning: making HollowBric for code: \(schema.bric().stringify())")
+            return CodeTypeAlias(name: typename, type: HollowBricType, access: accessor(parents))
         }
     }
 

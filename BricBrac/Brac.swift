@@ -160,17 +160,82 @@ public extension Bric {
         return try bracRange(1...1, bracers: oneOf)[0]
     }
 
-//    /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error or more than one succeeded
-//    public func bracOne<T: Bracable>(@autoclosure oneOf: () throws -> T) throws -> T {
-//        return try bracRange(1...1, bracers: [oneOf])[0]
-//    }
+    /// Reads at least one of the given Brics, throwing an error if none of the brics passed
+    public func bracAny<T1, T2>(b1: Bric throws -> T1, _ b2: Bric throws -> T2) throws -> (T1?, T2?) {
+        var errs: [ErrorType] = []
 
-//    /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error or more than one succeeded
-//    public func bracOne<T: Bracable>(@autoclosure oneOf: () throws -> T, @autoclosure _ oneOf2: () throws -> T) throws -> T {
-//        return try bracRange(1...1, bracers: [oneOf, oneOf2])[0]
-//    }
+        var t1: T1?
+        do { t1 = try b1(self) } catch { errs.append(error) }
+        var t2: T2?
+        do { t2 = try b2(self) } catch { errs.append(error) }
 
-    /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error
+        if t1 == nil && t2 == nil {
+            throw BracError.MultipleErrors(errors: errs, path: [])
+        } else {
+            return (t1, t2)
+        }
+    }
+
+    /// Reads at least one of the given Brics, throwing an error if none of the brics passed
+    public func bracAny<T1, T2, T3>(b1: Bric throws -> T1, _ b2: Bric throws -> T2, _ b3: Bric throws -> T3) throws -> (T1?, T2?, T3?) {
+        var errs: [ErrorType] = []
+
+        var t1: T1?
+        do { t1 = try b1(self) } catch { errs.append(error) }
+        var t2: T2?
+        do { t2 = try b2(self) } catch { errs.append(error) }
+        var t3: T3?
+        do { t3 = try b3(self) } catch { errs.append(error) }
+
+        if t1 == nil && t2 == nil && t3 == nil {
+            throw BracError.MultipleErrors(errors: errs, path: [])
+        } else {
+            return (t1, t2, t3)
+        }
+    }
+
+    /// Reads at least one of the given Brics, throwing an error if none of the brics passed
+    public func bracAny<T1, T2, T3, T4>(b1: Bric throws -> T1, _ b2: Bric throws -> T2, _ b3: Bric throws -> T3, _ b4: Bric throws -> T4) throws -> (T1?, T2?, T3?, T4?) {
+        var errs: [ErrorType] = []
+
+        var t1: T1?
+        do { t1 = try b1(self) } catch { errs.append(error) }
+        var t2: T2?
+        do { t2 = try b2(self) } catch { errs.append(error) }
+        var t3: T3?
+        do { t3 = try b3(self) } catch { errs.append(error) }
+        var t4: T4?
+        do { t4 = try b4(self) } catch { errs.append(error) }
+
+        if t1 == nil && t2 == nil && t3 == nil && t4 == nil {
+            throw BracError.MultipleErrors(errors: errs, path: [])
+        } else {
+            return (t1, t2, t3, t4)
+        }
+    }
+
+    /// Reads at least one of the given Brics, throwing an error if none of the brics passed
+    public func bracAny<T1, T2, T3, T4, T5>(b1: Bric throws -> T1, _ b2: Bric throws -> T2, _ b3: Bric throws -> T3, _ b4: Bric throws -> T4, _ b5: Bric throws -> T5) throws -> (T1?, T2?, T3?, T4?, T5?) {
+        var errs: [ErrorType] = []
+
+        var t1: T1?
+        do { t1 = try b1(self) } catch { errs.append(error) }
+        var t2: T2?
+        do { t2 = try b2(self) } catch { errs.append(error) }
+        var t3: T3?
+        do { t3 = try b3(self) } catch { errs.append(error) }
+        var t4: T4?
+        do { t4 = try b4(self) } catch { errs.append(error) }
+        var t5: T5?
+        do { t5 = try b5(self) } catch { errs.append(error) }
+
+        if t1 == nil && t2 == nil && t3 == nil && t4 == nil && t5 == nil {
+            throw BracError.MultipleErrors(errors: errs, path: [])
+        } else {
+            return (t1, t2, t3, t4, t5)
+        }
+    }
+
     public func bracAny<T: Bracable>(anyOf: [() throws -> T]) throws -> NonEmptyCollection<T, [T]> {
         let elements = try bracRange(1...anyOf.count, bracers: anyOf)
         return NonEmptyCollection(elements[0], tail: Array(elements.dropFirst()))

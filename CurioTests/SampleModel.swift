@@ -79,8 +79,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         public func breq(other: SampleModel.AllOfField) -> Bool {
-            return p0.breq(other.p0) && 
-            p1.breq(other.p1) 
+            return p0.breq(other.p0) 
+                && p1.breq(other.p1) 
         }
 
         /// FirstAll
@@ -154,38 +154,35 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
     }
 
-    public enum AnyOfField : Bricable, Bracable, Breqable {
-        case FirstAnyCase(FirstAny)
-        case SecondAnyCase(SecondAny)
+    public struct AnyOfField : Bricable, Bracable, Breqable {
+        /// FirstAny
+        public var p0: Optional<FirstAny>
+        /// SecondAny
+        public var p1: Optional<SecondAny>
 
-        public init(_ arg: FirstAny) {
-            self = .FirstAnyCase(arg) 
-        }
-
-        public init(_ arg: SecondAny) {
-            self = .SecondAnyCase(arg) 
+        public init(_ p0: Optional<FirstAny> = nil, _ p1: Optional<SecondAny> = nil) {
+            self.p0 = p0 
+            self.p1 = p1 
         }
 
         public func bric() -> Bric {
-            switch self { 
-            case .FirstAnyCase(let x): return x.bric() 
-            case .SecondAnyCase(let x): return x.bric() 
-            } 
-        }
-
-        public static func brac(bric: Bric) throws -> SampleModel.AnyOfField {
-            return try bric.bracOne([ 
-            { try .FirstAnyCase(FirstAny.brac(bric)) }, 
-            { try .SecondAnyCase(SecondAny.brac(bric)) }, 
+            return Bric(merge: [ 
+            p0.bric(), 
+            p1.bric() 
             ]) 
         }
 
+        public static func brac(bric: Bric) throws -> SampleModel.AnyOfField {
+            let anyOf: (Optional<FirstAny>, Optional<SecondAny>) = try bric.bracAny(FirstAny.brac, SecondAny.brac) 
+            return SampleModel.AnyOfField( 
+            anyOf.0,  
+            anyOf.1 
+            ) 
+        }
+
         public func breq(other: SampleModel.AnyOfField) -> Bool {
-            switch (self, other) { 
-            case let (.FirstAnyCase(lhs), .FirstAnyCase(rhs)): return lhs.breq(rhs) 
-            case let (.SecondAnyCase(lhs), .SecondAnyCase(rhs)): return lhs.breq(rhs) 
-            default: return false 
-            } 
+            return p0.breq(other.p0) 
+                && p1.breq(other.p1) 
         }
 
         /// FirstAny
@@ -388,8 +385,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         public func breq(other: SampleModel.NotField) -> Bool {
-            return p0.breq(other.p0) && 
-            p1.breq(other.p1) 
+            return p0.breq(other.p0) 
+                && p1.breq(other.p1) 
         }
 
         public struct P0 : Bricable, Bracable, Breqable {

@@ -84,6 +84,23 @@ public enum Indirect<Wrapped> : FlatMappable, Wrappable, NilLiteralConvertible {
     }
 }
 
+/// An Object Bric type that cannot contain anything
+public struct HollowBric : Bricable, Bracable, Breqable {
+    public init() {
+    }
+
+    public func bric() -> Bric {
+        return [:]
+    }
+
+    public static func brac(bric: Bric) throws -> HollowBric {
+        return HollowBric()
+    }
+
+    public func breq(other: HollowBric) -> Bool {
+        return true
+    }
+}
 
 /// A collection that must always have at least one element; the opposite of `EmptyCollection`
 public struct NonEmptyCollection<Element, Tail: RangeReplaceableCollectionType where Tail.Generator.Element == Element, Tail.Index == Int> : RangeReplaceableCollectionType {

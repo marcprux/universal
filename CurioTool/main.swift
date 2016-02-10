@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
-// usage: cat /opt/src/glimpse/glimpse/Glance/Glance/glance-schema.json | /Users/mprudhom/Library/Developer/Xcode/DerivedData/Glimpse-akzmpxhsvpypdxbqqszohlbdbwzm/Build/Products/Debug/CurioTool | xcrun -sdk macosx swiftc -parse -
+// usage: cat /opt/src/glimpse/glimpse/Glean/Glean/glean-schema.json | /Users/mprudhom/Library/Developer/Xcode/DerivedData/Glimpse-akzmpxhsvpypdxbqqszohlbdbwzm/Build/Products/Debug/CurioTool | xcrun -sdk macosx swiftc -parse -
 
 // The pure swift process handling is woefully simplistic; there is no stderr or process exiting, so
 // for the time being we throw errors when there is a problem with the arguments

@@ -8,8 +8,8 @@
 
 // General data structes need for `Brac` and `Curio` schema support
 
-/// A FlatMappable is able to map itself through an optional
-public protocol FlatMappable {
+/// A WrapperType is able to map itself through a wrapped optional
+public protocol WrapperType {
     typealias Wrapped
     init(_ some: Wrapped)
     func flatMap<U>(@noescape f: (Wrapped) throws -> U?) rethrows -> U?
@@ -22,11 +22,11 @@ public protocol Wrappable : NilLiteralConvertible {
 }
 
 
-extension Optional : FlatMappable { }
+extension Optional : WrapperType { }
 extension Optional : Wrappable { }
 
 /// Behaves exactly the same a an Optional except the .Some case is indirect, allowing for recursive value types
-public enum Indirect<Wrapped> : FlatMappable, Wrappable, NilLiteralConvertible {
+public enum Indirect<Wrapped> : WrapperType, Wrappable, NilLiteralConvertible {
     case None
     indirect case Some(Wrapped)
 

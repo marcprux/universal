@@ -482,7 +482,7 @@ public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub 
 }
 
 
-extension FlatMappable {
+extension WrapperType {
     /// Maps the underlying layer, or `Bric.Nul` if it is nil
     public func bricMap(f: Wrapped -> Bric) -> Bric {
         if let x = flatMap({$0}) {
@@ -494,11 +494,11 @@ extension FlatMappable {
 }
 
 extension Optional : BricLayer {
-    public typealias BricSub = Wrapped // inherits bracMap via FlatMappable conformance
+    public typealias BricSub = Wrapped // inherits bracMap via WrapperType conformance
 }
 
 extension Indirect : BricLayer {
-    public typealias BricSub = Wrapped // inherits bracMap via FlatMappable conformance
+    public typealias BricSub = Wrapped // inherits bracMap via WrapperType conformance
 }
 
 extension RawRepresentable where RawValue : Bricable {

@@ -89,7 +89,7 @@ public extension BreqLayer where Self.BricSub : BreqLayer, Self.BricSub.BricSub 
 }
 
 
-extension FlatMappable {
+extension WrapperType {
     /// All flat mappables breq through their unwrapped instances
     public func breqMap(other: Self, eq: (Wrapped, Wrapped) -> Bool) -> Bool {
         let lhs = self.flatMap({ $0 })

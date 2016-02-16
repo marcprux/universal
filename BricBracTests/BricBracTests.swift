@@ -1501,6 +1501,26 @@ class BricBracTests : XCTestCase {
         }
     }
 
+    let BreqPerformanceCount = 1_000_000
+
+    func testOptimizedBreqPerformance() {
+        let array1 = Array(count: BreqPerformanceCount, repeatedValue: true)
+        let array2 = array1
+        measureBlock { // 0.626 ... hmmm...
+            let allEqual = array1.breq(array2)
+            XCTAssertEqual(allEqual, true)
+        }
+    }
+
+    func testUnoptimizedBreqPerformance() {
+        let array1 = Array(count: BreqPerformanceCount, repeatedValue: true)
+        let array2 = array1
+        measureBlock { // 0.575
+            let allEqual = zip(array1, array2).reduce(true, combine: { (b, vals) in b && (vals.0 == vals.1) })
+            XCTAssertEqual(allEqual, true)
+        }
+    }
+
     func testBreqable() {
         var bc = Person.Breqs
         let p1 = Person(name: "Marc", male: true, age: 42, children: [])
@@ -1531,6 +1551,13 @@ class BricBracTests : XCTestCase {
 
 //        let brq = Person.breq
 
+        let afp1 = AnyForwardCollection(ap1)
+        let afp2 = AnyForwardCollection(ap2)
+        XCTAssertTrue(afp1 === afp1, "equivalence check should be true")
+        XCTAssertTrue(afp1 !== afp2, "equivalence check should be false")
+
+        bc = Person.Breqs
+
         // now try with an array of optionals, which should utilize the BricLayer implementation
         let aoap1: Array<Optional<Array<Person>>> = [ap1, ap2, ap1]
         var aoap2 = aoap1
@@ -1539,11 +1566,13 @@ class BricBracTests : XCTestCase {
 
         aoap2.append(nil)
         XCTAssertFalse(aoap1.breq(aoap2)) // should fail due to different number of elements
-        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
+//        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
+        XCTAssertEqual(bc + 0, Person.Breqs); bc = Person.Breqs // zero due to fast array equivalence checking
 
         aoap2[1] = nil
         XCTAssertFalse(aoap1.breq(aoap2)) // should short-circuit after 3
-        XCTAssertEqual(bc + 3, Person.Breqs); bc = Person.Breqs
+//        XCTAssertEqual(bc + 3, Person.Breqs); bc = Person.Breqs
+        XCTAssertEqual(bc + 0, Person.Breqs); bc = Person.Breqs // zero due to fast array equivalence checking
 
 //        XCTAssertTrue(aoap1 == aoap2)
 //        XCTAssertEqual(bc + 6, Person.Breqs); bc = Person.Breqs
@@ -1552,6 +1581,21 @@ class BricBracTests : XCTestCase {
         XCTAssertTrue(x.breq(x))
         // XCTAssertTrue(x == x) // also check to see if the equals implementation works
     }
+
+    func testDeepMerge() {
+        XCTAssertEqual(Bric.Obj(["foo": "bar"]).merge(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": "bar"]).merge(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": [1, 2, 3]]).merge(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": [1, 2, ["x": "y"]]]).merge(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
+    }
+
+    func testShallowMerge() {
+        XCTAssertEqual(Bric.Obj(["foo": "bar"]).assign(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": "bar"]).assign(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": [1, 2, 3]]).assign(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": [1, 2, ["x": "y"]]]).assign(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
+    }
+
 }
 
 /// Parses the given stream of elements with the associated codec

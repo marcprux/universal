@@ -108,6 +108,41 @@ extension Bric {
     }
 }
 
+public extension Bric {
+    /// Copy the values of all enumerable own properties from one or more source objects to a target object,
+    /// returning the union of the objects
+    ///
+    /// - See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+    @warn_unused_result
+    public func assign(bric: Bric) -> Bric {
+        return merge(bric, depth: 1)
+    }
+
+    /// Performs a deep merge of all the object & array elements of the given Bric
+    @warn_unused_result
+    public func merge(bric: Bric, depth: Int = Int.max) -> Bric {
+        if depth <= 0 { return self }
+
+        if case .Arr(var a1) = self, case .Arr(let a2) = bric {
+            for (i, (e1, e2)) in zip(a1, a2).enumerate() {
+                a1[i] = e1.merge(e2, depth: depth - 1)
+            }
+            return .Arr(a1)
+        }
+
+        guard case .Obj(var dest) = self, case .Obj(let src) = bric else { return self }
+        for (srckey, srcval) in src {
+            if let destval = dest[srckey] {
+                dest[srckey] = destval.merge(srcval, depth: depth - 1)
+            } else {
+                dest[srckey] = srcval
+            }
+        }
+        return .Obj(dest)
+    }
+}
+
+
 /// Object keyed subscription helpers for fluent dictionary-like access to Bric
 public extension Bric {
 

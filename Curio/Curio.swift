@@ -264,7 +264,7 @@ public struct Curio {
         let breqfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "breq", access: self.accessor(parents), instance: true, exception: false, arguments: CodeTuple(elements: [selfType($0, name: "other")]), returns: CodeTuple(elements: [(name: nil, type: BoolType, value: nil, anon: false)])) }
 
 
-        let comments = [schema.title, schema.description].filter({ $0 != nil }).map({ $0! })
+        let comments = [schema.title, schema.description].filter({ $0 != nil }).map(unsafeUnwrap)
 
 
         func schemaTypeName(schema: Schema, types: [CodeType], suffix: String = "") -> String {
@@ -587,7 +587,7 @@ public struct Curio {
                     ]
                 }
 
-                propd.comments = [prop.title, prop.description].filter({ $0 != nil }).map({ $0! })
+                propd.comments = [prop.title, prop.description].filter({ $0 != nil }).map(unsafeUnwrap)
                 
                 code.props.append(propi)
                 let pt: PropNameType = (name: propn, type: proptype)

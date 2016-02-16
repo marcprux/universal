@@ -123,13 +123,29 @@ extension SequenceType {
     }
 }
 
-extension Array : BreqLayer { } // inherits breqMap via SequenceType conformance
-extension ArraySlice : BreqLayer { } // inherits breqMap via SequenceType conformance
-extension ContiguousArray : BreqLayer { } // inherits breqMap via SequenceType conformance
+extension CollectionType {
+    public func breqMap(other: Self, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+        if self.isEmpty != other.isEmpty { return false }
+
+        // Fast check for underlying array pointer equivalence (performance: O(1))
+        if AnyForwardCollection(self) === AnyForwardCollection(other) { return true }
+
+        // after the check because count might be O(N)
+        if self.count != other.count { return false }
+
+        // fall back to the default sequence mapping
+        return AnySequence(self).breqMap(AnySequence(other), eq: eq)
+    }
+}
+
+extension Array : BreqLayer { } // inherits breqMap via CollectionType conformance
+extension ArraySlice : BreqLayer { } // inherits breqMap via CollectionType conformance
+extension ContiguousArray : BreqLayer { } // inherits breqMap via CollectionType conformance
+extension CollectionOfOne : BreqLayer { } // inherits breqMap via CollectionType conformance
+extension EmptyCollection : BreqLayer { } // inherits breqMap via CollectionType conformance
+extension NonEmptyCollection : BreqLayer { } // inherits breqMap via CollectionType conformance
+
 extension Set : BreqLayer { } // inherits breqMap via SequenceType conformance
-extension CollectionOfOne : BreqLayer { } // inherits breqMap via SequenceType conformance
-extension EmptyCollection : BreqLayer { } // inherits breqMap via SequenceType conformance
-extension NonEmptyCollection : BreqLayer { } // inherits breqMap via SequenceType conformance
 
 extension Dictionary : BreqLayer { // TODO: Swift 3: where Key == String
 

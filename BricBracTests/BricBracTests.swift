@@ -1587,6 +1587,8 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual(Bric.Obj(["foo": "bar"]).merge(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
         XCTAssertEqual(Bric.Obj(["foo": [1, 2, 3]]).merge(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
         XCTAssertEqual(Bric.Obj(["foo": [1, 2, ["x": "y"]]]).merge(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": [1, 2, [[[["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[[["a": "b"]]]]]]), ["foo": [1, 2, [[[["a": "b", "x": "y"]]]]], "bar": "baz"])
+        XCTAssertEqual(Bric.Obj(["foo": [1, 2, [[2, [["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[2, [["a": "b"]]]]]]), ["foo": [1, 2, [[2, [["a": "b", "x": "y"]]]]], "bar": "baz"])
     }
 
     func testShallowMerge() {

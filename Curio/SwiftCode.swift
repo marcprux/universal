@@ -12,6 +12,17 @@ public protocol CodeEmitterType {
     func emit(tokens: String?...)
 }
 
+public extension CodeEmitterType {
+    public func emitComments(comments: [String]) {
+        let comms = comments.flatMap({ $0.characters.split { $0 == "\n" || $0 == "\r" } })
+
+        for comment in comms {
+            emit("///", String(comment))
+        }
+    }
+}
+
+
 public class CodeEmitter<T: OutputStreamType> : CodeEmitterType {
     public var stream: T
     public var level: UInt = 0
@@ -206,7 +217,7 @@ public struct CodeProperty {
         }
 
         public func emit(emitter: CodeEmitterType) {
-            for comment in comments { emitter.emit("///", comment) }
+            emitter.emitComments(comments)
             emitter.emit("var", name + ":", type.identifier, "{", "get", mutable ? "set" : "", "}")
         }
 
@@ -221,7 +232,7 @@ public struct CodeProperty {
         public var comments: [String] = []
 
         public func emit(emitter: CodeEmitterType) {
-            for comment in declaration.comments { emitter.emit("///", comment) }
+            emitter.emitComments(declaration.comments)
             // TODO: allow declaration bodies (e.g., dynamic get/set, willSet/didSet)
             emitter.emit(declaration.access.rawValue, declaration.mutable || !body.isEmpty ? "var" : "let", declaration.name + ":", declaration.type.identifier, body.isEmpty ? "" : "{")
             if !body.isEmpty {
@@ -297,7 +308,7 @@ public struct CodeFunction {
         }
 
         public func emit(emitter: CodeEmitterType) {
-            for comment in comments { emitter.emit("///", comment) }
+            emitter.emitComments(comments)
             emitter.emit(access.rawValue, instance ? "" : "static", "func", name, identifier)
         }
 
@@ -318,7 +329,7 @@ public struct CodeFunction {
         public var comments: [String] = []
 
         public func emit(emitter: CodeEmitterType) {
-            for comment in declaration.comments { emitter.emit("///", comment) }
+            emitter.emitComments(declaration.comments)
 
             // TODO: if emitted by a class, "static" should be called "class"
             if declaration.name == "init" {
@@ -363,7 +374,7 @@ public struct CodeTypeAlias : CodeNamedType {
     }
 
     public func emit(emitter: CodeEmitterType) {
-        for comment in comments { emitter.emit("///", comment) }
+        emitter.emitComments(comments)
         emitter.emit(access.rawValue, "typealias", name, "=", type.identifier)
 
         // type aliases can refer to an external type (like "String", but they can also carry their own peer types)
@@ -432,7 +443,7 @@ public struct CodeSimpleEnum<T> : CodeNamedType, CodeImplementationType {
     }
 
     public func emit(emitter: CodeEmitterType) {
-        for comment in comments { emitter.emit("///", comment) }
+        emitter.emitComments(comments)
 
         emitter.emit(access.rawValue, "enum", name, adoptions, "{")
         for c in cases {
@@ -500,7 +511,7 @@ public struct CodeEnum : CodeNamedType, CodeImplementationType {
     }
 
     public func emit(emitter: CodeEmitterType) {
-        for comment in comments { emitter.emit("///", comment) }
+        emitter.emitComments(comments)
         emitter.emit(access.rawValue, "enum", name, adoptions, "{")
         for c in cases {
             if let type = c.type {
@@ -569,7 +580,7 @@ public struct CodeProtocol : CodeNamedType, CodeConformantType {
     }
 
     public func emit(emitter: CodeEmitterType) {
-        for comment in comments { emitter.emit("///", comment) }
+        emitter.emitComments(comments)
         emitter.emit(access.rawValue, "protocol", name, adoptions, "{")
         for p in props { p.emit(emitter) }
         emitter.emit("}")
@@ -616,7 +627,7 @@ public struct CodeStruct : CodeStateType {
     }
 
     public func emit(emitter: CodeEmitterType) {
-        for comment in comments { emitter.emit("///", comment) }
+        emitter.emitComments(comments)
         emitter.emit(access.rawValue, "struct", name, adoptions, "{")
         for p in props {
             p.emit(emitter)
@@ -677,7 +688,7 @@ public struct CodeClass : CodeStateType {
     }
 
     public func emit(emitter: CodeEmitterType) {
-        for comment in comments { emitter.emit("///", comment) }
+        emitter.emitComments(comments)
         emitter.emit(access.rawValue, final ? "final" : "", "class", name, adoptions, "{")
 
         for p in props {

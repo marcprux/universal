@@ -184,6 +184,7 @@ public struct Curio {
     }
 
     typealias PropInfo = (name: String?, required: Bool, schema: Schema)
+    typealias PropDec = (name: String, required: Bool, prop: Schema, anon: Bool)
 
     func getPropInfo(schema: Schema, id: String, parents: [CodeTypeName]) -> [PropInfo] {
         let properties = schema.properties ?? [:]
@@ -264,7 +265,7 @@ public struct Curio {
         let breqfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "breq", access: self.accessor(parents), instance: true, exception: false, arguments: CodeTuple(elements: [selfType($0, name: "other")]), returns: CodeTuple(elements: [(name: nil, type: BoolType, value: nil, anon: false)])) }
 
 
-        let comments = [schema.title, schema.description].filter({ $0 != nil }).map(unsafeUnwrap)
+        let comments = [schema.title, schema.description].flatMap { $0 }
 
 
         func schemaTypeName(schema: Schema, types: [CodeType], suffix: String = "") -> String {
@@ -503,7 +504,7 @@ public struct Curio {
 
             // assign some anonymous names to the properties
             var anonPropCount = 0
-            var props = properties.map({ (name: $0.name ?? propName(parents, "p\(anonPropCount++)"), required: $0.required, prop: $0.schema, anon: $0.name == nil) })
+            var props: [PropDec] = properties.map({ PropDec(name: $0.name ?? propName(parents, "p\(anonPropCount++)"), required: $0.required, prop: $0.schema, anon: $0.name == nil) })
 
             for (name, required, prop, anon) in props {
                 var proptype: CodeType
@@ -587,7 +588,7 @@ public struct Curio {
                     ]
                 }
 
-                propd.comments = [prop.title, prop.description].filter({ $0 != nil }).map(unsafeUnwrap)
+                propd.comments = [prop.title, prop.description].flatMap { $0 }
                 
                 code.props.append(propi)
                 let pt: PropNameType = (name: propn, type: proptype)
@@ -679,9 +680,36 @@ public struct Curio {
 //            if isUnionType { makeInit(true) } // TODO: make convenience initializers for merged (i.e., allOf) nested properties
 
             var breqbody : [String] = []
+//        case Array = "array"
+//        case Boolean = "boolean"
+//        case Integer = "integer"
+//        case Null = "null"
+//        case Number = "number"
+//        case Object = "object"
+//        case String = "string"
+
+            /// order by the ease of comparison
+            func breqOrdering(p1: PropDec, p2: PropDec) -> Bool {
+                switch (p1.prop.type, p2.prop.type) {
+                case (.Some(.A(let x)), .Some(.A(let y))) where x == y: return p1.name < p2.name
+                case (.Some(.A(.Boolean)), _): return true
+                case (_, .Some(.A(.Boolean))): return false
+                case (.Some(.A(.Integer)), _): return true
+                case (_, .Some(.A(.Integer))): return false
+                case (.Some(.A(.Number)), _): return true
+                case (_, .Some(.A(.Number))): return false
+                case (.Some(.A(.String)), _): return true
+                case (_, .Some(.A(.String))): return false
+                case (.Some(.A(.Object)), _): return true
+                case (_, .Some(.A(.Object))): return false
+                case (.Some(.A(.Array)), _): return true
+                case (_, .Some(.A(.Array))): return false
+                default: return p1.name < p2.name
+                }
+            }
 
             // breq implementation is the same for allOf/anyOf/standard
-            for (i, pt) in props.enumerate() {
+            for (i, pt) in props.sort(breqOrdering).enumerate() {
                 let pname = propName(parents + [typename], pt.name)
 
                 let ret = (i == 0 ? "return " : "    && ")
@@ -920,7 +948,9 @@ public struct Curio {
         } else if let oneOf = schema.oneOf { // TODO: allows properties in addition to oneOf
             return try createOneOf(oneOf)
         } else if let ref = schema.ref { // create a typealias to the reference
-            return CodeTypeAlias(name: typename, type: CodeExternalType(typeName(parents, ref), access: accessor(parents)), access: accessor(parents))
+            let tname = typeName(parents, ref)
+            let extern = CodeExternalType(tname, access: accessor(parents))
+            return CodeTypeAlias(name: typename == tname ? typename + "Type" : typename, type: extern, access: accessor(parents))
         } else if let not = schema.not.value { // a "not" generates a validator against an inverse schema
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)

@@ -40,8 +40,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     public func breq(other: SampleModel) -> Bool {
         return allOfField.breq(other.allOfField) 
             && anyOfField.breq(other.anyOfField) 
-            && oneOfField.breq(other.oneOfField) 
             && notField.breq(other.notField) 
+            && oneOfField.breq(other.oneOfField) 
             && simpleOneOf.breq(other.simpleOneOf) 
     }
 

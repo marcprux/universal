@@ -15,19 +15,18 @@ extension Bric : Streamable {
 
     /// Serializes this Bric as an ECMA-404 JSON Data Interchange Format string.
     ///
-    /// :param: mapper When set, .Obj instances will be passed through the given mapper to filter, re-order, or modify the values
+    /// - Parameter space: the number of indentation spaces to use for pretty-printing
+    /// - Parameter maxline: fit pretty-printed output on a single line if it is less than maxline
+    /// - Parameter mapper: When set, .Obj instances will be passed through the given mapper to filter, re-order, or modify the values
     @warn_unused_result
-    public func stringify(space space: Int = 0, bufferSize: Int? = nil, recursive: Bool = false, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) })->String {
-        if recursive {
-            return stringifyRecursive(level: 1, space: space, mapper: mapper)
-        } else {
-            var str = String()
-            if let bufferSize = bufferSize {
-                str.reserveCapacity(bufferSize)
-            }
-            self.writeJSON(&str, space: space, mapper: mapper)
-            return str
+    public func stringify(space space: Int = 0, maxline: Int = 0, bufferSize: Int? = nil, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) })->String {
+        var str = String()
+        if let bufferSize = bufferSize {
+            str.reserveCapacity(bufferSize)
         }
+        let spacer = String(count: space, repeatedValue: Character(" "))
+        self.writeJSON(&str, spacer: spacer, maxline: maxline, mapper: mapper)
+        return str
     }
 
     // the emission state; note that indexes go from -1...count, since the edges are markers for container open/close tokens
@@ -36,59 +35,31 @@ extension Bric : Streamable {
         case Obj(index: Int, object: [(String, Bric)])
     }
 
+    public func writeJSON<Target: OutputStreamType>(inout output: Target, spacer: String = "", maxline: Int = 0, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) }) {
+        if maxline <= 0 {
+            writeJSON(&output, writer: FormattingJSONWriter<Target>(spacer: spacer), mapper: mapper)
+        } else {
+            writeJSON(&output, writer: BufferedJSONWriter(spacer: spacer, maxline: maxline), mapper: mapper)
+        }
+    }
+
     /// A non-recursive streaming JSON stringifier
-    public func writeJSON<Target: OutputStreamType>(inout output: Target, space: Int = 0, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) }) {
+    public func writeJSON<Target: OutputStreamType, Writer: JSONWriter where Writer.Target == Target>(inout output: Target, writer: Writer, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) }) {
         // the current stack of containers; we use this instead of recursion to track where we are in the process
         var stack: [State] = []
 
-        func indent(level: Int) {
-            if space != 0 {
-                output.write("\n")
-            }
-            for _ in 0..<space*level {
-                output.write(" ")
-            }
-        }
-
-        func quoteString(str: String) {
-            output.write("\"")
-            for c in str.unicodeScalars {
-                switch c {
-                case "\\": output.write("\\\\")
-                case "\n": output.write("\\n")
-                case "\r": output.write("\\r")
-                case "\t": output.write("\\t")
-                case "\"": output.write("\\\"")
-                // case "/": output.write("\\/") // you may escape slashes, but we don't (neither does JSC's JSON.stringify)
-                case UnicodeScalar(0x08): output.write("\\b") // backspace
-                case UnicodeScalar(0x0C): output.write("\\f") // formfeed
-                default: output.write(String(c))
-                }
-            }
-            output.write("\"")
-        }
-
+        writer.writeStart(&output)
 
         func processBric(bric: Bric) {
             switch bric {
             case .Nul:
-                output.write("null")
+                writer.writeNull(&output)
             case .Bol(let bol):
-                if bol == true {
-                    output.write("true")
-                } else {
-                    output.write("false")
-                }
+                writer.writeBoolean(&output, boolean: bol)
             case .Str(let str):
-                quoteString(str)
+                writer.writeString(&output, string: str)
             case .Num(let num):
-                let str = String(num) // FIXME: this outputs exponential notation for some large numbers
-                // when a string ends in ".0", we just append the rounded int FIXME: better string formatting
-                if str.hasSuffix(".0") {
-                    output.write(str[str.startIndex..<str.endIndex.predecessor().predecessor()])
-                } else {
-                    output.write(str)
-                }
+                writer.writeNumber(&output, number: num)
             case .Arr(let arr):
                 stack.append(State.Arr(index: -1, array: arr))
             case .Obj(let obj):
@@ -99,39 +70,39 @@ extension Bric : Streamable {
 
         func processArrayElement(index: Int, array: [Bric]) {
             if index == -1 {
-                output.write("[")
+                writer.writeArrayOpen(&output)
                 return
             } else if index == array.count {
-                if index > 0 { indent(stack.count) }
-                output.write("]")
+                if index > 0 { writer.writeIndentation(&output, level: stack.count) }
+                writer.writeArrayClose(&output)
                 return
             } else if index > 0 {
-                output.write(",")
+                writer.writeArrayDelimiter(&output)
             }
 
             let element = array[index]
-            indent(stack.count)
+            writer.writeIndentation(&output, level: stack.count)
 
             processBric(element)
         }
 
         func processObjectElement(index: Int, object: [(String, Bric)]) {
             if index == -1 {
-                output.write("{")
+                writer.writeObjectOpen(&output)
                 return
             } else if index == object.count {
-                if index > 0 { indent(stack.count) }
-                output.write("}")
+                if index > 0 { writer.writeIndentation(&output, level: stack.count) }
+                writer.writeObjectClose(&output)
                 return
             } else if index > 0 {
-                output.write(",")
+                writer.writeObjectDelimiter(&output)
             }
 
             let element = object[index]
-            indent(stack.count)
-            quoteString(element.0)
-            output.write(":")
-            if space > 0 { output.write(" ") }
+            writer.writeIndentation(&output, level: stack.count)
+            writer.writeString(&output, string: element.0)
+            writer.writeObjectSeparator(&output)
+            writer.writePadding(&output, count: 1)
 
             processBric(element.1)
         }
@@ -153,52 +124,9 @@ extension Bric : Streamable {
                 processObjectElement(index, object: object)
             }
         }
+
+        writer.writeEnd(&output)
     }
-
-    // OLD slow version
-    /// Serializes this Bric as an ECMA-404 JSON Data Interchange Format string.
-    ///
-    /// :param: mapper When set, .Obj instances will be passed through the given mapper to filter, re-order, or modify the values
-    ///
-    /// *Note* This is about 2x-3x slower than NSJSONSerialization
-    @warn_unused_result
-    private func stringifyRecursive(level level: Int = 1, space: Int? = nil, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) })->String {
-        func quoteString(str: String)->String {
-            return "\"" + str.replace("\"", replacement: "\\\"") + "\""
-        }
-
-        let pre1 = String(count: (space ?? 0)*(level-1), repeatedValue: Character(" "))
-        let pre2 = String(count: (space ?? 0)*(level), repeatedValue: Character(" "))
-        let post = (space != nil) ? "\n" : ""
-        let colon = (space != nil) ? " : " : ":"
-        let comma = ","
-
-        switch self {
-        case .Nul:
-            return "null"
-        case .Bol(let bol):
-            return bol ? "true" : "false"
-        case .Str(let str):
-            return quoteString(str)
-        case .Num(let num):
-            return num == Double(Int(num)) ? String(Int(num)) : String(num) // FIXME: "0.6000000000000001" outputs as "0.6"
-        case .Arr(let arr):
-            var buffer = ""
-            for e in arr {
-                if !buffer.isEmpty { buffer += comma }
-                buffer += post + pre2 + e.stringifyRecursive(level: level+1, space: space, mapper: mapper)
-            }
-            return "[" + buffer + post + pre1 + "]"
-        case .Obj(let obj):
-            var buffer = ""
-            for (key, value) in mapper(obj) {
-                if !buffer.isEmpty { buffer += comma }
-                buffer += post + pre2 + quoteString(key) + colon + value.stringifyRecursive(level: level+1, space: space, mapper: mapper)
-            }
-            return "{" + buffer + post + pre1 + "}"
-        }
-    }
-
 }
 
 extension Bric : CustomDebugStringConvertible {
@@ -591,3 +519,267 @@ extension String {
         self = String(String.UnicodeScalarView() + scalars) // seems a tiny bit faster
     }
 }
+
+
+public protocol JSONWriter {
+    typealias Target
+
+    func writeStart(inout output: Target)
+    func writeEnd(inout output: Target)
+
+    func writeIndentation(inout output: Target, level: Int)
+    func writeNull(inout output: Target)
+    func writeBoolean(inout output: Target, boolean: Bool)
+    func writeNumber(inout output: Target, number: Double)
+    func writeString(inout output: Target, string: String)
+
+    func writePadding(inout output: Target, count: Int)
+
+    func writeArrayOpen(inout output: Target)
+    func writeArrayClose(inout output: Target)
+    func writeArrayDelimiter(inout output: Target)
+
+    func writeObjectOpen(inout output: Target)
+    func writeObjectClose(inout output: Target)
+    func writeObjectSeparator(inout output: Target)
+    func writeObjectDelimiter(inout output: Target)
+
+    func emit(inout output: Target, string: String)
+}
+
+/// Default implementations of common JSONWriter functions when the target is an output stream
+public extension JSONWriter {
+    func writeStart(inout output: Target) {
+
+    }
+
+    func writeEnd(inout output: Target) {
+        
+    }
+
+    func writeString(inout output: Target, string: String) {
+        emit(&output, string: "\"")
+        for c in string.unicodeScalars {
+            switch c {
+            case "\\": emit(&output, string: "\\\\")
+            case "\n": emit(&output, string: "\\n")
+            case "\r": emit(&output, string: "\\r")
+            case "\t": emit(&output, string: "\\t")
+            case "\"": emit(&output, string: "\\\"")
+                // case "/": emit(&output, string: "\\/") // you may escape slashes, but we don't (neither does JSC's JSON.stringify)
+            case UnicodeScalar(0x08): emit(&output, string: "\\b") // backspace
+            case UnicodeScalar(0x0C): emit(&output, string: "\\f") // formfeed
+            default: emit(&output, string: String(c))
+            }
+        }
+        emit(&output, string: "\"")
+    }
+
+    func writeNull(inout output: Target) {
+        emit(&output, string: "null")
+    }
+
+    func writeBoolean(inout output: Target, boolean: Bool) {
+        if boolean == true {
+            emit(&output, string: "true")
+        } else {
+            emit(&output, string: "false")
+        }
+    }
+
+    func writeNumber(inout output: Target, number: Double) {
+        // TODO: output exactly the same as the ECMA spec: http://es5.github.io/#x15.7.4.2
+        // see also: http://www.netlib.org/fp/dtoa.c
+        let str = String(number) // FIXME: this outputs exponential notation for some large numbers
+        // when a string ends in ".0", we just append the rounded int FIXME: better string formatting
+        if str.hasSuffix(".0") {
+            emit(&output, string: str[str.startIndex..<str.endIndex.predecessor().predecessor()])
+        } else {
+            emit(&output, string: str)
+        }
+    }
+
+
+    func writeArrayOpen(inout output: Target) {
+        emit(&output, string: "[")
+    }
+
+    func writeArrayClose(inout output: Target) {
+        emit(&output, string: "]")
+    }
+
+    func writeArrayDelimiter(inout output: Target) {
+        emit(&output, string: ",")
+    }
+
+    func writeObjectOpen(inout output: Target) {
+        emit(&output, string: "{")
+    }
+
+    func writeObjectClose(inout output: Target) {
+        emit(&output, string: "}")
+    }
+
+    func writeObjectSeparator(inout output: Target) {
+        emit(&output, string: ":")
+    }
+
+    func writeObjectDelimiter(inout output: Target) {
+        emit(&output, string: ",")
+    }
+}
+
+public struct FormattingJSONWriter<Target: OutputStreamType> : JSONWriter {
+    let spacer: String
+
+    public func writeIndentation(inout output: Target, level: Int) {
+        if !spacer.isEmpty {
+            emit(&output, string: "\n")
+            for _ in 0..<level {
+                emit(&output, string: spacer)
+            }
+        }
+    }
+
+    public func writePadding(inout output: Target, count: Int) {
+        if !spacer.isEmpty {
+            emit(&output, string: String(count: count, repeatedValue: Character(" ")))
+        }
+    }
+
+    public func emit(inout output: Target, string: String) {
+        output.write(string)
+    }
+}
+
+public enum BufferedJSONWriterToken {
+    case Str(String)
+    case Indent(Int)
+}
+
+/// A `JSONWriter` implementation that buffers the output in order to apply advanced formatting
+public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
+    public var tokens: [BufferedJSONWriterToken] = []
+    let spacer: String
+    let maxline: Int
+    let pad: String = " "
+
+    public init(spacer: String, maxline: Int) {
+        self.spacer = spacer
+        self.maxline = maxline
+    }
+
+    public func writeIndentation(inout _: Target, level: Int) {
+        tokens.append(.Indent(level))
+    }
+
+    public func writePadding(inout output: Target, count: Int) {
+        for _ in 0..<count {
+            emit(&output, string: pad)
+        }
+    }
+
+    public func emit<T: OutputStreamType>(inout _: T, string: String) {
+        // we don't actually write to the output here, but instead buffer all the tokens so we can later reformat them
+        tokens.append(.Str(string))
+    }
+
+    public func writeEnd(inout output: Target) {
+        // once we reach the end, compact and flush
+        flush(&output)
+    }
+
+    /// Compact the tokens into peers that will fit on a single line of `maxline` length or less
+    public func compact() {
+        if tokens.isEmpty { return }
+
+        func rangeBlock(index: Int, level: Int) -> Range<Int>? {
+            let match = tokens.dropFirst(index).indexOf({
+                if case .Indent(let lvl) = $0 where lvl == (level - 1) {
+                    return true
+                } else {
+                    return false
+                }
+            })
+
+            if let match = match {
+                return index...match
+            } else {
+                return nil
+            }
+        }
+
+        func toklen(token: BufferedJSONWriterToken) -> Int {
+            switch token {
+            case .Indent: return pad.characters.count // because indent will convert to a pad
+            case .Str(let str): return str.characters.count
+            }
+        }
+
+        func toklev(token: BufferedJSONWriterToken) -> Int {
+            switch token {
+            case .Indent(let lvl): return lvl
+            case .Str: return 0
+            }
+        }
+
+        func isStringToken(token: BufferedJSONWriterToken) -> Bool {
+            switch token {
+            case .Indent: return false
+            case .Str: return true
+            }
+        }
+
+        func compactRange(range: Range<Int>, level: Int) -> Bool {
+            let strlen = tokens[range].reduce(0) { $0 + toklen($1) }
+            let indentLen = level * spacer.characters.count
+            if strlen + indentLen > maxline { return false }
+
+            // the sum of the contiguous tokens are less than max line; replace all indents with a single space
+            for i in range {
+                if !isStringToken(tokens[i]) {
+                    tokens[i] = .Str(pad)
+                }
+            }
+            return true
+        }
+
+        func compactLevel(level: Int) {
+            for var index = tokens.startIndex; index < tokens.endIndex; index = index.successor() {
+                let item = tokens[index]
+                switch item {
+                case .Indent(let lvl) where lvl == level:
+                    if let range = rangeBlock(index, level: lvl) where range.endIndex > range.startIndex {
+                        compactRange(range, level: level)
+                        index = range.endIndex // skip ahead
+                    }
+                default:
+                    break
+                }
+            }
+        }
+
+        let maxlev = tokens.map(toklev).reduce(0, combine: max)
+        for level in Array(0...maxlev).reverse() {
+            compactLevel(level)
+        }
+    }
+
+    public func flush<T: OutputStreamType>(inout output: T) {
+        compact()
+        for tok in tokens {
+            switch tok {
+            case .Str(let str):
+                output.write(str)
+            case .Indent(let level):
+                output.write("\n")
+                for _ in 0..<level {
+                    output.write(spacer)
+                }
+
+            }
+        }
+        tokens.removeAll()
+    }
+}
+

@@ -1198,6 +1198,24 @@ class BricBracTests : XCTestCase {
                 print("r4: \(r4)") // .EmptyInput
             }
         }
+    }
+
+    func testMaxlineStringify() {
+        let arr: Bric = [1, 2]
+        let bric: Bric = ["abc": [1, 2, 3, 4]]
+
+        XCTAssertEqual("[\n  1,\n  2\n]", arr.stringify(space: 2, maxline: 7))
+        XCTAssertEqual("[ 1, 2 ]", arr.stringify(space: 2, maxline: 8))
+
+        XCTAssertEqual("{\"abc\":[1,2,3,4]}", bric.stringify(space: 0, maxline: 0))
+        XCTAssertEqual("{\n  \"abc\": [\n    1,\n    2,\n    3,\n    4\n  ]\n}", bric.stringify(space: 2, maxline: 0))
+
+        XCTAssertEqual("{ \"abc\": [ 1, 2, 3, 4 ] }", bric.stringify(space: 2, maxline: 80))
+        XCTAssertEqual("{\n  \"abc\": [ 1, 2, 3, 4 ]\n}", bric.stringify(space: 2, maxline: 23))
+        XCTAssertEqual("{ \"abc\": [\n    1, 2, 3, 4\n  ]\n}", bric.stringify(space: 2, maxline: 15))
+
+        XCTAssertEqual("{\n  \"abc\": [\n    1,\n    2,\n    3,\n    4\n  ]\n}", bric.stringify(space: 2, maxline: 5))
+
 
     }
 
@@ -1212,15 +1230,15 @@ class BricBracTests : XCTestCase {
                 var strs: [String] = [] // hang onto the strings so we don't include ARC releases in the profile
                 var datas: [NSData] = []
 
-                let styles: [Bool?] = [false, true, nil]
-                let styleNames = styles.map({ $0 == true ? "recursive" : $0 == false ? "non-recursive" : "cocoa" })
+                let natives: [Bool] = [false, true]
+                let styleNames = natives.map({ $0 ? "bric" : "cocoa" })
                 var times: [NSTimeInterval] = []
 
-                for style in styles {
+                for native in natives {
                     let start = CFAbsoluteTimeGetCurrent()
                     for _ in 0...10 {
-                        if let recursive = style {
-                            strs.append(bric.stringify(space: 2, recursive: recursive))
+                        if native {
+                            strs.append(bric.stringify(space: 2))
                         } else {
                             datas.append(try NSJSONSerialization.dataWithJSONObject(cocoa, options: NSJSONWritingOptions.PrettyPrinted))
                         }
@@ -1555,6 +1573,16 @@ class BricBracTests : XCTestCase {
         let afp2 = AnyForwardCollection(ap2)
         XCTAssertTrue(afp1 === afp1, "equivalence check should be true")
         XCTAssertTrue(afp1 !== afp2, "equivalence check should be false")
+
+        // also test if optimized comparison works for dictionaries wrapped in AnyForwardCollection
+        let dct1: [String: Int] = ["foo": 1, "bar": 2]
+        let dct2: [String: Int] = ["foo": 1, "bar": 2]
+        let afdct1 = AnyForwardCollection(dct1)
+        let afdct2 = AnyForwardCollection(dct2)
+        XCTAssertTrue(afdct1 === afdct1, "equivalence check should be true")
+        XCTAssertTrue(afdct1 !== afdct2, "equivalence check should be false")
+        XCTAssertTrue(dct1 == dct1, "equality check should be true")
+        XCTAssertTrue(dct1 == dct2, "equality check should be true")
 
         bc = Person.Breqs
 

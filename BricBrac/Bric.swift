@@ -23,11 +23,17 @@ public enum Bric {
 }
 
 extension Bric {
+    /// Returns the underlying `String` for `Bric.Str` cases, else nil
     public var str: String? { if case .Str(let x) = self { return x } else { return nil } }
+    /// Returns the underlying `Double` for `Bric.Num` cases, else nil
     public var num: Double? { if case .Num(let x) = self { return x } else { return nil } }
+    /// Returns the underlying `Bool` for `Bric.Bol` cases, else nil
     public var bol: Bool? { if case .Bol(let x) = self { return x } else { return nil } }
+    /// Returns the underlying `Void` for `Bric.Nul` cases, else nil
     public var nul: Void? { if case .Nul = self { return Void() } else { return nil } }
+    /// Returns the underlying `Array<Bric>` for `Bric.Arr` cases, else nil
     public var arr: [Bric]? { if case .Arr(let x) = self { return x.map({ $0 as Bric }) } else { return nil } }
+    /// Returns the underlying `Dictionary<String,Bric>` for `Bric.Obj` cases, else nil
     public var obj: [String : Bric]? { if case .Obj(let x) = self { return x } else { return nil } }
 }
 

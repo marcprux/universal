@@ -86,6 +86,86 @@ class BricBracTests : XCTestCase {
         }
     }
 
+    func testISO8601JSONDates() {
+        func testDateParse(str: Bric, _ unix: Int?, canonical: Bool = false, line: UInt = __LINE__) {
+            guard let dtm = str.dtm else { return XCTAssertEqual(nil, unix, line: line) }
+
+            // we extracted a date/time; convert it to a UNIX timestamp
+            let dc = NSDateComponents()
+            dc.year = dtm.year
+            dc.month = dtm.month
+            dc.day = dtm.day
+            dc.hour = dtm.hour
+            dc.minute = dtm.minute
+            dc.second = Int(floor(dtm.second))
+            dc.nanosecond = Int((dtm.second - Double(dc.second)) * 1e9)
+            dc.timeZone = NSTimeZone(forSecondsFromGMT: ((dtm.zone.hours * 60) + dtm.zone.minutes) * 60)
+            guard let date = NSCalendar.currentCalendar().dateFromComponents(dc) else { return XCTFail("could not convert calendar from \(dc)", line: line) }
+            let unixsecs = date.timeIntervalSince1970
+            if unixsecs > 8640000000000.000 { XCTAssertEqual(unix, nil, line: line) } // over the max permitted
+            if unixsecs < -8640000000000.000 { XCTAssertEqual(unix, nil, line: line) } // under the min permitted
+            XCTAssertEqual(unix, Int(unixsecs * 1000), line: line)
+
+            if canonical == true {
+                // for canonical strings, also check that the stringified version is correct
+                XCTAssertEqual(str.str ?? "", dtm.description, line: line)
+            }
+        }
+
+        // date compat tests from https://github.com/es-shims/es5-shim/blob/master/tests/spec/s-date.js
+
+        // extended years
+        testDateParse("0001-01-01T00:00:00Z", -62135596800000)
+        testDateParse("+275760-09-13T00:00:00.000Z", 8640000000000000)
+        //        testDateParse("+275760-09-13T00:00:00.001Z", nil)
+        //        testDateParse("-271821-04-20T00:00:00.000Z", -8640000000000000)
+        //        testDateParse("-271821-04-19T23:59:59.999Z", nil)
+        testDateParse("+033658-09-27T01:46:40.000Z", 1000000000000000)
+        testDateParse("-000001-01-01T00:00:00Z", -62198755200000)
+        testDateParse("+002009-12-15T00:00:00Z", 1260835200000)
+
+        testDateParse("2012-11-31T23:59:59.000Z", nil)
+        testDateParse("2012-12-31T23:59:59.000Z", 1356998399000, canonical: true)
+        testDateParse("2012-12-31T23:59:60.000Z", nil)
+        testDateParse("2012-04-04T05:02:02.170Z", 1333515722170, canonical: true)
+        testDateParse("2012-04-04T05:02:02.170999Z", 1333515722170, canonical: true)
+        testDateParse("2012-04-04T05:02:02.17Z", 1333515722170)
+        testDateParse("2012-04-04T05:02:02.1Z", 1333515722100)
+        testDateParse("2012-04-04T24:00:00.000Z", 1333584000000, canonical: true)
+        testDateParse("2012-04-04T24:00:00.500Z", nil)
+        testDateParse("2012-12-31T10:08:60.000Z", nil)
+        testDateParse("2012-13-01T12:00:00.000Z", nil)
+        testDateParse("2012-12-32T12:00:00.000Z", nil)
+        testDateParse("2012-12-31T25:00:00.000Z", nil)
+        testDateParse("2012-12-31T24:01:00.000Z", nil)
+        testDateParse("2012-12-31T12:60:00.000Z", nil)
+        testDateParse("2012-12-31T12:00:60.000Z", nil)
+        testDateParse("2012-00-31T23:59:59.000Z", nil)
+        testDateParse("2012-12-00T23:59:59.000Z", nil)
+        testDateParse("2012-02-29T12:00:00.000Z", 1330516800000, canonical: true)
+        testDateParse("2011-02-29T12:00:00.000Z", nil)
+        testDateParse("2011-03-01T12:00:00.000Z", 1298980800000, canonical: true)
+
+        // https://github.com/kriskowal/es5-shim/issues/80 Safari bug with leap day
+        testDateParse("2034-03-01T00:00:00.000Z", 2024784000000)
+        testDateParse("2034-02-27T23:59:59.999Z", 2024784000000 - 86400001, canonical: true)
+
+        // Time Zone Offset
+        testDateParse("2012-01-29T12:00:00.000+01:00", 1327834800000, canonical: true)
+        testDateParse("2012-01-29T12:00:00.000-00:00", 1327838400000)
+        testDateParse("2012-01-29T12:00:00.000+00:00", 1327838400000)
+        //        testDateParse("2012-01-29T12:00:00.000+23:59", 1327752060000)
+        //        testDateParse("2012-01-29T12:00:00.000-23:59", 1327924740000)
+        testDateParse("2012-01-29T12:00:00.000+24:00", nil)
+        testDateParse("2012-01-29T12:00:00.000+24:01", nil)
+        testDateParse("2012-01-29T12:00:00.000+24:59", nil)
+        testDateParse("2012-01-29T12:00:00.000+25:00", nil)
+        testDateParse("2012-01-29T12:00:00.000+00:60", nil)
+        //        testDateParse("-271821-04-20T00:00:00.000+00:01", nil)
+        //        testDateParse("-271821-04-20T00:01:00.000+00:01", -8640000000000000)
+        
+    }
+
     func testBricBracPerson() {
         do {
             let p1 = try Person.brac(["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]) // , "children": []])

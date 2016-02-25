@@ -8,6 +8,11 @@
 
 // General data structes need for `Brac` and `Curio` schema support
 
+public extension Bric {
+    /// Returns the underlying `BricDateTime` for `Bric.Str` cases that can be pased with `ISO8601FromString`, else nil
+    public var dtm: BricDateTime? { return str.flatMap(BricDateTime.init) }
+}
+
 /// A WrapperType is able to map itself through a wrapped optional
 public protocol WrapperType {
     typealias Wrapped
@@ -509,4 +514,143 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable,
         }
     }
 }
+
+
+
+
+/// An ISO-8601 date-time structure, the common JSON format for dates and times
+/// - See: https://en.wikipedia.org/wiki/ISO_8601
+public struct BricDateTime: Hashable, Equatable, CustomStringConvertible, Bricable, Bracable, Breqable {
+    public typealias BricDate = (year: Int, month: Int, day: Int)
+    public typealias BricTime = (hour: Int, minute: Int, second: Double)
+    public typealias BricZone = (hours: Int, minutes: Int)
+
+    public let year, month, day, hour, minute: Int
+    public let second: Double
+    public let zone: BricZone
+
+    public init(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Double, zone: BricZone) {
+        self.year = year
+        self.month = month
+        self.day = day
+        self.hour = hour
+        self.minute = minute
+        self.second = second
+        self.zone = zone
+    }
+
+    public var date: BricDate { return (year, month, day) }
+    public var time: BricTime { return (hour, minute, second) }
+
+    public func toISO8601String() -> String {
+        func pad(num: Int, _ len: Int) -> String {
+            var str = String(num)
+            while str.characters.count < len {
+                str = "0" + str
+            }
+            return str
+        }
+
+        /// Secs need to be padded to 2 at the beginning and 3 at the end, e.g.: 00.000
+        func sec(secs: Double) -> String {
+            var str = String(secs)
+            let chars = str.characters
+            if chars.count >= 2 && chars.dropFirst().first == "." { str = "0" + str }
+            while str.characters.count < 6 { str += "0" }
+            return str
+        }
+
+        return pad(year, 4) + "-" + pad(month, 2) + "-" + pad(day, 2) + "T" + pad(hour, 2) + ":" + pad(minute, 2) + ":" + sec(second) + (zone.hours == 0 && zone.minutes == 0 ? "Z" : ((zone.hours >= 0 ? "+" : "") + pad(zone.hours, 2) + ":" + pad(zone.minutes, 2)))
+    }
+
+
+    /// Attempt to parse the given String as an ISO-8601 date-time structure
+    public init?(_ str: String) {
+        var gen = str.characters.generate()
+
+        func scan(skip: Int = 0, _ until: Character...) -> (String, Character?)? {
+            var num = 0
+            var buf = ""
+            while let c = gen.next() {
+                if until.contains(c) && num >= skip {
+                    if buf.isEmpty { return nil }
+                    return (buf, c)
+                }
+                num++
+                buf.append(c)
+            }
+            if buf.isEmpty { return nil }
+            return (buf, nil)
+        }
+
+        func str2int(str: String, _ stop: Character?) -> Int? { return Int(str) }
+
+        guard let year = scan(1, "-").flatMap(str2int) else { return nil }
+        guard let month = scan(0, "-").flatMap(str2int) where month >= 1 && month <= 12 else { return nil }
+        guard let day = scan(0, "T").flatMap(str2int) where day >= 1 && day <= 31 else { return nil }
+
+        if day == 31 && (month == 4 || month == 6 || month == 9 || month == 11) { return nil }
+
+        // Feb leap year check
+        if day > 28 && month == 2 && !((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) { return nil }
+
+        guard let hour = scan(0, ":").flatMap(str2int) where hour >= 0 && hour <= 24 else { return nil }
+        guard let minute = scan(0, ":").flatMap(str2int) where minute >= 0 && minute <= 59 else { return nil }
+
+        // “ISO 8601 permits the hyphen (-) to be used as the minus (−) character when the character set is limited.”
+        guard let secstop = scan(0, "Z", "+", "-", "−") else { return nil }
+
+        guard let second = Double(secstop.0) where second >= 0.0 && second < 60.0 else { return nil }
+
+        if hour == 24 && (minute > 0 || second > 0.0) { return nil } // 24 is only valid as 24:00:00.0
+
+        let tzc = secstop.1
+        var tzh = 0, tzm = 0
+        if tzc != "Z" { // non-Zulu time
+            guard let h = scan(0, ":").flatMap(str2int) where h >= 0 && h <= 23 else { return nil }
+            tzh = h * (tzc == "-" || tzc == "−" ? -1 : +1)
+
+            guard let m = scan(0).flatMap(str2int) where m >= 0 && m <= 59 else { return nil }
+            tzm = m
+        }
+
+        if gen.next() != nil { return nil } // trailing characters
+
+        let dtm = BricDateTime(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zone: (tzh, tzm))
+        self = dtm
+    }
+
+    public var description: String { return toISO8601String() }
+
+    public var hashValue: Int { return year }
+
+    public func breq(other: BricDateTime) -> Bool {
+        return self.year == other.year
+            && self.month == other.month
+            && self.day == other.day
+            && self.hour == other.hour
+            && self.minute == other.minute
+            && self.second == other.second
+            && self.zone.hours == other.zone.hours
+            && self.zone.minutes == other.zone.minutes
+    }
+
+    /// BricDateTime instances are serialized to ISO-8601 strings
+    public func bric() -> Bric {
+        return Bric.Str(toISO8601String())
+    }
+
+    /// BricDateTime instances are serialized to ISO-8601 strings
+    public static func brac(bric: Bric) throws -> BricDateTime {
+        guard case .Str(let str) = bric else { return try bric.invalidType() }
+        guard let dtm = BricDateTime(str) else { return try bric.invalidRawValue(str) }
+        return dtm
+    }
+}
+
+/// Two BricDateTime instances are equal iff all their components are equal; actual temporal equality is not considered
+public func ==(lhs: BricDateTime, rhs: BricDateTime) -> Bool {
+    return lhs.breq(rhs)
+}
+
 

@@ -384,9 +384,11 @@ extension Wrappable {
     }
 }
 
+#if !os(Linux) // sadly, this crashes the swift-DEVELOPMENT-SNAPSHOT-2016-02-25-a-ubuntu14.04 compiler
 extension Optional : BracLayer {
     public typealias BracSub = Wrapped // inherits bracMap via Wrappable conformance
 }
+#endif
 
 extension Indirect : BracLayer {
     public typealias BracSub = Wrapped // inherits bracMap via Wrappable conformance

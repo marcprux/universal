@@ -107,7 +107,7 @@ extension Indirect : BreqLayer { }
 
 extension SequenceType {
     /// All sequences breq sub-equality
-    public func breqMap(other: Self, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+    public func breqSequence(other: Self, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
         var a = self.generate(), b = other.generate()
         while let lhs = a.next(), rhs = b.next() {
             if eq(lhs, rhs) == false {
@@ -121,13 +121,18 @@ extension SequenceType {
         
         return true
     }
+
+    public func breqMap(other: Self, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+        return breqSequence(other, eq: eq)
+    }
+
 }
 
 extension CollectionType {
-    public func breqMap(other: Self, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+    public func breqCollection(other: Self, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
         if self.isEmpty != other.isEmpty { return false }
 
-        // Fast check for underlying array pointer equivalence (performance: O(1))
+        // Fast check for underlying array pointer equality (performance: O(1))
         let af1 = AnyForwardCollection(self)
         let af2 = AnyForwardCollection(other)
         if af1 === af2 { return true }
@@ -136,7 +141,11 @@ extension CollectionType {
         if self.count != other.count { return false }
 
         // fall back to the default sequence mapping
-        return af1.breqMap(af2, eq: eq)
+        return self.breqSequence(other, eq: eq)
+    }
+
+    public func breqMap(other: Self, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+        return breqCollection(other, eq: eq)
     }
 }
 

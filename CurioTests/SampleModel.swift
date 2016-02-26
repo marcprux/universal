@@ -6,14 +6,18 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     public var anyOfField: AnyOfField
     public var oneOfField: OneOfField
     public var notField: NotField
+    public var list: Optional<Array<ListItem>>
+    public var nested1: Optional<Nested1>
     /// Should generate a simple OneOf enum
     public var simpleOneOf: Optional<SimpleOneOf>
 
-    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, simpleOneOf: Optional<SimpleOneOf> = nil) {
+    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, list: Optional<Array<ListItem>> = nil, nested1: Optional<Nested1> = nil, simpleOneOf: Optional<SimpleOneOf> = nil) {
         self.allOfField = allOfField 
         self.anyOfField = anyOfField 
         self.oneOfField = oneOfField 
         self.notField = notField 
+        self.list = list 
+        self.nested1 = nested1 
         self.simpleOneOf = simpleOneOf 
     }
 
@@ -23,6 +27,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         Keys.anyOfField: anyOfField.bric(), 
         Keys.oneOfField: oneOfField.bric(), 
         Keys.notField: notField.bric(), 
+        Keys.list: list.bric(), 
+        Keys.nested1: nested1.bric(), 
         Keys.simpleOneOf: simpleOneOf.bric(), 
         ]) 
     }
@@ -33,6 +39,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         anyOfField: bric.bracKey(Keys.anyOfField), 
         oneOfField: bric.bracKey(Keys.oneOfField), 
         notField: bric.bracKey(Keys.notField), 
+        list: bric.bracKey(Keys.list), 
+        nested1: bric.bracKey(Keys.nested1), 
         simpleOneOf: bric.bracKey(Keys.simpleOneOf) 
         ) 
     }
@@ -40,8 +48,10 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     public func breq(other: SampleModel) -> Bool {
         return allOfField.breq(other.allOfField) 
             && anyOfField.breq(other.anyOfField) 
+            && nested1.breq(other.nested1) 
             && notField.breq(other.notField) 
             && oneOfField.breq(other.oneOfField) 
+            && list.breq(other.list) 
             && simpleOneOf.breq(other.simpleOneOf) 
     }
 
@@ -50,6 +60,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         case anyOfField = "anyOfField"
         case oneOfField = "oneOfField"
         case notField = "notField"
+        case list = "list"
+        case nested1 = "nested1"
         case simpleOneOf = "simpleOneOf"
     }
 
@@ -447,6 +459,182 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public enum Str : String, Bricable, Bracable, Breqable {
                 case Illegal = "illegal"
+            }
+        }
+    }
+
+    public struct ListItem : Bricable, Bracable, Breqable {
+        public var prop: Prop
+
+        public init(prop: Prop = .Value) {
+            self.prop = prop 
+        }
+
+        public func bric() -> Bric {
+            return Bric(obj: [ 
+            Keys.prop: prop.bric(), 
+            ]) 
+        }
+
+        public static func brac(bric: Bric) throws -> SampleModel.ListItem {
+            return try SampleModel.ListItem( 
+            prop: bric.bracKey(Keys.prop) 
+            ) 
+        }
+
+        public func breq(other: SampleModel.ListItem) -> Bool {
+            return prop.breq(other.prop) 
+        }
+
+        public enum Keys : String {
+            case prop = "prop"
+        }
+
+        public enum Prop : String, Bricable, Bracable, Breqable {
+            case Value = "value"
+        }
+    }
+
+    public struct Nested1 : Bricable, Bracable, Breqable {
+        public var nested2: Nested2
+
+        public init(nested2: Nested2) {
+            self.nested2 = nested2 
+        }
+
+        public func bric() -> Bric {
+            return Bric(obj: [ 
+            Keys.nested2: nested2.bric(), 
+            ]) 
+        }
+
+        public static func brac(bric: Bric) throws -> SampleModel.Nested1 {
+            return try SampleModel.Nested1( 
+            nested2: bric.bracKey(Keys.nested2) 
+            ) 
+        }
+
+        public func breq(other: SampleModel.Nested1) -> Bool {
+            return nested2.breq(other.nested2) 
+        }
+
+        public enum Keys : String {
+            case nested2 = "nested2"
+        }
+
+        public struct Nested2 : Bricable, Bracable, Breqable {
+            public var nested3: Nested3
+
+            public init(nested3: Nested3) {
+                self.nested3 = nested3 
+            }
+
+            public func bric() -> Bric {
+                return Bric(obj: [ 
+                Keys.nested3: nested3.bric(), 
+                ]) 
+            }
+
+            public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2 {
+                return try SampleModel.Nested1.Nested2( 
+                nested3: bric.bracKey(Keys.nested3) 
+                ) 
+            }
+
+            public func breq(other: SampleModel.Nested1.Nested2) -> Bool {
+                return nested3.breq(other.nested3) 
+            }
+
+            public enum Keys : String {
+                case nested3 = "nested3"
+            }
+
+            public struct Nested3 : Bricable, Bracable, Breqable {
+                public var nested4: Nested4
+
+                public init(nested4: Nested4) {
+                    self.nested4 = nested4 
+                }
+
+                public func bric() -> Bric {
+                    return Bric(obj: [ 
+                    Keys.nested4: nested4.bric(), 
+                    ]) 
+                }
+
+                public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2.Nested3 {
+                    return try SampleModel.Nested1.Nested2.Nested3( 
+                    nested4: bric.bracKey(Keys.nested4) 
+                    ) 
+                }
+
+                public func breq(other: SampleModel.Nested1.Nested2.Nested3) -> Bool {
+                    return nested4.breq(other.nested4) 
+                }
+
+                public enum Keys : String {
+                    case nested4 = "nested4"
+                }
+
+                public struct Nested4 : Bricable, Bracable, Breqable {
+                    public var nested5: Nested5
+
+                    public init(nested5: Nested5) {
+                        self.nested5 = nested5 
+                    }
+
+                    public func bric() -> Bric {
+                        return Bric(obj: [ 
+                        Keys.nested5: nested5.bric(), 
+                        ]) 
+                    }
+
+                    public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2.Nested3.Nested4 {
+                        return try SampleModel.Nested1.Nested2.Nested3.Nested4( 
+                        nested5: bric.bracKey(Keys.nested5) 
+                        ) 
+                    }
+
+                    public func breq(other: SampleModel.Nested1.Nested2.Nested3.Nested4) -> Bool {
+                        return nested5.breq(other.nested5) 
+                    }
+
+                    public enum Keys : String {
+                        case nested5 = "nested5"
+                    }
+
+                    public struct Nested5 : Bricable, Bracable, Breqable {
+                        public var single: Single
+
+                        public init(single: Single = .Value) {
+                            self.single = single 
+                        }
+
+                        public func bric() -> Bric {
+                            return Bric(obj: [ 
+                            Keys.single: single.bric(), 
+                            ]) 
+                        }
+
+                        public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5 {
+                            return try SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5( 
+                            single: bric.bracKey(Keys.single) 
+                            ) 
+                        }
+
+                        public func breq(other: SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5) -> Bool {
+                            return single.breq(other.single) 
+                        }
+
+                        public enum Keys : String {
+                            case single = "single"
+                        }
+
+                        public enum Single : String, Bricable, Bracable, Breqable {
+                            case Value = "value"
+                        }
+                    }
+                }
             }
         }
     }

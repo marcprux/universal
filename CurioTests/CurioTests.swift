@@ -17,6 +17,47 @@ class CurioTests: XCTestCase {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "type": "object",
             "properties": [
+                "list": [
+                    "type": "array",
+                    "items": [
+                        "type": "object",
+                        "required": ["prop"],
+                        "properties": [
+                            "prop": [ "type": "string", "enum": ["value"] ]
+                        ]
+                    ]
+                ],
+                "nested1": [
+                    "type": "object",
+                    "required": ["nested2"],
+                    "properties": [
+                        "nested2": [
+                            "type": "object",
+                            "required": ["nested3"],
+                            "properties": [
+                                "nested3": [
+                                    "type": "object",
+                                    "required": ["nested4"],
+                                    "properties": [
+                                        "nested4": [
+                                            "type": "object",
+                                            "required": ["nested5"],
+                                            "properties": [
+                                                "nested5": [
+                                                    "type": "object",
+                                                    "required": ["single"],
+                                                    "properties": [
+                                                        "single": [ "type": "string", "enum": ["value"] ]
+                                                    ]
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    ],
                 "allOfField": [
                     "type": "object",
                     "allOf": [
@@ -194,6 +235,30 @@ class CurioTests: XCTestCase {
 
 
 public class TestSampleModel : XCTestCase {
+
+    func assertBracable(bric: Bric, line: UInt = __LINE__) -> ErrorType? {
+        do {
+            let sample = try SampleModel.brac(bric)
+            XCTAssertEqual(bric, sample.bric(), line: line)
+            return nil
+        } catch {
+            XCTFail(String(error), line: line)
+            return error
+        }
+    }
+
+    func assertNOTBracable(bric: Bric, line: UInt = __LINE__) -> ErrorType? {
+        do {
+            let _ = try SampleModel.brac(bric)
+            XCTFail("should not have bracd", line: line)
+            return nil
+        } catch {
+            return error
+        }
+    }
+
+
+
     func testAnyOfField() {
         var bric: Bric = [
             "allOfField": [
@@ -212,26 +277,8 @@ public class TestSampleModel : XCTestCase {
         ]
 
         
-        func assertBracable(bric: Bric, file: String = __FILE__, line: UInt = __LINE__) {
-            do {
-                let sample = try SampleModel.brac(bric)
-                XCTAssertEqual(bric, sample.bric())
-            } catch {
-                XCTFail(String(error), file: file, line: line)
-            }
-        }
-
-        func assertNotBracable(bric: Bric, file: String = __FILE__, line: UInt = __LINE__) {
-            do {
-                let _ = try SampleModel.brac(bric)
-                XCTFail("should not have bracd", file: __FILE__, line: __LINE__)
-            } catch {
-            }
-        }
-
-
         bric["anyOfField"] = [:]
-        assertNotBracable(bric)
+        assertNOTBracable(bric)
 
         bric["anyOfField"] = [ "b1": 1, "b2": "b2" ]
         assertBracable(bric)
@@ -240,7 +287,7 @@ public class TestSampleModel : XCTestCase {
         assertBracable(bric)
 
         bric["anyOfField"] = [ "b3": true ]
-        assertNotBracable(bric)
+        assertNOTBracable(bric)
 
         bric["anyOfField"] = [ "b3": true, "b4": 1.2 ]
         assertBracable(bric)
@@ -249,9 +296,78 @@ public class TestSampleModel : XCTestCase {
         assertBracable(bric)
 
         bric["simpleOneOf"] = true
-        assertNotBracable(bric)
+        assertNOTBracable(bric)
 
         bric["simpleOneOf"] = "x"
+        assertBracable(bric)
+    }
+
+    func testArrayField() {
+        var bric: Bric = [
+            "anyOfField": [ "b1": 1, "b2": "b2" ],
+            "allOfField": [ "a1": 1, "a2": "a2", "a3": true, "a4": 1.2 ],
+            "oneOfField": [ "c1": 1, "c2": "b2", ],
+            "notField": [ "str": "str" ]
+        ]
+
+        assertBracable(bric)
+
+        bric["list"] = []
+        assertBracable(bric)
+
+        bric["list"] = [["prop": "value"], ["prop": "value"], ["prop": "value"]]
+        assertBracable(bric)
+
+        bric["list"] = [["prop": "value"], ["prop": "BAD"], ["prop": "value"]]
+        if let err = assertNOTBracable(bric) {
+            XCTAssertEqual("Invalid value “BAD” at #/list/1/prop of type CurioTests.SampleModel.ListItem.Prop", String(err))
+        }
+
+        bric["list"] = [["prop": "value"], ["prop": "value"], [:]]
+        if let err = assertNOTBracable(bric) {
+            XCTAssertEqual("Missing required property «prop» of type CurioTests.SampleModel.ListItem.Prop at #/list/2", String(err))
+        }
+
+        bric["list"] = [["prop": "value"], ["prop": "value"], ["x"]]
+        if let err = assertNOTBracable(bric) {
+            XCTAssertEqual("Object key «prop» requested in non-object at #/list/2", String(err))
+        }
+    }
+
+    func testNestedFields() {
+        var bric: Bric = [
+            "anyOfField": [ "b1": 1, "b2": "b2" ],
+            "allOfField": [ "a1": 1, "a2": "a2", "a3": true, "a4": 1.2 ],
+            "oneOfField": [ "c1": 1, "c2": "b2", ],
+            "notField": [ "str": "str" ]
+        ]
+
+        assertBracable(bric)
+
+        bric["nested1"] = [:]
+        if let err = assertNOTBracable(bric) {
+            XCTAssertEqual("Missing required property «nested2» of type CurioTests.SampleModel.Nested1.Nested2 at #/nested1", String(err))
+        }
+
+        bric["nested1"]?["nested2"] = [:]
+        if let err = assertNOTBracable(bric) {
+            XCTAssertEqual("Missing required property «nested3» of type CurioTests.SampleModel.Nested1.Nested2.Nested3 at #/nested1/nested2", String(err))
+        }
+
+        bric["nested1"]?["nested2"]?["nested3"] = [:]
+        assertNOTBracable(bric)
+
+        bric["nested1"]?["nested2"]?["nested3"]?["nested4"] = [:]
+        assertNOTBracable(bric)
+
+        bric["nested1"]?["nested2"]?["nested3"]?["nested4"]?["nested5"] = [:]
+        assertNOTBracable(bric)
+
+        bric["nested1"]?["nested2"]?["nested3"]?["nested4"]?["nested5"]?["single"] = "bad"
+        if let err = assertNOTBracable(bric) {
+            XCTAssertEqual("Invalid value “bad” at #/nested1/nested2/nested3/nested4/nested5/single of type CurioTests.SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5.Single", String(err))
+        }
+        bric["nested1"]?["nested2"]?["nested3"]?["nested4"]?["nested5"]?["single"] = "value"
         assertBracable(bric)
     }
 
@@ -309,6 +425,7 @@ public class TestSampleModel : XCTestCase {
             XCTFail("should not have been able to parse invalid schema")
         } catch {
             // validation should fail
+            print(error)
         }
 
     }

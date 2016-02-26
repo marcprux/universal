@@ -103,7 +103,7 @@ public extension Bric {
     /// Reads a required Bric instance from the given key in an object bric
     public func bracKey<T: Bracable, R: RawRepresentable where R.RawValue == String>(key: R) throws -> T {
         if let value = try objectKey(key) {
-            return try bracpath([Bric.Ref(key: key)], T.brac(value))
+            return try bracPath(key, T.brac(value))
         } else {
             throw BracError.MissingRequiredKey(type: T.self, key: key.rawValue, path: [])
         }
@@ -111,30 +111,30 @@ public extension Bric {
 
     /// Reads one level of wrapped instance(s) from the given key in an object bric
     public func bracKey<T: BracLayer, R: RawRepresentable where R.RawValue == String, T.BracSub : Bracable>(key: R) throws -> T {
-        return try T.brac(bracpath([Bric.Ref(key: key)], objectKey(key) ?? nil))
+        return try bracPath(key, T.brac(objectKey(key) ?? nil))
     }
 
     /// Reads two levels of wrapped instance(s) from the given key in an object bric
     public func bracKey<T: BracLayer, R: RawRepresentable where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : Bracable>(key: R) throws -> T {
-        return try T.brac(bracpath([Bric.Ref(key: key)], objectKey(key) ?? nil))
+        return try bracPath(key, T.brac(objectKey(key) ?? nil))
     }
 
     /// Reads three levels of wrapped instance(s) from the given key in an object bric
     public func bracKey<T: BracLayer, R: RawRepresentable where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : Bracable>(key: R) throws -> T {
-        return try T.brac(bracpath([Bric.Ref(key: key)], objectKey(key) ?? nil))
+        return try bracPath(key, T.brac(objectKey(key) ?? nil))
     }
 
     /// Reads four levels of wrapped instance(s) from the given key in an object bric
     public func bracKey<T: BracLayer, R: RawRepresentable where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : Bracable>(key: R) throws -> T {
-        return try T.brac(bracpath([Bric.Ref(key: key)], objectKey(key) ?? nil))
+        return try bracPath(key, T.brac(objectKey(key) ?? nil))
     }
 
     /// Reads five levels of wrapped instance(s) from the given key in an object bric
     public func bracKey<T: BracLayer, R: RawRepresentable where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub.BracSub : Bracable>(key: R) throws -> T {
-        return try T.brac(bracpath([Bric.Ref(key: key)], objectKey(key) ?? nil))
+        return try bracPath(key, T.brac(objectKey(key) ?? nil))
     }
 
-    /// Reads any one of the given Brics, throwing an error if the successfull number of instances is outside of the given range of acceptable passes
+    /// Reads any one of the given Brics, throwing an error if the successful number of instances is outside of the given range of acceptable passes
     public func bracRange<T: Bracable>(range: Range<Int>, bracers: [() throws -> T]) throws -> [T] {
         var values: [T] = []
         var errors: [ErrorType] = []
@@ -408,7 +408,13 @@ extension RawRepresentable where RawValue : Bracable {
 extension RangeReplaceableCollectionType {
     /// Returns this collection around the bracMaps, or throws an error if the parameter is not `Bric.Arr`
     public static func bracMap(bric: Bric, f: Bric throws -> Generator.Element) throws -> Self {
-        if case .Arr(let arr) = bric { return try Self() + arr.map(f) }
+        if case .Arr(let arr) = bric {
+            var ret = Self()
+            for (i, x) in arr.enumerate() {
+                ret.append(try bracIndex(i, f(x)))
+            }
+            return ret
+        }
         return try bric.invalidType()
     }
 }
@@ -641,6 +647,10 @@ public enum BracError: ErrorType, CustomDebugStringConvertible {
     case MultipleErrors(errors: Array<ErrorType>, path: Bric.Pointer)
 
     public var debugDescription: String {
+        return describeErrors(space: 2)
+    }
+
+    public func describeErrors(space space: Int = 0) -> String {
         func atPath(path: Bric.Pointer) -> String {
             if path.isEmpty {
                 return ""
@@ -653,21 +663,35 @@ public enum BracError: ErrorType, CustomDebugStringConvertible {
                 }
             }
 
-            return " at /" + parts.joinWithSeparator("/")
+            return " at #/" + parts.joinWithSeparator("/")
         }
 
         switch self {
-        case .MissingRequiredKey(let type, let key, let path): return "Missing key for \(type): «\(key)»\(atPath(path))"
-        case .UnrecognizedKey(let key, let path): return "Unrecognized key: «\(key)»\(atPath(path))"
-        case .InvalidType(let type, let actual, let path): return "Invalid type: expected \(type), found \(actual)\(atPath(path))"
-        case .InvalidRawValue(let type, let value, let path): return "Invalid value for \(type): \(value)\(atPath(path))"
-        case .NumericOverflow(let type, let value, let path): return "Numeric overflow: \(type) cannot contain \(value)\(atPath(path))"
-        case .InvalidArrayLength(let range, let actual, let path): return "Invalid array length: array with count \(actual) not within required range \(range)\(atPath(path))"
-        case .KeyWithoutObject(let key, let path): return "Object key «\(key)» requested in non-object\(atPath(path))"
-        case .BadEnum(let bric, let path): return "Invalid enum value «\(bric)»\(atPath(path))"
-        case .ShouldNotBracError(let type, let path): return "Should not have parsed «\(type)»\(atPath(path))"
-        case .MultipleMatches(let type, let path): return "Too many matches «\(type)»\(atPath(path))"
-        case .MultipleErrors(let errs, let path): return "Errors\(atPath(path)): \(errs)"
+        case .MissingRequiredKey(let type, let key, let path):
+            return "Missing required property «\(key)» of type \(_typeName(type))\(atPath(path))"
+        case .UnrecognizedKey(let key, let path):
+            return "Unrecognized key «\(key)»\(atPath(path))"
+        case .InvalidType(let type, let actual, let path):
+            return "Invalid type\(atPath(path)): expected \(_typeName(type)), found \(_typeName(actual.dynamicType))"
+        case .InvalidRawValue(let type, let value, let path):
+            return "Invalid value “\(value)”\(atPath(path)) of type \(_typeName(type))"
+        case .NumericOverflow(let type, let value, let path):
+            return "Numeric overflow\(atPath(path)): \(_typeName(type)) cannot contain \(value)"
+        case .InvalidArrayLength(let range, let actual, let path):
+            return "Invalid array length \(actual)\(atPath(path)) expected \(range)"
+        case .KeyWithoutObject(let key, let path):
+            return "Object key «\(key)» requested in non-object\(atPath(path))"
+        case .BadEnum(let bric, let path):
+            return "Invalid enum value “\(bric)”\(atPath(path))"
+        case .ShouldNotBracError(let type, let path):
+            return "Data matches schema from 'not'\(atPath(path)) of type \(_typeName(type)))"
+        case .MultipleMatches(let type, let path):
+            return "Too many matches\(atPath(path)): «\(_typeName(type))»"
+        case .MultipleErrors(let errs, let path):
+            let nberrs: [String] = errs.filter({ !($0 is BracError) }).map({ String($0) })
+            let brerrs: [String] = errs.map({ $0 as? BracError }).flatMap({ $0?.prependPath(path) }).map({ $0.describeErrors(space: space == 0 ? 0 : space + 2) })
+
+            return "\(errs.count) errors\(atPath(path)):" + ([""] + nberrs + brerrs).joinWithSeparator("\n" + String(count: space, repeatedValue: Character(" ")))
         }
     }
 
@@ -691,17 +715,28 @@ public enum BracError: ErrorType, CustomDebugStringConvertible {
 
         set {
             switch self {
-            case .MissingRequiredKey(let type, let key, _): self = .MissingRequiredKey(type: type, key: key, path: newValue)
-            case .InvalidType(let type, let actual, _): self = .InvalidType(type: type, actual: actual, path: newValue)
-            case .InvalidRawValue(let type, let value, _): self = .InvalidRawValue(type: type, value: value, path: newValue)
-            case .NumericOverflow(let type, let value, _): self = .NumericOverflow(type: type, value: value, path: newValue)
-            case .InvalidArrayLength(let range, let actual, _): self = .InvalidArrayLength(required: range, actual: actual, path: newValue)
-            case .KeyWithoutObject(let key, _): self = .KeyWithoutObject(key: key, path: newValue)
-            case .BadEnum(let bric, _): self = .BadEnum(bric: bric, path: newValue)
-            case .UnrecognizedKey(let key, _): self = .UnrecognizedKey(key: key, path: newValue)
-            case .ShouldNotBracError(let type, _): self = .ShouldNotBracError(type: type, path: newValue)
-            case .MultipleMatches(let count, _): self = .MultipleMatches(type: count, path: newValue)
-            case .MultipleErrors(let errors, _): self = .MultipleErrors(errors: errors, path: newValue)
+            case .MissingRequiredKey(let type, let key, _):
+                self = .MissingRequiredKey(type: type, key: key, path: newValue)
+            case .InvalidType(let type, let actual, _):
+                self = .InvalidType(type: type, actual: actual, path: newValue)
+            case .InvalidRawValue(let type, let value, _):
+                self = .InvalidRawValue(type: type, value: value, path: newValue)
+            case .NumericOverflow(let type, let value, _):
+                self = .NumericOverflow(type: type, value: value, path: newValue)
+            case .InvalidArrayLength(let range, let actual, _):
+                self = .InvalidArrayLength(required: range, actual: actual, path: newValue)
+            case .KeyWithoutObject(let key, _):
+                self = .KeyWithoutObject(key: key, path: newValue)
+            case .BadEnum(let bric, _):
+                self = .BadEnum(bric: bric, path: newValue)
+            case .UnrecognizedKey(let key, _):
+                self = .UnrecognizedKey(key: key, path: newValue)
+            case .ShouldNotBracError(let type, _):
+                self = .ShouldNotBracError(type: type, path: newValue)
+            case .MultipleMatches(let count, _):
+                self = .MultipleMatches(type: count, path: newValue)
+            case .MultipleErrors(let errors, _):
+                self = .MultipleErrors(errors: errors, path: newValue)
             }
         }
     }
@@ -736,11 +771,22 @@ public extension Bric {
 
 
 /// Invokes the given autoclosure and returns the value, pre-pending the given path to any BracError
-private func bracpath<T>(@autoclosure path: () -> Bric.Pointer, @autoclosure _ f: () throws -> T) throws -> T {
+private func bracPath<T, R: RawRepresentable where R.RawValue == String>(key: R, @autoclosure _ f: () throws -> T) throws -> T {
     do {
         return try f()
     } catch let err as BracError {
-        throw err.prependPath(path())
+        throw err.prependPath([Bric.Ref(key: key)])
+    } catch {
+        throw error
+    }
+}
+
+/// Invokes the given autoclosure and returns the value, pre-pending the given path to any BracError
+private func bracIndex<T>(index: Int, @autoclosure _ f: () throws -> T) throws -> T {
+    do {
+        return try f()
+    } catch let err as BracError {
+        throw err.prependPath([Bric.Ref(index: index)])
     } catch {
         throw error
     }

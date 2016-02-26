@@ -65,11 +65,11 @@ public final class CocoaBricolage: NSObject, Bricolage {
     public static func createArray() -> ArrType { return ArrType() }
 
     public static func createString(scalars: [UnicodeScalar]) -> StrType? {
-        return String(String.UnicodeScalarView() + scalars)
+        return String(String.UnicodeScalarView() + scalars) as NSString
     }
 
     public static func createNumber(scalars: [UnicodeScalar]) -> NumType? {
-        if let str = createString(Array(scalars)) {
+        if let str: NSString = createString(Array(scalars)) {
             return NSDecimalNumber(string: str as String) // needed for 0.123456789e-12
         } else {
             return nil
@@ -77,12 +77,20 @@ public final class CocoaBricolage: NSObject, Bricolage {
     }
 
     public static func putKeyValue(obj: ObjType, key: StrType, value: CocoaBricolage) -> ObjType {
-        obj.setObject(copyElements ? value.object.copyWithZone(NSZone()) : value.object, forKey: key)
+        if let copy = (value.object as? NSCopying)?.copyWithZone(NSZone()) where copyElements {
+            obj.setObject(copy, forKey: key)
+        } else {
+            obj.setObject(value.object, forKey: key)
+        }
         return obj
     }
 
     public static func putElement(arr: ArrType, element: CocoaBricolage) -> ArrType {
-        arr.addObject(copyElements ? element.object.copyWithZone(NSZone()) : element.object)
+        if let copy = (element.object as? NSCopying)?.copyWithZone(NSZone()) where copyElements {
+            arr.addObject(copy)
+        } else {
+            arr.addObject(element.object)
+        }
         return arr
     }
 }

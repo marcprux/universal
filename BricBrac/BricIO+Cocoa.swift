@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreFoundation
 
 public extension Bric {
 
@@ -38,7 +39,7 @@ public extension Bric {
 }
 
 /// Bricolage that represents the elements as Cocoa NSObject types with reference semantics
-@objc public final class CocoaBricolage: NSObject, Bricolage {
+public final class CocoaBricolage: NSObject, Bricolage {
     public typealias NulType = NSNull
     public typealias BolType = NSNumber
     public typealias StrType = NSString

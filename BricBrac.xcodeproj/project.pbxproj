@@ -45,7 +45,7 @@
 		7EB235C01BA7000500377FBB /* Products.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BC1BA7000500377FBB /* Products.swift */; };
 		7EB235C11BA7000500377FBB /* Stuff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BD1BA7000500377FBB /* Stuff.swift */; };
 		7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */; };
-		7EFA1FFD1B5D72DC00B2F12E /* BricIO+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFC1B5D72DC00B2F12E /* BricIO+Cocoa.swift */; };
+		7EFA1FFD1B5D72DC00B2F12E /* BricIO+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */; };
 		7EFA1FFF1B5D735400B2F12E /* Curio+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */; };
 		7EFD4F341BA5D98200802D99 /* AutoBricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */; };
 /* End PBXBuildFile section */
@@ -146,7 +146,7 @@
 		7EB235BC1BA7000500377FBB /* Products.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Products.swift; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EB235BD1BA7000500377FBB /* Stuff.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stuff.swift; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricPointer.swift; sourceTree = "<group>"; };
-		7EFA1FFC1B5D72DC00B2F12E /* BricIO+Cocoa.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BricIO+Cocoa.swift"; sourceTree = "<group>"; };
+		7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BricIO+Foundation.swift"; sourceTree = "<group>"; };
 		7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Curio+Cocoa.swift"; sourceTree = "<group>"; };
 		7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoBricBrac.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -276,7 +276,7 @@
 				7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */,
 				7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */,
 				7E7F9B381B36159A0058706A /* BricIO.swift */,
-				7EFA1FFC1B5D72DC00B2F12E /* BricIO+Cocoa.swift */,
+				7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */,
 				7E10201F1B858F6000171AFE /* JSONParser.swift */,
 				7E8930141BEA570A00F245C5 /* Structures.swift */,
 				7E7F9B211B3615850058706A /* Info.plist */,
@@ -530,7 +530,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EFA1FFD1B5D72DC00B2F12E /* BricIO+Cocoa.swift in Sources */,
+				7EFA1FFD1B5D72DC00B2F12E /* BricIO+Foundation.swift in Sources */,
 				7E7F9B391B36159A0058706A /* Bric.swift in Sources */,
 				7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */,
 				7E1020201B858F6000171AFE /* JSONParser.swift in Sources */,

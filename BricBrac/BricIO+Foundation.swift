@@ -47,9 +47,7 @@ public final class CocoaBricolage: NSObject, Bricolage {
     public typealias ArrType = NSMutableArray
     public typealias ObjType = NSMutableDictionary
 
-    let object: NSCopying
-
-    static let copyElements = false
+    let object: NSObject
 
     public init(str: StrType) { self.object = str }
     public init(num: NumType) { self.object = num }
@@ -77,20 +75,12 @@ public final class CocoaBricolage: NSObject, Bricolage {
     }
 
     public static func putKeyValue(obj: ObjType, key: StrType, value: CocoaBricolage) -> ObjType {
-        if let copy = (value.object as? NSCopying)?.copyWithZone(NSZone()) where copyElements {
-            obj.setObject(copy, forKey: key)
-        } else {
-            obj.setObject(value.object, forKey: key)
-        }
+        obj.setObject(value.object, forKey: key)
         return obj
     }
 
     public static func putElement(arr: ArrType, element: CocoaBricolage) -> ArrType {
-        if let copy = (element.object as? NSCopying)?.copyWithZone(NSZone()) where copyElements {
-            arr.addObject(copy)
-        } else {
-            arr.addObject(element.object)
-        }
+        arr.addObject(element.object)
         return arr
     }
 }

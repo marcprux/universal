@@ -6,6 +6,7 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
+#if !os(Linux) // should work eventually, but build bugs in swift-DEVELOPMENT-SNAPSHOT-2016-02-25-a-ubuntu14.04
 import Foundation
 import CoreFoundation
 
@@ -22,21 +23,6 @@ public extension Bric {
     }
 }
 
-
-
-public extension Bric {
-    public static let ISO8601DateFormatter: NSDateFormatter = {
-        let dateFormatter = NSDateFormatter()
-        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-        return dateFormatter
-    }()
-
-    /// Convenience variable to obtain the current date in JSON-standard ISO-8601
-    public static var currentDateISO8601: String {
-        return ISO8601DateFormatter.stringFromDate(NSDate())
-    }
-}
 
 /// Bricolage that represents the elements as Cocoa NSObject types with reference semantics
 public final class CocoaBricolage: NSObject, Bricolage {
@@ -135,3 +121,4 @@ public final class FoundationBricolage: Bricolage {
         return arr
     }
 }
+#endif // #if !os(Linux)

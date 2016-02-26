@@ -87,7 +87,7 @@ class BricBracTests : XCTestCase {
     }
 
     func testISO8601JSONDates() {
-        func testDateParse(str: Bric, _ unix: Int?, canonical: Bool = false, line: UInt = __LINE__) {
+        func testDateParse(str: Bric, _ unix: Int64?, canonical: Bool = false, line: UInt = __LINE__) {
             guard let dtm = str.dtm else { return XCTAssertEqual(nil, unix, line: line) }
 
             // we extracted a date/time; convert it to a UNIX timestamp
@@ -104,7 +104,7 @@ class BricBracTests : XCTestCase {
             let unixsecs = date.timeIntervalSince1970
             if unixsecs > 8640000000000.000 { XCTAssertEqual(unix, nil, line: line) } // over the max permitted
             if unixsecs < -8640000000000.000 { XCTAssertEqual(unix, nil, line: line) } // under the min permitted
-            XCTAssertEqual(unix, Int(unixsecs * 1000), line: line)
+            XCTAssertEqual(unix, Int64(unixsecs * 1000), line: line)
 
             if canonical == true {
                 // for canonical strings, also check that the stringified version is correct

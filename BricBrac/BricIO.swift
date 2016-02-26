@@ -239,10 +239,7 @@ public enum FidelityBricolage : Bricolage {
     public static func createArray() -> ArrType { return ArrType() }
     public static func createString(scalars: [UnicodeScalar]) -> StrType? { return scalars }
     public static func createNumber(scalars: [UnicodeScalar]) -> NumType? { return scalars }
-    public static func putElement(var arr: ArrType, element: FidelityBricolage) -> ArrType {
-        arr.append(element)
-        return arr
-    }
+    public static func putElement(arr: ArrType, element: FidelityBricolage) -> ArrType { return arr + [element] }
     public static func putKeyValue(var obj: ObjType, key: StrType, value: FidelityBricolage) -> ObjType {
         obj.append((key, value))
         return obj

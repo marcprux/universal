@@ -66,9 +66,11 @@ extension Bric : Hashable {
 }
 
 /// - SeeAlso: `Bric`'s `appendContentsOf`
-public func + (var lhs: Bric, rhs: Bric) -> Bric {
-    lhs.appendContentsOf(rhs)
-    return lhs
+@warn_unused_result
+public func + (lhs: Bric, rhs: Bric) -> Bric {
+    var bric = lhs
+    bric.appendContentsOf(rhs)
+    return bric
 }
 
 /// - SeeAlso: `Bric`'s `appendContentsOf`

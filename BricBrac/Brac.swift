@@ -254,7 +254,8 @@ public extension Bric {
     /// Returns a dictionary of keys to raw Brics for all keys that are not present in the given RawType (e.g., an enum of keys)
     /// This is useful for maintaining the underlying Brics of any object keys that are not strictly enumerated
     public func bracDisjoint<R: RawRepresentable where R.RawValue == String>(keys: R.Type) throws -> Dictionary<String, Bric> {
-        guard case .Obj(var dict) = self else { return try invalidType() }
+        guard case .Obj(let d) = self else { return try invalidType() }
+        var dict = d
         for key in dict.keys {
             if R(rawValue: key) != nil {
                 dict.removeValueForKey(key)

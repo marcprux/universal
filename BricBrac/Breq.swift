@@ -128,13 +128,15 @@ extension CollectionType {
         if self.isEmpty != other.isEmpty { return false }
 
         // Fast check for underlying array pointer equivalence (performance: O(1))
-        if AnyForwardCollection(self) === AnyForwardCollection(other) { return true }
+        let af1 = AnyForwardCollection(self)
+        let af2 = AnyForwardCollection(other)
+        if af1 === af2 { return true }
 
         // after the check because count might be O(N)
         if self.count != other.count { return false }
 
         // fall back to the default sequence mapping
-        return AnySequence(self).breqMap(AnySequence(other), eq: eq)
+        return af1.breqMap(af2, eq: eq)
     }
 }
 

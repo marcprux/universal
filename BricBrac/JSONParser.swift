@@ -647,7 +647,7 @@ public final class JSONParser {
                     highSurrogate = hex // save the high surrogate and move along
                 } else if hex >= 0xDC00 && hex <= 0xDFFF { // low surrogates
                     if let highSurrogate = highSurrogate {
-                        let codepoint = ((highSurrogate - 0xD800) << 10) + (hex - 0xDC00) + 0x010000
+                        let codepoint: UInt32 = ((highSurrogate - 0xD800) << 10) + (hex - 0xDC00) + 0x010000
                         slice.append(UnicodeScalar(codepoint))
                     } else {
                         throw ParseError(msg: "Low surrogate not preceeded by high surrogate", line: line, column: column + start.distanceTo(i))
@@ -705,7 +705,8 @@ public extension JSONParser {
         func pad() {
             if let indent = indent where indent > 0 {
                 out.write("\n")
-                out.write(String(count: depth * indent, repeatedValue: UnicodeScalar(" ")))
+                let space: UnicodeScalar = " "
+                out.write(String(count: depth * indent, repeatedValue: space))
             }
         }
 

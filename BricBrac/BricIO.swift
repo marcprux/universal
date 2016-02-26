@@ -584,7 +584,8 @@ public extension JSONWriter {
         // see also: http://www.netlib.org/fp/dtoa.c
         let str = String(number) // FIXME: this outputs exponential notation for some large numbers
         // when a string ends in ".0", we just append the rounded int FIXME: better string formatting
-        if str.hasSuffix(".0") {
+        let suffix = str.characters.suffix(2)
+        if suffix.first == "." && suffix.last == "0" {
             emit(&output, string: str[str.startIndex..<str.endIndex.predecessor().predecessor()])
         } else {
             emit(&output, string: str)

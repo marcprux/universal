@@ -14,12 +14,12 @@ public extension Bric {
 
     /// Validates the given JSON string and throws an error if there was a problem
     public static func parseCocoa(string: String, options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
-        return try CocoaBricolage.parseJSON(Array(string.unicodeScalars), options: options).object as! NSObject
+        return try CocoaBricolage.parseJSON(Array(string.unicodeScalars), options: options).object
     }
 
     /// Validates the given array of unicode scalars and throws an error if there was a problem
     public static func parseCocoa(scalars: [UnicodeScalar], options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
-        return try CocoaBricolage.parseJSON(scalars, options: options).object as! NSObject
+        return try CocoaBricolage.parseJSON(scalars, options: options).object
     }
 }
 

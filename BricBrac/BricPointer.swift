@@ -156,7 +156,7 @@ public extension Bric {
         }
 
         // special case: trailing slashes will map to the "" key of an object
-        if case .Obj(let obj) = node where pointer.hasSuffix("/") {
+        if case .Obj(let obj) = node where pointer.characters.last == "/" {
             node = obj[""] ?? node
         }
 

@@ -69,7 +69,8 @@ public extension Bric {
 
     /// Returns a map of all references in the Bric
     /// See: <http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03>
-    public func resolve(var rmap: [String : Bric] = [:], resolver: (String) throws -> Bric) throws -> [String : Bric] {
+    public func resolve(obj: [String : Bric] = [:], resolver: (String) throws -> Bric) throws -> [String : Bric] {
+        var rmap = obj
         switch self {
         case .Arr(let arr):
             for a in arr {

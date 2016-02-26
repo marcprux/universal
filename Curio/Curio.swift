@@ -172,11 +172,12 @@ public struct Curio {
     }
 
     /// Returns true if the schema will be serialized as a raw Bric instance
-    func isBricType(var schema: Schema) -> Bool {
+    func isBricType(schema: Schema) -> Bool {
+        var sch = schema
         // trim out extranneous values
-        schema.description = nil
+        sch.description = nil
 
-        let bric = schema.bric()
+        let bric = sch.bric()
         if bric == [:] { return true }
         if bric == ["type": "object"] { return true }
 

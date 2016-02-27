@@ -516,18 +516,27 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable,
 }
 
 
-
-
 /// An ISO-8601 date-time structure, the common JSON format for dates and times
 /// - See: https://en.wikipedia.org/wiki/ISO_8601
-public struct BricDateTime: Hashable, Equatable, CustomStringConvertible, Bricable, Bracable, Breqable {
+public protocol ISO8601DateTime {
+    var year: Int { get set }
+    var month: Int { get set }
+    var day: Int { get set }
+    var hour: Int { get set }
+    var minute: Int { get set }
+    var second: Double { get set }
+    var zone: (hours: Int, minutes: Int) { get set }
+}
+
+
+public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, CustomStringConvertible, Bricable, Bracable, Breqable {
     public typealias BricDate = (year: Int, month: Int, day: Int)
     public typealias BricTime = (hour: Int, minute: Int, second: Double)
     public typealias BricZone = (hours: Int, minutes: Int)
 
-    public let year, month, day, hour, minute: Int
-    public let second: Double
-    public let zone: BricZone
+    public var year, month, day, hour, minute: Int
+    public var second: Double
+    public var zone: BricZone
 
     public init(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Double, zone: BricZone) {
         self.year = year
@@ -539,10 +548,48 @@ public struct BricDateTime: Hashable, Equatable, CustomStringConvertible, Bricab
         self.zone = zone
     }
 
-    public var date: BricDate { return (year, month, day) }
-    public var time: BricTime { return (hour, minute, second) }
+    /// Attempt to parse the given String as an ISO-8601 date-time structure
+    public init?(_ str: String) {
+        if let dtm = BricDateTime(year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, zone: (0, 0)).parseISO8601String(str) {
+            self = dtm
+        } else {
+            return nil
+        }
+    }
 
-    public func toISO8601String() -> String {
+    public var description: String { return toISO8601String() }
+
+    public var hashValue: Int { return year }
+
+    public func breq(other: BricDateTime) -> Bool {
+        return self.year == other.year
+            && self.month == other.month
+            && self.day == other.day
+            && self.hour == other.hour
+            && self.minute == other.minute
+            && self.second == other.second
+            && self.zone.hours == other.zone.hours
+            && self.zone.minutes == other.zone.minutes
+    }
+
+    /// BricDateTime instances are serialized to ISO-8601 strings
+    public func bric() -> Bric {
+        return Bric.Str(toISO8601String())
+    }
+
+    /// BricDateTime instances are serialized to ISO-8601 strings
+    public static func brac(bric: Bric) throws -> BricDateTime {
+        guard case .Str(let str) = bric else { return try bric.invalidType() }
+        guard let dtm = BricDateTime(str) else { return try bric.invalidRawValue(str) }
+        return dtm
+    }
+
+}
+
+public extension ISO8601DateTime {
+
+    /// Converts this datetime to a formatted string with the given time separator and designator for UTC (Zulu) time
+    public func toFormattedString(timesep timesep: String = "T", utctz: String? = "Z", padsec: Int = 3) -> String {
         func pad(num: Int, _ len: Int) -> String {
             var str = String(num)
             while str.characters.count < len {
@@ -555,17 +602,23 @@ public struct BricDateTime: Hashable, Equatable, CustomStringConvertible, Bricab
         func sec(secs: Double) -> String {
             var str = String(secs)
             let chars = str.characters
-            if chars.count >= 2 && chars.dropFirst().first == "." { str = "0" + str }
-            while str.characters.count < 6 { str += "0" }
+            if padsec > 0 {
+                if chars.count >= 2 && chars.dropFirst().first == "." { str = "0" + str }
+                while str.characters.count < (padsec + 3) { str += "0" }
+            }
             return str
         }
 
-        return pad(year, 4) + "-" + pad(month, 2) + "-" + pad(day, 2) + "T" + pad(hour, 2) + ":" + pad(minute, 2) + ":" + sec(second) + (zone.hours == 0 && zone.minutes == 0 ? "Z" : ((zone.hours >= 0 ? "+" : "") + pad(zone.hours, 2) + ":" + pad(zone.minutes, 2)))
+        return pad(year, 4) + "-" + pad(month, 2) + "-" + pad(day, 2) + timesep + pad(hour, 2) + ":" + pad(minute, 2) + ":" + sec(second) + ((utctz != nil && zone.hours == 0 && zone.minutes == 0) ? utctz! : ((zone.hours >= 0 ? "+" : "") + pad(zone.hours, 2) + ":" + pad(zone.minutes, 2)))
     }
 
+    /// Returns a string representation in accordance with ISO-8601
+    public func toISO8601String() -> String {
+        return toFormattedString()
+    }
 
     /// Attempt to parse the given String as an ISO-8601 date-time structure
-    public init?(_ str: String) {
+    public func parseISO8601String(str: String) -> Self? {
         var gen = str.characters.generate()
 
         func scan(skip: Int = 0, _ until: Character...) -> (String, Character?)? {
@@ -616,34 +669,15 @@ public struct BricDateTime: Hashable, Equatable, CustomStringConvertible, Bricab
 
         if gen.next() != nil { return nil } // trailing characters
 
-        let dtm = BricDateTime(year: year, month: month, day: day, hour: hour, minute: minute, second: second, zone: (tzh, tzm))
-        self = dtm
-    }
-
-    public var description: String { return toISO8601String() }
-
-    public var hashValue: Int { return year }
-
-    public func breq(other: BricDateTime) -> Bool {
-        return self.year == other.year
-            && self.month == other.month
-            && self.day == other.day
-            && self.hour == other.hour
-            && self.minute == other.minute
-            && self.second == other.second
-            && self.zone.hours == other.zone.hours
-            && self.zone.minutes == other.zone.minutes
-    }
-
-    /// BricDateTime instances are serialized to ISO-8601 strings
-    public func bric() -> Bric {
-        return Bric.Str(toISO8601String())
-    }
-
-    /// BricDateTime instances are serialized to ISO-8601 strings
-    public static func brac(bric: Bric) throws -> BricDateTime {
-        guard case .Str(let str) = bric else { return try bric.invalidType() }
-        guard let dtm = BricDateTime(str) else { return try bric.invalidRawValue(str) }
+        // fill in the fields
+        var dtm = self
+        dtm.year = year
+        dtm.month = month
+        dtm.day = day
+        dtm.hour = hour
+        dtm.minute = minute
+        dtm.second = second
+        dtm.zone = (tzh, tzm)
         return dtm
     }
 }

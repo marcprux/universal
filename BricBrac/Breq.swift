@@ -133,9 +133,7 @@ extension CollectionType {
         if self.isEmpty != other.isEmpty { return false }
 
         // Fast check for underlying array pointer equality (performance: O(1))
-        let af1 = AnyForwardCollection(self)
-        let af2 = AnyForwardCollection(other)
-        if af1 === af2 {
+        if AnyForwardCollection(self) === AnyForwardCollection(other) {
             return true
         }
 
@@ -151,9 +149,58 @@ extension CollectionType {
     }
 }
 
-extension Array : BreqLayer { } // inherits breqMap via CollectionType conformance
-extension ArraySlice : BreqLayer { } // inherits breqMap via CollectionType conformance
-extension ContiguousArray : BreqLayer { } // inherits breqMap via CollectionType conformance
+extension Array : BreqLayer {
+    public func breqMap(other: Array, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+        // comparing the underlying equality with many elements is expensive for the common case where
+        // the elements are unchanged; performing a direct pointer comparison is much faster
+        // note that this should be redundant against CollectionType's AnyForwardCollection ===
+        // optimization, but observation has shown that this passes at times when AnyForwardCollection fails
+        let ptreq = self.withUnsafeBufferPointer { ptr1 in
+            other.withUnsafeBufferPointer { ptr2 in
+                ptr1.count == ptr2.count && ptr1.baseAddress == ptr2.baseAddress
+            }
+        }
+
+        if ptreq {
+            return true
+        } else {
+        return breqCollection(other, eq: eq)
+        }
+    }
+}
+
+extension ArraySlice : BreqLayer {
+    public func breqMap(other: ArraySlice, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+        let ptreq = self.withUnsafeBufferPointer { ptr1 in
+            other.withUnsafeBufferPointer { ptr2 in
+                ptr1.count == ptr2.count && ptr1.baseAddress == ptr2.baseAddress
+            }
+        }
+
+        if ptreq {
+            return true
+        } else {
+            return breqCollection(other, eq: eq)
+        }
+    }
+}
+
+extension ContiguousArray : BreqLayer {
+    public func breqMap(other: ContiguousArray, eq: (Generator.Element, Generator.Element) -> Bool) -> Bool {
+        let ptreq = self.withUnsafeBufferPointer { ptr1 in
+            other.withUnsafeBufferPointer { ptr2 in
+                ptr1.count == ptr2.count && ptr1.baseAddress == ptr2.baseAddress
+            }
+        }
+
+        if ptreq {
+            return true
+        } else {
+            return breqCollection(other, eq: eq)
+        }
+    }
+}
+
 extension CollectionOfOne : BreqLayer { } // inherits breqMap via CollectionType conformance
 extension EmptyCollection : BreqLayer { } // inherits breqMap via CollectionType conformance
 extension NonEmptyCollection : BreqLayer { } // inherits breqMap via CollectionType conformance
@@ -165,10 +212,6 @@ extension Dictionary : BreqLayer { // TODO: Swift 3: where Key == String
     public func breqMap(other: Dictionary, eq: (BricSub, BricSub) -> Bool) -> Bool {
         if self.count != other.count {
             return false
-        }
-
-        if AnyForwardCollection(self) === AnyForwardCollection(other) {
-            return true // optimized collection pointer comparison
         }
 
         let keys = Set(self.keys)

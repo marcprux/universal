@@ -1670,7 +1670,8 @@ class BricBracTests : XCTestCase {
         let aoap1: Array<Optional<Array<Person>>> = [ap1, ap2, ap1]
         var aoap2 = aoap1
         XCTAssertTrue(aoap1.breq(aoap2))
-        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
+//        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
+        XCTAssertEqual(bc + 0, Person.Breqs); bc = Person.Breqs // zero due to fast array equivalence checking
 
         aoap2.append(nil)
         XCTAssertFalse(aoap1.breq(aoap2)) // should fail due to different number of elements

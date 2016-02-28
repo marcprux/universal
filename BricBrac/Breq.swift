@@ -43,7 +43,7 @@ extension UInt64: Breqable { }
 extension Float: Breqable { }
 extension Double: Breqable { }
 
-/// Breqable equatablilty defers to the `brequal` implemention in the concrete type
+/// Breqable equatablilty defers to the `breq` implemention in the concrete type
 public func ==<T: Breqable>(lhs: T, rhs: T) -> Bool {
     return lhs.breq(rhs)
 }
@@ -135,7 +135,9 @@ extension CollectionType {
         // Fast check for underlying array pointer equality (performance: O(1))
         let af1 = AnyForwardCollection(self)
         let af2 = AnyForwardCollection(other)
-        if af1 === af2 { return true }
+        if af1 === af2 {
+            return true
+        }
 
         // after the check because count might be O(N)
         if self.count != other.count { return false }
@@ -161,7 +163,14 @@ extension Set : BreqLayer { } // inherits breqMap via SequenceType conformance
 extension Dictionary : BreqLayer { // TODO: Swift 3: where Key == String
 
     public func breqMap(other: Dictionary, eq: (BricSub, BricSub) -> Bool) -> Bool {
-        if self.count != other.count { return false }
+        if self.count != other.count {
+            return false
+        }
+
+        if AnyForwardCollection(self) === AnyForwardCollection(other) {
+            return true // optimized collection pointer comparison
+        }
+
         let keys = Set(self.keys)
         if keys != Set(other.keys) { return false }
         let selfValues = keys.map({ self[$0]! }), otherValues = keys.map({ other[$0]! })

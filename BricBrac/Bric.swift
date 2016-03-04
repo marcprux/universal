@@ -65,19 +65,6 @@ extension Bric : Hashable {
     }
 }
 
-/// - SeeAlso: `Bric`'s `appendContentsOf`
-@warn_unused_result
-public func + (lhs: Bric, rhs: Bric) -> Bric {
-    var bric = lhs
-    bric.appendContentsOf(rhs)
-    return bric
-}
-
-/// - SeeAlso: `Bric`'s `appendContentsOf`
-public func += (inout lhs: Bric, rhs: Bric) {
-    lhs.appendContentsOf(rhs)
-}
-
 extension Bric {
     /// The count of Bric is either the number of properties (for an object), number of elements (for an array), 0 for null, or 1 for string & number
     public var count: Int {
@@ -165,44 +152,6 @@ public extension Bric {
             }
         }
     }
-
-
-    /// Convenience subscripter for directly getting/setting a String from an object by key
-    public subscript(key: String)->String? {
-        get { return try? bracKey(key) }
-        set { self[key] = newValue.map(Bric.Str) }
-    }
-
-    /// Convenience subscripter for directly getting/setting a Double from an object by key
-    public subscript(key: String)->Double? {
-        get { return try? bracKey(key) }
-        set { self[key] = newValue.map(Bric.Num) }
-    }
-
-    /// Convenience subscripter for directly getting/setting an Int from an object by key (large values are rounded to extrema)
-    public subscript(key: String)->Int? {
-        get { return try? bracKey(key) }
-        set { self[key] = newValue.map(Double.init).map(Bric.Num) }
-    }
-
-    /// Convenience subscripter for directly getting/setting a Bool from an object by key
-    public subscript(key: String)->Bool? {
-        get { return try? bracKey(key) }
-        set { self[key] = newValue.map(Bric.Bol) }
-    }
-
-    /// Convenience subscripter for directly getting/setting an object from an object by key
-    public subscript(key: String)->[Bric]? {
-        get { return try? bracKey(key) }
-        set { self[key] = newValue.map(Bric.Arr) }
-    }
-
-    /// Convenience subscripter for directly getting/setting an Object from an object by key
-    public subscript(key: String)->[String: Bric]? {
-        get { return try? bracKey(key) }
-        set { self[key] = newValue.map(Bric.Obj) }
-    }
-
 }
 
 /// Array indexed subscription helpers for fluent dictionary-like access to Bric
@@ -230,90 +179,6 @@ public extension Bric {
             default:
                 break
             }
-        }
-    }
-
-    /// Convenience subscripter for directly getting/setting a String from an array by index
-    public subscript(index: Int)->String? {
-        get {
-            switch self[index] as Bric? {
-            case .Some(.Str(let x)): return x
-            default: return .None
-            }
-        }
-
-        set {
-            self[index] = newValue.map(Bric.Str)
-        }
-    }
-
-    /// Convenience subscripter for directly getting/setting a Double from an array by index
-    public subscript(index: Int)->Double? {
-        get {
-            switch self[index] as Bric? {
-            case .Some(.Num(let x)): return x
-            default: return .None
-            }
-        }
-
-        set {
-            self[index] = newValue.map(Bric.Num)
-        }
-    }
-
-    /// Convenience subscripter for directly getting/setting an Int from an array by index (large values are rounded to extrema)
-    public subscript(index: Int)->Int? {
-        get {
-            switch self[index] as Bric? {
-            case .Some(.Num(let x)): return x <= Double(Int.min) ? Int.min : x >= Double(Int.max) ? Int.max : Int(x)
-            default: return .None
-            }
-        }
-
-        set {
-            self[index] = newValue.map(Double.init).map(Bric.Num)
-        }
-    }
-
-    /// Convenience subscripter for directly getting/setting a Bool from an array by index
-    public subscript(index: Int)->Bool? {
-        get {
-            switch self[index] as Bric? {
-            case .Some(.Bol(let x)): return x
-            default: return .None
-            }
-        }
-
-        set {
-            self[index] = newValue.map(Bric.Bol)
-        }
-    }
-
-    /// Convenience subscripter for directly getting/setting an Array from an array by index
-    public subscript(index: Int)->[Bric]? {
-        get {
-            switch self[index] as Bric? {
-            case .Some(.Arr(let x)): return x
-            default: return .None
-            }
-        }
-
-        set {
-            self[index] = newValue.map(Bric.Arr)
-        }
-    }
-
-    /// Convenience subscripter for directly getting/setting an Object from an array by index
-    public subscript(index: Int)->[String: Bric]? {
-        get {
-            switch self[index] as Bric? {
-            case .Some(.Obj(let x)): return x
-            default: return .None
-            }
-        }
-
-        set {
-            self[index] = newValue.map(Bric.Obj)
         }
     }
 }

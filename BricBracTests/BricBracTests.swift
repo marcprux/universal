@@ -784,54 +784,10 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func testArraySubscripting() {
-        var arr: Bric = [123, "abc", true]
-        XCTAssertEqual(123, arr[0])
-        XCTAssertEqual("abc", arr[1])
-        XCTAssertEqual(true, arr[2])
-
-        arr[0] = Int(456)
-        XCTAssertEqual(456, arr[0])
-
-        arr[0] = Bool(true)
-        XCTAssertEqual(true, arr[0])
-
-        arr[0] = String("yes")
-        XCTAssertEqual("yes", arr[0])
-
-        arr[0] = nil as String?
-        XCTAssertEqual(Optional<String>.None, arr[0])
-
-        arr[0] = Double(Int.max) + 100
-        XCTAssertEqual(Int.max, arr[0])
-
-        arr[0] = Double(Int.max) + 100
-        XCTAssertEqual(Int.max, arr[0])
-
-        arr[0] = 99.999
-        XCTAssertEqual(99.999, arr[0])
-
-        arr[6] = "out of bounds"
-        arr[6] = nil as String?
-
-        arr[2] = ["foo": [1,2,3]] as Dictionary<String, Bric>
-        XCTAssertEqual(["foo": [1,2,3]] as Bric, arr[2])
-
-        var copy = arr
-        copy[100] = "abc" // shoud be a no-op
-        XCTAssertEqual(arr.hashValue, copy.hashValue)
-
-        copy[2]?["foo"]?[2] = 99
-        //XCTAssertNotEqual(arr.hashValue, copy.hashValue)
-
-        copy += "xyz"
-        XCTAssertEqual(copy, [99.999, "abc", ["foo": [1,2,99]], "xyz"])
-
-    }
 
     func testKeyedSubscripting() {
         let val: Bric = ["key": "foo"]
-        if let _: String = val["key"] {
+        if let _: String = val["key"]?.str {
         } else {
             XCTFail()
         }

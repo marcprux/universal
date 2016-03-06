@@ -142,7 +142,7 @@ extension Bric : CustomDebugStringConvertible {
 /// other storages are possible:
 ///
 /// * `EmptyBricolage`: doesn't store any data, and exists for fast validation of a document
-/// * `CocoaBricolage`: storage that is compatible with Cocoa's `NSJSONSerialization` APIs
+/// * `FoundationBricolage`: storage that is compatible with Cocoa's `NSJSONSerialization` APIs
 ///
 /// Note that nothing prevents `Bricolage` storage from being lossy, such as numeric types overflowing 
 /// or losing precision from number strings
@@ -271,7 +271,9 @@ extension FidelityBricolage : Bricolagable {
         case .Obj(let obj):
             var object = B.createObject()
             for x in obj {
-                object = B.putKeyValue(object, key: B.createString(x.0)!, value: x.1.bricolage())
+                if let key = B.createString(x.0) {
+                    object = B.putKeyValue(object, key: key, value: x.1.bricolage())
+                }
             }
             return B(obj: object)
         }

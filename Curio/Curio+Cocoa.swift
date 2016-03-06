@@ -31,7 +31,7 @@ public extension Curio {
             return // contents are unchanged from local version; skip compiling
         }
 
-        let bundle = NSBundle(forClass: CocoaBricolage.self).executablePath! // we are just using CocoaBricolage because it is the only class in the BricBrac framework
+        let bundle = NSBundle(forClass: FoundationBricolage.self).executablePath! // we are just using FoundationBricolage because it is the only class in the BricBrac framework
         let frameworkDir = ((bundle as NSString).stringByDeletingLastPathComponent as NSString).stringByDeletingLastPathComponent
 
         let args = [

@@ -12,6 +12,14 @@ import JavaScriptCore
 
 class BricBracTests : XCTestCase {
 
+    func testBricConversion() {
+        let bric: Bric = ["a": [1, 2, true, false, nil]]
+        let cocoa = FoundationBricolage.brac(bric)
+        XCTAssertNotNil(cocoa.object)
+        let bric2 = cocoa.bric()
+        XCTAssertEqual(bric, bric2)
+    }
+
     func testAllocatonProfiling() {
         // json with unicode escapes
         // let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/caliper.json", ofType: "")!
@@ -635,7 +643,7 @@ class BricBracTests : XCTestCase {
             let js = CFAbsoluteTimeGetCurrent()
             for _ in 1...count {
                 if cf {
-                    let _ = try FoundationBricolage.parseJSON(scalars, options: JSONParser.Options.Strict)
+                    let _ = try CoreFoundationBricolage.parseJSON(scalars, options: JSONParser.Options.Strict)
 //                    let nsobj = Unmanaged<NSObject>.fromOpaque(COpaquePointer(fbric.ptr)).takeRetainedValue()
                 } else if cocoa {
                     let _: NSObject = try Bric.parseCocoa(scalars)

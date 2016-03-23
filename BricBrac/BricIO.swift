@@ -19,7 +19,7 @@ extension Bric : Streamable {
     /// - Parameter maxline: fit pretty-printed output on a single line if it is less than maxline
     /// - Parameter mapper: When set, .Obj instances will be passed through the given mapper to filter, re-order, or modify the values
     @warn_unused_result
-    public func stringify(space space: Int = 0, maxline: Int = 0, bufferSize: Int? = nil, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) })->String {
+    public func stringify(space space: Int = 0, maxline: Int = 0, bufferSize: Int? = nil, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { AnyGenerator($0.generate()) })->String {
         var str = String()
         if let bufferSize = bufferSize {
             str.reserveCapacity(bufferSize)
@@ -35,7 +35,7 @@ extension Bric : Streamable {
         case Obj(index: Int, object: [(String, Bric)])
     }
 
-    public func writeJSON<Target: OutputStreamType>(inout output: Target, spacer: String = "", maxline: Int = 0, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) }) {
+    public func writeJSON<Target: OutputStreamType>(inout output: Target, spacer: String = "", maxline: Int = 0, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { AnyGenerator($0.generate()) }) {
         if maxline <= 0 {
             writeJSON(&output, writer: FormattingJSONWriter<Target>(spacer: spacer), mapper: mapper)
         } else {
@@ -44,7 +44,7 @@ extension Bric : Streamable {
     }
 
     /// A non-recursive streaming JSON stringifier
-    public func writeJSON<Target: OutputStreamType, Writer: JSONWriter where Writer.Target == Target>(inout output: Target, writer: Writer, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { anyGenerator($0.generate()) }) {
+    public func writeJSON<Target: OutputStreamType, Writer: JSONWriter where Writer.Target == Target>(inout output: Target, writer: Writer, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { AnyGenerator($0.generate()) }) {
         // the current stack of containers; we use this instead of recursion to track where we are in the process
         var stack: [State] = []
 
@@ -147,12 +147,12 @@ extension Bric : CustomDebugStringConvertible {
 /// Note that nothing prevents `Bricolage` storage from being lossy, such as numeric types overflowing 
 /// or losing precision from number strings
 public protocol Bricolage {
-    typealias NulType
-    typealias StrType
-    typealias NumType
-    typealias BolType
-    typealias ArrType
-    typealias ObjType
+    associatedtype NulType
+    associatedtype StrType
+    associatedtype NumType
+    associatedtype BolType
+    associatedtype ArrType
+    associatedtype ObjType
 
     init(nul: NulType)
     init(str: StrType)
@@ -516,7 +516,7 @@ extension String {
 
 
 public protocol JSONWriter {
-    typealias Target
+    associatedtype Target
 
     func writeStart(inout output: Target)
     func writeEnd(inout output: Target)
@@ -740,13 +740,13 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
         }
 
         func compactLevel(level: Int) {
-            for var index = tokens.startIndex; index < tokens.endIndex; index = index.successor() {
+            for index in tokens.startIndex..<tokens.endIndex {
                 let item = tokens[index]
                 switch item {
                 case .Indent(let lvl) where lvl == level:
                     if let range = rangeBlock(index, level: lvl) where range.endIndex > range.startIndex {
                         compactRange(range, level: level)
-                        index = range.endIndex // skip ahead
+                        return
                     }
                 default:
                     break

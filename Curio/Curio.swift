@@ -89,17 +89,14 @@ public struct Curio {
     static let nameBody = Set(Array(nameStart) + "0123456789".characters)
 
     /// Reserved words as per the Swift language guide
-    static let reservedWords = Set(["class", "deinit", "enum", "extension", "func", "import", "init", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript", "typealias", "var", "break", "case", "continue", "default", "do", "else", "fallthrough", "for", "if", "in", "retu", ", switch", "where", "while", "as", "dynamicType", "false", "is", "nil", "self", "Self", "super", "true", "__COLUMN__", "__FILE__", "__FUNCTION__", "__LINE__", "associativity", "convenience", "dynamic", "didSet", "final", "get", "infix", "inout", "lazy", "left", "mutating", "none", "nonmutating", "optional", "override", "postfix", "precedence", "prefix", "Protocol", "required", "right", "set", "Type", "unowned", "weak", "willSet"])
+    static let reservedWords = Set(["class", "deinit", "enum", "extension", "func", "import", "init", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript", "typealias", "var", "break", "case", "continue", "default", "do", "else", "fallthrough", "for", "if", "in", "retu", ", switch", "where", "while", "as", "dynamicType", "false", "is", "nil", "self", "Self", "super", "true", "#column", "#file", "#function", "#line", "associativity", "convenience", "dynamic", "didSet", "final", "get", "infix", "inout", "lazy", "left", "mutating", "none", "nonmutating", "optional", "override", "postfix", "precedence", "prefix", "Protocol", "required", "right", "set", "Type", "unowned", "weak", "willSet"])
 
-    func propName(parents: [CodeTypeName], var _ id: String) -> CodePropName {
-        if let pname = renamer(parents, id) {
+    func propName(parents: [CodeTypeName], _ idx: String) -> CodePropName {
+        if let pname = renamer(parents, idx) {
             return pname
         }
 
-        if id == "init" {
-            id = "initx" // even escaped with `init`, it crashes the compiler
-        }
-
+        var id = idx == "init" ? "initx" : idx // even escaped with `init`, it crashes the compiler
 
         while let first = id.characters.first where !Curio.nameStart.contains(first) {
             id = String(id.characters.dropFirst())
@@ -202,7 +199,8 @@ public struct Curio {
     }
 
     /// Reifies the given schema as a Swift data structure
-    public func reify(schema: Schema, id: String, var parents: [CodeTypeName]) throws -> CodeNamedType {
+    public func reify(schema: Schema, id: String, parents parentsx: [CodeTypeName]) throws -> CodeNamedType {
+        var parents = parentsx
         func dictionaryType(keyType: CodeType, _ valueType: CodeType) -> CodeExternalType {
             return CodeExternalType("Dictionary", generics: [keyType, valueType], access: accessor(parents))
         }
@@ -234,7 +232,6 @@ public struct Curio {
         func oneOfType(types: [CodeType]) -> CodeExternalType {
             return CodeExternalType("OneOf\(types.count)", generics: types, access: accessor(parents))
         }
-
 
         let BricType = CodeExternalType("Bric", access: accessor(parents))
         let StringType = CodeExternalType("String", access: accessor(parents))
@@ -290,7 +287,7 @@ public struct Curio {
                 var uniqueName = name
                 var num = 0
                 while names.contains(uniqueName) {
-                    num++
+                    num += 1
                     uniqueName = name + String(num)
                 }
 
@@ -351,7 +348,10 @@ public struct Curio {
                 var casename = cname
                 var n = 0
                 // make sure case names are unique by suffixing with a number
-                while casenames.contains(casename) { casename = cname + String(++n) }
+                while casenames.contains(casename) {
+                    n += 1
+                    casename = cname + String(n)
+                }
                 casenames.insert(casename)
 
                 code.cases.append(CodeEnum.Case(name: casename, type: casetype))
@@ -488,7 +488,8 @@ public struct Curio {
         enum StateMode { case Standard, AllOf, AnyOf }
 
         /// Creates a schema instance for an "object" type with all the listed properties
-        func createObject(typename: CodeTypeName, properties: [PropInfo], var mode: StateMode) throws -> CodeStateType {
+        func createObject(typename: CodeTypeName, properties: [PropInfo], mode modex: StateMode) throws -> CodeStateType {
+            var mode = modex
             let isUnionType = mode == .AllOf || mode == .AnyOf
 
             var code: CodeStateType
@@ -505,7 +506,11 @@ public struct Curio {
 
             // assign some anonymous names to the properties
             var anonPropCount = 0
-            var props: [PropDec] = properties.map({ PropDec(name: $0.name ?? propName(parents, "p\(anonPropCount++)"), required: $0.required, prop: $0.schema, anon: $0.name == nil) })
+            func incrementAnonPropCount() -> Int {
+                anonPropCount += 1
+                return anonPropCount - 1
+            }
+            var props: [PropDec] = properties.map({ PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, prop: $0.schema, anon: $0.name == nil) })
 
             for (name, required, prop, anon) in props {
                 var proptype: CodeType

@@ -38,7 +38,7 @@ class BricBracTests : XCTestCase {
             let _ = try? Bric.parse(scalars) // caliper.json: ~64/sec, rap.json: 105/sec
 //            let _ = try? Bric.validate(scalars, options: .Strict) // caliper.json: ~185/sec, rap.json: ~380/sec
 //            let _ = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) // caliper.json: ~985/sec, rap.json: 1600/sec
-            c++
+            c += 1
             let t2 = CFAbsoluteTimeGetCurrent()
             if t2 > (t + 1.0) {
                 print("parse-per-second: \(c)")
@@ -95,7 +95,7 @@ class BricBracTests : XCTestCase {
     }
 
     func testISO8601JSONDates() {
-        func testDateParse(str: Bric, _ unix: Int64?, canonical: Bool = false, line: UInt = __LINE__) {
+        func testDateParse(str: Bric, _ unix: Int64?, canonical: Bool = false, line: UInt = #line) {
             guard let dtm = str.dtm else { return XCTAssertEqual(nil, unix, line: line) }
 
             // we extracted a date/time; convert it to a UNIX timestamp
@@ -459,7 +459,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func expectFail(s: String, _ msg: String? = nil, options: JSONParser.Options = .Strict, file: String = __FILE__, line: UInt = __LINE__) {
+    func expectFail(s: String, _ msg: String? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
         do {
             try Bric.parse(s, options: options)
             XCTFail("Should have failed to parse", file: file, line: line)
@@ -470,7 +470,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func expectPass(s: String, _ bric: Bric? = nil, options: JSONParser.Options = .Strict, file: String = __FILE__, line: UInt = __LINE__) {
+    func expectPass(s: String, _ bric: Bric? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
         do {
             let b = try Bric.parse(s, options: options)
             if let bric = bric {
@@ -665,7 +665,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func parsePath(path: String, strict: Bool, file: String = __FILE__, line: UInt = __LINE__) throws -> Bric {
+    func parsePath(path: String, strict: Bool, file: StaticString = #file, line: UInt = #line) throws -> Bric {
         let str = try NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding)
         let bric = try Bric.parse(str as String, options: strict ? .Strict : .Lenient)
 
@@ -674,7 +674,7 @@ class BricBracTests : XCTestCase {
         return bric
     }
 
-    func compareCocoaParsing(string: String, msg: String, file: String = __FILE__, line: UInt = __LINE__) {
+    func compareCocoaParsing(string: String, msg: String, file: StaticString = #file, line: UInt = #line) {
         var cocoaBric: NSObject?
         var bricError: ErrorType?
         var cocoa: NSObject?
@@ -728,7 +728,7 @@ class BricBracTests : XCTestCase {
     ///   Swift Dictionaries and JSC Objects)
     ///
     /// * We outputs exponential notation for some large integers, whereas JSC nevers appears to do so
-    func compareJSCStringification(b: Bric, space: Int = 2, msg: String, file: String = __FILE__, line: UInt = __LINE__) {
+    func compareJSCStringification(b: Bric, space: Int = 2, msg: String, file: StaticString = #file, line: UInt = #line) {
         // JSC only allows dictionaries and arrays, so wrap any primitives in an array
         let bric: Bric = ["ob": b] // we just wrap everything in an array
 
@@ -737,7 +737,7 @@ class BricBracTests : XCTestCase {
         // we need to serialize the swift key order the same as JavaScriptCore; we do this by
         // having the mapper query the JSContents for the order in which the keys would be output
         func mapper(dict: [String: Bric]) -> AnyGenerator<(String, Bric)> {
-            return anyGenerator(Array(dict).sort({ kv1, kv2 in
+            return AnyGenerator(Array(dict).sort({ kv1, kv2 in
                 return kv1.0 < kv2.0
             }).generate())
         }
@@ -1139,7 +1139,7 @@ class BricBracTests : XCTestCase {
     }
 
     /// Assert that the given events are emitted by the parser
-    func expectEvents(string: String, _ events: [JSONParser.Event], file: String = __FILE__, line: UInt = __LINE__) {
+    func expectEvents(string: String, _ events: [JSONParser.Event], file: StaticString = #file, line: UInt = #line) {
         do {
             var evts: [JSONParser.Event] = []
             let cb: (JSONParser.Event)->() = { e in evts.append(e) }
@@ -1337,7 +1337,7 @@ class BricBracTests : XCTestCase {
 
 
         // "1","audi","a4",1.8,1999,4,"auto(l5)","f",18,29,"p","compact"
-        let audi2 = Car(manufacturer: "audi", model: "a4", displacement: 1.8, year: 1999, cylinders: .Four, transmissionType: "auto(l5)", drive: .Front, cityMileage: 18, highwayMileage: 29, fuel: .Premium, `class`: .compact)
+        let audi2 = Car(manufacturer: "audi", model: "a4", displacement: 1.8, year: 1999, cylinders: .Four, transmissionType: "auto(l5)", drive: .Front, cityMileage: 18, highwayMileage: 29, fuel: .Premium, class: .compact)
         let bric = audi2.bric()
         XCTAssertEqual(bric, template)
         do {
@@ -1741,7 +1741,7 @@ extension Person : BricBrac, Equatable {
     /// A more efficient implementation of Breqable that perform direct field comparison
     /// ordered by the fastest comparisons to the slowest
     func breq(other: Person) -> Bool {
-        Person.Breqs++ // for testing whether brequals is called
+        Person.Breqs += 1 // for testing whether brequals is called
         return male == other.male && age == other.age && name == other.name && children == other.children
     }
 }

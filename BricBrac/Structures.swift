@@ -15,14 +15,14 @@ public extension Bric {
 
 /// A WrapperType is able to map itself through a wrapped optional
 public protocol WrapperType {
-    typealias Wrapped
+    associatedtype Wrapped
     init(_ some: Wrapped)
     func flatMap<U>(@noescape f: (Wrapped) throws -> U?) rethrows -> U?
 }
 
 /// Wrappable can contain zero or one instances (covers both `Optional` and `Indirect`)
 public protocol Wrappable : NilLiteralConvertible {
-    typealias Wrapped
+    associatedtype Wrapped
     init(_ some: Wrapped)
 }
 
@@ -210,7 +210,7 @@ public struct NonEmptyCollection<Element, Tail: RangeReplaceableCollectionType w
 }
 
 public protocol OneOf: BricBrac {
-    typealias T
+    associatedtype T
 
     /// Returns a tuple of the possible value types for this OneOf
     var values: T { get }
@@ -629,7 +629,7 @@ public extension ISO8601DateTime {
                     if buf.isEmpty { return nil }
                     return (buf, c)
                 }
-                num++
+                num += 1
                 buf.append(c)
             }
             if buf.isEmpty { return nil }

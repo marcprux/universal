@@ -348,7 +348,7 @@ extension Bool: Bricable {
 /// data will be wrapped accordingly.
 public protocol BricLayer {
     /// The type that is being wrapped by this layer
-    typealias BricSub
+    associatedtype BricSub
 
     /// Construct an instance of self by invoking the function on the given bric
     func bricMap(f: BricSub -> Bric) -> Bric

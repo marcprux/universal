@@ -332,15 +332,15 @@ public final class JSONParser {
         }
 
         for scalar in scalars {
-            index++
+            index += 1
             let sval = scalar.value
 
             // track the current line for error reporting purposes
             if sval == 0x000A {
-                row++
+                row += 1
                 col = 0
             } else {
-                col++
+                col += 1
             }
 
             if !completing {
@@ -358,15 +358,15 @@ public final class JSONParser {
                 // is closed (because it has an unescaped quote), whereas a number is only processed once we hit a
                 // non-numeric character
                 if case .Number(var num) = processing {
-                    num.loc++
+                    num.loc += 1
 
                     switch sval {
                     case 0x30...0x39: // digit
                         if sval == 0x30 && num.leadingZeros == num.digitCount && num.fraction == nil {
-                            num.leadingZeros++ // count the number of leading zeros for validation later
+                            num.leadingZeros += 1 // count the number of leading zeros for validation later
                         }
-                        num.digitCount++
-                        num.trailingDigits++
+                        num.digitCount += 1
+                        num.trailingDigits += 1
                         processing = .Number(num)
                         buffer.append(scalar)
                         continue
@@ -410,7 +410,7 @@ public final class JSONParser {
                         func trailingEscapes() -> Int {
                             var slashes = 0
                             for c in buffer.reverse() {
-                                if c == "\\" { slashes++ } else { break }
+                                if c == "\\" { slashes += 1 } else { break }
                             }
                             return slashes
                         }
@@ -718,18 +718,18 @@ public extension JSONParser {
             switch event {
             case .ObjectStart(let s):
                 put(s)
-                depth++
+                depth += 1
                 pad()
             case .ObjectEnd(let s):
-                depth--
+                depth -= 1
                 pad()
                 put(s)
             case .ArrayStart(let s):
                 put(s)
-                depth++
+                depth += 1
                 pad()
             case .ArrayEnd(let s):
-                depth--
+                depth -= 1
                 pad()
                 put(s)
             case .Whitespace(let s):

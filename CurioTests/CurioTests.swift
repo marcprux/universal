@@ -168,7 +168,7 @@ class CurioTests: XCTestCase {
             let code = try gen.reify(schema, id: "SampleModel", parents: [])
             let module = CodeModule()
             module.types.append(code)
-            try gen.emit(module, name: "SampleModel.swift", dir: (__FILE__ as NSString).stringByDeletingLastPathComponent)
+            try gen.emit(module, name: "SampleModel.swift", dir: (#file as NSString).stringByDeletingLastPathComponent)
         } catch {
             XCTFail(String(error))
         }
@@ -220,7 +220,7 @@ class CurioTests: XCTestCase {
 //                        // TODO: schema doesn't compile yet
 //                        if file != "schema.json" {
 //                            let id = (file as NSString).stringByDeletingPathExtension
-//                            try curio.emit(module, name: id + ".swift", dir: (__FILE__ as NSString).stringByDeletingLastPathComponent)
+//                            try curio.emit(module, name: id + ".swift", dir: (#file as NSString).stringByDeletingLastPathComponent)
 //                        }
 //                    }
 //                } catch {
@@ -236,7 +236,7 @@ class CurioTests: XCTestCase {
 
 public class TestSampleModel : XCTestCase {
 
-    func assertBracable(bric: Bric, line: UInt = __LINE__) -> ErrorType? {
+    func assertBracable(bric: Bric, line: UInt = #line) -> ErrorType? {
         do {
             let sample = try SampleModel.brac(bric)
             XCTAssertEqual(bric, sample.bric(), line: line)
@@ -247,7 +247,7 @@ public class TestSampleModel : XCTestCase {
         }
     }
 
-    func assertNOTBracable(bric: Bric, line: UInt = __LINE__) -> ErrorType? {
+    func assertNOTBracable(bric: Bric, line: UInt = #line) -> ErrorType? {
         do {
             let _ = try SampleModel.brac(bric)
             XCTFail("should not have bracd", line: line)

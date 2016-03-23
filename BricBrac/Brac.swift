@@ -312,7 +312,7 @@ public extension Bric {
 /// Array<String>, Optional<Array<Bool>>, Array<Optional<Bool>>, and Array<Optional<Set<CollectionOfOne<Int>>>>
 public protocol BracLayer {
     /// The type that is being wrapped by this layer
-    typealias BracSub
+    associatedtype BracSub
 
     /// Construct an instance of self by invoking the function on the given bric
     static func bracMap(bric: Bric, f: Bric throws -> BracSub) throws -> Self

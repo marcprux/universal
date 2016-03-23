@@ -33,7 +33,7 @@ public class CodeEmitter<T: OutputStreamType> : CodeEmitterType {
 
     public func emit(tokens: String?...) {
         if tokens.count == 1 && tokens.last ?? "" == "}" {
-            level--
+            level -= 1
         }
 
         // only output non-blank, non-nil tokens
@@ -54,7 +54,7 @@ public class CodeEmitter<T: OutputStreamType> : CodeEmitterType {
 
         // increase/decrease indentation based on trailing code blocks
         if tokens.last ?? "" == "{" {
-            level++
+            level += 1
         }
 
         stream.write("\n")

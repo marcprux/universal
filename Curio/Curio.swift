@@ -16,6 +16,9 @@
 /// • hide Indirect in private fields and make public Optional getters/setters
 public struct Curio {
 
+    /// The swift version to generate
+    public var swiftVersion = 2.2
+
     /// whether to generate structs or classes (classes are faster to compiler for large models)
     public var generateValueTypes = true
 
@@ -88,25 +91,31 @@ public struct Curio {
     /// “After the first character, digits and combining Unicode characters are also allowed.”
     static let nameBody = Set(Array(nameStart) + "0123456789".characters)
 
-    /// Reserved words as per the Swift language guide
-    static let reservedWords = Set(["class", "deinit", "enum", "extension", "func", "import", "init", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript", "typealias", "var", "break", "case", "continue", "default", "do", "else", "fallthrough", "for", "if", "in", "retu", ", switch", "where", "while", "as", "dynamicType", "false", "is", "nil", "self", "Self", "super", "true", "#column", "#file", "#function", "#line", "associativity", "convenience", "dynamic", "didSet", "final", "get", "infix", "inout", "lazy", "left", "mutating", "none", "nonmutating", "optional", "override", "postfix", "precedence", "prefix", "Protocol", "required", "right", "set", "Type", "unowned", "weak", "willSet"])
 
-    func propName(parents: [CodeTypeName], _ idx: String) -> CodePropName {
-        if let pname = renamer(parents, idx) {
+    func propName(parents: [CodeTypeName], _ id: String, arg: Bool = false) -> CodePropName {
+        if let pname = renamer(parents, id) {
             return pname
         }
 
-        var id = idx == "init" ? "initx" : idx // even escaped with `init`, it crashes the compiler
+        // enums can't have a prop named "init", since it will conflict with the constructor name
+        var idx = id == "init" ? "initx" : id
 
-        while let first = id.characters.first where !Curio.nameStart.contains(first) {
-            id = String(id.characters.dropFirst())
+        while let first = idx.characters.first where !Curio.nameStart.contains(first) {
+            idx = String(idx.characters.dropFirst())
         }
 
-
-        if Curio.reservedWords.contains(id) {
-            id = "`" + id + "`"
+        // swift version 2.2+ allow unescaped keywords as argument names: https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
+        if arg {
+            if idx.isSwiftReservedArg() {
+                idx = "`" + idx + "`"
+            }
+        } else {
+            if idx.isSwiftKeyword() {
+                idx = "`" + idx + "`"
+            }
         }
-        return id
+
+        return idx
     }
 
     func unescape(name: String) -> String {
@@ -148,7 +157,7 @@ public struct Curio {
 
         var name = capitalize(nm)
 
-        if Curio.reservedWords.contains(name) {
+        if name.isSwiftKeyword() {
             name = "`" + name + "`"
         }
 
@@ -669,6 +678,18 @@ public struct Curio {
                     }
                 }
 
+                // for the init declaration, unescape all the elements and only re-escape them if they are the few forbidden keywords
+                // https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
+                for i in 0..<elements.count {
+                    if var name = elements[i].name {
+                        name = unescape(name)
+                        if name.isSwiftReservedArg() {
+                            name = "`" + name + "`"
+                        }
+                        elements[i].name = name
+                    }
+                }
+
                 let initargs = CodeTuple(elements: elements)
 
                 let initfun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, arguments: initargs, returns: CodeTuple(elements: []))
@@ -794,8 +815,9 @@ public struct Curio {
                 bracbody.append("return try \(fullName(code))(")
                 for (i, t) in props.enumerate() {
                     let sep = (i == props.count - (addPropType == nil ? 1 : 0) ? "" : ",")
-                    let pname = propName(parents + [typename], t.name)
-                    bracbody.append("\(pname): bric.bracKey(\(keysName).\(pname))" + sep)
+                    let aname = propName(parents + [typename], t.name, arg: true)
+                    let pname = propName(parents + [typename], t.name, arg: false)
+                    bracbody.append("\(aname): bric.bracKey(\(keysName).\(pname))" + sep)
                 }
                 if hasAdditionalProps == true { // empty key for additional properties; first so addprop keys don't clobber state keys
                     bracbody.append("\(addPropName): bric.bracDisjoint(\(keysName).self)")

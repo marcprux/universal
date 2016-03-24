@@ -6,16 +6,19 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     public var anyOfField: AnyOfField
     public var oneOfField: OneOfField
     public var notField: NotField
+    /// Should not escape keyword arguments
+    public var keywordFields: Optional<KeywordFields>
     public var list: Optional<Array<ListItem>>
     public var nested1: Optional<Nested1>
     /// Should generate a simple OneOf enum
     public var simpleOneOf: Optional<SimpleOneOf>
 
-    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, list: Optional<Array<ListItem>> = nil, nested1: Optional<Nested1> = nil, simpleOneOf: Optional<SimpleOneOf> = nil) {
+    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields> = nil, list: Optional<Array<ListItem>> = nil, nested1: Optional<Nested1> = nil, simpleOneOf: Optional<SimpleOneOf> = nil) {
         self.allOfField = allOfField 
         self.anyOfField = anyOfField 
         self.oneOfField = oneOfField 
         self.notField = notField 
+        self.keywordFields = keywordFields 
         self.list = list 
         self.nested1 = nested1 
         self.simpleOneOf = simpleOneOf 
@@ -27,6 +30,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         Keys.anyOfField: anyOfField.bric(), 
         Keys.oneOfField: oneOfField.bric(), 
         Keys.notField: notField.bric(), 
+        Keys.keywordFields: keywordFields.bric(), 
         Keys.list: list.bric(), 
         Keys.nested1: nested1.bric(), 
         Keys.simpleOneOf: simpleOneOf.bric(), 
@@ -39,6 +43,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         anyOfField: bric.bracKey(Keys.anyOfField), 
         oneOfField: bric.bracKey(Keys.oneOfField), 
         notField: bric.bracKey(Keys.notField), 
+        keywordFields: bric.bracKey(Keys.keywordFields), 
         list: bric.bracKey(Keys.list), 
         nested1: bric.bracKey(Keys.nested1), 
         simpleOneOf: bric.bracKey(Keys.simpleOneOf) 
@@ -48,6 +53,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     public func breq(other: SampleModel) -> Bool {
         return allOfField.breq(other.allOfField) 
             && anyOfField.breq(other.anyOfField) 
+            && keywordFields.breq(other.keywordFields) 
             && nested1.breq(other.nested1) 
             && notField.breq(other.notField) 
             && oneOfField.breq(other.oneOfField) 
@@ -60,6 +66,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         case anyOfField = "anyOfField"
         case oneOfField = "oneOfField"
         case notField = "notField"
+        case keywordFields = "keywordFields"
         case list = "list"
         case nested1 = "nested1"
         case simpleOneOf = "simpleOneOf"
@@ -460,6 +467,71 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Str : String, Bricable, Bracable, Breqable {
                 case Illegal = "illegal"
             }
+        }
+    }
+
+    /// Should not escape keyword arguments
+    public struct KeywordFields : Bricable, Bracable, Breqable {
+        public var `case`: Optional<String>
+        public var `for`: Optional<String>
+        public var `in`: Optional<String>
+        public var `inout`: Optional<String>
+        public var `let`: Optional<String>
+        public var `var`: Optional<String>
+        public var `while`: Optional<String>
+
+        public init(case: Optional<String> = nil, for: Optional<String> = nil, in: Optional<String> = nil, `inout`: Optional<String> = nil, `let`: Optional<String> = nil, `var`: Optional<String> = nil, while: Optional<String> = nil) {
+            self.`case` = `case` 
+            self.`for` = `for` 
+            self.`in` = `in` 
+            self.`inout` = `inout` 
+            self.`let` = `let` 
+            self.`var` = `var` 
+            self.`while` = `while` 
+        }
+
+        public func bric() -> Bric {
+            return Bric(obj: [ 
+            Keys.`case`: `case`.bric(), 
+            Keys.`for`: `for`.bric(), 
+            Keys.`in`: `in`.bric(), 
+            Keys.`inout`: `inout`.bric(), 
+            Keys.`let`: `let`.bric(), 
+            Keys.`var`: `var`.bric(), 
+            Keys.`while`: `while`.bric(), 
+            ]) 
+        }
+
+        public static func brac(bric: Bric) throws -> SampleModel.KeywordFields {
+            return try SampleModel.KeywordFields( 
+            case: bric.bracKey(Keys.`case`), 
+            for: bric.bracKey(Keys.`for`), 
+            in: bric.bracKey(Keys.`in`), 
+            `inout`: bric.bracKey(Keys.`inout`), 
+            `let`: bric.bracKey(Keys.`let`), 
+            `var`: bric.bracKey(Keys.`var`), 
+            while: bric.bracKey(Keys.`while`) 
+            ) 
+        }
+
+        public func breq(other: SampleModel.KeywordFields) -> Bool {
+            return `case`.breq(other.`case`) 
+                && `for`.breq(other.`for`) 
+                && `in`.breq(other.`in`) 
+                && `inout`.breq(other.`inout`) 
+                && `let`.breq(other.`let`) 
+                && `var`.breq(other.`var`) 
+                && `while`.breq(other.`while`) 
+        }
+
+        public enum Keys : String {
+            case `case` = "case"
+            case `for` = "for"
+            case `in` = "in"
+            case `inout` = "inout"
+            case `let` = "let"
+            case `var` = "var"
+            case `while` = "while"
         }
     }
 

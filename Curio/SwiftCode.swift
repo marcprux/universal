@@ -400,10 +400,24 @@ public protocol CodeImplementationType : CodeConformantType, CodeEmittable {
     var funcs: [CodeFunction.Implementation] { get set }
 }
 
+/// Reserved words as per the Swift language guide
+private let reservedWords = Set(["class", "deinit", "enum", "extension", "func", "import", "init", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript", "typealias", "var", "break", "case", "continue", "default", "do", "else", "fallthrough", "for", "if", "in", "retu", ", switch", "where", "while", "as", "dynamicType", "false", "is", "nil", "self", "Self", "super", "true", "#column", "#file", "#function", "#line", "associativity", "convenience", "dynamic", "didSet", "final", "get", "infix", "inout", "lazy", "left", "mutating", "none", "nonmutating", "optional", "override", "postfix", "precedence", "prefix", "Protocol", "required", "right", "set", "Type", "unowned", "weak", "willSet"])
+
+// Wwift version 2.2+ allow unescaped keywords as argument names: https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
+private let reservedArgs = Set(["inout", "var", "let"])
+
 extension String {
     func afterLast(sep: Character) -> String {
         let lastPart: String = (self.characters.split { $0 == "." }).last.flatMap({ String($0) }) ?? self
         return lastPart
+    }
+
+    func isSwiftKeyword() -> Bool {
+        return reservedWords.contains(self)
+    }
+
+    func isSwiftReservedArg() -> Bool {
+        return reservedArgs.contains(self)
     }
 }
 

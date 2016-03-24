@@ -150,6 +150,19 @@ class CurioTests: XCTestCase {
                         ]
                     ]
                 ],
+                "keywordFields": [
+                    "description": "Should not escape keyword arguments",
+                    "type": "object",
+                    "properties": [
+                        "in": [ "type": "string" ],
+                        "for": [ "type": "string" ],
+                        "while": [ "type": "string" ],
+                        "var": [ "type": "string" ],
+                        "let": [ "type": "string" ],
+                        "inout": [ "type": "string" ],
+                        "case": [ "type": "string" ],
+                    ]
+                ],
                 "simpleOneOf": [
                     "description": "Should generate a simple OneOf enum",
                     "oneOf": [

@@ -12,11 +12,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     public var nested1: Optional<Nested1>
     /// Should generate a simple OneOf enum
     public var simpleOneOf: Optional<SimpleOneOf>
-    public var bricState: BricState {
-        get { return (allOfField, anyOfField, oneOfField, notField, keywordFields, list, nested1, simpleOneOf) }
-        set($) { (allOfField, anyOfField, oneOfField, notField, keywordFields, list, nested1, simpleOneOf) = $ }
-    }
-    public static let bricKeys = (allOfField: "allOfField", anyOfField: "anyOfField", oneOfField: "oneOfField", notField: "notField", keywordFields: "keywordFields", list: "list", nested1: "nested1", simpleOneOf: "simpleOneOf")
 
     public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields> = nil, list: Optional<Array<ListItem>> = nil, nested1: Optional<Nested1> = nil, simpleOneOf: Optional<SimpleOneOf> = nil) {
         self.allOfField = allOfField 
@@ -84,11 +79,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public var p0: FirstAll
         /// SecondAll
         public var p1: SecondAll
-        public var bricState: BricState {
-            get { return (p0, p1) }
-            set($) { (p0, p1) = $ }
-        }
-        public static let bricKeys = (p0: "p0", p1: "p1")
 
         public init(_ p0: FirstAll, _ p1: SecondAll) {
             self.p0 = p0 
@@ -118,11 +108,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public struct FirstAll : Bricable, Bracable, Breqable {
             public var a1: Int
             public var a2: String
-            public var bricState: BricState {
-                get { return (a1, a2) }
-                set($) { (a1, a2) = $ }
-            }
-            public static let bricKeys = (a1: "a1", a2: "a2")
 
             public init(a1: Int, a2: String) {
                 self.a1 = a1 
@@ -154,19 +139,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 public static let asList: Array<Keys> = [a1, a2]
                 public static let asTuple = (a1, a2)
             }
-
-            public typealias BricState = (a1: Int, a2: String)
         }
 
         /// SecondAll
         public struct SecondAll : Bricable, Bracable, Breqable {
             public var a3: Bool
             public var a4: Double
-            public var bricState: BricState {
-                get { return (a3, a4) }
-                set($) { (a3, a4) = $ }
-            }
-            public static let bricKeys = (a3: "a3", a4: "a4")
 
             public init(a3: Bool, a4: Double) {
                 self.a3 = a3 
@@ -198,11 +176,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 public static let asList: Array<Keys> = [a3, a4]
                 public static let asTuple = (a3, a4)
             }
-
-            public typealias BricState = (a3: Bool, a4: Double)
         }
-
-        public typealias BricState = (p0: FirstAll, p1: SecondAll)
     }
 
     public struct AnyOfField : Bricable, Bracable, Breqable {
@@ -210,11 +184,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public var p0: Optional<FirstAny>
         /// SecondAny
         public var p1: Optional<SecondAny>
-        public var bricState: BricState {
-            get { return (p0, p1) }
-            set($) { (p0, p1) = $ }
-        }
-        public static let bricKeys = (p0: "p0", p1: "p1")
 
         public init(_ p0: Optional<FirstAny> = nil, _ p1: Optional<SecondAny> = nil) {
             self.p0 = p0 
@@ -245,11 +214,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public struct FirstAny : Bricable, Bracable, Breqable {
             public var b1: Int
             public var b2: String
-            public var bricState: BricState {
-                get { return (b1, b2) }
-                set($) { (b1, b2) = $ }
-            }
-            public static let bricKeys = (b1: "b1", b2: "b2")
 
             public init(b1: Int, b2: String) {
                 self.b1 = b1 
@@ -281,19 +245,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 public static let asList: Array<Keys> = [b1, b2]
                 public static let asTuple = (b1, b2)
             }
-
-            public typealias BricState = (b1: Int, b2: String)
         }
 
         /// SecondAny
         public struct SecondAny : Bricable, Bracable, Breqable {
             public var b3: Bool
             public var b4: Double
-            public var bricState: BricState {
-                get { return (b3, b4) }
-                set($) { (b3, b4) = $ }
-            }
-            public static let bricKeys = (b3: "b3", b4: "b4")
 
             public init(b3: Bool, b4: Double) {
                 self.b3 = b3 
@@ -325,11 +282,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 public static let asList: Array<Keys> = [b3, b4]
                 public static let asTuple = (b3, b4)
             }
-
-            public typealias BricState = (b3: Bool, b4: Double)
         }
-
-        public typealias BricState = (p0: Optional<FirstAny>, p1: Optional<SecondAny>)
     }
 
     public enum OneOfField : Bricable, Bracable, Breqable {
@@ -370,11 +323,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public struct FirstOne : Bricable, Bracable, Breqable {
             public var c1: Int
             public var c2: String
-            public var bricState: BricState {
-                get { return (c1, c2) }
-                set($) { (c1, c2) = $ }
-            }
-            public static let bricKeys = (c1: "c1", c2: "c2")
 
             public init(c1: Int, c2: String) {
                 self.c1 = c1 
@@ -406,19 +354,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 public static let asList: Array<Keys> = [c1, c2]
                 public static let asTuple = (c1, c2)
             }
-
-            public typealias BricState = (c1: Int, c2: String)
         }
 
         /// SecondOne
         public struct SecondOne : Bricable, Bracable, Breqable {
             public var c3: Bool
             public var c4: Double
-            public var bricState: BricState {
-                get { return (c3, c4) }
-                set($) { (c3, c4) = $ }
-            }
-            public static let bricKeys = (c3: "c3", c4: "c4")
 
             public init(c3: Bool, c4: Double) {
                 self.c3 = c3 
@@ -450,19 +391,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 public static let asList: Array<Keys> = [c3, c4]
                 public static let asTuple = (c3, c4)
             }
-
-            public typealias BricState = (c3: Bool, c4: Double)
         }
     }
 
     public struct NotField : Bricable, Bracable, Breqable {
         public var p0: P0
         public var p1: P1
-        public var bricState: BricState {
-            get { return (p0, p1) }
-            set($) { (p0, p1) = $ }
-        }
-        public static let bricKeys = (p0: "p0", p1: "p1")
 
         public init(_ p0: P0, _ p1: P1) {
             self.p0 = p0 
@@ -490,11 +424,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public struct P0 : Bricable, Bracable, Breqable {
             public var str: String
-            public var bricState: BricState {
-                get { return (str) }
-                set($) { (str) = $ }
-            }
-            public static let bricKeys = (str: "str")
 
             public init(str: String) {
                 self.str = str 
@@ -521,18 +450,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 public static let asList: Array<Keys> = [str]
                 public static let asTuple = (str)
             }
-
-            public typealias BricState = String
         }
 
         public typealias P1 = NotBrac<NotP1>
         public struct NotP1 : Bricable, Bracable, Breqable {
             public var str: Str
-            public var bricState: BricState {
-                get { return (str) }
-                set($) { (str) = $ }
-            }
-            public static let bricKeys = (str: "str")
 
             public init(str: Str = .Illegal) {
                 self.str = str 
@@ -563,11 +485,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Str : String, Bricable, Bracable, Breqable {
                 case Illegal = "illegal"
             }
-
-            public typealias BricState = Str
         }
-
-        public typealias BricState = (p0: P0, p1: P1)
     }
 
     /// Should not escape keyword arguments
@@ -579,11 +497,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public var `let`: Optional<String>
         public var `var`: Optional<String>
         public var `while`: Optional<String>
-        public var bricState: BricState {
-            get { return (`case`, `for`, `in`, `inout`, `let`, `var`, `while`) }
-            set($) { (`case`, `for`, `in`, `inout`, `let`, `var`, `while`) = $ }
-        }
-        public static let bricKeys = (case: "case", for: "for", in: "in", `inout`: "inout", `let`: "let", `var`: "var", while: "while")
 
         public init(`case`: Optional<String> = nil, `for`: Optional<String> = nil, `in`: Optional<String> = nil, `inout`: Optional<String> = nil, `let`: Optional<String> = nil, `var`: Optional<String> = nil, `while`: Optional<String> = nil) {
             self.`case` = `case` 
@@ -640,17 +553,10 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public static let asList: Array<Keys> = [`case`, `for`, `in`, `inout`, `let`, `var`, `while`]
             public static let asTuple = (`case`, `for`, `in`, `inout`, `let`, `var`, `while`)
         }
-
-        public typealias BricState = (`case`: Optional<String>, `for`: Optional<String>, `in`: Optional<String>, `inout`: Optional<String>, `let`: Optional<String>, `var`: Optional<String>, `while`: Optional<String>)
     }
 
     public struct ListItem : Bricable, Bracable, Breqable {
         public var prop: Prop
-        public var bricState: BricState {
-            get { return (prop) }
-            set($) { (prop) = $ }
-        }
-        public static let bricKeys = (prop: "prop")
 
         public init(prop: Prop = .Value) {
             self.prop = prop 
@@ -681,17 +587,10 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public enum Prop : String, Bricable, Bracable, Breqable {
             case Value = "value"
         }
-
-        public typealias BricState = Prop
     }
 
     public struct Nested1 : Bricable, Bracable, Breqable {
         public var nested2: Nested2
-        public var bricState: BricState {
-            get { return (nested2) }
-            set($) { (nested2) = $ }
-        }
-        public static let bricKeys = (nested2: "nested2")
 
         public init(nested2: Nested2) {
             self.nested2 = nested2 
@@ -721,11 +620,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public struct Nested2 : Bricable, Bracable, Breqable {
             public var nested3: Nested3
-            public var bricState: BricState {
-                get { return (nested3) }
-                set($) { (nested3) = $ }
-            }
-            public static let bricKeys = (nested3: "nested3")
 
             public init(nested3: Nested3) {
                 self.nested3 = nested3 
@@ -755,11 +649,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public struct Nested3 : Bricable, Bracable, Breqable {
                 public var nested4: Nested4
-                public var bricState: BricState {
-                    get { return (nested4) }
-                    set($) { (nested4) = $ }
-                }
-                public static let bricKeys = (nested4: "nested4")
 
                 public init(nested4: Nested4) {
                     self.nested4 = nested4 
@@ -789,11 +678,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                 public struct Nested4 : Bricable, Bracable, Breqable {
                     public var nested5: Nested5
-                    public var bricState: BricState {
-                        get { return (nested5) }
-                        set($) { (nested5) = $ }
-                    }
-                    public static let bricKeys = (nested5: "nested5")
 
                     public init(nested5: Nested5) {
                         self.nested5 = nested5 
@@ -823,11 +707,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                     public struct Nested5 : Bricable, Bracable, Breqable {
                         public var single: Single
-                        public var bricState: BricState {
-                            get { return (single) }
-                            set($) { (single) = $ }
-                        }
-                        public static let bricKeys = (single: "single")
 
                         public init(single: Single = .Value) {
                             self.single = single 
@@ -858,24 +737,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                         public enum Single : String, Bricable, Bracable, Breqable {
                             case Value = "value"
                         }
-
-                        public typealias BricState = Single
                     }
-
-                    public typealias BricState = Nested5
                 }
-
-                public typealias BricState = Nested4
             }
-
-            public typealias BricState = Nested3
         }
-
-        public typealias BricState = Nested2
     }
 
     /// Should generate a simple OneOf enum
     public typealias SimpleOneOf = OneOf2<String, Double>
-
-    public typealias BricState = (allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields>, list: Optional<Array<ListItem>>, nested1: Optional<Nested1>, simpleOneOf: Optional<SimpleOneOf>)
 }

@@ -19,6 +19,9 @@ public struct Curio {
     /// The swift version to generate
     public var swiftVersion = 2.2
 
+    /// Whether to generate support for autoBricBrac
+    public var autoBricBrac = false
+
     /// whether to generate structs or classes (classes are faster to compiler for large models)
     public var generateValueTypes = true
 
@@ -709,37 +712,38 @@ public struct Curio {
 
                 let initargs = CodeTuple(elements: argElements)
 
-                // make a nested `BricState` type that is a tuple representing all our fields
-                let stateType = initargs.makeTypeAlias(typeName(parents, "BricState"), access: accessor(parents))
-                code.nestedTypes.append(stateType)
+                // generate support for AutoBricBrac (not yet supported)
+                if autoBricBrac {
+                    // make a nested `BricState` type that is a tuple representing all our fields
+                    let stateType = initargs.makeTypeAlias(typeName(parents, "BricState"), access: accessor(parents))
+                    code.nestedTypes.append(stateType)
 
-                // make a dynamic `bricState` variable that converts to & from the `State` tuple
-                let spropd = CodeProperty.Declaration(name: "bricState", type: stateType, access: accessor(parents))
-                var spropi = spropd.implementation
-                let valuesTuple = "(" + elements.map({ $0.name ?? "_" }).joinWithSeparator(", ") + ")"
-                spropi.body = [
-                    "get { return " + valuesTuple + " }",
-                    "set($) { " + valuesTuple + " = $ }",
-                ]
-                code.props.append(spropi)
+                    // make a dynamic `bricState` variable that converts to & from the `State` tuple
+                    let spropd = CodeProperty.Declaration(name: "bricState", type: stateType, access: accessor(parents))
+                    var spropi = spropd.implementation
+                    let valuesTuple = "(" + elements.map({ $0.name ?? "_" }).joinWithSeparator(", ") + ")"
+                    spropi.body = [
+                        "get { return " + valuesTuple + " }",
+                        "set($) { " + valuesTuple + " = $ }",
+                    ]
+                    code.props.append(spropi)
 
 
-                var bricKeys: [(key: String, value: String)] = []
-                for (key, _, _, _) in props {
-                    let pname = propName(parents + [typename], key, arg: true)
-                    bricKeys.append((key: pname, value: key))
+                    var bricKeys: [(key: String, value: String)] = []
+                    for (key, _, _, _) in props {
+                        let pname = propName(parents + [typename], key, arg: true)
+                        bricKeys.append((key: pname, value: key))
+                    }
+                    if let _ = addPropType {
+                        bricKeys.append((key: addPropName, value: ""))
+                    }
+
+                    let kpropd = CodeProperty.Declaration(name: "bricKeys", type: nil, access: accessor(parents), instance: false, mutable: false)
+                    var kpropi = kpropd.implementation
+                    let keyMap: [String] = bricKeys.map({ (key: String, value: String) in key + ": \"" + value + "\"" })
+                    kpropi.value = "(" + keyMap.joinWithSeparator(", ") + ")"
+                    code.props.append(kpropi)
                 }
-                if let _ = addPropType {
-                    bricKeys.append((key: addPropName, value: ""))
-                }
-
-                let kpropd = CodeProperty.Declaration(name: "bricKeys", type: nil, access: accessor(parents), instance: false, mutable: false)
-                var kpropi = kpropd.implementation
-                let keyMap: [String] = bricKeys.map({ (key: String, value: String) in key + ": \"" + value + "\"" })
-                kpropi.value = "(" + keyMap.joinWithSeparator(", ") + ")"
-                code.props.append(kpropi)
-
-
 
                 let initfun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, arguments: initargs, returns: CodeTuple(elements: []))
                 let initimp = CodeFunction.Implementation(declaration: initfun, body: initbody, comments: [])

@@ -647,7 +647,21 @@ public struct Curio {
                 }
 
                 if !cases.isEmpty {
-                    code.nestedTypes.insert(CodeSimpleEnum(name: keyName, access: accessor(parents), cases: cases), atIndex: 0)
+                    var keysType = CodeSimpleEnum(name: keyName, access: accessor(parents), cases: cases)
+
+                    // also add an "asList" static field for key enumeration
+                    let klpropd = CodeProperty.Declaration(name: "asList", type: arrayType(keysType), access: accessor(parents), instance: false, mutable: false)
+                    var klpropi = klpropd.implementation
+                    klpropi.value = "[" + cases.map({ $0.name }).joinWithSeparator(", ") + "]"
+                    keysType.props.append(klpropi)
+
+                    // also add an "asTuple" static field for key lineup
+                    let ktpropd = CodeProperty.Declaration(name: "asTuple", type: nil, access: accessor(parents), instance: false, mutable: false)
+                    var ktpropi = ktpropd.implementation
+                    ktpropi.value = "(" + cases.map({ $0.name }).joinWithSeparator(", ") + ")"
+                    keysType.props.append(ktpropi)
+
+                    code.nestedTypes.insert(keysType, atIndex: 0)
                 }
             }
 
@@ -664,7 +678,8 @@ public struct Curio {
                         let sub = merged ? p1.declaration.type as? CodeStateType : nil
                         for p in (sub?.props ?? [p1]) {
                             let d = p.declaration
-                            let e = CodeTupleElement(name: d.name, type: d.type, value: d.type.defaultValue, anon: isUnionType)
+                            let e = CodeTupleElement(name: d.name, type: d.type, value: d.type?.defaultValue, anon: isUnionType)
+
                             elements.append(e)
                             if wasIndirect {
                                 // unescape is a hack because we don't preserve the original property name, so we need to
@@ -691,6 +706,10 @@ public struct Curio {
                 }
 
                 let initargs = CodeTuple(elements: elements)
+
+                // make a nested "State" type that is a tuple representing all our fields
+                let stateType = initargs.makeTypeAlias(typeName(parents, "State"), access: accessor(parents))
+                code.nestedTypes.append(stateType)
 
                 let initfun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, arguments: initargs, returns: CodeTuple(elements: []))
                 let initimp = CodeFunction.Implementation(declaration: initfun, body: initbody, comments: [])
@@ -881,34 +900,26 @@ public struct Curio {
                     throw CodegenErrors.NonStringEnumsNotSupported
                 }
             }
-            var bricbody : [String] = []
-            var bracbody : [String] = []
-            let breqbody : [String] = []
+
+//            var bricbody : [String] = []
+//            var bracbody : [String] = []
+//            let breqbody : [String] = []
 
             // when there is only a single possible value, make it the default
             if let firstCase = code.cases.first where code.cases.count == 1 {
                 code.defaultValue = "." + firstCase.name
             }
 
-            bricbody.append("return .Nul")
-//            bricbody.append("return Bric(object: [")
-//            for (name, _, _) in props {
-//                bricbody.append("\"\(name)\" : \(propName(parents, name)).bric(),")
-//            }
-//            bricbody.append("])")
-
-//            code.conforms.append(bricbrac)
-
             code.conforms.append(bricable)
-            code.funcs.append(CodeFunction.Implementation(declaration: bricfun, body: bricbody, comments: []))
+//            code.funcs.append(CodeFunction.Implementation(declaration: bricfun, body: bricbody, comments: []))
 
-            if bracbody.isEmpty { bracbody.append("fatalError()") }
+//            if bracbody.isEmpty { bracbody.append("fatalError()") }
             code.conforms.append(bracable)
-            code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
+//            code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
 
             if generateEquals {
                 code.conforms.append(breqable)
-                code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
+//                code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
             }
 
             return code

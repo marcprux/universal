@@ -70,6 +70,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         case list = "list"
         case nested1 = "nested1"
         case simpleOneOf = "simpleOneOf"
+        public static let asList: Array<Keys> = [allOfField, anyOfField, oneOfField, notField, keywordFields, list, nested1, simpleOneOf]
+        public static let asTuple = (allOfField, anyOfField, oneOfField, notField, keywordFields, list, nested1, simpleOneOf)
     }
 
     public struct AllOfField : Bricable, Bracable, Breqable {
@@ -134,7 +136,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Keys : String {
                 case a1 = "a1"
                 case a2 = "a2"
+                public static let asList: Array<Keys> = [a1, a2]
+                public static let asTuple = (a1, a2)
             }
+
+            public typealias State = (a1: Int, a2: String)
         }
 
         /// SecondAll
@@ -169,8 +175,14 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Keys : String {
                 case a3 = "a3"
                 case a4 = "a4"
+                public static let asList: Array<Keys> = [a3, a4]
+                public static let asTuple = (a3, a4)
             }
+
+            public typealias State = (a3: Bool, a4: Double)
         }
+
+        public typealias State = (p0: FirstAll, p1: SecondAll)
     }
 
     public struct AnyOfField : Bricable, Bracable, Breqable {
@@ -236,7 +248,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Keys : String {
                 case b1 = "b1"
                 case b2 = "b2"
+                public static let asList: Array<Keys> = [b1, b2]
+                public static let asTuple = (b1, b2)
             }
+
+            public typealias State = (b1: Int, b2: String)
         }
 
         /// SecondAny
@@ -271,8 +287,14 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Keys : String {
                 case b3 = "b3"
                 case b4 = "b4"
+                public static let asList: Array<Keys> = [b3, b4]
+                public static let asTuple = (b3, b4)
             }
+
+            public typealias State = (b3: Bool, b4: Double)
         }
+
+        public typealias State = (p0: Optional<FirstAny>, p1: Optional<SecondAny>)
     }
 
     public enum OneOfField : Bricable, Bracable, Breqable {
@@ -341,7 +363,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Keys : String {
                 case c1 = "c1"
                 case c2 = "c2"
+                public static let asList: Array<Keys> = [c1, c2]
+                public static let asTuple = (c1, c2)
             }
+
+            public typealias State = (c1: Int, c2: String)
         }
 
         /// SecondOne
@@ -376,7 +402,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             public enum Keys : String {
                 case c3 = "c3"
                 case c4 = "c4"
+                public static let asList: Array<Keys> = [c3, c4]
+                public static let asTuple = (c3, c4)
             }
+
+            public typealias State = (c3: Bool, c4: Double)
         }
     }
 
@@ -433,7 +463,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public enum Keys : String {
                 case str = "str"
+                public static let asList: Array<Keys> = [str]
+                public static let asTuple = (str)
             }
+
+            public typealias State = String
         }
 
         public typealias P1 = NotBrac<NotP1>
@@ -462,12 +496,18 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public enum Keys : String {
                 case str = "str"
+                public static let asList: Array<Keys> = [str]
+                public static let asTuple = (str)
             }
 
             public enum Str : String, Bricable, Bracable, Breqable {
                 case Illegal = "illegal"
             }
+
+            public typealias State = Str
         }
+
+        public typealias State = (p0: P0, p1: P1)
     }
 
     /// Should not escape keyword arguments
@@ -532,7 +572,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             case `let` = "let"
             case `var` = "var"
             case `while` = "while"
+            public static let asList: Array<Keys> = [`case`, `for`, `in`, `inout`, `let`, `var`, `while`]
+            public static let asTuple = (`case`, `for`, `in`, `inout`, `let`, `var`, `while`)
         }
+
+        public typealias State = (case: Optional<String>, for: Optional<String>, in: Optional<String>, `inout`: Optional<String>, `let`: Optional<String>, `var`: Optional<String>, while: Optional<String>)
     }
 
     public struct ListItem : Bricable, Bracable, Breqable {
@@ -560,11 +604,15 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public enum Keys : String {
             case prop = "prop"
+            public static let asList: Array<Keys> = [prop]
+            public static let asTuple = (prop)
         }
 
         public enum Prop : String, Bricable, Bracable, Breqable {
             case Value = "value"
         }
+
+        public typealias State = Prop
     }
 
     public struct Nested1 : Bricable, Bracable, Breqable {
@@ -592,6 +640,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public enum Keys : String {
             case nested2 = "nested2"
+            public static let asList: Array<Keys> = [nested2]
+            public static let asTuple = (nested2)
         }
 
         public struct Nested2 : Bricable, Bracable, Breqable {
@@ -619,6 +669,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public enum Keys : String {
                 case nested3 = "nested3"
+                public static let asList: Array<Keys> = [nested3]
+                public static let asTuple = (nested3)
             }
 
             public struct Nested3 : Bricable, Bracable, Breqable {
@@ -646,6 +698,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                 public enum Keys : String {
                     case nested4 = "nested4"
+                    public static let asList: Array<Keys> = [nested4]
+                    public static let asTuple = (nested4)
                 }
 
                 public struct Nested4 : Bricable, Bracable, Breqable {
@@ -673,6 +727,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                     public enum Keys : String {
                         case nested5 = "nested5"
+                        public static let asList: Array<Keys> = [nested5]
+                        public static let asTuple = (nested5)
                     }
 
                     public struct Nested5 : Bricable, Bracable, Breqable {
@@ -700,17 +756,31 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                         public enum Keys : String {
                             case single = "single"
+                            public static let asList: Array<Keys> = [single]
+                            public static let asTuple = (single)
                         }
 
                         public enum Single : String, Bricable, Bracable, Breqable {
                             case Value = "value"
                         }
+
+                        public typealias State = Single
                     }
+
+                    public typealias State = Nested5
                 }
+
+                public typealias State = Nested4
             }
+
+            public typealias State = Nested3
         }
+
+        public typealias State = Nested2
     }
 
     /// Should generate a simple OneOf enum
     public typealias SimpleOneOf = OneOf2<String, Double>
+
+    public typealias State = (allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields>, list: Optional<Array<ListItem>>, nested1: Optional<Nested1>, simpleOneOf: Optional<SimpleOneOf>)
 }

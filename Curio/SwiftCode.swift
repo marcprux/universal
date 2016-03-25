@@ -196,45 +196,51 @@ public protocol CodeImplementation : CodeEmittable {
 public struct CodeProperty {
     public class Declaration: CodeUnit {
         public var name: CodePropName
-        public var type: CodeType
+        /// The type of the property, which can be nil if we want it to be inferred
+        public var type: CodeType?
+        public var instance: Bool
         public var access: CodeAccess
         public var mutable: Bool = true
         public var comments: [String] = []
 
         public var isDictionary: Bool {
-            return type.identifier.hasPrefix("Dictionary")
+            return type?.identifier.hasPrefix("Dictionary") ?? false
         }
 
         public var isArray: Bool {
-            return type.identifier.hasPrefix("Array")
+            return type?.identifier.hasPrefix("Array") ?? false
         }
 
-        public init(name: CodePropName, type: CodeType, access: CodeAccess, mutable: Bool = true) {
+        public init(name: CodePropName, type: CodeType?, access: CodeAccess, instance: Bool = true, mutable: Bool = true) {
             self.name = name
             self.type = type
             self.access = access
+            self.instance = instance
             self.mutable = mutable
         }
 
         public func emit(emitter: CodeEmitterType) {
             emitter.emitComments(comments)
-            emitter.emit("var", name + ":", type.identifier, "{", "get", mutable ? "set" : "", "}")
+            emitter.emit(instance ? "" : "static", "var", name + (type == nil ? "" : ":"), type?.identifier, "{", "get", mutable ? "set" : "", "}")
         }
 
         public var implementation: Implementation {
-            return Implementation(declaration: self, body: [], comments: comments)
+            return Implementation(declaration: self, value: nil, body: [], comments: comments)
         }
     }
 
+    
     public struct Implementation : CodeImplementation {
         public let declaration: Declaration
+        public var value: String?
         public var body: [String] = []
         public var comments: [String] = []
 
         public func emit(emitter: CodeEmitterType) {
             emitter.emitComments(declaration.comments)
             // TODO: allow declaration bodies (e.g., dynamic get/set, willSet/didSet)
-            emitter.emit(declaration.access.rawValue, declaration.mutable || !body.isEmpty ? "var" : "let", declaration.name + ":", declaration.type.identifier, body.isEmpty ? "" : "{")
+            emitter.emit(declaration.access.rawValue, declaration.instance ? "" : "static", declaration.mutable || !body.isEmpty ? "var" : "let", declaration.name + (declaration.type == nil ? "" : ":"), declaration.type?.identifier, value == nil ? "" : "=", value, body.isEmpty ? "" : "{")
+
             if !body.isEmpty {
                 for b in body {
                     emitter.emit(b) // TODO: trailing { should indent
@@ -245,7 +251,7 @@ public struct CodeProperty {
     }
 }
 
-public typealias CodeTupleElement = (name: CodePropName?, type: CodeType, value: String?, anon: Bool)
+public typealias CodeTupleElement = (name: CodePropName?, type: CodeType?, value: String?, anon: Bool)
 
 public struct CodeTuple : CodeCompoundType {
     public var elements: [CodeTupleElement]
@@ -261,10 +267,11 @@ public struct CodeTuple : CodeCompoundType {
         func ename(element: CodeTupleElement) -> String {
             // slow compile!
             // return (element.name.flatMap({ $0 + ": " }) ?? "") + element.type.identifier + (element.value.flatMap({ " = " + $0 }) ?? "")
-            let n0: String = element.anon ? "_ " : ""
-            let n1: String = (element.name.flatMap({ $0 + ": " }) ?? "")
-            let n2: String = (element.value.flatMap({ " = " + $0 }) ?? "")
-            return n0 + n1 + element.type.identifier + n2
+            let anondec = element.anon ? "_ " : ""
+            let namedec = element.name.flatMap({ $0 + (element.type == nil ? " " : ": ") }) ?? ""
+            let typedec = element.type?.identifier ?? ""
+            let valuedec = element.value.flatMap({ " = " + $0 }) ?? ""
+            return anondec + namedec + typedec + valuedec
         }
         let parts = elements.map(ename)
         // un-named single-element tuples do not need to be named
@@ -273,7 +280,22 @@ public struct CodeTuple : CodeCompoundType {
     }
 
     public var directReferences : [CodeNamedType] {
-        return elements.flatMap({ $0.type.directReferences })
+        return elements.flatMap({ $0.type?.directReferences }).flatMap({ $0 })
+    }
+
+    /// Create a type alias for this tuple type, removing the name for single-tuple elements (since they are illegal)
+    public func makeTypeAlias(name: CodeTypeName, access: CodeAccess) -> CodeTypeAlias {
+        var t = self
+        // single-element tuples are not allowed to have a name
+        if t.elements.count == 1 {
+            t.elements[0].name = nil
+        }
+        for i in 0..<t.elements.count {
+            t.elements[i].anon = false
+            t.elements[i].value = nil
+        }
+        return CodeTypeAlias(name: name, type: t, access: access)
+
     }
 }
 
@@ -421,20 +443,22 @@ extension String {
     }
 }
 
-public struct CodeSimpleEnum<T> : CodeNamedType, CodeImplementationType {
+public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var cases: [CodeCaseSimple<T>] = []
     public var conforms: [CodeProtocol] = []
+    public var props: [CodeProperty.Implementation]
     public var funcs: [CodeFunction.Implementation] = []
     public var comments: [String] = []
     public var defaultValue: String?
     public var nestedTypes: [CodeNamedType] = []
 
-    public init(name: CodeTypeName, access: CodeAccess, cases: [CodeCaseSimple<T>] = []) {
+    public init(name: CodeTypeName, access: CodeAccess, cases: [CodeCaseSimple<T>] = [], props: [CodeProperty.Implementation] = []) {
         self.access = access
         self.name = name
         self.cases = cases
+        self.props = props
     }
 
     func quotedString(value: T) -> String {
@@ -462,6 +486,15 @@ public struct CodeSimpleEnum<T> : CodeNamedType, CodeImplementationType {
         emitter.emit(access.rawValue, "enum", name, adoptions, "{")
         for c in cases {
             emitter.emit("case", c.name, c.value.flatMap({ "= " + quotedString($0) }))
+        }
+
+        for p in props {
+            p.emit(emitter)
+        }
+
+        for f in funcs {
+            emitter.emit("")
+            f.emit(emitter)
         }
 
         for inner in nestedTypes {
@@ -637,7 +670,7 @@ public struct CodeStruct : CodeStateType {
     }
 
     public var directReferences : [CodeNamedType] {
-        return [self] + props.flatMap({ $0.declaration.type.directReferences })
+        return [self] + props.flatMap({ $0.declaration.type }).flatMap({ $0.directReferences })
     }
 
     public func emit(emitter: CodeEmitterType) {

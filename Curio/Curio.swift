@@ -712,23 +712,22 @@ public struct Curio {
 
                 let initargs = CodeTuple(elements: argElements)
 
+                // make a nested `BricState` type that is a tuple representing all our fields
+                let stateType = initargs.makeTypeAlias(typeName(parents, "BricState"), access: accessor(parents))
+                code.nestedTypes.append(stateType)
+
+                // make a dynamic `bricState` variable that converts to & from the `State` tuple
+                let spropd = CodeProperty.Declaration(name: "bricState", type: stateType, access: accessor(parents))
+                var spropi = spropd.implementation
+                let valuesTuple = "(" + elements.map({ $0.name ?? "_" }).joinWithSeparator(", ") + ")"
+                spropi.body = [
+                    "get { return " + valuesTuple + " }",
+                    "set($) { " + valuesTuple + " = $ }",
+                ]
+                code.props.append(spropi)
+
                 // generate support for AutoBricBrac (not yet supported)
                 if autoBricBrac {
-                    // make a nested `BricState` type that is a tuple representing all our fields
-                    let stateType = initargs.makeTypeAlias(typeName(parents, "BricState"), access: accessor(parents))
-                    code.nestedTypes.append(stateType)
-
-                    // make a dynamic `bricState` variable that converts to & from the `State` tuple
-                    let spropd = CodeProperty.Declaration(name: "bricState", type: stateType, access: accessor(parents))
-                    var spropi = spropd.implementation
-                    let valuesTuple = "(" + elements.map({ $0.name ?? "_" }).joinWithSeparator(", ") + ")"
-                    spropi.body = [
-                        "get { return " + valuesTuple + " }",
-                        "set($) { " + valuesTuple + " = $ }",
-                    ]
-                    code.props.append(spropi)
-
-
                     var bricKeys: [(key: String, value: String)] = []
                     for (key, _, _, _) in props {
                         let pname = propName(parents + [typename], key, arg: true)

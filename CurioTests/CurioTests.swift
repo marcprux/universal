@@ -12,7 +12,7 @@ import BricBrac
 
 class CurioTests: XCTestCase {
     
-    func testASampleSchema() {
+    func testSampleSchema() throws {
         let schemaBric: Bric = [
             "$schema": "http://json-schema.org/draft-04/schema#",
             "type": "object",
@@ -182,8 +182,6 @@ class CurioTests: XCTestCase {
             let module = CodeModule()
             module.types.append(code)
             try gen.emit(module, name: "SampleModel.swift", dir: (#file as NSString).stringByDeletingLastPathComponent)
-        } catch {
-            XCTFail(String(error))
         }
     }
 
@@ -384,7 +382,7 @@ public class TestSampleModel : XCTestCase {
         assertBracable(bric)
     }
 
-    func testVerifyNotFieldFiles() {
+    func testVerifyNotFieldFiles() throws {
         let bric: Bric = [
             "allOfField": [
                 "a1": 1,
@@ -416,8 +414,6 @@ public class TestSampleModel : XCTestCase {
             XCTAssertTrue(sample.simpleOneOf.breq(sample.simpleOneOf))
             XCTAssertTrue(sample.breq(sample))
             XCTAssertTrue(sample == sample)
-        } catch {
-            XCTFail(String(error))
         }
 
         do {

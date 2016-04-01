@@ -49,7 +49,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func testEscaping() {
+    func testEscaping() throws {
         func q(s: String)->String { return "\"" + s + "\"" }
 
         expectPass(q("\\/"), "/")
@@ -89,8 +89,6 @@ class BricBracTests : XCTestCase {
 
             let bric = try Bric.parse(escaped)
             XCTAssertEqual(unescaped, bric)
-        } catch {
-            XCTFail(String(error))
         }
     }
 
@@ -828,7 +826,7 @@ class BricBracTests : XCTestCase {
 //        }
 //    }
 
-    func testJSONFormatting() {
+    func testJSONFormatting() throws {
         let json = "{\"abc\": 1.2233 , \"xyz\" :  \n\t\t[true,false, null]}  "
         let compact = "{\"abc\":1.2233,\"xyz\":[true,false,null]}"
         let pretty = "{\n  \"abc\" : 1.2233,\n  \"xyz\" : [\n    true,\n    false,\n    null\n  ]\n}"
@@ -841,8 +839,6 @@ class BricBracTests : XCTestCase {
 
             let p3 = try JSONParser.formatJSON(json, indent: 2)
             XCTAssertEqual(p3, pretty)
-        } catch {
-            XCTFail(String(error))
         }
     }
 
@@ -1263,7 +1259,7 @@ class BricBracTests : XCTestCase {
 
     }
 
-    func testSerializationPerformance() {
+    func testSerializationPerformance() throws {
         do {
             let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/rap.json", ofType: "")!
             let contents = try NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding)
@@ -1292,24 +1288,20 @@ class BricBracTests : XCTestCase {
                 }
                 print("serialization times: \(styleNames) \(times)")
             }
-        } catch {
-            XCTFail(String(error))
         }
     }
 
-    func testBricDate() {
+    func testBricDate() throws {
         let now = NSDate(timeIntervalSince1970: 500000)
         let dict = ["timestamp": now]
         let bric = dict.bric()
         do {
             let brac = try [String:NSDate].brac(bric)
             XCTAssertEqual(dict, brac)
-        } catch {
-            XCTFail(String(error))
         }
     }
 
-    func testNestedBricDate() {
+    func testNestedBricDate() throws {
         typealias X = Dictionary<String, Optional<Optional<Optional<Optional<NSDate>>>>>
         let now = NSDate(timeIntervalSince1970: 500000)
         let dict: X = X(dictionaryLiteral: ("timestamp", now))
@@ -1319,20 +1311,16 @@ class BricBracTests : XCTestCase {
             let t1 = dict["timestamp"]!!!!
             let t2 = brac["timestamp"]!!!!
             XCTAssertTrue(t1 == t2)
-        } catch {
-            XCTFail(String(error))
         }
     }
 
-    func testAutoBricBrac() {
+    func testAutoBricBrac() throws {
         let template: Bric = ["manufacturer": "audi", "model": "a4", "displ": 1.8, "year": 1999, "cyl": 4, "trans": "auto(l5)", "drv": "f", "cty": 18, "hwy": 29, "fl": "p", "class": "compact"]
 
         do {
             let audi1 = try Car.brac(template)
             XCTAssertEqual(audi1.manufacturer, "audi")
             XCTAssertEqual(audi1.model, "a4")
-        } catch {
-            XCTFail(String(error))
         }
 
 
@@ -1343,8 +1331,6 @@ class BricBracTests : XCTestCase {
         do {
             let audi3 = try Car.brac(bric)
             XCTAssertEqual(audi3, audi2)
-        } catch {
-            XCTFail(String(error))
         }
 
         do {
@@ -1353,12 +1339,10 @@ class BricBracTests : XCTestCase {
             let uniqueList: Bric = ["year": 1999, "type": "efficiency", "cars": [template]]
             let report = try CarReport.brac(list)
             XCTAssertEqual(report.bric(), uniqueList, "re-serialized list should only contain a single unique element")
-        } catch {
-            XCTFail(String(error))
         }
     }
 
-    func testNonEmptyCollection() {
+    func testNonEmptyCollection() throws {
         var nec = NonEmptyCollection("foo", tail: [])
 
         nec.appendContentsOf(["bar", "baz"])
@@ -1402,8 +1386,6 @@ class BricBracTests : XCTestCase {
 
         do {
             let _ = try NonEmptyCollection<String, [String]>.brac(["foo"])
-        } catch {
-            XCTFail(String(error))
         }
 
         do {

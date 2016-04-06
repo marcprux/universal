@@ -218,7 +218,7 @@ public protocol OneOf: BricBrac {
 
 
 /// A simple union type that can be one of either T1 or T2
-public indirect enum OneOf2<T1, T2 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable> : OneOf {
+public enum OneOf2<T1, T2 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable> : OneOf {
     case V1(T1), V2(T2)
 
     public init(t1: T1) { self = .V1(t1) }
@@ -272,7 +272,7 @@ public indirect enum OneOf2<T1, T2 where T1: Bricable, T1: Bracable, T1: Breqabl
 
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public indirect enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable> : OneOf {
+public enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable> : OneOf {
     case V1(T1), V2(T2), V3(T3)
 
     public init(t1: T1) { self = .V1(t1) }
@@ -340,7 +340,7 @@ public indirect enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Bre
 
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public indirect enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable> : OneOf {
+public enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable> : OneOf {
     case V1(T1), V2(T2), V3(T3), V4(T4)
 
     public init(t1: T1) { self = .V1(t1) }
@@ -422,7 +422,7 @@ public indirect enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1:
 
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public indirect enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable, T5: Bricable, T5: Bracable, T5: Breqable> : OneOf {
+public enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable, T5: Bricable, T5: Bracable, T5: Breqable> : OneOf {
     case V1(T1), V2(T2), V3(T3), V4(T4), V5(T5)
 
     public init(t1: T1) { self = .V1(t1) }

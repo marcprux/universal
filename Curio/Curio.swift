@@ -203,10 +203,10 @@ public struct Curio {
         /// followed by ordering them by their appearance in the (non-standard) "propertyOrder" element
         /// followed by ordering them by their appearance in the "required" element
         /// followed by alphabetical property name ordering
-        let ordering = (propOrdering(parents, id) ?? []) + (schema.propertyOrder ?? []) + (schema.required ?? []) + Array(properties.keys).sort()
+        let ordering: [String] = ((propOrdering(parents, id) ?? []) as [String]) + ((schema.propertyOrder ?? []) as [String]) + ((schema.required ?? []) as [String]) + Array(properties.keys).sort()
         let ordered = properties.sort { a, b in return ordering.indexOf(a.0) <= ordering.indexOf(b.0) }
         let req = Set(schema.required ?? [])
-        let props = ordered.map({ PropInfo(name: $0, required: req.contains($0), schema: $1) })
+        let props: [PropInfo] = ordered.map({ PropInfo(name: $0, required: req.contains($0), schema: $1) })
         return props
     }
 

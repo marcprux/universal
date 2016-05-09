@@ -209,6 +209,8 @@ public struct NonEmptyCollection<Element, Tail: RangeReplaceableCollectionType w
     }
 }
 
+// Swift 3 TODO: Variadic Generics: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#variadic-generics
+
 public protocol OneOf: BricBrac {
     associatedtype T
 

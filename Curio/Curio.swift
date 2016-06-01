@@ -42,6 +42,12 @@ public struct Curio {
     /// The prefix for private internal indirect implementations
     public var indirectPrefix = "_"
 
+    /// The suffic for a OneOf choice enum
+    public var oneOfSuffix = "Choice"
+
+    /// The suffix for a case operation
+    public var caseSuffix = "Case"
+
     public var accessor: ([CodeTypeName])->(CodeAccess) = { _ in .Public }
     public var renamer: ([CodeTypeName], String)->(CodeTypeName?) = { (parents, id) in nil }
 
@@ -355,7 +361,7 @@ public struct Curio {
                 }
 
                 casetypes.append(casetype)
-                let cname = typeName(parents, casetype.identifier) + "Case"
+                let cname = typeName(parents, casetype.identifier) + caseSuffix
 
                 var casename = cname
                 var n = 0
@@ -414,7 +420,7 @@ public struct Curio {
                 && casetypes.count <= 5
                 && !casetypes.contains({ ($0 as? CodeExternalType)?.name == VoidType.name })
                 && !casetypes.contains({ ($0 as? CodeExternalType)?.name == ArrayType.name }) {
-                var alias = CodeTypeAlias(name: ename, type: oneOfType(casetypes), access: accessor(parents))
+                var alias = CodeTypeAlias(name: ename + oneOfSuffix, type: oneOfType(casetypes), access: accessor(parents))
                 alias.comments = comments
                 return alias
             }

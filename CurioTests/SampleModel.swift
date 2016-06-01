@@ -11,13 +11,13 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     public var list: Optional<Array<ListItem>>
     public var nested1: Optional<Nested1>
     /// Should generate a simple OneOf enum
-    public var simpleOneOf: Optional<SimpleOneOf>
+    public var simpleOneOf: Optional<SimpleOneOfChoice>
     public var bricState: BricState {
         get { return (allOfField, anyOfField, oneOfField, notField, keywordFields, list, nested1, simpleOneOf) }
         set($) { (allOfField, anyOfField, oneOfField, notField, keywordFields, list, nested1, simpleOneOf) = $ }
     }
 
-    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields> = nil, list: Optional<Array<ListItem>> = nil, nested1: Optional<Nested1> = nil, simpleOneOf: Optional<SimpleOneOf> = nil) {
+    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields> = nil, list: Optional<Array<ListItem>> = nil, nested1: Optional<Nested1> = nil, simpleOneOf: Optional<SimpleOneOfChoice> = nil) {
         self.allOfField = allOfField 
         self.anyOfField = anyOfField 
         self.oneOfField = oneOfField 
@@ -856,7 +856,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     }
 
     /// Should generate a simple OneOf enum
-    public typealias SimpleOneOf = OneOf2<String, Double>
+    public typealias SimpleOneOfChoice = OneOf2<String, Double>
 
-    public typealias BricState = (allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields>, list: Optional<Array<ListItem>>, nested1: Optional<Nested1>, simpleOneOf: Optional<SimpleOneOf>)
+    public typealias BricState = (allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfField, notField: NotField, keywordFields: Optional<KeywordFields>, list: Optional<Array<ListItem>>, nested1: Optional<Nested1>, simpleOneOf: Optional<SimpleOneOfChoice>)
 }

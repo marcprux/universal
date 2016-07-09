@@ -48,8 +48,13 @@ public struct Curio {
     /// The suffix for a case operation
     public var caseSuffix = "Case"
 
-    public var accessor: ([CodeTypeName])->(CodeAccess) = { _ in .Public }
+    public var accessor: ([CodeTypeName])->(CodeAccess) = { _ in .`public` }
     public var renamer: ([CodeTypeName], String)->(CodeTypeName?) = { (parents, id) in nil }
+
+    /// The case of the generated enums
+    public var enumCase: EnumCase = .lower
+
+    public enum EnumCase { case upper, lower }
 
     /// special prefixes to trim (adheres to the convention that top-level types go in the "defintions" level)
     public var trimPrefixes = ["#/definitions/", "#/defs/"]
@@ -63,29 +68,29 @@ public struct Curio {
     }
 
     enum CodegenErrors : ErrorType, CustomDebugStringConvertible {
-        case TypeArrayNotSupported
-        case IllegalDefaultType
-        case DefaultValueNotInStringEnum
-        case NonStringEnumsNotSupported // TODO
-        case TupleTypeingNotSupported // TODO
-        case ComplexTypesNotAllowedInMultiType
-        case IllegalState(String)
-        case Unsupported(String)
-        case IllegalProperty(Schema)
-        case CompileError(String)
+        case typeArrayNotSupported
+        case illegalDefaultType
+        case defaultValueNotInStringEnum
+        case nonStringEnumsNotSupported // TODO
+        case tupleTypeingNotSupported // TODO
+        case complexTypesNotAllowedInMultiType
+        case illegalState(String)
+        case unsupported(String)
+        case illegalProperty(Schema)
+        case compileError(String)
 
         var debugDescription : String {
             switch self {
-            case TypeArrayNotSupported: return "TypeArrayNotSupported"
-            case IllegalDefaultType: return "IllegalDefaultType"
-            case DefaultValueNotInStringEnum: return "DefaultValueNotInStringEnum"
-            case NonStringEnumsNotSupported: return "NonStringEnumsNotSupported"
-            case TupleTypeingNotSupported: return "TupleTypeingNotSupported"
-            case ComplexTypesNotAllowedInMultiType: return "ComplexTypesNotAllowedInMultiType"
-            case IllegalState(let x): return "IllegalState(\(x))"
-            case Unsupported(let x): return "Unsupported(\(x))"
-            case IllegalProperty(let x): return "IllegalProperty(\(x))"
-            case CompileError(let x): return "CompileError(\(x))"
+            case typeArrayNotSupported: return "TypeArrayNotSupported"
+            case illegalDefaultType: return "IllegalDefaultType"
+            case defaultValueNotInStringEnum: return "DefaultValueNotInStringEnum"
+            case nonStringEnumsNotSupported: return "NonStringEnumsNotSupported"
+            case tupleTypeingNotSupported: return "TupleTypeingNotSupported"
+            case complexTypesNotAllowedInMultiType: return "ComplexTypesNotAllowedInMultiType"
+            case illegalState(let x): return "IllegalState(\(x))"
+            case unsupported(let x): return "Unsupported(\(x))"
+            case illegalProperty(let x): return "IllegalProperty(\(x))"
+            case compileError(let x): return "CompileError(\(x))"
             }
         }
     }
@@ -135,13 +140,14 @@ public struct Curio {
         }
     }
 
-    func capitalize(nm: String) -> String {
+    func sanitizeString(nm: String, capitalize: Bool = true) -> String {
         var name = ""
-        var capnext = true
+
+        var capnext = capitalize
         for c in nm.characters {
             let validCharacters = name.isEmpty ? Curio.nameStart : Curio.nameBody
             if !validCharacters.contains(c) {
-                capnext = true
+                capnext = name.isEmpty ? capitalize : true
             } else if capnext {
                 name.appendContentsOf(String(c).uppercaseString)
                 capnext = false
@@ -152,7 +158,7 @@ public struct Curio {
         return name
     }
 
-    func typeName(parents: [CodeTypeName], _ id: String) -> CodeTypeName {
+    func typeName(parents: [CodeTypeName], _ id: String, capitalize: Bool = true) -> CodeTypeName {
         if let tname = renamer(parents, id) {
             return tname
         }
@@ -164,7 +170,7 @@ public struct Curio {
             }
         }
 
-        var name = capitalize(nm)
+        var name = sanitizeString(nm, capitalize: capitalize)
 
         if name.isSwiftKeyword() {
             name = "`" + name + "`"
@@ -172,7 +178,7 @@ public struct Curio {
 
         if name.isEmpty { // e.g., ">=" -> "U62U61"
             for c in id.unicodeScalars {
-                name += "U\(c.value)"
+                name += (enumCase == .upper ? "U" : "u") + "\(c.value)"
             }
         }
         return CodeTypeName(name)
@@ -209,7 +215,12 @@ public struct Curio {
         /// followed by ordering them by their appearance in the (non-standard) "propertyOrder" element
         /// followed by ordering them by their appearance in the "required" element
         /// followed by alphabetical property name ordering
-        let ordering: [String] = ((propOrdering(parents, id) ?? []) as [String]) + ((schema.propertyOrder ?? []) as [String]) + ((schema.required ?? []) as [String]) + Array(properties.keys).sort()
+        var ordering: [String] = []
+        ordering.appendContentsOf(propOrdering(parents, id) ?? [])
+        ordering.appendContentsOf(schema.propertyOrder ?? [])
+        ordering.appendContentsOf(schema.required ?? [])
+        ordering.appendContentsOf(properties.keys.sort())
+        
         let ordered = properties.sort { a, b in return ordering.indexOf(a.0) <= ordering.indexOf(b.0) }
         let req = Set(schema.required ?? [])
         let props: [PropInfo] = ordered.map({ PropInfo(name: $0, required: req.contains($0), schema: $1) })
@@ -297,7 +308,7 @@ public struct Curio {
             if props.count > 0 && props.count <= 5 {
                 var name = ""
                 for prop in props {
-                    name += capitalize(prop.name ?? "")
+                    name += sanitizeString(prop.name ?? "")
                 }
                 name += "Type"
 
@@ -334,15 +345,15 @@ public struct Curio {
                 let casetype: CodeType
 
                 switch sub.type {
-                case .Some(.A(.String)) where sub._enum == nil:
+                case .Some(.a(.string)) where sub._enum == nil:
                     casetype = StringType
-                case .Some(.A(.Number)):
+                case .Some(.a(.number)):
                     casetype = DoubleType
-                case .Some(.A(.Boolean)):
+                case .Some(.a(.boolean)):
                     casetype = BoolType
-                case .Some(.A(.Integer)):
+                case .Some(.a(.integer)):
                     casetype = IntType
-                case .Some(.A(.Null)):
+                case .Some(.a(.null)):
                     casetype = VoidType
                 default:
                     let subtype = try reify(sub, id: schemaTypeName(sub, types: casetypes, suffix: String(casenames.count+1)), parents: parents + [code.name])
@@ -361,9 +372,21 @@ public struct Curio {
                 }
 
                 casetypes.append(casetype)
-                let cname = typeName(parents, casetype.identifier) + caseSuffix
+                let cname = typeName(parents, casetype.identifier, capitalize: enumCase == .upper) + caseSuffix
 
                 var casename = cname
+                if enumCase == .lower && casename.characters.count > 2 {
+                    // lower-case the case; just because it was not capitalized above does not mean it
+                    // was lower-cases, because the case name may have been derived from a type name (list ArrayStringCase)
+                    let initial = casename[casename.startIndex..<casename.startIndex.successor()]
+                    let second = casename[casename.startIndex.successor()..<casename.startIndex.successor().successor()]
+                    // only lower-case the type name if the second character is *not* upper-case; this heuristic
+                    // is to prevent downcasing synonym types (e.g., we don't want "RGBCase" to be "rGBCase")
+                    if second.uppercaseString != second {
+                        let remaining = casename[casename.startIndex.successor()..<casename.endIndex]
+                        casename = initial.lowercaseString + remaining
+                    }
+                }
                 var n = 0
                 // make sure case names are unique by suffixing with a number
                 while casenames.contains(casename) {
@@ -376,7 +399,7 @@ public struct Curio {
 
                 if casetype.identifier == "Void" {
                     // Void can't be extended, so we need to special-case it to avoid calling methods on the type
-                    bricbody.append("case .\(casename): return .Nul")
+                    bricbody.append("case .\(casename): return .nul")
 //                    bracbody.append("{ Void() },") // just skip it
                     bracbody.append("{ try .\(casename)(bric.bracNul()) },")
                     breqbody.append("case (.\(casename), .\(casename)): return true")
@@ -441,42 +464,49 @@ public struct Curio {
 
             for (_, sub) in types.enumerate() {
                 switch sub {
-                case .String:
-                    assoc.cases.append(CodeEnum.Case(name: "Text", type: StringType))
-                    bricbody.append("case .Text(let x): return x.bric()")
-                    bracbody.append("{ try .Text(String.brac(bric)) },")
-                    breqbody.append("case let (.Text(lhs), .Text(rhs)): return lhs == rhs")
-                case .Number:
-                    assoc.cases.append(CodeEnum.Case(name: "Number", type: DoubleType))
-                    bricbody.append("case .Number(let x): return x.bric()")
-                    bracbody.append("{ try .Number(Double.brac(bric)) },")
-                    breqbody.append("case let (.Number(lhs), .Number(rhs)): return lhs == rhs")
-                case .Boolean:
-                    assoc.cases.append(CodeEnum.Case(name: "Boolean", type: BoolType))
-                    bricbody.append("case .Boolean(let x): return x.bric()")
-                    bracbody.append("{ try .Boolean(Bool.brac(bric)) },")
-                    breqbody.append("case let (.Boolean(lhs), .Boolean(rhs)): return lhs == rhs")
-                case .Integer:
-                    assoc.cases.append(CodeEnum.Case(name: "Integer", type: IntType))
-                    bricbody.append("case .Integer(let x): return x.bric()")
-                    bracbody.append("{ try .Integer(Int.brac(bric)) },")
-                    breqbody.append("case let (.Integer(lhs), .Integer(rhs)): return lhs == rhs")
-                case .Array:
-                    assoc.cases.append(CodeEnum.Case(name: "List", type: ArrayType))
-                    bricbody.append("case .List(let x): return x.bric()")
-                    bracbody.append("{ try .List(Array<Bric>.brac(bric)) },")
-                    breqbody.append("case let (.List(lhs), .List(rhs)): return lhs == rhs")
-                case .Object:
+                case .string:
+                    let caseName = enumCase == .upper ? "Text" : "text"
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: StringType))
+                    bricbody.append("case .\(caseName)(let x): return x.bric()")
+                    bracbody.append("{ try .\(caseName)(String.brac(bric)) },")
+                    breqbody.append("case let (.\(caseName)(lhs), .\(caseName)(rhs)): return lhs == rhs")
+                case .number:
+                    let caseName = enumCase == .upper ? "Number" : "number"
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: DoubleType))
+                    bricbody.append("case .\(caseName)(let x): return x.bric()")
+                    bracbody.append("{ try .\(caseName)(Double.brac(bric)) },")
+                    breqbody.append("case let (.\(caseName)(lhs), .\(caseName)(rhs)): return lhs == rhs")
+                case .boolean:
+                    let caseName = enumCase == .upper ? "Boolean" : "boolean"
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: BoolType))
+                    bricbody.append("case .\(caseName)(let x): return x.bric()")
+                    bracbody.append("{ try .\(caseName)(Bool.brac(bric)) },")
+                    breqbody.append("case let (.\(caseName)(lhs), .\(caseName)(rhs)): return lhs == rhs")
+                case .integer:
+                    let caseName = enumCase == .upper ? "Integer" : "integer"
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: IntType))
+                    bricbody.append("case .\(caseName)(let x): return x.bric()")
+                    bracbody.append("{ try .\(caseName)(Int.brac(bric)) },")
+                    breqbody.append("case let (.\(caseName)(lhs), .\(caseName)(rhs)): return lhs == rhs")
+                case .array:
+                    let caseName = enumCase == .upper ? "List" : "list"
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: ArrayType))
+                    bricbody.append("case .\(caseName)(let x): return x.bric()")
+                    bracbody.append("{ try .\(caseName)(Array<Bric>.brac(bric)) },")
+                    breqbody.append("case let (.\(caseName)(lhs), .\(caseName)(rhs)): return lhs == rhs")
+                case .object:
+                    let caseName = enumCase == .upper ? "Object" : "object"
                     //print("warning: making Bric for key: \(name)")
-                    assoc.cases.append(CodeEnum.Case(name: "Object", type: BricType))
-                    bricbody.append("case .Object(let x): return x.bric()")
-                    bracbody.append("{ .Object(bric) },")
-                    breqbody.append("case let (.Object(lhs), .Object(rhs)): return lhs == rhs")
-                case .Null:
-                    assoc.cases.append(CodeEnum.Case(name: "None", type: nil))
-                    bricbody.append("case .None: return .Nul")
-                    bracbody.append("{ .Nul },")
-                    breqbody.append("case (.None, .None): return true")
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: BricType))
+                    bricbody.append("case .\(caseName)(let x): return x.bric()")
+                    bracbody.append("{ .\(caseName)(bric) },")
+                    breqbody.append("case let (.\(caseName)(lhs), .\(caseName)(rhs)): return lhs == rhs")
+                case .null:
+                    let caseName = enumCase == .upper ? "None" : "none"
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: nil))
+                    bricbody.append("case .\(caseName): return .nul")
+                    bracbody.append("{ .nul },")
+                    breqbody.append("case (.\(caseName), .\(caseName)): return true")
                 }
             }
 
@@ -503,12 +533,12 @@ public struct Curio {
             return assoc
         }
 
-        enum StateMode { case Standard, AllOf, AnyOf }
+        enum StateMode { case standard, allOf, anyOf }
 
         /// Creates a schema instance for an "object" type with all the listed properties
         func createObject(typename: CodeTypeName, properties: [PropInfo], mode modex: StateMode) throws -> CodeStateType {
             var mode = modex
-            let isUnionType = mode == .AllOf || mode == .AnyOf
+            let isUnionType = mode == .allOf || mode == .anyOf
 
             var code: CodeStateType
             if generateValueTypes {
@@ -538,24 +568,24 @@ public struct Curio {
                     proptype = CodeExternalType(tname, access: accessor(parents + [typename]))
                 } else {
                     switch prop.type {
-                    case .Some(.A(.String)) where prop._enum == nil: proptype = StringType
-                    case .Some(.A(.Number)): proptype = DoubleType
-                    case .Some(.A(.Boolean)): proptype = BoolType
-                    case .Some(.A(.Integer)): proptype = IntType
-                    case .Some(.A(.Null)): proptype = VoidType
+                    case .Some(.a(.string)) where prop._enum == nil: proptype = StringType
+                    case .Some(.a(.number)): proptype = DoubleType
+                    case .Some(.a(.boolean)): proptype = BoolType
+                    case .Some(.a(.integer)): proptype = IntType
+                    case .Some(.a(.null)): proptype = VoidType
 
-                    case .Some(.B(let types)):
+                    case .Some(.b(let types)):
                         let assoc = createSimpleEnumeration(typename, name: name, types: types)
                         code.nestedTypes.append(assoc)
                         proptype = assoc
 
-                    case .Some(.A(.Array)):
+                    case .Some(.a(.array)):
                         switch prop.items {
                         case .None:
                             proptype = arrayType(BricType)
-                        case .Some(.B):
-                            throw CodegenErrors.TypeArrayNotSupported
-                        case .Some(.A(let itemz)):
+                        case .Some(.b):
+                            throw CodegenErrors.typeArrayNotSupported
+                        case .Some(.a(let itemz)):
                             if let item = itemz.value { // FIXME: indirect
                                 if let ref = item.ref {
                                     proptype = arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents)))
@@ -565,13 +595,13 @@ public struct Curio {
                                     proptype = arrayType(type)
                                 }
                             } else {
-                                throw CodegenErrors.Unsupported("Empty indirect")
+                                throw CodegenErrors.unsupported("Empty indirect")
                             }
                         }
 
                     default:
                         // generate the type for the object
-                        let subtype = try reify(prop, id: prop.title ?? (capitalize(name) + typeSuffix), parents: parents + [code.name])
+                        let subtype = try reify(prop, id: prop.title ?? (sanitizeString(name) + typeSuffix), parents: parents + [code.name])
                         code.nestedTypes.append(subtype)
                         proptype = subtype
                     }
@@ -583,7 +613,7 @@ public struct Curio {
                     let structProps = props.filter({ (name, required, prop, anon) in
                         switch prop.type?.types.first {
                         case .None: return true // unspecified object type: maybe a $ref
-                        case .Some(.Object): return true // a custom object
+                        case .Some(.object): return true // a custom object
                         default: return false // raw types never get an indirect
                         }
                     })
@@ -602,7 +632,7 @@ public struct Curio {
                 // indirect properties are stored privately as _prop vars with cover wrappers that convert them to optionals
                 if let indirect = indirect {
                     let ipropn = propName(parents + [typename], indirectPrefix + name)
-                    var ipropd = CodeProperty.Declaration(name: ipropn, type: indirect, access: .Private)
+                    var ipropd = CodeProperty.Declaration(name: ipropn, type: indirect, access: .`private`)
                     let ipropi = ipropd.implementation
                     code.props.append(ipropi)
 
@@ -625,9 +655,9 @@ public struct Curio {
             switch schema.additionalProperties {
             case .None:
                 hasAdditionalProps = nil // TODO: make a global default for whether unspecified additionalProperties means yes or no
-            case .Some(.A(false)):
+            case .Some(.a(false)):
                 hasAdditionalProps = nil // FIXME: when this is false, allOf union types won't validate
-            case .Some(.A(true)), .Some(.B): // TODO: generate object types for B
+            case .Some(.a(true)), .Some(.b): // TODO: generate object types for B
                 hasAdditionalProps = true
                 addPropType = ObjectType // additionalProperties default to [String:Bric]
             }
@@ -765,30 +795,30 @@ public struct Curio {
 //            if isUnionType { makeInit(true) } // TODO: make convenience initializers for merged (i.e., allOf) nested properties
 
             var breqbody : [String] = []
-//        case Array = "array"
-//        case Boolean = "boolean"
-//        case Integer = "integer"
-//        case Null = "null"
-//        case Number = "number"
-//        case Object = "object"
-//        case String = "string"
+//        case array = "array"
+//        case boolean = "boolean"
+//        case integer = "integer"
+//        case null = "null"
+//        case number = "number"
+//        case object = "object"
+//        case string = "string"
 
             /// order by the ease of comparison
             func breqOrdering(p1: PropDec, p2: PropDec) -> Bool {
                 switch (p1.prop.type, p2.prop.type) {
-                case (.Some(.A(let x)), .Some(.A(let y))) where x == y: return p1.name < p2.name
-                case (.Some(.A(.Boolean)), _): return true
-                case (_, .Some(.A(.Boolean))): return false
-                case (.Some(.A(.Integer)), _): return true
-                case (_, .Some(.A(.Integer))): return false
-                case (.Some(.A(.Number)), _): return true
-                case (_, .Some(.A(.Number))): return false
-                case (.Some(.A(.String)), _): return true
-                case (_, .Some(.A(.String))): return false
-                case (.Some(.A(.Object)), _): return true
-                case (_, .Some(.A(.Object))): return false
-                case (.Some(.A(.Array)), _): return true
-                case (_, .Some(.A(.Array))): return false
+                case (.Some(.a(let x)), .Some(.a(let y))) where x == y: return p1.name < p2.name
+                case (.Some(.a(.boolean)), _): return true
+                case (_, .Some(.a(.boolean))): return false
+                case (.Some(.a(.integer)), _): return true
+                case (_, .Some(.a(.integer))): return false
+                case (.Some(.a(.number)), _): return true
+                case (_, .Some(.a(.number))): return false
+                case (.Some(.a(.string)), _): return true
+                case (_, .Some(.a(.string))): return false
+                case (.Some(.a(.object)), _): return true
+                case (_, .Some(.a(.object))): return false
+                case (.Some(.a(.array)), _): return true
+                case (_, .Some(.a(.array))): return false
                 default: return p1.name < p2.name
                 }
             }
@@ -806,7 +836,7 @@ public struct Curio {
 
             var bricbody : [String] = []
             switch mode {
-            case .AllOf, .AnyOf:
+            case .allOf, .anyOf:
                 bricbody.append("return Bric(merge: [")
                 for (i, pt) in props.enumerate() {
                     let pname = propName(parents + [typename], pt.name)
@@ -815,7 +845,7 @@ public struct Curio {
                 }
                 bricbody.append("])")
 
-            case .Standard:
+            case .standard:
                 bricbody.append("return Bric(obj: [")
                 if hasAdditionalProps == true { // empty key for additional properties; first so addprop keys don't clobber state keys
                     bricbody.append("\(keysName).\(addPropName): \(addPropName).bric(),")
@@ -832,7 +862,7 @@ public struct Curio {
 
             var bracbody : [String] = []
             switch mode {
-            case .AllOf:
+            case .allOf:
                 bracbody.append("return try \(fullName(code))(")
                 for (i, pt) in proptypes.enumerate() {
                     let sep = (i == props.count-1 ? "" : ",")
@@ -841,7 +871,7 @@ public struct Curio {
                 }
                 bracbody.append(")")
 
-            case .AnyOf:
+            case .anyOf:
                 var anydec = "let anyOf: ("
                 for (i, pt) in proptypes.enumerate() {
                     anydec += (i > 0 ? ", " : "") + pt.type.identifier
@@ -865,7 +895,7 @@ public struct Curio {
                 }
                 bracbody.append(")")
 
-            case .Standard:
+            case .standard:
                 if hasAdditionalProps == false {
                     bracbody.append("try bric.prohibitExtraKeys(\(keysName))")
                 }
@@ -905,9 +935,9 @@ public struct Curio {
             switch schema.items {
             case .None:
                 return CodeTypeAlias(name: typeName(parents, id), type: arrayType(BricType), access: accessor(parents))
-            case .Some(.B):
-                throw CodegenErrors.TypeArrayNotSupported
-            case .Some(.A(let itemz)):
+            case .Some(.b):
+                throw CodegenErrors.typeArrayNotSupported
+            case .Some(.a(let itemz)):
                 if let item = itemz.value { // FIXME: make indirect to avoid circular references
                     if let ref = item.ref {
                         return CodeTypeAlias(name: typeName(parents, id), type: arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents))), access: accessor(parents))
@@ -924,7 +954,7 @@ public struct Curio {
                         }
                     }
                 } else {
-                    throw CodegenErrors.Unsupported("Empty indirect")
+                    throw CodegenErrors.unsupported("Empty indirect")
                 }
             }
         }
@@ -933,10 +963,10 @@ public struct Curio {
             var code = CodeSimpleEnum<String>(name: typeName(parents, id), access: accessor(parents))
             code.comments = comments
             for e in values {
-                if case .Str(let evalue) = e {
-                    code.cases.append(CodeCaseSimple<String>(name: typeName(parents, evalue), value: evalue))
+                if case .str(let evalue) = e {
+                    code.cases.append(CodeCaseSimple<String>(name: typeName(parents, evalue, capitalize: enumCase == .upper), value: evalue))
                 } else {
-                    throw CodegenErrors.NonStringEnumsNotSupported
+                    throw CodegenErrors.nonStringEnumsNotSupported
                 }
             }
 
@@ -969,36 +999,36 @@ public struct Curio {
 
         if let values = schema._enum {
             return try createStringEnum(typename, values: values)
-        } else if case .Some(.B(let multiType)) = type {
+        } else if case .Some(.b(let multiType)) = type {
             // "type": ["string", "number"]
             var subTypes: [CodeType] = []
             for type in multiType {
                 switch type {
-                case .Array: throw CodegenErrors.ComplexTypesNotAllowedInMultiType
-                case .Boolean: subTypes.append(BoolType)
-                case .Integer: subTypes.append(IntType)
-                case .Null: throw CodegenErrors.ComplexTypesNotAllowedInMultiType
-                case .Number: subTypes.append(DoubleType)
-                case .Object: throw CodegenErrors.ComplexTypesNotAllowedInMultiType
-                case .String: subTypes.append(StringType)
+                case .array: throw CodegenErrors.complexTypesNotAllowedInMultiType
+                case .boolean: subTypes.append(BoolType)
+                case .integer: subTypes.append(IntType)
+                case .null: throw CodegenErrors.complexTypesNotAllowedInMultiType
+                case .number: subTypes.append(DoubleType)
+                case .object: throw CodegenErrors.complexTypesNotAllowedInMultiType
+                case .string: subTypes.append(StringType)
                 }
             }
             let oneOf = oneOfType(subTypes)
             return CodeTypeAlias(name: typename, type: oneOf, access: accessor(parents))
-        } else if case .Some(.A(.String)) = type {
+        } else if case .Some(.a(.string)) = type {
             return CodeTypeAlias(name: typename, type: StringType, access: accessor(parents))
-        } else if case .Some(.A(.Integer)) = type {
+        } else if case .Some(.a(.integer)) = type {
             return CodeTypeAlias(name: typename, type: IntType, access: accessor(parents))
-        } else if case .Some(.A(.Number)) = type {
+        } else if case .Some(.a(.number)) = type {
             return CodeTypeAlias(name: typename, type: DoubleType, access: accessor(parents))
-        } else if case .Some(.A(.Boolean)) = type {
+        } else if case .Some(.a(.boolean)) = type {
             return CodeTypeAlias(name: typename, type: BoolType, access: accessor(parents))
-        } else if case .Some(.A(.Null)) = type {
+        } else if case .Some(.a(.null)) = type {
             return CodeTypeAlias(name: typename, type: VoidType, access: accessor(parents))
-        } else if case .Some(.A(.Array)) = type {
+        } else if case .Some(.a(.array)) = type {
             return try createArray(typename)
         } else if let properties = schema.properties where !properties.isEmpty {
-            return try createObject(typename, properties: getPropInfo(schema, id: id, parents: parents), mode: .Standard)
+            return try createObject(typename, properties: getPropInfo(schema, id: id, parents: parents), mode: .standard)
         } else if let allOf = schema.allOf {
             // represent allOf as a struct with non-optional properties
             var props: [PropInfo] = []
@@ -1012,7 +1042,7 @@ public struct Curio {
                     props.append(PropInfo(name: nil, required: true, schema: propSchema))
 //                }
             }
-            return try createObject(typename, properties: props, mode: .AllOf)
+            return try createObject(typename, properties: props, mode: .allOf)
         } else if let anyOf = schema.anyOf {
             var props: [PropInfo] = []
             for propSchema in anyOf {
@@ -1022,7 +1052,7 @@ public struct Curio {
             if props.count == 1 { props[0].required = true }
 
             // AnyOfs with only 1 property are AllOf
-            return try createObject(typename, properties: props, mode: props.count > 1 ? .AnyOf : .AllOf)
+            return try createObject(typename, properties: props, mode: props.count > 1 ? .anyOf : .allOf)
         } else if let oneOf = schema.oneOf { // TODO: allows properties in addition to oneOf
             return try createOneOf(oneOf)
         } else if let ref = schema.ref { // create a typealias to the reference
@@ -1040,16 +1070,16 @@ public struct Curio {
 //            return CodeTypeAlias(name: typename, type: notBracType(reqSchema), access: accessor(parents), peers: [reqSchema])
         } else if isBricType(schema) { // an empty schema just generates pure Bric
             return CodeTypeAlias(name: typename, type: BricType, access: accessor(parents))
-        } else if case .Some(.A(.Object)) = type, .Some(.B(.Some(let adp))) = schema.additionalProperties {
+        } else if case .Some(.a(.object)) = type, .Some(.b(.Some(let adp))) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Type]
             let adpType = try reify(adp, id: typename + "Value", parents: parents)
             return CodeTypeAlias(name: typename, type: dictionaryType(StringType, adpType), access: accessor(parents), peers: [adpType])
-        } else if case .Some(.A(.Object)) = type, .Some(.A(let adp)) = schema.additionalProperties where adp == true {
+        } else if case .Some(.a(.object)) = type, .Some(.a(let adp)) = schema.additionalProperties where adp == true {
             // an empty schema with additionalProperties makes it a [String:Bric]
             //print("warning: making Brictionary for code: \(schema.bric().stringify())")
             return CodeTypeAlias(name: typename, type: ObjectType, access: accessor(parents))
         } else {
-            // throw CodegenErrors.IllegalState("No code to generate for: \(schema.bric().stringify())")
+            // throw CodegenErrors.illegalState("No code to generate for: \(schema.bric().stringify())")
             print("warning: making HollowBric for code: \(schema.bric().stringify())")
             return CodeTypeAlias(name: typename, type: HollowBricType, access: accessor(parents))
         }
@@ -1089,19 +1119,19 @@ public struct Curio {
 public extension Schema {
 
     enum BracReferenceError : ErrorType, CustomDebugStringConvertible {
-        case ReferenceRequiredRoot(String)
-        case ReferenceMustBeRelativeToCurrentDocument(String)
-        case ReferenceMustBeRelativeToDocumentRoot(String)
-        case RefWithoutAdditionalProperties(String)
-        case ReferenceNotFound(String)
+        case referenceRequiredRoot(String)
+        case referenceMustBeRelativeToCurrentDocument(String)
+        case referenceMustBeRelativeToDocumentRoot(String)
+        case refWithoutAdditionalProperties(String)
+        case referenceNotFound(String)
 
         public var debugDescription : String {
             switch self {
-            case ReferenceRequiredRoot(let str): return "ReferenceRequiredRoot: \(str)"
-            case ReferenceMustBeRelativeToCurrentDocument(let str): return "ReferenceMustBeRelativeToCurrentDocument: \(str)"
-            case ReferenceMustBeRelativeToDocumentRoot(let str): return "ReferenceMustBeRelativeToDocumentRoot: \(str)"
-            case RefWithoutAdditionalProperties(let str): return "RefWithoutAdditionalProperties: \(str)"
-            case ReferenceNotFound(let str): return "ReferenceNotFound: \(str)"
+            case referenceRequiredRoot(let str): return "ReferenceRequiredRoot: \(str)"
+            case referenceMustBeRelativeToCurrentDocument(let str): return "ReferenceMustBeRelativeToCurrentDocument: \(str)"
+            case referenceMustBeRelativeToDocumentRoot(let str): return "ReferenceMustBeRelativeToDocumentRoot: \(str)"
+            case refWithoutAdditionalProperties(let str): return "RefWithoutAdditionalProperties: \(str)"
+            case referenceNotFound(let str): return "ReferenceNotFound: \(str)"
             }
         }
     }
@@ -1110,15 +1140,15 @@ public extension Schema {
     func resolve(path: String) throws -> Schema {
         var parts = path.characters.split(isSeparator: { $0 == "/" }).map { String($0) }
 //        print("parts: \(parts)")
-        if parts.isEmpty { throw BracReferenceError.ReferenceRequiredRoot(path) }
+        if parts.isEmpty { throw BracReferenceError.referenceRequiredRoot(path) }
         let first = parts.removeAtIndex(0)
-        if first != "#" {  throw BracReferenceError.ReferenceMustBeRelativeToCurrentDocument(path) }
-        if parts.isEmpty { throw BracReferenceError.ReferenceRequiredRoot(path) }
+        if first != "#" {  throw BracReferenceError.referenceMustBeRelativeToCurrentDocument(path) }
+        if parts.isEmpty { throw BracReferenceError.referenceRequiredRoot(path) }
         let root = parts.removeAtIndex(0)
-        if _additionalProperties.isEmpty { throw BracReferenceError.RefWithoutAdditionalProperties(path) }
-        guard var json = _additionalProperties[root] else { throw BracReferenceError.ReferenceNotFound(path) }
+        if _additionalProperties.isEmpty { throw BracReferenceError.refWithoutAdditionalProperties(path) }
+        guard var json = _additionalProperties[root] else { throw BracReferenceError.referenceNotFound(path) }
         for part in parts {
-            guard let next: Bric = json[part] else { throw BracReferenceError.ReferenceNotFound(path) }
+            guard let next: Bric = json[part] else { throw BracReferenceError.referenceNotFound(path) }
             json = next
         }
 
@@ -1159,24 +1189,24 @@ public extension Schema {
     /// can use the same ordering that appears in the raw JSON schema
     private static func imputePropertyOrdering(bc: FidelityBricolage) -> FidelityBricolage {
         switch bc {
-        case .Arr(let arr):
-            return .Arr(arr.map(imputePropertyOrdering))
-        case .Obj(let obj):
+        case .arr(let arr):
+            return .arr(arr.map(imputePropertyOrdering))
+        case .obj(let obj):
             var sub = FidelityBricolage.createObject()
 
             for (key, value) in obj {
                 sub.append(key, imputePropertyOrdering(value))
                 // if the key is "properties" then also add a "propertyOrder" property with the order that the props appear in the raw JSON
-                if case .Obj(let dict) = value where !dict.isEmpty && String(String.UnicodeScalarView() + key) == "properties" {
+                if case .obj(let dict) = value where !dict.isEmpty && String(String.UnicodeScalarView() + key) == "properties" {
                     // ### FIXME: we hack in a check for "type" to determine if we are in a schema element and not,
                     //  e.g., another properties list, but this will fail if there is an actual property named "type"
                     if bc.bric()["type"] == "object" {
                         let ordering = dict.map({ $0.0 })
-                        sub.append((FidelityBricolage.StrType("propertyOrder".unicodeScalars), FidelityBricolage.Arr(ordering.map(FidelityBricolage.Str))))
+                        sub.append((FidelityBricolage.StrType("propertyOrder".unicodeScalars), FidelityBricolage.arr(ordering.map(FidelityBricolage.str))))
                     }
                 }
             }
-            return .Obj(sub)
+            return .obj(sub)
         default:
             return bc
         }
@@ -1264,10 +1294,10 @@ extension Curio {
 
             var access: CodeAccess
             switch accessType {
-            case "public": access = .Public
-            case "private": access = .Private
-            case "internal": access = .Internal
-            case "default": access = .Default
+            case "public": access = .`public`
+            case "private": access = .`private`
+            case "internal": access = .`internal`
+            case "default": access = .`default`
             default: throw UsageError("Unknown access type: \(accessType) (must be 'public', 'private', 'internal', or 'default')")
             }
 

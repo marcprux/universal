@@ -326,35 +326,35 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     }
 
     public enum OneOfField : Bricable, Bracable, Breqable {
-        case FirstOneCase(FirstOne)
-        case SecondOneCase(SecondOne)
+        case firstOneCase(FirstOne)
+        case secondOneCase(SecondOne)
 
         public init(_ arg: FirstOne) {
-            self = .FirstOneCase(arg) 
+            self = .firstOneCase(arg) 
         }
 
         public init(_ arg: SecondOne) {
-            self = .SecondOneCase(arg) 
+            self = .secondOneCase(arg) 
         }
 
         public func bric() -> Bric {
             switch self { 
-            case .FirstOneCase(let x): return x.bric() 
-            case .SecondOneCase(let x): return x.bric() 
+            case .firstOneCase(let x): return x.bric() 
+            case .secondOneCase(let x): return x.bric() 
             } 
         }
 
         public static func brac(bric: Bric) throws -> SampleModel.OneOfField {
             return try bric.bracOne([ 
-            { try .FirstOneCase(FirstOne.brac(bric)) }, 
-            { try .SecondOneCase(SecondOne.brac(bric)) }, 
+            { try .firstOneCase(FirstOne.brac(bric)) }, 
+            { try .secondOneCase(SecondOne.brac(bric)) }, 
             ]) 
         }
 
         public func breq(other: SampleModel.OneOfField) -> Bool {
             switch (self, other) { 
-            case let (.FirstOneCase(lhs), .FirstOneCase(rhs)): return lhs.breq(rhs) 
-            case let (.SecondOneCase(lhs), .SecondOneCase(rhs)): return lhs.breq(rhs) 
+            case let (.firstOneCase(lhs), .firstOneCase(rhs)): return lhs.breq(rhs) 
+            case let (.secondOneCase(lhs), .secondOneCase(rhs)): return lhs.breq(rhs) 
             default: return false 
             } 
         }
@@ -522,7 +522,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 set($) { (str) = $ }
             }
 
-            public init(str: Str = .Illegal) {
+            public init(str: Str = .illegal) {
                 self.str = str 
             }
 
@@ -549,7 +549,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             }
 
             public enum Str : String, Bricable, Bracable, Breqable {
-                case Illegal = "illegal"
+                case illegal = "illegal"
             }
 
             public typealias BricState = Str
@@ -638,7 +638,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             set($) { (prop) = $ }
         }
 
-        public init(prop: Prop = .Value) {
+        public init(prop: Prop = .value) {
             self.prop = prop 
         }
 
@@ -665,7 +665,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         public enum Prop : String, Bricable, Bracable, Breqable {
-            case Value = "value"
+            case value = "value"
         }
 
         public typealias BricState = Prop
@@ -810,7 +810,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                             set($) { (single) = $ }
                         }
 
-                        public init(single: Single = .Value) {
+                        public init(single: Single = .value) {
                             self.single = single 
                         }
 
@@ -837,7 +837,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                         }
 
                         public enum Single : String, Bricable, Bracable, Breqable {
-                            case Value = "value"
+                            case value = "value"
                         }
 
                         public typealias BricState = Single

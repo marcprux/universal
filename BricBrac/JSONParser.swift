@@ -13,87 +13,87 @@ public final class JSONParser {
     /// An event that is emitted during parsing
     public enum Event : CustomDebugStringConvertible {
         /// The start of an array was encountered (i.e. `[`)
-        case ArrayStart([UnicodeScalar])
+        case arrayStart([UnicodeScalar])
         /// The end of an array was encountered (i.e. `]`)
-        case ArrayEnd([UnicodeScalar])
+        case arrayEnd([UnicodeScalar])
         /// The start of an object was encountered (i.e. `{`)
-        case ObjectStart([UnicodeScalar])
+        case objectStart([UnicodeScalar])
         /// The end of an object was encountered (i.e. `}`)
-        case ObjectEnd([UnicodeScalar])
+        case objectEnd([UnicodeScalar])
         /// A separator between Array or Object elements was encountered (i.e. `,`)
-        case ElementSeparator([UnicodeScalar])
+        case elementSeparator([UnicodeScalar])
         /// A separator between an Object's key and value was encountered (i.e. `:`)
-        case KeyValueSeparator([UnicodeScalar])
+        case keyValueSeparator([UnicodeScalar])
         /// A string was begun (i.e. `"`)
-        case StringStart([UnicodeScalar])
+        case stringStart([UnicodeScalar])
         /// Some unescaped string contents was emitted with the given escape indices
         /// - SeeAlso: `unescape`
-        case StringContent([UnicodeScalar], [Int])
+        case stringContent([UnicodeScalar], [Int])
         /// The string was closed (i.e. `"`)
-        case StringEnd([UnicodeScalar])
+        case stringEnd([UnicodeScalar])
         /// A complete number was processed
-        case Number([UnicodeScalar])
+        case number([UnicodeScalar])
         /// The `true` literal was encountered
-        case True([UnicodeScalar])
+        case `true`([UnicodeScalar])
         /// The `false` literal was encountered
-        case False([UnicodeScalar])
+        case `false`([UnicodeScalar])
         /// The `null` literal was encountered
-        case Null([UnicodeScalar])
+        case null([UnicodeScalar])
         /// Some whitespace happened
-        case Whitespace([UnicodeScalar])
+        case whitespace([UnicodeScalar])
 
         public var debugDescription: Swift.String {
             switch self {
-            case .ArrayStart: return "ArrayStart"
-            case .ArrayEnd: return "ArrayEnd"
-            case .ObjectStart: return "ObjectStart"
-            case .ObjectEnd: return "ObjectEnd"
-            case .ElementSeparator: return "ElementSeparator"
-            case .KeyValueSeparator: return "KeyValueSeparator"
-            case .StringStart: return "StringStart"
-            case .StringContent: return "StringContent"
-            case .StringEnd: return "StringEnd"
-            case .Number: return "Number"
-            case .True: return "True"
-            case .False: return "False"
-            case .Null: return "Null"
-            case .Whitespace: return "Whitespace"
+            case .arrayStart: return "ArrayStart"
+            case .arrayEnd: return "ArrayEnd"
+            case .objectStart: return "ObjectStart"
+            case .objectEnd: return "ObjectEnd"
+            case .elementSeparator: return "ElementSeparator"
+            case .keyValueSeparator: return "KeyValueSeparator"
+            case .stringStart: return "StringStart"
+            case .stringContent: return "StringContent"
+            case .stringEnd: return "StringEnd"
+            case .number: return "Number"
+            case .`true`: return "True"
+            case .`false`: return "False"
+            case .null: return "Null"
+            case .whitespace: return "Whitespace"
             }
         }
 
         /// Returns the underlying array of unicode scalars represented by this instance
         public var value: [UnicodeScalar] {
             switch self {
-            case .ArrayStart(let s): return s
-            case .ArrayEnd(let s): return s
-            case .ObjectStart(let s): return s
-            case .ObjectEnd(let s): return s
-            case .ElementSeparator(let s): return s
-            case .KeyValueSeparator(let s): return s
-            case .StringStart(let s): return s
-            case .StringContent(let s, _): return s
-            case .StringEnd(let s): return s
-            case .Number(let s): return s
-            case .True(let s): return s
-            case .False(let s): return s
-            case .Null(let s): return s
-            case .Whitespace(let s): return s
+            case .arrayStart(let s): return s
+            case .arrayEnd(let s): return s
+            case .objectStart(let s): return s
+            case .objectEnd(let s): return s
+            case .elementSeparator(let s): return s
+            case .keyValueSeparator(let s): return s
+            case .stringStart(let s): return s
+            case .stringContent(let s, _): return s
+            case .stringEnd(let s): return s
+            case .number(let s): return s
+            case .`true`(let s): return s
+            case .`false`(let s): return s
+            case .null(let s): return s
+            case .whitespace(let s): return s
             }
         }
 
 
         // cache of singleton scalar constants for fast delegate passing
-        private static let ArrayStartScalars: [UnicodeScalar] = ["["]
-        private static let ArrayEndScalars: [UnicodeScalar] = ["]"]
-        private static let ObjectStartScalars: [UnicodeScalar] = ["{"]
-        private static let ObjectEndScalars: [UnicodeScalar] = ["}"]
-        private static let StringStartScalars: [UnicodeScalar] = ["\""]
-        private static let StringEndScalars: [UnicodeScalar] = ["\""]
-        private static let ElementSeparatorScalars: [UnicodeScalar] = [","]
-        private static let KeyValueSeparatorScalars: [UnicodeScalar] = [":"]
-        private static let NullScalars: [UnicodeScalar] = ["n", "u", "l", "l"]
-        private static let TrueScalars: [UnicodeScalar] = ["t", "r", "u", "e"]
-        private static let FalseScalars: [UnicodeScalar] = ["f", "a", "l", "s", "e"]
+        private static let arrayStartScalars: [UnicodeScalar] = ["["]
+        private static let arrayEndScalars: [UnicodeScalar] = ["]"]
+        private static let objectStartScalars: [UnicodeScalar] = ["{"]
+        private static let objectEndScalars: [UnicodeScalar] = ["}"]
+        private static let stringStartScalars: [UnicodeScalar] = ["\""]
+        private static let stringEndScalars: [UnicodeScalar] = ["\""]
+        private static let elementSeparatorScalars: [UnicodeScalar] = [","]
+        private static let keyValueSeparatorScalars: [UnicodeScalar] = [":"]
+        private static let nullScalars: [UnicodeScalar] = ["n", "u", "l", "l"]
+        private static let trueScalars: [UnicodeScalar] = ["t", "r", "u", "e"]
+        private static let falseScalars: [UnicodeScalar] = ["f", "a", "l", "s", "e"]
     }
 
     /// Customization of the JSON parson process
@@ -134,18 +134,18 @@ public final class JSONParser {
     typealias StringParse = ([Int])
 
     private enum State {
-        case Idle, String(StringParse), Number(NumberParse), Literal, ArrayOpen, ArrayElement, ObjectOpen, ObjectKey, ObjectElement
+        case idle, string(StringParse), number(NumberParse), literal, arrayOpen, arrayElement, objectOpen, objectKey, objectElement
 
         var isValue: Bool {
             switch self {
-            case .ArrayElement, .ObjectElement, .String, .Number, .Literal: return true
+            case .arrayElement, .objectElement, .string, .number, .literal: return true
             default: return false
             }
         }
 
         var isContainer: Bool {
             switch self {
-            case .ArrayElement, .ObjectElement: return true
+            case .arrayElement, .objectElement: return true
             default: return false
             }
         }
@@ -161,16 +161,16 @@ public final class JSONParser {
     public private(set) var row = 1, col = 0
 
     /// The current state
-    private var state = State.Idle
+    private var state = State.idle
 
     /// The current processing result, such as a number being parsed or a string being assembled
-    private var processing = State.Idle
+    private var processing = State.idle
 
     /// The current pending result, such as a parsed string that is waiting to be added to an array
-    private var pending = State.Idle
+    private var pending = State.idle
 
     /// The current container (and array or object)
-    private var container = State.Idle
+    private var container = State.idle
 
     /// The current stack of container states (arrays and objects)
     private var stack: [State] = []
@@ -191,24 +191,24 @@ public final class JSONParser {
         if container.isContainer {
             stack.append(container)
         }
-        container = value // e.g., .Arr(createArray())
+        container = value // e.g., .arr(createArray())
         state = parse // .ArrayStart
-        pending = .Idle
+        pending = .idle
 
-        if case .ObjectOpen = state {
-            try delegate(.ObjectStart(Event.ObjectStartScalars))
-        } else if case .ArrayOpen = state {
-            try delegate(.ArrayStart(Event.ArrayStartScalars))
+        if case .objectOpen = state {
+            try delegate(.objectStart(Event.objectStartScalars))
+        } else if case .arrayOpen = state {
+            try delegate(.arrayStart(Event.arrayStartScalars))
         }
     }
 
     private func popContainer() throws {
         let x = stack.removeLast()
 
-        if case .ObjectElement = container {
-            try delegate(.ObjectEnd(Event.ObjectEndScalars))
-        } else if case .ArrayElement = container {
-            try delegate(.ArrayEnd(Event.ArrayEndScalars))
+        if case .objectElement = container {
+            try delegate(.objectEnd(Event.objectEndScalars))
+        } else if case .arrayElement = container {
+            try delegate(.arrayEnd(Event.arrayEndScalars))
         }
 
         pending = container
@@ -216,7 +216,7 @@ public final class JSONParser {
             container = x
             state = stack.removeLast()
         } else {
-            container = .Idle
+            container = .idle
             state = x
         }
     }
@@ -228,21 +228,21 @@ public final class JSONParser {
     private func pushObjectKey() throws {
         if stack.isEmpty { throw err("Object key assignment with no container") }
         if !pending.isValue { throw err("Object key assignment with no value") }
-        guard case .ObjectElement = container else { throw err("Object key assignment outside of object") }
-        container = .ObjectElement
+        guard case .objectElement = container else { throw err("Object key assignment outside of object") }
+        container = .objectElement
         state = stack.removeLast()
     }
 
     private func appendArrayValue() throws {
         if pending.isValue {
-            if case .ArrayElement = container {
-                container = .ArrayElement
+            if case .arrayElement = container {
+                container = .arrayElement
             } else {
                 throw err("Array append outside of array")
             }
         }
 
-        pending = .Idle
+        pending = .idle
     }
 
     private func clearBuffer() {
@@ -250,19 +250,19 @@ public final class JSONParser {
     }
 
     private func flushString() throws {
-        if case .String(let escapes) = processing {
-            try delegate(.StringContent(buffer, escapes))
-            pending = .String(escapes)
+        if case .string(let escapes) = processing {
+            try delegate(.stringContent(buffer, escapes))
+            pending = .string(escapes)
             clearBuffer()
         }
-        processing = .Idle
+        processing = .idle
     }
 
     /// Takes any outstanding number buffer and flushes it
     private func flushNumber() throws {
-        guard case .Number(let num) = processing else { return }
+        guard case .number(let num) = processing else { return }
 
-        try delegate(.Number(buffer))
+        try delegate(.number(buffer))
 
         if num.digitCount == 0 { throw err("Expected a digit, got: \(buffer)") }
 
@@ -272,9 +272,9 @@ public final class JSONParser {
         }
 
         if num.trailingDigits == 0 { throw err("Number did not end in a digit") }
-        pending = .Number(num)
+        pending = .number(num)
         clearBuffer()
-        self.processing = .Idle
+        self.processing = .idle
     }
     
     
@@ -305,8 +305,8 @@ public final class JSONParser {
     public func parse<S: SequenceType where S.Generator.Element == UnicodeScalar>(scalars: S, complete: Bool = false) throws -> Int {
         var index = 0
 
-        func processingNumber() -> Bool { if case .Number = processing { return true } else { return false } }
-        func processingString() -> Bool { if case .String = processing { return true } else { return false } }
+        func processingNumber() -> Bool { if case .number = processing { return true } else { return false } }
+        func processingString() -> Bool { if case .string = processing { return true } else { return false } }
 
         var completing = false
         func completeBuffer() throws {
@@ -321,7 +321,7 @@ public final class JSONParser {
                     // ensure that all that remains in whitespace in the buffer and the generator
                     for trailing in buffer {
                         if !trailing.isJSONWhitespace { throw err("Trailing content") }
-                        try delegate(.Whitespace([trailing]))
+                        try delegate(.whitespace([trailing]))
                     }
                     buffer.removeAll(keepCapacity: false)
                 }
@@ -357,7 +357,7 @@ public final class JSONParser {
                 // note that open numbers are different than open strings because we always know when a string
                 // is closed (because it has an unescaped quote), whereas a number is only processed once we hit a
                 // non-numeric character
-                if case .Number(var num) = processing {
+                if case .number(var num) = processing {
                     num.loc += 1
 
                     switch sval {
@@ -367,7 +367,7 @@ public final class JSONParser {
                         }
                         num.digitCount += 1
                         num.trailingDigits += 1
-                        processing = .Number(num)
+                        processing = .number(num)
                         buffer.append(scalar)
                         continue
                     case 0x2E: // .
@@ -377,7 +377,7 @@ public final class JSONParser {
                             num.fraction = num.loc
                         }
                         num.trailingDigits = 0
-                        processing = .Number(num)
+                        processing = .number(num)
                         buffer.append(scalar)
                         continue
                     case 0x45, 0x65: // e E
@@ -387,7 +387,7 @@ public final class JSONParser {
                             num.exponent = num.loc
                         }
                         num.trailingDigits = 0
-                        processing = .Number(num)
+                        processing = .number(num)
                         buffer.append(scalar)
                         continue
                     case 0x2B, 0x2D: // + -
@@ -395,7 +395,7 @@ public final class JSONParser {
                             throw err("Sign not following exponent")
                         }
                         num.trailingDigits = 0
-                        processing = .Number(num)
+                        processing = .number(num)
                         buffer.append(scalar)
                         continue
                     default:  // anything else: stop parsing the number
@@ -406,7 +406,7 @@ public final class JSONParser {
 
                 switch sval {
                 case _ where processingString(): // currently processing a string: append characters
-                    if case .String(var escapeIndices) = processing {
+                    if case .string(var escapeIndices) = processing {
                         func trailingEscapes() -> Int {
                             var slashes = 0
                             for c in buffer.reverse() {
@@ -417,7 +417,7 @@ public final class JSONParser {
 
                         if sval == 0x22 && trailingEscapes() % 2 == 0 { // close quote
                             try flushString()
-                            try delegate(.StringEnd(Event.StringEndScalars))
+                            try delegate(.stringEnd(Event.stringEndScalars))
                         } else {
                             if sval == 0x0009 && !options.contains(.AllowTabsInStrings) {
                                 throw err("Strings may not contain tab characters")
@@ -431,34 +431,34 @@ public final class JSONParser {
                             }
 
                             buffer.append(scalar)
-                            processing = .String(escapeIndices)
+                            processing = .string(escapeIndices)
                         }
                     }
 
                 case 0x22: // open quote: start processing a string
                     if pending.isValue { throw err("String found with pending result value") }
-                    processing = .String(StringParse([]))
-                    try delegate(.StringStart(Event.StringEndScalars))
+                    processing = .string(StringParse([]))
+                    try delegate(.stringStart(Event.stringEndScalars))
 
                 case 0x0020, 0x0009, 0x000A, 0x000D: // space, tab, newline, carriage return
-                    try delegate(.Whitespace([scalar]))
+                    try delegate(.whitespace([scalar]))
 
                 case 0x7B: // open curly brace
-                    if case .ObjectOpen = state { throw err("Object start within object start") }
+                    if case .objectOpen = state { throw err("Object start within object start") }
                     if pending.isValue { throw err("Object start with pending result value") }
-                    try pushContainer(.ObjectOpen, .ObjectElement)
+                    try pushContainer(.objectOpen, .objectElement)
 
                 case 0x5B: // open square bracket
-                    if case .ObjectOpen = state { throw err("Array start within object start") }
+                    if case .objectOpen = state { throw err("Array start within object start") }
                     if pending.isValue { throw err("Array start with pending result value") }
-                    try pushContainer(.ArrayOpen, .ArrayElement)
+                    try pushContainer(.arrayOpen, .arrayElement)
 
                 case 0x7D: // close curly brace
-                    if case .ObjectKey = state {
+                    if case .objectKey = state {
                         try pushObjectKey()
                     }
 
-                    if case .ObjectOpen = state {
+                    if case .objectOpen = state {
                         try popContainer()
                     } else {
                         throw err("Unmatched close object brace")
@@ -466,7 +466,7 @@ public final class JSONParser {
 
 
                 case 0x5D: // close square bracket
-                    if case .ArrayOpen = state {
+                    if case .arrayOpen = state {
                         try appendArrayValue()
                         try popContainer()
                     } else {
@@ -474,46 +474,46 @@ public final class JSONParser {
                     }
 
                 case 0x2C: // comma
-                    if case .ObjectOpen = state { throw err("Comma within object start") }
+                    if case .objectOpen = state { throw err("Comma within object start") }
                     if !pending.isValue { throw err("Comma found with no pending result") }
 
-                    if case .ObjectKey = state { // : assignment
+                    if case .objectKey = state { // : assignment
                         try pushObjectKey()
-                        pending = .Idle
-                    } else if case .ArrayOpen = state { // [ array
+                        pending = .idle
+                    } else if case .arrayOpen = state { // [ array
                         try appendArrayValue()
                     } else {
                         throw err("Comma not contained in array or object")
                     }
 
-                    try delegate(.ElementSeparator(Event.ElementSeparatorScalars))
+                    try delegate(.elementSeparator(Event.elementSeparatorScalars))
                     trailingComma = true
 
                 case 0x3A: // colon
-                    if case .ObjectOpen = state {
-                        guard case .String = pending else { throw err("Missing object key") }
+                    if case .objectOpen = state {
+                        guard case .string = pending else { throw err("Missing object key") }
                         stack.append(state)
-                        pending = .Idle
-                        state = .ObjectKey
-                        try delegate(.KeyValueSeparator(Event.KeyValueSeparatorScalars))
+                        pending = .idle
+                        state = .objectKey
+                        try delegate(.keyValueSeparator(Event.keyValueSeparatorScalars))
                     } else {
                         throw err("Object key assignment outside of an object")
                     }
 
                 case 0x30...0x39, 0x2B, 0x2D, 0x2E, 0x45 where processingNumber(), 0x65 where processingNumber(): // digit, +, -, (.), (e), (E)
-                    if case .ObjectOpen = state { throw err("Number within object start") }
+                    if case .objectOpen = state { throw err("Number within object start") }
                     if pending.isValue { throw err("Number found with pending result value") }
 
                     if !processingNumber() {
                         let dc = sval >= 0x30 && sval <= 0x39 ? 1 : 0
                         let num: NumberParse = (0, nil, nil, dc, dc, sval == 0x30 ? 1 : 0, sval == 0x2D || sval == 0x2E)
-                        processing = .Number(num)
+                        processing = .number(num)
                     }
 
                     buffer.append(scalar)
 
                 default:
-                    if case .ObjectOpen = state { throw err("Invalid character within object start") }
+                    if case .objectOpen = state { throw err("Invalid character within object start") }
                     if pending.isValue { throw err("Character found with pending result value") }
 
                     // finally, check for the JSON literals "true", "false", and "null"
@@ -527,8 +527,8 @@ public final class JSONParser {
                     case (.Some("n"), .Some("u"), .None, .None, .None): break // nu
                     case (.Some("n"), .Some("u"), .Some("l"), .None, .None): break // nul
                     case (.Some("n"), .Some("u"), .Some("l"), .Some("l"), .None): // null
-                        pending = .Literal
-                        try delegate(.Null(Event.NullScalars))
+                        pending = .literal
+                        try delegate(.null(Event.nullScalars))
                         clearBuffer()
                         break
 
@@ -536,8 +536,8 @@ public final class JSONParser {
                     case (.Some("t"), .Some("r"), .None, .None, .None): break // tr
                     case (.Some("t"), .Some("r"), .Some("u"), .None, .None): break // tru
                     case (.Some("t"), .Some("r"), .Some("u"), .Some("e"), .None): // true
-                        pending = .Literal
-                        try delegate(.True(Event.TrueScalars))
+                        pending = .literal
+                        try delegate(.`true`(Event.trueScalars))
                         clearBuffer()
                         break
 
@@ -546,8 +546,8 @@ public final class JSONParser {
                     case (.Some("f"), .Some("a"), .Some("l"), .None, .None): break // fal
                     case (.Some("f"), .Some("a"), .Some("l"), .Some("s"), .None): break // fals
                     case (.Some("f"), .Some("a"), .Some("l"), .Some("s"), .Some("e")): // false
-                        pending = .Literal
-                        try delegate(.False(Event.FalseScalars))
+                        pending = .literal
+                        try delegate(.`false`(Event.falseScalars))
                         clearBuffer()
                         break
 
@@ -563,7 +563,7 @@ public final class JSONParser {
                 }
             } else if completing && complete {
                 if scalar.isJSONWhitespace {
-                    try delegate(.Whitespace([scalar]))
+                    try delegate(.whitespace([scalar]))
                 } else {
                     if !options.contains(.AllowTrailingContent) { throw err("Trailing content") }
                 }
@@ -716,29 +716,29 @@ public extension JSONParser {
 
         parser.delegate = { event in
             switch event {
-            case .ObjectStart(let s):
+            case .objectStart(let s):
                 put(s)
                 depth += 1
                 pad()
-            case .ObjectEnd(let s):
+            case .objectEnd(let s):
                 depth -= 1
                 pad()
                 put(s)
-            case .ArrayStart(let s):
+            case .arrayStart(let s):
                 put(s)
                 depth += 1
                 pad()
-            case .ArrayEnd(let s):
+            case .arrayEnd(let s):
                 depth -= 1
                 pad()
                 put(s)
-            case .Whitespace(let s):
+            case .whitespace(let s):
                 // copy the raw whitespace when we aren't formatting
                 if indent == nil { put(s) }
-            case .ElementSeparator(let s):
+            case .elementSeparator(let s):
                 put(s)
                 pad()
-            case .KeyValueSeparator(let s):
+            case .keyValueSeparator(let s):
                 if indent > 0 { out.write(" ") }
                 put(s)
                 if indent > 0 { out.write(" ") }
@@ -773,20 +773,20 @@ extension JSONParser.Event : Equatable { }
 
 public func ==(e1: JSONParser.Event, e2: JSONParser.Event) -> Bool {
     switch (e1, e2) {
-    case (.ArrayStart(let x1), .ArrayStart(let x2)): return x1 == x2
-    case (.ArrayEnd(let x1), .ArrayEnd(let x2)): return x1 == x2
-    case (.ObjectStart(let x1), .ObjectStart(let x2)): return x1 == x2
-    case (.ObjectEnd(let x1), .ObjectEnd(let x2)): return x1 == x2
-    case (.StringStart(let x1), .StringStart(let x2)): return x1 == x2
-    case (.StringContent(let s1, let e1), .StringContent(let s2, let e2)): return s1 == s2 && e1 == e2
-    case (.StringEnd(let x1), .StringEnd(let x2)): return x1 == x2
-    case (.Number(let n1), .Number(let n2)): return n1 == n2
-    case (.True(let x1), .True(let x2)): return x1 == x2
-    case (.False(let x1), .False(let x2)): return x1 == x2
-    case (.Null(let x1), .Null(let x2)): return x1 == x2
-    case (.Whitespace(let w1), .Whitespace(let w2)): return w1 == w2
-    case (.ElementSeparator(let x1), .ElementSeparator(let x2)): return x1 == x2
-    case (.KeyValueSeparator(let x1), .KeyValueSeparator(let x2)): return x1 == x2
+    case (.arrayStart(let x1), .arrayStart(let x2)): return x1 == x2
+    case (.arrayEnd(let x1), .arrayEnd(let x2)): return x1 == x2
+    case (.objectStart(let x1), .objectStart(let x2)): return x1 == x2
+    case (.objectEnd(let x1), .objectEnd(let x2)): return x1 == x2
+    case (.stringStart(let x1), .stringStart(let x2)): return x1 == x2
+    case (.stringContent(let s1, let e1), .stringContent(let s2, let e2)): return s1 == s2 && e1 == e2
+    case (.stringEnd(let x1), .stringEnd(let x2)): return x1 == x2
+    case (.number(let n1), .number(let n2)): return n1 == n2
+    case (.`true`(let x1), .`true`(let x2)): return x1 == x2
+    case (.`false`(let x1), .`false`(let x2)): return x1 == x2
+    case (.null(let x1), .null(let x2)): return x1 == x2
+    case (.whitespace(let w1), .whitespace(let w2)): return w1 == w2
+    case (.elementSeparator(let x1), .elementSeparator(let x2)): return x1 == x2
+    case (.keyValueSeparator(let x1), .keyValueSeparator(let x2)): return x1 == x2
     default: return false
     }
 }

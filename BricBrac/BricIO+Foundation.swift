@@ -80,45 +80,45 @@ extension FoundationBricolage : Bricable, Bracable {
     private static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
     private static func toBric(object: AnyObject) -> Bric {
         if let bol = object as? BolType where bolTypes.contains(String.fromCString(bol.objCType) ?? "") {
-            return Bric.Bol(bol as Bool)
+            return Bric.bol(bol as Bool)
         }
         if let str = object as? StrType {
-            return Bric.Str(str as String)
+            return Bric.str(str as String)
         }
         if let num = object as? NumType {
-            return Bric.Num(num as Double)
+            return Bric.num(num as Double)
         }
         if let arr = object as? ArrType {
-            return Bric.Arr(arr.map(toBric))
+            return Bric.arr(arr.map(toBric))
         }
         if let obj = object as? ObjType {
             var dict: [String: Bric] = [:]
             for (key, value) in obj {
                 dict[String(key)] = toBric(value)
             }
-            return Bric.Obj(dict)
+            return Bric.obj(dict)
         }
 
-        return Bric.Nul
+        return Bric.nul
     }
 
     public static func brac(bric: Bric) -> FoundationBricolage {
         switch bric {
-        case .Nul:
+        case .nul:
             return FoundationBricolage(nul: FoundationBricolage.createNull())
-        case .Bol(let bol):
+        case .bol(let bol):
             return FoundationBricolage(bol: bol ? FoundationBricolage.createTrue() : FoundationBricolage.createFalse())
-        case .Str(let str):
+        case .str(let str):
             return FoundationBricolage(str: str)
-        case .Num(let num):
+        case .num(let num):
             return FoundationBricolage(num: num)
-        case .Arr(let arr):
+        case .arr(let arr):
             let nsarr = FoundationBricolage.createArray()
             for a in arr {
                 FoundationBricolage.putElement(nsarr, element: FoundationBricolage.brac(a))
             }
             return FoundationBricolage(arr: nsarr)
-        case .Obj(let obj):
+        case .obj(let obj):
             let nsobj = FoundationBricolage.createObject()
             for (k, v) in obj {
                 FoundationBricolage.putKeyValue(nsobj, key: k, value: FoundationBricolage.brac(v))

@@ -186,7 +186,7 @@ public protocol CodeCompoundType : CodeType {
 }
 
 public enum CodeAccess : String {
-    case Public = "public", Private = "private", Internal = "internal", Default = ""
+    case `public` = "public", `private` = "private", `internal` = "internal", `default` = ""
 }
 
 public protocol CodeImplementation : CodeEmittable {

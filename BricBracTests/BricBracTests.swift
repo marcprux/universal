@@ -191,8 +191,8 @@ class BricBracTests : XCTestCase {
 
         do {
             // test numeric overflow throwing exception
-            let _ = try Person.brac(["name": "Marc", "age": .Num(Double(Int.min)), "male": true, "children": ["Bebe"]])
-        } catch BracError.NumericOverflow {
+            let _ = try Person.brac(["name": "Marc", "age": .num(Double(Int.min)), "male": true, "children": ["Bebe"]])
+        } catch BracError.numericOverflow {
             // as expected
         } catch {
             XCTFail("unexpected error when deserializing: \(error)")
@@ -201,9 +201,9 @@ class BricBracTests : XCTestCase {
         do {
             try Person.brac(["name": "Marc", "male": true])
             XCTFail("should not have been able to deserialize with required fields")
-        } catch BracError.MissingRequiredKey {
+        } catch BracError.missingRequiredKey {
             // as expected
-        } catch BracError.InvalidType {
+        } catch BracError.invalidType {
             // FIXME: we should instead be throwing a MissingRequiredKey
         } catch {
             XCTFail("unexpected error when deserializing: \(error)")
@@ -506,7 +506,7 @@ class BricBracTests : XCTestCase {
         expectFail("n")
         expectFail("nu")
         expectFail("nul")
-        expectPass("null", .Nul)
+        expectPass("null", .nul)
 
         expectFail("t")
         expectFail("tr")
@@ -603,7 +603,7 @@ class BricBracTests : XCTestCase {
         expectPass(q("abc\\uD834\\uDD1Exyz"), "abc\u{0001D11E}xyz") // ECMA-404 section 9
 
         for char in ["X", "é", "\u{003}", "😡"] {
-            expectPass(q(char), .Str(char))
+            expectPass(q(char), .str(char))
         }
     }
 
@@ -764,24 +764,24 @@ class BricBracTests : XCTestCase {
 
     func testNulNilEquivalence() {
         do {
-            let j1 = Bric.Obj(["foo": "bar"])
+            let j1 = Bric.obj(["foo": "bar"])
 
-            let j2 = Bric.Obj(["foo": "bar", "baz": nil])
+            let j2 = Bric.obj(["foo": "bar", "baz": nil])
 
             // the two Brics are not the same...
             XCTAssertNotEqual(j1, j2)
 
             // ... and the two underlying dictionaries are the same ...
-            if case .Obj(let d1) = j1, .Obj(let d2) = j2 {
+            if case .obj(let d1) = j1, .obj(let d2) = j2 {
                 XCTAssertNotEqual(d1, d2)
             }
 
-            let j3 = Bric.Obj(["foo": "bar", "baz": .Nul])
+            let j3 = Bric.obj(["foo": "bar", "baz": .nul])
             // the two Brics are the same...
             XCTAssertEqual(j2, j3)
 
             // ... and the two underlying dictionaries are the same ...
-            if case .Obj(let d2) = j2, .Obj(let d3) = j3 {
+            if case .obj(let d2) = j2, .obj(let d3) = j3 {
                 XCTAssertEqual(d2, d3)
             }
 
@@ -800,18 +800,18 @@ class BricBracTests : XCTestCase {
     }
 
     func testBricAlter() {
-        XCTAssertEqual("Bar", Bric.Str("Foo").alter { (_, _) in "Bar" })
-        XCTAssertEqual(123, Bric.Str("Foo").alter { (_, _) in 123 })
-        XCTAssertEqual([:], Bric.Arr([]).alter { (_, _) in [:] })
+        XCTAssertEqual("Bar", Bric.str("Foo").alter { (_, _) in "Bar" })
+        XCTAssertEqual(123, Bric.str("Foo").alter { (_, _) in 123 })
+        XCTAssertEqual([:], Bric.arr([]).alter { (_, _) in [:] })
 
-        XCTAssertEqual(["foo": 1, "bar": "XXX"], Bric.Obj(["foo": 1, "bar": 2]).alter {
-            return $0 == [.Key("bar")] ? "XXX" : $1
+        XCTAssertEqual(["foo": 1, "bar": "XXX"], Bric.obj(["foo": 1, "bar": 2]).alter {
+            return $0 == [.key("bar")] ? "XXX" : $1
         })
 
         do {
             let b1: Bric = [["foo": 1, "bar": 2], ["foo": 1, "bar": 2]]
             let b2: Bric = [["foo": 1, "bar": 2], ["foo": "XXX", "bar": "XXX"]]
-            let path: Bric.Pointer = [.Index(1) ]
+            let path: Bric.Pointer = [.index(1) ]
             XCTAssertEqual(b2, b1.alter { return $0.startsWith(path) && $0 != path ? "XXX" : $1 })
         }
     }
@@ -891,12 +891,12 @@ class BricBracTests : XCTestCase {
                                     let bric = try Bric.parse(contents)
 
                                     // the format of the tests in https://github.com/json-schema/JSON-Schema-Test-Suite are arrays of objects that contain a "schema" item
-                                    guard case let .Arr(items) = bric else {
+                                    guard case let .arr(items) = bric else {
                                         XCTFail("No top-level array in \(file)")
                                         continue
                                     }
                                     for (_, item) in items.enumerate() {
-                                        guard case let .Obj(def) = item else {
+                                        guard case let .obj(def) = item else {
                                             XCTFail("Array element was not an object: \(file)")
                                             continue
                                         }
@@ -1027,20 +1027,20 @@ class BricBracTests : XCTestCase {
                 func one(c: UnicodeScalar) -> [UnicodeScalar] { return [c] }
 
                 try parser.parse(one("["))
-                XCTAssertEqual(events, [.ArrayStart(one("["))])
+                XCTAssertEqual(events, [.arrayStart(one("["))])
 
                 try parser.parse(one(" "))
-                XCTAssertEqual(events, [.ArrayStart(one("[")), .Whitespace([" "])])
+                XCTAssertEqual(events, [.arrayStart(one("[")), .whitespace([" "])])
 
                 try parser.parse(one("1"))
                 // note no trailing number event, because it doesn't know when it is completed
-                XCTAssertEqual(events, [.ArrayStart(one("[")), .Whitespace([" "])]) // , .Number(["1"])])
+                XCTAssertEqual(events, [.arrayStart(one("[")), .whitespace([" "])]) // , .number(["1"])])
 
                 try parser.parse(one("\n"))
-                XCTAssertEqual(events, [.ArrayStart(one("[")), .Whitespace([" "]), .Number(["1"]), .Whitespace(["\n"])])
+                XCTAssertEqual(events, [.arrayStart(one("[")), .whitespace([" "]), .number(["1"]), .whitespace(["\n"])])
 
                 try parser.parse(one("]"), complete: true)
-                XCTAssertEqual(events, [.ArrayStart(one("[")), .Whitespace([" "]), .Number(["1"]), .Whitespace(["\n"]), .ArrayEnd(one("]"))])
+                XCTAssertEqual(events, [.arrayStart(one("[")), .whitespace([" "]), .number(["1"]), .whitespace(["\n"]), .arrayEnd(one("]"))])
             }
 
             // break up the parse into a variety of subsets to test that the streaming parser emits the exact same events
@@ -1062,19 +1062,19 @@ class BricBracTests : XCTestCase {
                 for range in ranges { try parser.parse(Array(strm[range])) }
                 try parser.parse([], complete: true)
 
-                XCTAssertEqual(events, [JSONParser.Event.ObjectStart(["{"]),
-                    JSONParser.Event.StringStart(["\""]),
-                    JSONParser.Event.StringContent(Array("object".unicodeScalars), []),
-                    JSONParser.Event.StringEnd(["\""]),
-                    JSONParser.Event.KeyValueSeparator([":"]), JSONParser.Event.Whitespace([" "]),
-                    JSONParser.Event.Number(Array("1234.56E2".unicodeScalars)),
-                    JSONParser.Event.ObjectEnd(["}"])])
+                XCTAssertEqual(events, [JSONParser.Event.objectStart(["{"]),
+                    JSONParser.Event.stringStart(["\""]),
+                    JSONParser.Event.stringContent(Array("object".unicodeScalars), []),
+                    JSONParser.Event.stringEnd(["\""]),
+                    JSONParser.Event.keyValueSeparator([":"]), JSONParser.Event.whitespace([" "]),
+                    JSONParser.Event.number(Array("1234.56E2".unicodeScalars)),
+                    JSONParser.Event.objectEnd(["}"])])
 
             }
 
-            expectEvents("[[[]]]", [.ArrayStart(["["]), .ArrayStart(["["]), .ArrayStart(["["]), .ArrayEnd(["]"]), .ArrayEnd(["]"]), .ArrayEnd(["]"])])
-            expectEvents("[[ ]]", [.ArrayStart(["["]), .ArrayStart(["["]), .Whitespace([" "]), .ArrayEnd(["]"]), .ArrayEnd(["]"])])
-//            expectEvents("[{\"x\": 2.2}]", [.ArrayStart, .ObjectStart, .String(["x"], []), .KeyValueSeparator, .Whitespace([" "]), .Number(["2", ".", "2"]), .ObjectEnd, .ArrayEnd])
+            expectEvents("[[[]]]", [.arrayStart(["["]), .arrayStart(["["]), .arrayStart(["["]), .arrayEnd(["]"]), .arrayEnd(["]"]), .arrayEnd(["]"])])
+            expectEvents("[[ ]]", [.arrayStart(["["]), .arrayStart(["["]), .whitespace([" "]), .arrayEnd(["]"]), .arrayEnd(["]"])])
+//            expectEvents("[{\"x\": 2.2}]", [.arrayStart, .objectStart, .string(["x"], []), .keyValueSeparator, .whitespace([" "]), .number(["2", ".", "2"]), .objectEnd, .arrayEnd])
 
        } catch {
             XCTFail(String(error))
@@ -1325,7 +1325,7 @@ class BricBracTests : XCTestCase {
 
 
         // "1","audi","a4",1.8,1999,4,"auto(l5)","f",18,29,"p","compact"
-        let audi2 = Car(manufacturer: "audi", model: "a4", displacement: 1.8, year: 1999, cylinders: .Four, transmissionType: "auto(l5)", drive: .Front, cityMileage: 18, highwayMileage: 29, fuel: .Premium, class: .compact)
+        let audi2 = Car(manufacturer: "audi", model: "a4", displacement: 1.8, year: 1999, cylinders: .four, transmissionType: "auto(l5)", drive: .front, cityMileage: 18, highwayMileage: 29, fuel: .premium, class: .compact)
         let bric = audi2.bric()
         XCTAssertEqual(bric, template)
         do {
@@ -1492,7 +1492,7 @@ class BricBracTests : XCTestCase {
 
     func testFidelityBricolage() {
         let fb: FidelityBricolage = ["a": 1, "b": 2, "c": 3, "d": 4]
-        if case .Obj(let obj) = fb {
+        if case .obj(let obj) = fb {
             XCTAssertEqual(Array(obj.map({ String(String.UnicodeScalarView() + $0.0) })), ["a", "b", "c", "d"])
         } else {
             XCTFail("FidelityBricolage not object")
@@ -1638,19 +1638,19 @@ class BricBracTests : XCTestCase {
     }
 
     func testDeepMerge() {
-        XCTAssertEqual(Bric.Obj(["foo": "bar"]).merge(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": "bar"]).merge(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": [1, 2, 3]]).merge(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": [1, 2, ["x": "y"]]]).merge(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": [1, 2, [[[["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[[["a": "b"]]]]]]), ["foo": [1, 2, [[[["a": "b", "x": "y"]]]]], "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": [1, 2, [[2, [["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[2, [["a": "b"]]]]]]), ["foo": [1, 2, [[2, [["a": "b", "x": "y"]]]]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).merge(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).merge(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[[["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[[["a": "b"]]]]]]), ["foo": [1, 2, [[[["a": "b", "x": "y"]]]]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[2, [["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[2, [["a": "b"]]]]]]), ["foo": [1, 2, [[2, [["a": "b", "x": "y"]]]]], "bar": "baz"])
     }
 
     func testShallowMerge() {
-        XCTAssertEqual(Bric.Obj(["foo": "bar"]).assign(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": "bar"]).assign(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": [1, 2, 3]]).assign(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
-        XCTAssertEqual(Bric.Obj(["foo": [1, 2, ["x": "y"]]]).assign(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).assign(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).assign(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
     }
 
 }
@@ -1730,20 +1730,20 @@ extension Person : BricBrac, Equatable {
 
 
 enum Executive : BricBrac {
-    case Human(Person)
-    case Robot(serialNumber: String)
+    case human(Person)
+    case robot(serialNumber: String)
 
     func bric() -> Bric {
         switch self {
-        case .Human(let p): return p.bric()
-        case .Robot(let id): return id.bric()
+        case .human(let p): return p.bric()
+        case .robot(let id): return id.bric()
         }
     }
 
     static func brac(bric: Bric) throws -> Executive {
         switch bric {
-        case .Str(let id): return .Robot(serialNumber: id)
-        case .Obj(let dict) where dict["name"] != nil: return try .Human(Person.brac(bric))
+        case .str(let id): return .robot(serialNumber: id)
+        case .obj(let dict) where dict["name"] != nil: return try .human(Person.brac(bric))
         default: return try bric.invalidType()
         }
     }
@@ -1754,7 +1754,7 @@ enum CorporateStatus : String, BricBrac {
 }
 
 enum CorporateCode : Int, BricBrac {
-    case A = 1, B = 2, C = 3, D = 4
+    case a = 1, b = 2, c = 3, d = 4
 }
 
 /// Example of using a class and a tuple in the type itself to define the keys for BricBrac
@@ -1832,9 +1832,9 @@ struct Car {
     /// vehicle class name
     var `class`: Class
 
-    enum Cylinders : Int { case Four = 4, Six = 6, Eight = 8 }
-    enum Drive : String { case Front = "f", Rear = "r", Four }
-    enum Fuel : String { case Regular = "r", Premium = "p" }
+    enum Cylinders : Int { case four = 4, six = 6, eight = 8 }
+    enum Drive : String { case front = "f", rear = "r", four }
+    enum Fuel : String { case regular = "r", premium = "p" }
     enum Class : String { case subcompact, compact, midsize, suv, minivan, pickup }
 }
 

@@ -51,7 +51,7 @@ public extension Curio {
         task.waitUntilExit()
         let status = task.terminationStatus
         if status != 0 {
-            throw CodegenErrors.CompileError("Could not compile \(tmppath)")
+            throw CodegenErrors.compileError("Could not compile \(tmppath)")
         }
 
         if status == 0 {

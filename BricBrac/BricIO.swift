@@ -31,8 +31,8 @@ extension Bric : Streamable {
 
     // the emission state; note that indexes go from -1...count, since the edges are markers for container open/close tokens
     private enum State {
-        case Arr(index: Int, array: [Bric])
-        case Obj(index: Int, object: [(String, Bric)])
+        case arr(index: Int, array: [Bric])
+        case obj(index: Int, object: [(String, Bric)])
     }
 
     public func writeJSON<Target: OutputStreamType>(inout output: Target, spacer: String = "", maxline: Int = 0, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { AnyGenerator($0.generate()) }) {
@@ -52,19 +52,19 @@ extension Bric : Streamable {
 
         func processBric(bric: Bric) {
             switch bric {
-            case .Nul:
+            case .nul:
                 writer.writeNull(&output)
-            case .Bol(let bol):
+            case .bol(let bol):
                 writer.writeBoolean(&output, boolean: bol)
-            case .Str(let str):
+            case .str(let str):
                 writer.writeString(&output, string: str)
-            case .Num(let num):
+            case .num(let num):
                 writer.writeNumber(&output, number: num)
-            case .Arr(let arr):
-                stack.append(State.Arr(index: -1, array: arr))
-            case .Obj(let obj):
+            case .arr(let arr):
+                stack.append(State.arr(index: -1, array: arr))
+            case .obj(let obj):
                 let keyValues = Array(mapper(obj))
-                stack.append(State.Obj(index: -1, object: keyValues))
+                stack.append(State.obj(index: -1, object: keyValues))
             }
         }
 
@@ -112,14 +112,14 @@ extension Bric : Streamable {
         // walk through the stack and process each element in turn; note that the processing of elements may itself increase the stack
         while !stack.isEmpty {
             switch stack.removeLast() {
-            case .Arr(let index, let array):
+            case .arr(let index, let array):
                 if index < array.count {
-                    stack.append(.Arr(index: index+1, array: array))
+                    stack.append(.arr(index: index+1, array: array))
                 }
                 processArrayElement(index, array: array)
-            case .Obj(let index, let object):
+            case .obj(let index, let object):
                 if index < object.count {
-                    stack.append(.Obj(index: index+1, object: object))
+                    stack.append(.obj(index: index+1, object: object))
                 }
                 processObjectElement(index, object: object)
             }
@@ -218,19 +218,19 @@ public enum FidelityBricolage : Bricolage {
     public typealias ArrType = Array<FidelityBricolage>
     public typealias ObjType = Array<(StrType, FidelityBricolage)>
 
-    case Nul(NulType)
-    case Bol(BolType)
-    case Str(StrType)
-    case Num(NumType)
-    case Arr(ArrType)
-    case Obj(ObjType)
+    case nul(NulType)
+    case bol(BolType)
+    case str(StrType)
+    case num(NumType)
+    case arr(ArrType)
+    case obj(ObjType)
 
-    public init(nul: NulType) { self = .Nul(nul) }
-    public init(bol: BolType) { self = .Bol(bol) }
-    public init(str: StrType) { self = .Str(str) }
-    public init(num: NumType) { self = .Num(num) }
-    public init(arr: ArrType) { self = .Arr(arr) }
-    public init(obj: ObjType) { self = .Obj(obj) }
+    public init(nul: NulType) { self = .nul(nul) }
+    public init(bol: BolType) { self = .bol(bol) }
+    public init(str: StrType) { self = .str(str) }
+    public init(num: NumType) { self = .num(num) }
+    public init(arr: ArrType) { self = .arr(arr) }
+    public init(obj: ObjType) { self = .obj(obj) }
 
     public static func createNull() -> NulType { }
     public static func createTrue() -> BolType { return true }
@@ -254,21 +254,21 @@ extension Bricolagable {
 extension FidelityBricolage : Bricolagable {
     public func bricolage<B: Bricolage>() -> B {
         switch self {
-        case .Nul:
+        case .nul:
             return B(nul: B.createNull())
-        case .Bol(let bol):
+        case .bol(let bol):
             return B(bol: bol ? B.createTrue() : B.createFalse())
-        case .Str(let str):
+        case .str(let str):
             return B.createString(str).flatMap({ B(str: $0) }) ?? B(nul: B.createNull())
-        case .Num(let num):
+        case .num(let num):
             return B.createNumber(num).flatMap({ B(num: $0) }) ?? B(nul: B.createNull())
-        case .Arr(let arr):
+        case .arr(let arr):
             var array = B.createArray()
             for x in arr {
                 array = B.putElement(array, element: x.bricolage())
             }
             return B(arr: array)
-        case .Obj(let obj):
+        case .obj(let obj):
             var object = B.createObject()
             for x in obj {
                 if let key = B.createString(x.0) {
@@ -281,50 +281,50 @@ extension FidelityBricolage : Bricolagable {
 }
 
 extension FidelityBricolage : NilLiteralConvertible {
-    public init(nilLiteral: ()) { self = .Nul() }
+    public init(nilLiteral: ()) { self = .nul() }
 }
 
 extension FidelityBricolage : BooleanLiteralConvertible {
     public init(booleanLiteral value: Bool) {
-        self = .Bol(value ? FidelityBricolage.createTrue() : FidelityBricolage.createFalse())
+        self = .bol(value ? FidelityBricolage.createTrue() : FidelityBricolage.createFalse())
     }
 }
 
 extension FidelityBricolage : StringLiteralConvertible {
     public init(stringLiteral value: String) {
-        self = .Str(Array(value.unicodeScalars))
+        self = .str(Array(value.unicodeScalars))
     }
 
     public init(extendedGraphemeClusterLiteral value: StringLiteralType) {
-        self = .Str(Array(value.unicodeScalars))
+        self = .str(Array(value.unicodeScalars))
     }
 
     public init(unicodeScalarLiteral value: StringLiteralType) {
-        self = .Str(Array(value.unicodeScalars))
+        self = .str(Array(value.unicodeScalars))
     }
 }
 
 extension FidelityBricolage : IntegerLiteralConvertible {
     public init(integerLiteral value: Int) {
-        self = .Num(Array(String(value).unicodeScalars))
+        self = .num(Array(String(value).unicodeScalars))
     }
 }
 
 extension FidelityBricolage : FloatLiteralConvertible {
     public init(floatLiteral value: Double) {
-        self = .Num(Array(String(value).unicodeScalars))
+        self = .num(Array(String(value).unicodeScalars))
     }
 }
 
 extension FidelityBricolage : ArrayLiteralConvertible {
     public init(arrayLiteral elements: FidelityBricolage...) {
-        self = .Arr(elements)
+        self = .arr(elements)
     }
 }
 
 extension FidelityBricolage : DictionaryLiteralConvertible {
     public init(dictionaryLiteral elements: (String, FidelityBricolage)...) {
-        self = .Obj(elements.map({ (key, value) in (Array(key.unicodeScalars), value) }))
+        self = .obj(elements.map({ (key, value) in (Array(key.unicodeScalars), value) }))
     }
 }
 
@@ -339,12 +339,12 @@ extension Bric: Bricolage {
     public typealias ArrType = Array<Bric>
     public typealias ObjType = Dictionary<StrType, Bric>
 
-    public init(nul: NulType) { self = .Nul }
-    public init(bol: BolType) { self = .Bol(bol) }
-    public init(str: StrType) { self = .Str(str) }
-    public init(num: NumType) { self = .Num(num) }
-    public init(arr: ArrType) { self = .Arr(arr) }
-    public init(obj: ObjType) { self = .Obj(obj) }
+    public init(nul: NulType) { self = .nul }
+    public init(bol: BolType) { self = .bol(bol) }
+    public init(str: StrType) { self = .str(str) }
+    public init(num: NumType) { self = .num(num) }
+    public init(arr: ArrType) { self = .arr(arr) }
+    public init(obj: ObjType) { self = .obj(obj) }
 
     public static func createNull() -> NulType { }
     public static func createTrue() -> BolType { return true }
@@ -389,8 +389,8 @@ extension Bricolage {
 }
 
 private enum Container<T : Bricolage> {
-    case Object(T.ObjType, T.StrType?)
-    case Array(T.ArrType)
+    case object(T.ObjType, T.StrType?)
+    case array(T.ArrType)
 }
 
 extension Bricolage {
@@ -442,8 +442,8 @@ extension Bricolage {
             func closeContainer() throws {
                 if stack.count <= 0 { throw err("Cannot close top-level container") }
                 switch stack.removeLast() {
-                case .Object(let x, _): try pushValue(T(obj: x))
-                case .Array(let x): try pushValue(T(arr: x))
+                case .object(let x, _): try pushValue(T(obj: x))
+                case .array(let x): try pushValue(T(arr: x))
                 }
             }
 
@@ -452,33 +452,33 @@ extension Bricolage {
                 let value = delegate(x, level: stack.count)
 
                 switch stack.last {
-                case .Some(.Object(let x, let key)):
+                case .Some(.object(let x, let key)):
                     if let key = key {
-                        stack[stack.endIndex.predecessor()] = .Object(T.putKeyValue(x, key: key, value: value), .None)
+                        stack[stack.endIndex.predecessor()] = .object(T.putKeyValue(x, key: key, value: value), .None)
                     } else {
                         throw err("Put object with no key type")
                     }
-                case .Some(.Array(let x)):
-                    stack[stack.endIndex.predecessor()] = .Array(T.putElement(x, element: value))
+                case .Some(.array(let x)):
+                    stack[stack.endIndex.predecessor()] = .array(T.putElement(x, element: value))
                 case .None:
                     break
                 }
             }
 
            switch event {
-            case .ObjectStart:
-                stack.append(.Object(T.createObject(), .None))
-            case .ObjectEnd:
+            case .objectStart:
+                stack.append(.object(T.createObject(), .None))
+            case .objectEnd:
                 try closeContainer()
-            case .ArrayStart:
-                stack.append(.Array(T.createArray()))
-            case .ArrayEnd:
+            case .arrayStart:
+                stack.append(.array(T.createArray()))
+            case .arrayEnd:
                 try closeContainer()
-            case .StringContent(let s, let e):
+            case .stringContent(let s, let e):
                 let escaped = try JSONParser.unescape(s, escapeIndices: e, line: parser.row, column: parser.col)
                 if let str = T.createString(escaped) {
-                    if case .Some(.Object(let x, let key)) = stack.last where key == nil {
-                        stack[stack.endIndex.predecessor()] = .Object(x, str)
+                    if case .Some(.object(let x, let key)) = stack.last where key == nil {
+                        stack[stack.endIndex.predecessor()] = .object(x, str)
                         delegate(T(str: str), level: stack.count)
                     } else {
                         try pushValue(T(str: str))
@@ -486,19 +486,19 @@ extension Bricolage {
                 } else {
                     throw err("Unable to create string")
                 }
-            case .Number(let n):
+            case .number(let n):
                 if let num = T.createNumber(Array(n)) {
                     try pushValue(T(num: num))
                 } else {
                     throw err("Unable to create number")
                 }
-            case .True:
+            case .`true`:
                 try pushValue(T(bol: T.createTrue()))
-            case .False:
+            case .`false`:
                 try pushValue(T(bol: T.createFalse()))
-            case .Null:
+            case .null:
                 try pushValue(T(nul: T.createNull()))
-           case .Whitespace, .ElementSeparator, .KeyValueSeparator, .StringStart, .StringEnd:
+           case .whitespace, .elementSeparator, .keyValueSeparator, .stringStart, .stringEnd:
                 break // whitespace is ignored in document parsing
             }
         }
@@ -648,8 +648,8 @@ public struct FormattingJSONWriter<Target: OutputStreamType> : JSONWriter {
 }
 
 public enum BufferedJSONWriterToken {
-    case Str(String)
-    case Indent(Int)
+    case str(String)
+    case indent(Int)
 }
 
 /// A `JSONWriter` implementation that buffers the output in order to apply advanced formatting
@@ -665,7 +665,7 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
     }
 
     public func writeIndentation(inout _: Target, level: Int) {
-        tokens.append(.Indent(level))
+        tokens.append(.indent(level))
     }
 
     public func writePadding(inout output: Target, count: Int) {
@@ -676,7 +676,7 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
 
     public func emit<T: OutputStreamType>(inout _: T, string: String) {
         // we don't actually write to the output here, but instead buffer all the tokens so we can later reformat them
-        tokens.append(.Str(string))
+        tokens.append(.str(string))
     }
 
     public func writeEnd(inout output: Target) {
@@ -690,7 +690,7 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
 
         func rangeBlock(index: Int, level: Int) -> Range<Int>? {
             let match = tokens.dropFirst(index).indexOf({
-                if case .Indent(let lvl) = $0 where lvl == (level - 1) {
+                if case .indent(let lvl) = $0 where lvl == (level - 1) {
                     return true
                 } else {
                     return false
@@ -706,22 +706,22 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
 
         func toklen(token: BufferedJSONWriterToken) -> Int {
             switch token {
-            case .Indent: return pad.characters.count // because indent will convert to a pad
-            case .Str(let str): return str.characters.count
+            case .indent: return pad.characters.count // because indent will convert to a pad
+            case .str(let str): return str.characters.count
             }
         }
 
         func toklev(token: BufferedJSONWriterToken) -> Int {
             switch token {
-            case .Indent(let lvl): return lvl
-            case .Str: return 0
+            case .indent(let lvl): return lvl
+            case .str: return 0
             }
         }
 
         func isStringToken(token: BufferedJSONWriterToken) -> Bool {
             switch token {
-            case .Indent: return false
-            case .Str: return true
+            case .indent: return false
+            case .str: return true
             }
         }
 
@@ -733,7 +733,7 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
             // the sum of the contiguous tokens are less than max line; replace all indents with a single space
             for i in range {
                 if !isStringToken(tokens[i]) {
-                    tokens[i] = .Str(pad)
+                    tokens[i] = .str(pad)
                 }
             }
             return true
@@ -743,7 +743,7 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
             for index in tokens.startIndex..<tokens.endIndex {
                 let item = tokens[index]
                 switch item {
-                case .Indent(let lvl) where lvl == level:
+                case .indent(let lvl) where lvl == level:
                     if let range = rangeBlock(index, level: lvl) where range.endIndex > range.startIndex {
                         compactRange(range, level: level)
                         return
@@ -764,9 +764,9 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
         compact()
         for tok in tokens {
             switch tok {
-            case .Str(let str):
+            case .str(let str):
                 output.write(str)
-            case .Indent(let level):
+            case .indent(let level):
                 output.write("\n")
                 for _ in 0..<level {
                     output.write(spacer)

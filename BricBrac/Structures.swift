@@ -9,8 +9,14 @@
 // General data structes need for `Brac` and `Curio` schema support
 
 public extension Bric {
-    /// Returns the underlying `BricDateTime` for `Bric.Str` cases that can be pased with `ISO8601FromString`, else nil
-    public var dtm: BricDateTime? { return str.flatMap(BricDateTime.init) }
+    /// Returns the underlying `BricDateTime` for `Bric.str` cases that can be pased with `ISO8601FromString`, else nil
+    public var dtm: BricDateTime? {
+        if let str = self.str {
+            return BricDateTime(str)
+        } else {
+            return nil
+        }
+    }
 }
 
 /// A WrapperType is able to map itself through a wrapped optional
@@ -221,19 +227,19 @@ public protocol OneOf: BricBrac {
 
 /// A simple union type that can be one of either T1 or T2
 public enum OneOf2<T1, T2 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable> : OneOf {
-    case V1(T1), V2(T2)
+    case v1(T1), v2(T2)
 
-    public init(t1: T1) { self = .V1(t1) }
-    public init(_ t1: T1) { self = .V1(t1) }
+    public init(t1: T1) { self = .v1(t1) }
+    public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .V2(t2) }
-    public init(_ t2: T2) { self = .V2(t2) }
+    public init(t2: T2) { self = .v2(t2) }
+    public init(_ t2: T2) { self = .v2(t2) }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
     public var values: (T1?, T2?) { return (extract(), extract()) }
 
     public func extract() -> T1? {
-        if case .V1(let v1) = self {
+        if case .v1(let v1) = self {
             return v1
         } else {
             return nil
@@ -241,7 +247,7 @@ public enum OneOf2<T1, T2 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Br
     }
 
     public func extract() -> T2? {
-        if case .V2(let v2) = self {
+        if case .v2(let v2) = self {
             return v2
         } else {
             return nil
@@ -250,23 +256,23 @@ public enum OneOf2<T1, T2 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Br
 
     public func bric() -> Bric {
         switch self {
-        case .V1(let t1): return t1.bric()
-        case .V2(let t2): return t2.bric()
+        case .v1(let t1): return t1.bric()
+        case .v2(let t2): return t2.bric()
         }
     }
 
     public static func brac(bric: Bric) throws -> OneOf2 {
         return try bric.bracOne([
-            { try .V1(T1.brac(bric)) },
-            { try .V2(T2.brac(bric)) }
+            { try .v1(T1.brac(bric)) },
+            { try .v2(T2.brac(bric)) }
             ])
     }
 
     public func breq(other: OneOf2) -> Bool {
         switch (self, other) {
-        case (.V1(let v1l), .V1(let v1r)): return v1l.breq(v1r)
-        case (.V2(let v2l), .V2(let v2r)): return v2l.breq(v2r)
-        case (.V1, .V2), (.V2, .V1): return false
+        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
+        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
+        case (.v1, .v2), (.v2, .v1): return false
         }
     }
 }
@@ -275,22 +281,22 @@ public enum OneOf2<T1, T2 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Br
 
 /// A simple union type that can be one of either T1 or T2 or T3
 public enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable> : OneOf {
-    case V1(T1), V2(T2), V3(T3)
+    case v1(T1), v2(T2), v3(T3)
 
-    public init(t1: T1) { self = .V1(t1) }
-    public init(_ t1: T1) { self = .V1(t1) }
+    public init(t1: T1) { self = .v1(t1) }
+    public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .V2(t2) }
-    public init(_ t2: T2) { self = .V2(t2) }
+    public init(t2: T2) { self = .v2(t2) }
+    public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .V3(t3) }
-    public init(_ t3: T3) { self = .V3(t3) }
+    public init(t3: T3) { self = .v3(t3) }
+    public init(_ t3: T3) { self = .v3(t3) }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
     public var values: (T1?, T2?, T3?) { return (extract(), extract(), extract()) }
 
     public func extract() -> T1? {
-        if case .V1(let v1) = self {
+        if case .v1(let v1) = self {
             return v1
         } else {
             return nil
@@ -298,7 +304,7 @@ public enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Breqable, T2
     }
 
     public func extract() -> T2? {
-        if case .V2(let v2) = self {
+        if case .v2(let v2) = self {
             return v2
         } else {
             return nil
@@ -306,7 +312,7 @@ public enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Breqable, T2
     }
 
     public func extract() -> T3? {
-        if case .V3(let v3) = self {
+        if case .v3(let v3) = self {
             return v3
         } else {
             return nil
@@ -315,25 +321,25 @@ public enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Breqable, T2
 
     public func bric() -> Bric {
         switch self {
-        case .V1(let t1): return t1.bric()
-        case .V2(let t2): return t2.bric()
-        case .V3(let t3): return t3.bric()
+        case .v1(let t1): return t1.bric()
+        case .v2(let t2): return t2.bric()
+        case .v3(let t3): return t3.bric()
         }
     }
 
     public static func brac(bric: Bric) throws -> OneOf3 {
         return try bric.bracOne([
-            { try .V1(T1.brac(bric)) },
-            { try .V2(T2.brac(bric)) },
-            { try .V3(T3.brac(bric)) },
+            { try .v1(T1.brac(bric)) },
+            { try .v2(T2.brac(bric)) },
+            { try .v3(T3.brac(bric)) },
             ])
     }
 
     public func breq(other: OneOf3) -> Bool {
         switch (self, other) {
-        case (.V1(let v1l), .V1(let v1r)): return v1l.breq(v1r)
-        case (.V2(let v2l), .V2(let v2r)): return v2l.breq(v2r)
-        case (.V3(let v3l), .V3(let v3r)): return v3l.breq(v3r)
+        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
+        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
+        case (.v3(let v3l), .v3(let v3r)): return v3l.breq(v3r)
         default: return false
         }
     }
@@ -343,25 +349,25 @@ public enum OneOf3<T1, T2, T3 where T1: Bricable, T1: Bracable, T1: Breqable, T2
 
 /// A simple union type that can be one of either T1 or T2 or T3
 public enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable> : OneOf {
-    case V1(T1), V2(T2), V3(T3), V4(T4)
+    case v1(T1), v2(T2), v3(T3), v4(T4)
 
-    public init(t1: T1) { self = .V1(t1) }
-    public init(_ t1: T1) { self = .V1(t1) }
+    public init(t1: T1) { self = .v1(t1) }
+    public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .V2(t2) }
-    public init(_ t2: T2) { self = .V2(t2) }
+    public init(t2: T2) { self = .v2(t2) }
+    public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .V3(t3) }
-    public init(_ t3: T3) { self = .V3(t3) }
+    public init(t3: T3) { self = .v3(t3) }
+    public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .V4(t4) }
-    public init(_ t4: T4) { self = .V4(t4) }
+    public init(t4: T4) { self = .v4(t4) }
+    public init(_ t4: T4) { self = .v4(t4) }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
     public var values: (T1?, T2?, T3?, T4?) { return (extract(), extract(), extract(), extract()) }
 
     public func extract() -> T1? {
-        if case .V1(let v1) = self {
+        if case .v1(let v1) = self {
             return v1
         } else {
             return nil
@@ -369,7 +375,7 @@ public enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable
     }
 
     public func extract() -> T2? {
-        if case .V2(let v2) = self {
+        if case .v2(let v2) = self {
             return v2
         } else {
             return nil
@@ -377,7 +383,7 @@ public enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable
     }
 
     public func extract() -> T3? {
-        if case .V3(let v3) = self {
+        if case .v3(let v3) = self {
             return v3
         } else {
             return nil
@@ -385,7 +391,7 @@ public enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable
     }
 
     public func extract() -> T4? {
-        if case .V4(let v4) = self {
+        if case .v4(let v4) = self {
             return v4
         } else {
             return nil
@@ -394,28 +400,28 @@ public enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable
 
     public func bric() -> Bric {
         switch self {
-        case .V1(let t1): return t1.bric()
-        case .V2(let t2): return t2.bric()
-        case .V3(let t3): return t3.bric()
-        case .V4(let t4): return t4.bric()
+        case .v1(let t1): return t1.bric()
+        case .v2(let t2): return t2.bric()
+        case .v3(let t3): return t3.bric()
+        case .v4(let t4): return t4.bric()
         }
     }
 
     public static func brac(bric: Bric) throws -> OneOf4 {
         return try bric.bracOne([
-            { try .V1(T1.brac(bric)) },
-            { try .V2(T2.brac(bric)) },
-            { try .V3(T3.brac(bric)) },
-            { try .V4(T4.brac(bric)) },
+            { try .v1(T1.brac(bric)) },
+            { try .v2(T2.brac(bric)) },
+            { try .v3(T3.brac(bric)) },
+            { try .v4(T4.brac(bric)) },
             ])
     }
 
     public func breq(other: OneOf4) -> Bool {
         switch (self, other) {
-        case (.V1(let v1l), .V1(let v1r)): return v1l.breq(v1r)
-        case (.V2(let v2l), .V2(let v2r)): return v2l.breq(v2r)
-        case (.V3(let v3l), .V3(let v3r)): return v3l.breq(v3r)
-        case (.V4(let v4l), .V4(let v4r)): return v4l.breq(v4r)
+        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
+        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
+        case (.v3(let v3l), .v3(let v3r)): return v3l.breq(v3r)
+        case (.v4(let v4l), .v4(let v4r)): return v4l.breq(v4r)
         default: return false
         }
     }
@@ -425,28 +431,28 @@ public enum OneOf4<T1, T2, T3, T4 where T1: Bricable, T1: Bracable, T1: Breqable
 
 /// A simple union type that can be one of either T1 or T2 or T3
 public enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable, T5: Bricable, T5: Bracable, T5: Breqable> : OneOf {
-    case V1(T1), V2(T2), V3(T3), V4(T4), V5(T5)
+    case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5)
 
-    public init(t1: T1) { self = .V1(t1) }
-    public init(_ t1: T1) { self = .V1(t1) }
+    public init(t1: T1) { self = .v1(t1) }
+    public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .V2(t2) }
-    public init(_ t2: T2) { self = .V2(t2) }
+    public init(t2: T2) { self = .v2(t2) }
+    public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .V3(t3) }
-    public init(_ t3: T3) { self = .V3(t3) }
+    public init(t3: T3) { self = .v3(t3) }
+    public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .V4(t4) }
-    public init(_ t4: T4) { self = .V4(t4) }
+    public init(t4: T4) { self = .v4(t4) }
+    public init(_ t4: T4) { self = .v4(t4) }
 
-    public init(t5: T5) { self = .V5(t5) }
-    public init(_ t5: T5) { self = .V5(t5) }
+    public init(t5: T5) { self = .v5(t5) }
+    public init(_ t5: T5) { self = .v5(t5) }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
     public var values: (T1?, T2?, T3?, T4?, T5?) { return (extract(), extract(), extract(), extract(), extract()) }
 
     public func extract() -> T1? {
-        if case .V1(let v1) = self {
+        if case .v1(let v1) = self {
             return v1
         } else {
             return nil
@@ -454,7 +460,7 @@ public enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breq
     }
 
     public func extract() -> T2? {
-        if case .V2(let v2) = self {
+        if case .v2(let v2) = self {
             return v2
         } else {
             return nil
@@ -462,7 +468,7 @@ public enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breq
     }
 
     public func extract() -> T3? {
-        if case .V3(let v3) = self {
+        if case .v3(let v3) = self {
             return v3
         } else {
             return nil
@@ -470,7 +476,7 @@ public enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breq
     }
 
     public func extract() -> T4? {
-        if case .V4(let v4) = self {
+        if case .v4(let v4) = self {
             return v4
         } else {
             return nil
@@ -478,7 +484,7 @@ public enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breq
     }
 
     public func extract() -> T5? {
-        if case .V5(let v5) = self {
+        if case .v5(let v5) = self {
             return v5
         } else {
             return nil
@@ -487,31 +493,31 @@ public enum OneOf5<T1, T2, T3, T4, T5 where T1: Bricable, T1: Bracable, T1: Breq
 
     public func bric() -> Bric {
         switch self {
-        case .V1(let t1): return t1.bric()
-        case .V2(let t2): return t2.bric()
-        case .V3(let t3): return t3.bric()
-        case .V4(let t4): return t4.bric()
-        case .V5(let t5): return t5.bric()
+        case .v1(let t1): return t1.bric()
+        case .v2(let t2): return t2.bric()
+        case .v3(let t3): return t3.bric()
+        case .v4(let t4): return t4.bric()
+        case .v5(let t5): return t5.bric()
         }
     }
 
     public static func brac(bric: Bric) throws -> OneOf5 {
         return try bric.bracOne([
-            { try .V1(T1.brac(bric)) },
-            { try .V2(T2.brac(bric)) },
-            { try .V3(T3.brac(bric)) },
-            { try .V4(T4.brac(bric)) },
-            { try .V5(T5.brac(bric)) },
+            { try .v1(T1.brac(bric)) },
+            { try .v2(T2.brac(bric)) },
+            { try .v3(T3.brac(bric)) },
+            { try .v4(T4.brac(bric)) },
+            { try .v5(T5.brac(bric)) },
             ])
     }
 
     public func breq(other: OneOf5) -> Bool {
         switch (self, other) {
-        case (.V1(let v1l), .V1(let v1r)): return v1l.breq(v1r)
-        case (.V2(let v2l), .V2(let v2r)): return v2l.breq(v2r)
-        case (.V3(let v3l), .V3(let v3r)): return v3l.breq(v3r)
-        case (.V4(let v4l), .V4(let v4r)): return v4l.breq(v4r)
-        case (.V5(let v5l), .V5(let v5r)): return v5l.breq(v5r)
+        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
+        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
+        case (.v3(let v3l), .v3(let v3r)): return v3l.breq(v3r)
+        case (.v4(let v4l), .v4(let v4r)): return v4l.breq(v4r)
+        case (.v5(let v5l), .v5(let v5r)): return v5l.breq(v5r)
         default: return false
         }
     }
@@ -576,12 +582,12 @@ public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, CustomStringCo
 
     /// BricDateTime instances are serialized to ISO-8601 strings
     public func bric() -> Bric {
-        return Bric.Str(toISO8601String())
+        return Bric.str(toISO8601String())
     }
 
     /// BricDateTime instances are serialized to ISO-8601 strings
     public static func brac(bric: Bric) throws -> BricDateTime {
-        guard case .Str(let str) = bric else { return try bric.invalidType() }
+        guard case .str(let str) = bric else { return try bric.invalidType() }
         guard let dtm = BricDateTime(str) else { return try bric.invalidRawValue(str) }
         return dtm
     }

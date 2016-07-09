@@ -11,19 +11,19 @@
 /// Extension to Bric that supports JSON Pointers and JSON References
 public extension Bric {
     public enum BricReferenceError : ErrorType, CustomDebugStringConvertible {
-        case InvalidReferenceURI(String)
-        case UnresolvableReferenceRoot(String)
-        case ReferenceToNonObject(String)
-        case ObjectKeyNotFound(String)
-        case ArrayIndexNotFound(String)
+        case invalidReferenceURI(String)
+        case unresolvableReferenceRoot(String)
+        case referenceToNonObject(String)
+        case objectKeyNotFound(String)
+        case arrayIndexNotFound(String)
 
         public var debugDescription : String {
             switch self {
-            case InvalidReferenceURI(let x): return "InvalidReferenceURI: \(x)"
-            case UnresolvableReferenceRoot(let x): return "UnresolvableReferenceRoot: \(x)"
-            case ReferenceToNonObject(let x): return "ReferenceToNonObject: \(x)"
-            case ObjectKeyNotFound(let x): return "ObjectKeyNotFound: \(x)"
-            case ArrayIndexNotFound(let x): return "ArrayIndexNotFound: \(x)"
+            case invalidReferenceURI(let x): return "InvalidReferenceURI: \(x)"
+            case unresolvableReferenceRoot(let x): return "UnresolvableReferenceRoot: \(x)"
+            case referenceToNonObject(let x): return "ReferenceToNonObject: \(x)"
+            case objectKeyNotFound(let x): return "ObjectKeyNotFound: \(x)"
+            case arrayIndexNotFound(let x): return "ArrayIndexNotFound: \(x)"
             }
         }
     }
@@ -33,29 +33,29 @@ public extension Bric {
 
     /// A reference in a JSON Pointer as per http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
     public enum Ref: CustomStringConvertible {
-        case Key(String)
-        case Index(Int)
+        case key(String)
+        case index(Int)
 
         public init<R: RawRepresentable where R.RawValue == String>(key: R) {
-            self = Key(key.rawValue)
+            self = .key(key.rawValue)
         }
 
         public init(key: String) {
-            self = Key(key)
+            self = .key(key)
         }
 
         public init<R: RawRepresentable where R.RawValue == Int>(index: R) {
-            self = Index(index.rawValue)
+            self = .index(index.rawValue)
         }
 
         public init(index: Int) {
-            self = Index(index)
+            self = .index(index)
         }
 
         public var description: String {
             switch self {
-            case .Key(let key): return key
-            case .Index(let idx): return String(idx)
+            case .key(let key): return key
+            case .index(let idx): return String(idx)
             }
         }
     }
@@ -63,7 +63,7 @@ public extension Bric {
     public func resolve() throws -> [String : Bric] {
         return try resolve([:], resolver: { ref in
             if ref == "" { return self }
-            throw BricReferenceError.UnresolvableReferenceRoot(ref)
+            throw BricReferenceError.unresolvableReferenceRoot(ref)
         })
     }
 
@@ -72,17 +72,17 @@ public extension Bric {
     public func resolve(obj: [String : Bric] = [:], resolver: (String) throws -> Bric) throws -> [String : Bric] {
         var rmap = obj
         switch self {
-        case .Arr(let arr):
+        case .arr(let arr):
             for a in arr {
                 rmap = try a.resolve(rmap, resolver: resolver)
             }
             return rmap
 
-        case .Obj(var dict):
+        case .obj(var dict):
             // { "$ref": "http://example.com/example.json#/foo/bar" }
-            if case .Some(.Str(let ref)) = dict["$ref"] {
+            if case .Some(.str(let ref)) = dict["$ref"] {
                 var parts = ref.characters.split(allowEmptySlices: true, isSeparator: { $0 == "#" }).map({ String($0) })
-                if parts.count != 2 { throw BricReferenceError.UnresolvableReferenceRoot(ref) }
+                if parts.count != 2 { throw BricReferenceError.unresolvableReferenceRoot(ref) }
 
                 // resolve the absolute root: "http://example.com/example.json"
                 rmap[ref] = try resolver(parts[0]).reference(parts[1])
@@ -103,28 +103,28 @@ public extension Bric {
     public func find(pointer: Pointer) throws -> Bric {
         var node: Bric = self
         for ref in pointer {
-            if case .Arr(let arr) = node {
-                if case .Index(let index) = ref {
+            if case .arr(let arr) = node {
+                if case .index(let index) = ref {
                     if index < arr.count && index >= 0 {
                         node = arr[index]
                     } else {
-                        throw BricReferenceError.ArrayIndexNotFound("\(index)")
+                        throw BricReferenceError.arrayIndexNotFound("\(index)")
                     }
                 } else {
-                    throw BricReferenceError.ArrayIndexNotFound("")
+                    throw BricReferenceError.arrayIndexNotFound("")
                 }
-            } else if case .Obj(let obj) = node {
-                if case .Key(let key) = ref {
+            } else if case .obj(let obj) = node {
+                if case .key(let key) = ref {
                     if let found = obj[key] {
                         node = found
                     } else {
-                        throw BricReferenceError.ObjectKeyNotFound(key)
+                        throw BricReferenceError.objectKeyNotFound(key)
                     }
                 } else {
-                    throw BricReferenceError.ObjectKeyNotFound("")
+                    throw BricReferenceError.objectKeyNotFound("")
                 }
             } else {
-                throw BricReferenceError.ReferenceToNonObject("")
+                throw BricReferenceError.referenceToNonObject("")
             }
         }
         return node
@@ -140,23 +140,23 @@ public extension Bric {
             frag = frag.replace("~1", replacement: "/")
             frag = frag.replace("~0", replacement: "~")
 
-            if case .Arr(let arr) = node {
+            if case .arr(let arr) = node {
                 if let index = Int(frag) where index < arr.count && index >= 0 {
                     node = arr[index]
                 } else {
-                    throw BricReferenceError.ArrayIndexNotFound(frag)
+                    throw BricReferenceError.arrayIndexNotFound(frag)
                 }
-            } else if case .Obj(let obj) = node {
+            } else if case .obj(let obj) = node {
                 if let found = obj[frag] {
                     node = found
                 } else {
-                    throw BricReferenceError.ObjectKeyNotFound(frag)
+                    throw BricReferenceError.objectKeyNotFound(frag)
                 }
             }
         }
 
         // special case: trailing slashes will map to the "" key of an object
-        if case .Obj(let obj) = node where pointer.characters.last == "/" {
+        if case .obj(let obj) = node where pointer.characters.last == "/" {
             node = obj[""] ?? node
         }
 
@@ -168,28 +168,28 @@ extension Bric.Ref : Equatable { }
 
 extension Bric.Ref : StringLiteralConvertible {
     public init(stringLiteral value: String) {
-        self = .Key(value)
+        self = .key(value)
     }
 
     public init(extendedGraphemeClusterLiteral value: StringLiteralType) {
-        self = .Key(value)
+        self = .key(value)
     }
 
     public init(unicodeScalarLiteral value: StringLiteralType) {
-        self = .Key(value)
+        self = .key(value)
     }
 }
 
 extension Bric.Ref : IntegerLiteralConvertible {
     public init(integerLiteral value: Int) {
-        self = .Index(value)
+        self = .index(value)
     }
 }
 
 public func == (br1: Bric.Ref, br2: Bric.Ref) -> Bool {
     switch (br1, br2) {
-    case (.Index(let i1), .Index(let i2)): return i1 == i2
-    case (.Key(let k1), .Key(let k2)): return k1 == k2
+    case (.index(let i1), .index(let i2)): return i1 == i2
+    case (.key(let k1), .key(let k2)): return k1 == k2
     default: return false
     }
 }
@@ -197,8 +197,8 @@ public func == (br1: Bric.Ref, br2: Bric.Ref) -> Bool {
 extension Bric.Ref : Hashable {
     public var hashValue : Int {
         switch self {
-        case .Index(let index): return index.hashValue
-        case .Key(let key): return key.hashValue
+        case .index(let index): return index.hashValue
+        case .key(let key): return key.hashValue
         }
     }
 }
@@ -216,18 +216,18 @@ public extension Bric {
 
     @warn_unused_result private func alterPath(path: Pointer = [], _ mutator: (Pointer, Bric) throws -> Bric) rethrows -> Bric {
         switch self {
-        case .Arr(var values):
+        case .arr(var values):
             for (i, v) in values.enumerate() {
-                let p = path + [.Index(i)]
+                let p = path + [.index(i)]
                 values[i] = try mutator(p, v.alterPath(p, mutator))
             }
-            return try mutator(path, .Arr(values))
-        case .Obj(var dict):
+            return try mutator(path, .arr(values))
+        case .obj(var dict):
             for (k, v) in dict {
-                let p = path + [.Key(k)]
+                let p = path + [.key(k)]
                 dict[k] = try mutator(p, v.alterPath(p, mutator))
             }
-            return try mutator(path, .Obj(dict))
+            return try mutator(path, .obj(dict))
         default:
             return try mutator(path, self)
         }

@@ -10,7 +10,7 @@ public extension Schema {
     public init(type: SimpleTypes?) {
         var schema = Schema()
         if let type = type {
-            schema.type = .A(type)
+            schema.type = .a(type)
         }
         self = schema
     }
@@ -174,56 +174,56 @@ public struct Schema : BricBrac {
     public func validate() throws {
         if let _enum = _enum { // { "type": "array", "minItems": 1, "uniqueItems": true }
             if _enum.count == 0 {
-                throw SchemaError.EnumIsEmpty
+                throw SchemaError.enumIsEmpty
             } else if Set(_enum).count != _enum.count {
-                throw SchemaError.EnumIsNotUnique
+                throw SchemaError.enumIsNotUnique
             }
         }
     }
 
     public typealias StringArray = Array<String> // { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true }
     public enum AdditionalProperties : BricBrac {
-        case A(Bool) // { "type": "boolean" }
-        case B(Indirect<Schema>) // { "$ref": "#" } // TODO: make "indirect" in Swift 2
+        case a(Bool) // { "type": "boolean" }
+        case b(Indirect<Schema>) // { "$ref": "#" } // TODO: make "indirect" in Swift 2
 
         public func bric() -> Bric {
             switch self {
-            case let .A(x): return x.bric()
-            case let .B(x): return x.bric()
+            case let .a(x): return x.bric()
+            case let .b(x): return x.bric()
             }
         }
 
         public static func brac(bric: Bric) throws -> Schema.AdditionalProperties {
             switch bric {
-            case .Bol(let x): return .A(x)
-            case .Obj: return try .B(Indirect(Schema.brac(bric)))
+            case .bol(let x): return .a(x)
+            case .obj: return try .b(Indirect(Schema.brac(bric)))
             default: return try bric.invalidType()
             }
         }
     }
 
     public enum _Type : BricBrac {
-        case A(SimpleTypes) // { "$ref": "#/definitions/simpleTypes" }
-        case B([SimpleTypes]) // { "type": "array", "items": { "$ref": "#/definitions/simpleTypes" }, "minItems": 1, "uniqueItems": true }
+        case a(SimpleTypes) // { "$ref": "#/definitions/simpleTypes" }
+        case b([SimpleTypes]) // { "type": "array", "items": { "$ref": "#/definitions/simpleTypes" }, "minItems": 1, "uniqueItems": true }
 
         public var types: [SimpleTypes] {
             switch self {
-            case .A(let a): return [a]
-            case .B(let b): return b
+            case .a(let a): return [a]
+            case .b(let b): return b
             }
         }
         
         public func bric() -> Bric {
             switch self {
-            case let .A(x): return x.bric()
-            case let .B(x): return x.bric()
+            case let .a(x): return x.bric()
+            case let .b(x): return x.bric()
             }
         }
 
         public static func brac(bric: Bric) throws -> Schema._Type {
             switch bric {
-            case .Str: return try .A(Schema.SimpleTypes.brac(bric))
-            case .Arr(let x): return try .B(x.map(Schema.SimpleTypes.brac))
+            case .str: return try .a(Schema.SimpleTypes.brac(bric))
+            case .arr(let x): return try .b(x.map(Schema.SimpleTypes.brac))
             default: return try bric.invalidType()
             }
         }
@@ -235,77 +235,77 @@ public struct Schema : BricBrac {
     public typealias PositiveIntegerDefault0 = PositiveInteger // { "allOf": [ { "$ref": "#/definitions/positiveInteger" }, { "default": 0 } ] }
 
     public enum AdditionalItems : BricBrac {
-        case A(Bool) // { "type": "boolean" }
-        case B(Indirect<Schema>) // { "$ref": "#" } // TODO: make "indirect" in Swift 2
+        case a(Bool) // { "type": "boolean" }
+        case b(Indirect<Schema>) // { "$ref": "#" } // TODO: make "indirect" in Swift 2
 
         public func bric() -> Bric {
             switch self {
-            case let .A(x): return x.bric()
-            case let .B(x): return x.bric()
+            case let .a(x): return x.bric()
+            case let .b(x): return x.bric()
             }
         }
 
         public static func brac(bric: Bric) throws -> Schema.AdditionalItems {
             switch bric {
-            case .Bol(let x): return .A(x)
-            case .Obj: return try .B(Indirect(Schema.brac(bric)))
+            case .bol(let x): return .a(x)
+            case .obj: return try .b(Indirect(Schema.brac(bric)))
             default: return try bric.invalidType()
             }
         }
     }
 
     public enum Items : BricBrac {
-        case A(Indirect<Schema>) // { "$ref": "#" }
-        case B(SchemaArray) // { "$ref": "#/definitions/schemaArray" }
+        case a(Indirect<Schema>) // { "$ref": "#" }
+        case b(SchemaArray) // { "$ref": "#/definitions/schemaArray" }
 
         public func bric() -> Bric {
             switch self {
-            case let .A(x): return x.bric()
-            case let .B(x): return x.bric()
+            case let .a(x): return x.bric()
+            case let .b(x): return x.bric()
             }
         }
 
         public static func brac(bric: Bric) throws -> Schema.Items {
             switch bric {
-            case .Obj: return try .A(Indirect(Schema.brac(bric)))
-            case .Arr(let x): return try .B(x.map(Schema.brac))
+            case .obj: return try .a(Indirect(Schema.brac(bric)))
+            case .arr(let x): return try .b(x.map(Schema.brac))
             default: return try bric.invalidType()
             }
         }
     }
 
     public enum Dependencies : BricBrac {
-        case A(Indirect<Schema>) // { "$ref": "#" }
-        case B(StringArray) // { "$ref": "#/definitions/stringArray" }
+        case a(Indirect<Schema>) // { "$ref": "#" }
+        case b(StringArray) // { "$ref": "#/definitions/stringArray" }
 
         public func bric() -> Bric {
             switch self {
-            case let .A(x): return x.bric()
-            case let .B(x): return x.bric()
+            case let .a(x): return x.bric()
+            case let .b(x): return x.bric()
             }
         }
 
         public static func brac(bric: Bric) throws -> Schema.Dependencies {
             switch bric {
-            case .Obj: return try .A(Indirect(Schema.brac(bric)))
-            case .Arr(let x): return try .B(x.map(String.brac))
+            case .obj: return try .a(Indirect(Schema.brac(bric)))
+            case .arr(let x): return try .b(x.map(String.brac))
             default: return try bric.invalidType()
             }
         }
     }
 
     public enum SimpleTypes: String, BricBrac { // "enum": [ "array", "boolean", "integer", "null", "number", "object", "string" ]
-        case Array = "array"
-        case Boolean = "boolean"
-        case Integer = "integer"
-        case Null = "null"
-        case Number = "number"
-        case Object = "object"
-        case String = "string"
+        case array = "array"
+        case boolean = "boolean"
+        case integer = "integer"
+        case null = "null"
+        case number = "number"
+        case object = "object"
+        case string = "string"
     }
 
     public enum SchemaError : ErrorType {
-        case EnumIsEmpty
-        case EnumIsNotUnique
+        case enumIsEmpty
+        case enumIsNotUnique
     }
 }

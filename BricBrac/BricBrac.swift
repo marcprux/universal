@@ -33,7 +33,7 @@ public struct NotBrac<T: Bricable where T: Bracable> : BricBrac, NilLiteralConve
     public init(nilLiteral: ()) { }
 
     /// this type does not bric to anything
-    public func bric() -> Bric { return .Nul }
+    public func bric() -> Bric { return .nul }
 
     public static func brac(bric: Bric) throws -> NotBrac {
         do {
@@ -41,6 +41,6 @@ public struct NotBrac<T: Bricable where T: Bracable> : BricBrac, NilLiteralConve
         } catch {
             return NotBrac()
         }
-        throw BracError.ShouldNotBracError(type: T.self, path: [])
+        throw BracError.shouldNotBracError(type: T.self, path: [])
     }
 }

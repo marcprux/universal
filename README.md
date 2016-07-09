@@ -133,7 +133,7 @@ extension NSDate : Bricable, Bracable {
 
     /// NSDate will be saved as a ISO-8601 string
     public func bric() -> Bric {
-        return Bric.Str(NSDate.ISO8601Formatter.stringFromDate(self) as String)
+        return Bric.str(NSDate.ISO8601Formatter.stringFromDate(self) as String)
     }
 
     /// Restore an NSDate from a "time" field

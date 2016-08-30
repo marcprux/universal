@@ -1,8 +1,10 @@
-# Xcode
-#
+# .gitignore for xcode projects
+
+## Build generated
 build/
-/.build
-/Packages
+DerivedData/
+
+## Various settings
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -11,25 +13,19 @@ build/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
-xcuserdata
-*.xccheckout
+xcuserdata/
+
+## Other
 *.moved-aside
-DerivedData
-*.hmap
-*.ipa
 *.xcuserstate
-*.xcscmblueprint
 
-# CocoaPods
-#
-# We recommend against adding the Pods directory to your .gitignore. However
-# you should judge for yourself, the pros and cons are mentioned at:
-# http://guides.cocoapods.org/using/using-cocoapods.html#should-i-ignore-the-pods-directory-in-source-control
-#
-# Pods/
+## Obj-C/Swift specific
+*.hmap
 
-# Mac OS X
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Mac OS X
 .DS_Store
 
-# Quick
-Quick.framework.zip

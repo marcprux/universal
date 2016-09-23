@@ -1,5 +1,5 @@
 osx_image: xcode8
-language: swift
+language: Objective-C
 xcode_project: BricBrac.xcodeproj
 xcode_scheme: BricBrac
 script:

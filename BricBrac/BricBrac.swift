@@ -11,7 +11,7 @@
 /// and the ability to perform a deep copy with `bricbrac()`; note that standard primitives like String and Bool
 /// conform to both Bricable and Bracable but not to BricBrac because we don't want to conflict with their own
 /// Equatable and Hashable implementations
-public protocol BricBrac: Bricable, Bracable, Breqable {
+public protocol BricBrac: Bricable, Bracable, Breqable, Equatable {
 //    /// Perform semantic validation of the BricBrac; this could verify requirements that
 //    /// cannot be addressed by the type system, such as string and array length requirements
 //    func validate() throws
@@ -19,7 +19,7 @@ public protocol BricBrac: Bricable, Bracable, Breqable {
 
 public extension BricBrac {
     /// Returns a deep copy of this instance
-    func bricbrac() throws -> Self { return try Self.brac(self.bric()) }
+    func bricbrac() throws -> Self { return try Self.brac(bric: self.bric()) }
 
 //    /// The default validation method does nothing
 //    func validate() { }
@@ -28,7 +28,7 @@ public extension BricBrac {
 
 /// A BricBrac that only bracs elements that do not conform to the underlying type
 /// Useful for handling "not" elements of the JSON Schema spec
-public struct NotBrac<T: Bricable where T: Bracable> : BricBrac, NilLiteralConvertible {
+public struct NotBrac<T: Bricable> : BricBrac, ExpressibleByNilLiteral where T: Bracable {
     public init() { }
     public init(nilLiteral: ()) { }
 
@@ -37,10 +37,14 @@ public struct NotBrac<T: Bricable where T: Bracable> : BricBrac, NilLiteralConve
 
     public static func brac(bric: Bric) throws -> NotBrac {
         do {
-            try T.brac(bric)
+            _ = try T.brac(bric: bric)
         } catch {
             return NotBrac()
         }
         throw BracError.shouldNotBracError(type: T.self, path: [])
     }
+}
+
+public func ==<T: Bricable>(lhs: NotBrac<T>, rhs: NotBrac<T>) -> Bool {
+    return lhs.breq(rhs)
 }

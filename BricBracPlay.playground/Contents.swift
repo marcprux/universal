@@ -99,7 +99,7 @@ struct Product : BricBrac {
     }
 
     static func brac(bric: Bric) throws -> Product {
-        return try Product(name: bric.bracKey("name"), weight: bric.bracKey("weight"), description: bric.bracKey("description"), tags: bric.bracKey("tags"))
+        return try Product(name: bric.brac(key: "name"), weight: bric.brac(key: "weight"), description: bric.brac(key: "description"), tags: bric.brac(key: "tags"))
     }
 }
 
@@ -124,7 +124,7 @@ extension CGPoint : Bricable, Bracable {
     }
 
     public static func brac(bric: Bric) throws -> CGPoint {
-        return try CGPoint(x: bric.bracKey("x") as CGFloat.NativeType, y: bric.bracKey("y") as CGFloat.NativeType)
+        return try CGPoint(x: bric.brac(key: "x") as CGFloat.NativeType, y: bric.brac(key: "y") as CGFloat.NativeType)
     }
 }
 
@@ -236,7 +236,7 @@ extension Order : BricBrac {
     }
 
     static func brac(bric: Bric) throws -> Order {
-        return try Order(date: bric.bracKey("date"), type: bric.bracKey("type"), products: bric.bracKey("products"), location: bric.bracKey("location"))
+        return try Order(date: bric.brac(key: "date"), type: bric.brac(key: "type"), products: bric.brac(key: "products"), location: bric.brac(key: "location"))
     }
 }
 
@@ -252,5 +252,4 @@ order.location = CGPoint(x: 1043, y: 433)
 order.bric() // {"type":"direct","location":{"y":433,"x":1043},"date":"2015-09-14T13:33:16-04:00","products":[{"name":"MacBook","weight":2,"tags":["laptop","computer"],"description":"A Nice Laptop"}]}
 
 // {"args":{},"origin":"61.46.1.98","headers":{"Accept-Encoding":"gzip, deflate","Accept-Language":"en-us","Accept":"*/*","User-Agent":"BricBracPlay/1 CFNetwork/760.0.5 Darwin/15.0.0 (x86_64)","Host":"httpbin.org"},"url":"http://httpbin.org/get"}
-let rest = try Bric.parse(String(contentsOfURL: NSURL(string: "http://httpbin.org/get")!, encoding: NSUTF8StringEncoding))
-
+let rest = try Bric.parse(String(contentsOfURL: NSURL(string: "http://httpbin.org/get")!, encoding: NSUT

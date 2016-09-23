@@ -6,19 +6,18 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
-#if !os(Linux) // should work eventually, but build bugs in swift-DEVELOPMENT-SNAPSHOT-2016-02-25-a-ubuntu14.04
 import Foundation
 import CoreFoundation
 
 public extension Bric {
 
     /// Validates the given JSON string and throws an error if there was a problem
-    public static func parseCocoa(string: String, options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
+    public static func parseCocoa(_ string: String, options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
         return try FoundationBricolage.parseJSON(Array(string.unicodeScalars), options: options).object
     }
 
     /// Validates the given array of unicode scalars and throws an error if there was a problem
-    public static func parseCocoa(scalars: [UnicodeScalar], options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
+    public static func parseCocoa(_ scalars: [UnicodeScalar], options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
         return try FoundationBricolage.parseJSON(scalars, options: options).object
     }
 }
@@ -48,11 +47,11 @@ public final class FoundationBricolage: NSObject, Bricolage {
     public static func createObject() -> ObjType { return ObjType() }
     public static func createArray() -> ArrType { return ArrType() }
 
-    public static func createString(scalars: [UnicodeScalar]) -> StrType? {
+    public static func createString(_ scalars: [UnicodeScalar]) -> StrType? {
         return String(String.UnicodeScalarView() + scalars) as NSString
     }
 
-    public static func createNumber(scalars: [UnicodeScalar]) -> NumType? {
+    public static func createNumber(_ scalars: [UnicodeScalar]) -> NumType? {
         if let str: NSString = createString(Array(scalars)) {
             return NSDecimalNumber(string: str as String) // needed for 0.123456789e-12
         } else {
@@ -60,13 +59,13 @@ public final class FoundationBricolage: NSObject, Bricolage {
         }
     }
 
-    public static func putKeyValue(obj: ObjType, key: StrType, value: FoundationBricolage) -> ObjType {
+    public static func putKeyValue(_ obj: ObjType, key: StrType, value: FoundationBricolage) -> ObjType {
         obj.setObject(value.object, forKey: key)
         return obj
     }
 
-    public static func putElement(arr: ArrType, element: FoundationBricolage) -> ArrType {
-        arr.addObject(element.object)
+    public static func putElement(_ arr: ArrType, element: FoundationBricolage) -> ArrType {
+        arr.add(element.object)
         return arr
     }
 }
@@ -77,9 +76,9 @@ extension FoundationBricolage : Bricable, Bracable {
         return FoundationBricolage.toBric(object)
     }
 
-    private static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
-    private static func toBric(object: AnyObject) -> Bric {
-        if let bol = object as? BolType where bolTypes.contains(String.fromCString(bol.objCType) ?? "") {
+    fileprivate static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
+    fileprivate static func toBric(_ object: Any) -> Bric {
+        if let bol = object as? BolType , bolTypes.contains(String(cString: bol.objCType)) {
             return Bric.bol(bol as Bool)
         }
         if let str = object as? StrType {
@@ -94,7 +93,7 @@ extension FoundationBricolage : Bricable, Bracable {
         if let obj = object as? ObjType {
             var dict: [String: Bric] = [:]
             for (key, value) in obj {
-                dict[String(key)] = toBric(value)
+                dict[String(describing: key)] = toBric(value as AnyObject)
             }
             return Bric.obj(dict)
         }
@@ -109,19 +108,19 @@ extension FoundationBricolage : Bricable, Bracable {
         case .bol(let bol):
             return FoundationBricolage(bol: bol ? FoundationBricolage.createTrue() : FoundationBricolage.createFalse())
         case .str(let str):
-            return FoundationBricolage(str: str)
+            return FoundationBricolage(str: FoundationBricolage.StrType(string: str))
         case .num(let num):
-            return FoundationBricolage(num: num)
+            return FoundationBricolage(num: FoundationBricolage.NumType(value: num))
         case .arr(let arr):
             let nsarr = FoundationBricolage.createArray()
             for a in arr {
-                FoundationBricolage.putElement(nsarr, element: FoundationBricolage.brac(a))
+                _ = FoundationBricolage.putElement(nsarr, element: FoundationBricolage.brac(bric: a))
             }
             return FoundationBricolage(arr: nsarr)
         case .obj(let obj):
             let nsobj = FoundationBricolage.createObject()
             for (k, v) in obj {
-                FoundationBricolage.putKeyValue(nsobj, key: k, value: FoundationBricolage.brac(v))
+                _ = FoundationBricolage.putKeyValue(nsobj, key: k as NSString, value: FoundationBricolage.brac(bric: v))
             }
             return FoundationBricolage(obj: nsobj)
         }
@@ -137,17 +136,17 @@ public final class CoreFoundationBricolage: Bricolage {
     public typealias ArrType = CFMutableArray
     public typealias ObjType = CFMutableDictionary
 
-    public let ptr: UnsafePointer<AnyObject>
+    public let ptr: UnsafeMutableRawPointer
 
-    public init(str: StrType) { self.ptr = UnsafePointer(Unmanaged.passRetained(str).toOpaque()) }
-    public init(num: NumType) { self.ptr = UnsafePointer(Unmanaged.passRetained(num).toOpaque()) }
-    public init(bol: BolType) { self.ptr = UnsafePointer(Unmanaged.passRetained(bol).toOpaque()) }
-    public init(arr: ArrType) { self.ptr = UnsafePointer(Unmanaged.passRetained(arr).toOpaque()) }
-    public init(obj: ObjType) { self.ptr = UnsafePointer(Unmanaged.passRetained(obj).toOpaque()) }
-    public init(nul: NulType) { self.ptr = UnsafePointer(Unmanaged.passRetained(nul).toOpaque()) }
+    public init(str: StrType) { self.ptr = Unmanaged.passRetained(str).toOpaque() }
+    public init(num: NumType) { self.ptr = Unmanaged.passRetained(num).toOpaque() }
+    public init(bol: BolType) { self.ptr = Unmanaged.passRetained(bol).toOpaque() }
+    public init(arr: ArrType) { self.ptr = Unmanaged.passRetained(arr).toOpaque() }
+    public init(obj: ObjType) { self.ptr = Unmanaged.passRetained(obj).toOpaque() }
+    public init(nul: NulType) { self.ptr = Unmanaged.passRetained(nul).toOpaque() }
 
     deinit {
-        Unmanaged<AnyObject>.fromOpaque(COpaquePointer(ptr)).release()
+        Unmanaged<AnyObject>.fromOpaque(ptr).release()
     }
 
     public static func createNull() -> NulType { return kCFNull }
@@ -156,11 +155,11 @@ public final class CoreFoundationBricolage: Bricolage {
     public static func createObject() -> ObjType { return CFDictionaryCreateMutable(nil, 0, nil, nil) }
     public static func createArray() -> ArrType { return CFArrayCreateMutable(nil, 0, nil) }
 
-    public static func createString(scalars: [UnicodeScalar]) -> StrType? {
-        return String(String.UnicodeScalarView() + scalars)
+    public static func createString(_ scalars: [UnicodeScalar]) -> StrType? {
+        return String(String.UnicodeScalarView() + scalars) as CoreFoundationBricolage.StrType?
     }
 
-    public static func createNumber(scalars: [UnicodeScalar]) -> NumType? {
+    public static func createNumber(_ scalars: [UnicodeScalar]) -> NumType? {
         if let str = createString(Array(scalars)) {
             return NSDecimalNumber(string: str as String) // needed for 0.123456789e-12
         } else {
@@ -168,14 +167,13 @@ public final class CoreFoundationBricolage: Bricolage {
         }
     }
 
-    public static func putKeyValue(obj: ObjType, key: StrType, value: CoreFoundationBricolage) -> ObjType {
-        CFDictionarySetValue(obj, UnsafePointer<Void>(Unmanaged<CFString>.passRetained(key).toOpaque()), value.ptr)
+    public static func putKeyValue(_ obj: ObjType, key: StrType, value: CoreFoundationBricolage) -> ObjType {
+        CFDictionarySetValue(obj, UnsafeRawPointer(Unmanaged<CFString>.passRetained(key).toOpaque()), value.ptr)
         return obj
     }
 
-    public static func putElement(arr: ArrType, element: CoreFoundationBricolage) -> ArrType {
+    public static func putElement(_ arr: ArrType, element: CoreFoundationBricolage) -> ArrType {
         CFArrayAppendValue(arr, element.ptr)
         return arr
     }
 }
-#endif // #if !os(Linux)

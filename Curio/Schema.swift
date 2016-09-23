@@ -133,41 +133,41 @@ public struct Schema : BricBrac {
     public static func brac(bric: Bric) throws -> Schema {
 //        fatalError()
         return try Schema(
-            ref: bric.bracKey(Keys.ref),
-            type: bric.bracKey(Keys.type),
-            id: bric.bracKey(Keys.id),
-            _schema: bric.bracKey(Keys._schema),
-            title: bric.bracKey(Keys.title),
-            description: bric.bracKey(Keys.description),
-            _default: bric.bracKey(Keys._default),
-            multipleOf: bric.bracKey(Keys.multipleOf),
-            maximum: bric.bracKey(Keys.maximum),
-            exclusiveMaximum: bric.bracKey(Keys.exclusiveMaximum),
-            minimum: bric.bracKey(Keys.minimum),
-            exclusiveMinimum: bric.bracKey(Keys.exclusiveMinimum),
-            maxLength: bric.bracKey(Keys.maxLength),
-            minLength: bric.bracKey(Keys.minLength),
-            pattern: bric.bracKey(Keys.pattern),
-            additionalItems: bric.bracKey(Keys.additionalItems),
-            items: bric.bracKey(Keys.items),
-            maxItems: bric.bracKey(Keys.maxItems),
-            minItems: bric.bracKey(Keys.minItems),
-            uniqueItems: bric.bracKey(Keys.uniqueItems),
-            maxProperties: bric.bracKey(Keys.maxProperties),
-            minProperties: bric.bracKey(Keys.minProperties),
-            required: bric.bracKey(Keys.required),
-            propertyOrder: bric.bracKey(Keys.propertyOrder),
-            additionalProperties: bric.bracKey(Keys.additionalProperties),
-            definitions: bric.bracKey(Keys.definitions),
-            properties: bric.bracKey(Keys.properties),
-            patternProperties: bric.bracKey(Keys.patternProperties),
-            dependencies: bric.bracKey(Keys.dependencies),
-            _enum: bric.bracKey(Keys._enum),
-            allOf: bric.bracKey(Keys.allOf),
-            anyOf: bric.bracKey(Keys.anyOf),
-            oneOf: bric.bracKey(Keys.oneOf),
-            not: bric.bracKey(Keys.not),
-            _additionalProperties: bric.bracDisjoint(Keys) // everything else
+            ref: bric.brac(key: Keys.ref),
+            type: bric.brac(key: Keys.type),
+            id: bric.brac(key: Keys.id),
+            _schema: bric.brac(key: Keys._schema),
+            title: bric.brac(key: Keys.title),
+            description: bric.brac(key: Keys.description),
+            _default: bric.brac(key: Keys._default),
+            multipleOf: bric.brac(key: Keys.multipleOf),
+            maximum: bric.brac(key: Keys.maximum),
+            exclusiveMaximum: bric.brac(key: Keys.exclusiveMaximum),
+            minimum: bric.brac(key: Keys.minimum),
+            exclusiveMinimum: bric.brac(key: Keys.exclusiveMinimum),
+            maxLength: bric.brac(key: Keys.maxLength),
+            minLength: bric.brac(key: Keys.minLength),
+            pattern: bric.brac(key: Keys.pattern),
+            additionalItems: bric.brac(key: Keys.additionalItems),
+            items: bric.brac(key: Keys.items),
+            maxItems: bric.brac(key: Keys.maxItems),
+            minItems: bric.brac(key: Keys.minItems),
+            uniqueItems: bric.brac(key: Keys.uniqueItems),
+            maxProperties: bric.brac(key: Keys.maxProperties),
+            minProperties: bric.brac(key: Keys.minProperties),
+            required: bric.brac(key: Keys.required),
+            propertyOrder: bric.brac(key: Keys.propertyOrder),
+            additionalProperties: bric.brac(key: Keys.additionalProperties),
+            definitions: bric.brac(key: Keys.definitions),
+            properties: bric.brac(key: Keys.properties),
+            patternProperties: bric.brac(key: Keys.patternProperties),
+            dependencies: bric.brac(key: Keys.dependencies),
+            _enum: bric.brac(key: Keys._enum),
+            allOf: bric.brac(key: Keys.allOf),
+            anyOf: bric.brac(key: Keys.anyOf),
+            oneOf: bric.brac(key: Keys.oneOf),
+            not: bric.brac(key: Keys.not),
+            _additionalProperties: bric.brac(disjoint: Keys.self) // everything else
         )
     }
 
@@ -196,7 +196,7 @@ public struct Schema : BricBrac {
         public static func brac(bric: Bric) throws -> Schema.AdditionalProperties {
             switch bric {
             case .bol(let x): return .a(x)
-            case .obj: return try .b(Indirect(Schema.brac(bric)))
+            case .obj: return try .b(Indirect(Schema.brac(bric: bric)))
             default: return try bric.invalidType()
             }
         }
@@ -222,7 +222,7 @@ public struct Schema : BricBrac {
 
         public static func brac(bric: Bric) throws -> Schema._Type {
             switch bric {
-            case .str: return try .a(Schema.SimpleTypes.brac(bric))
+            case .str: return try .a(Schema.SimpleTypes.brac(bric: bric))
             case .arr(let x): return try .b(x.map(Schema.SimpleTypes.brac))
             default: return try bric.invalidType()
             }
@@ -248,7 +248,7 @@ public struct Schema : BricBrac {
         public static func brac(bric: Bric) throws -> Schema.AdditionalItems {
             switch bric {
             case .bol(let x): return .a(x)
-            case .obj: return try .b(Indirect(Schema.brac(bric)))
+            case .obj: return try .b(Indirect(Schema.brac(bric: bric)))
             default: return try bric.invalidType()
             }
         }
@@ -267,7 +267,7 @@ public struct Schema : BricBrac {
 
         public static func brac(bric: Bric) throws -> Schema.Items {
             switch bric {
-            case .obj: return try .a(Indirect(Schema.brac(bric)))
+            case .obj: return try .a(Indirect(Schema.brac(bric: bric)))
             case .arr(let x): return try .b(x.map(Schema.brac))
             default: return try bric.invalidType()
             }
@@ -287,7 +287,7 @@ public struct Schema : BricBrac {
 
         public static func brac(bric: Bric) throws -> Schema.Dependencies {
             switch bric {
-            case .obj: return try .a(Indirect(Schema.brac(bric)))
+            case .obj: return try .a(Indirect(Schema.brac(bric: bric)))
             case .arr(let x): return try .b(x.map(String.brac))
             default: return try bric.invalidType()
             }
@@ -304,7 +304,7 @@ public struct Schema : BricBrac {
         case string = "string"
     }
 
-    public enum SchemaError : ErrorType {
+    public enum SchemaError : Error {
         case enumIsEmpty
         case enumIsNotUnique
     }

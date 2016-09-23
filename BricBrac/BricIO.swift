@@ -6,10 +6,9 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
-extension Bric : Streamable {
-
+extension Bric : TextOutputStreamable {
     /// Streamable protocol implementation that writes the Bric as JSON to the given Target
-    public func writeTo<Target : OutputStreamType>(inout target: Target) {
+    public func write<Target : TextOutputStream>(to target: inout Target) {
         writeJSON(&target)
     }
 
@@ -18,24 +17,24 @@ extension Bric : Streamable {
     /// - Parameter space: the number of indentation spaces to use for pretty-printing
     /// - Parameter maxline: fit pretty-printed output on a single line if it is less than maxline
     /// - Parameter mapper: When set, .Obj instances will be passed through the given mapper to filter, re-order, or modify the values
-    @warn_unused_result
-    public func stringify(space space: Int = 0, maxline: Int = 0, bufferSize: Int? = nil, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { AnyGenerator($0.generate()) })->String {
+    
+    public func stringify(space: Int = 0, maxline: Int = 0, bufferSize: Int? = nil, mapper: @escaping ([String: Bric])->AnyIterator<(key: String, value: Bric)> = { AnyIterator($0.makeIterator()) })->String {
         var str = String()
         if let bufferSize = bufferSize {
             str.reserveCapacity(bufferSize)
         }
-        let spacer = String(count: space, repeatedValue: Character(" "))
+        let spacer = String(repeating: " ", count: space)
         self.writeJSON(&str, spacer: spacer, maxline: maxline, mapper: mapper)
         return str
     }
 
     // the emission state; note that indexes go from -1...count, since the edges are markers for container open/close tokens
-    private enum State {
+    fileprivate enum State {
         case arr(index: Int, array: [Bric])
-        case obj(index: Int, object: [(String, Bric)])
+        case obj(index: Int, object: [(key: String, value: Bric)])
     }
 
-    public func writeJSON<Target: OutputStreamType>(inout output: Target, spacer: String = "", maxline: Int = 0, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { AnyGenerator($0.generate()) }) {
+    public func writeJSON<Target: TextOutputStream>(_ output: inout Target, spacer: String = "", maxline: Int = 0, mapper: @escaping ([String: Bric])->AnyIterator<(key: String, value: Bric)> = { AnyIterator($0.makeIterator()) }) {
         if maxline <= 0 {
             writeJSON(&output, writer: FormattingJSONWriter<Target>(spacer: spacer), mapper: mapper)
         } else {
@@ -44,13 +43,13 @@ extension Bric : Streamable {
     }
 
     /// A non-recursive streaming JSON stringifier
-    public func writeJSON<Target: OutputStreamType, Writer: JSONWriter where Writer.Target == Target>(inout output: Target, writer: Writer, mapper: [String: Bric]->AnyGenerator<(String, Bric)> = { AnyGenerator($0.generate()) }) {
+    public func writeJSON<Target: TextOutputStream, Writer: JSONWriter>(_ output: inout Target, writer: Writer, mapper: @escaping ([String: Bric])->AnyIterator<(key: String, value: Bric)> = { AnyIterator($0.makeIterator()) }) where Writer.Target == Target {
         // the current stack of containers; we use this instead of recursion to track where we are in the process
         var stack: [State] = []
 
         writer.writeStart(&output)
 
-        func processBric(bric: Bric) {
+        func processBric(_ bric: Bric) {
             switch bric {
             case .nul:
                 writer.writeNull(&output)
@@ -68,7 +67,7 @@ extension Bric : Streamable {
             }
         }
 
-        func processArrayElement(index: Int, array: [Bric]) {
+        func processArrayElement(_ index: Int, array: [Bric]) {
             if index == -1 {
                 writer.writeArrayOpen(&output)
                 return
@@ -86,7 +85,7 @@ extension Bric : Streamable {
             processBric(element)
         }
 
-        func processObjectElement(index: Int, object: [(String, Bric)]) {
+        func processObjectElement(_ index: Int, object: [(key: String, value: Bric)]) {
             if index == -1 {
                 writer.writeObjectOpen(&output)
                 return
@@ -161,24 +160,24 @@ public protocol Bricolage {
     init(arr: ArrType)
     init(obj: ObjType)
 
-    @warn_unused_result
+    
     static func createNull() -> NulType
-    @warn_unused_result
+    
     static func createTrue() -> BolType
-    @warn_unused_result
+    
     static func createFalse() -> BolType
-    @warn_unused_result
+    
     static func createObject() -> ObjType
-    @warn_unused_result
+    
     static func createArray() -> ArrType
-    @warn_unused_result
-    static func createString(scalars: [UnicodeScalar]) -> StrType?
-    @warn_unused_result
-    static func createNumber(scalars: [UnicodeScalar]) -> NumType?
-    @warn_unused_result
-    static func putKeyValue(obj: ObjType, key: StrType, value: Self) -> ObjType
-    @warn_unused_result
-    static func putElement(arr: ArrType, element: Self) -> ArrType
+    
+    static func createString(_ scalars: [UnicodeScalar]) -> StrType?
+    
+    static func createNumber(_ scalars: [UnicodeScalar]) -> NumType?
+    
+    static func putKeyValue(_ obj: ObjType, key: StrType, value: Self) -> ObjType
+    
+    static func putElement(_ arr: ArrType, element: Self) -> ArrType
 }
 
 /// An empty implementation of JSON storage which can be used for fast validation
@@ -200,12 +199,12 @@ public struct EmptyBricolage: Bricolage {
     public static func createNull() -> NulType { }
     public static func createTrue() -> BolType { }
     public static func createFalse() -> BolType { }
-    public static func createString(scalars: [UnicodeScalar]) -> StrType? { return StrType() }
-    public static func createNumber(scalars: [UnicodeScalar]) -> NumType? { return NumType() }
+    public static func createString(_ scalars: [UnicodeScalar]) -> StrType? { return StrType() }
+    public static func createNumber(_ scalars: [UnicodeScalar]) -> NumType? { return NumType() }
     public static func createArray() -> ArrType { }
     public static func createObject() -> ObjType { }
-    public static func putElement(arr: ArrType, element: EmptyBricolage) -> ArrType { }
-    public static func putKeyValue(obj: ObjType, key: StrType, value: EmptyBricolage) -> ObjType { }
+    public static func putElement(_ arr: ArrType, element: EmptyBricolage) -> ArrType { }
+    public static func putKeyValue(_ obj: ObjType, key: StrType, value: EmptyBricolage) -> ObjType { }
 }
 
 /// Storage for JSON that maintains the raw underlying JSON values, which means that long number
@@ -237,10 +236,10 @@ public enum FidelityBricolage : Bricolage {
     public static func createFalse() -> BolType { return false }
     public static func createObject() -> ObjType { return ObjType() }
     public static func createArray() -> ArrType { return ArrType() }
-    public static func createString(scalars: [UnicodeScalar]) -> StrType? { return scalars }
-    public static func createNumber(scalars: [UnicodeScalar]) -> NumType? { return scalars }
-    public static func putElement(arr: ArrType, element: FidelityBricolage) -> ArrType { return arr + [element] }
-    public static func putKeyValue(obj: ObjType, key: StrType, value: FidelityBricolage) -> ObjType { return obj + [(key, value)] }
+    public static func createString(_ scalars: [UnicodeScalar]) -> StrType? { return scalars }
+    public static func createNumber(_ scalars: [UnicodeScalar]) -> NumType? { return scalars }
+    public static func putElement(_ arr: ArrType, element: FidelityBricolage) -> ArrType { return arr + [element] }
+    public static func putKeyValue(_ obj: ObjType, key: StrType, value: FidelityBricolage) -> ObjType { return obj + [(key, value)] }
 }
 
 public protocol Bricolagable : Bricable {
@@ -280,17 +279,17 @@ extension FidelityBricolage : Bricolagable {
     }
 }
 
-extension FidelityBricolage : NilLiteralConvertible {
+extension FidelityBricolage : ExpressibleByNilLiteral {
     public init(nilLiteral: ()) { self = .nul() }
 }
 
-extension FidelityBricolage : BooleanLiteralConvertible {
+extension FidelityBricolage : ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: Bool) {
         self = .bol(value ? FidelityBricolage.createTrue() : FidelityBricolage.createFalse())
     }
 }
 
-extension FidelityBricolage : StringLiteralConvertible {
+extension FidelityBricolage : ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = .str(Array(value.unicodeScalars))
     }
@@ -304,25 +303,25 @@ extension FidelityBricolage : StringLiteralConvertible {
     }
 }
 
-extension FidelityBricolage : IntegerLiteralConvertible {
+extension FidelityBricolage : ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         self = .num(Array(String(value).unicodeScalars))
     }
 }
 
-extension FidelityBricolage : FloatLiteralConvertible {
+extension FidelityBricolage : ExpressibleByFloatLiteral {
     public init(floatLiteral value: Double) {
         self = .num(Array(String(value).unicodeScalars))
     }
 }
 
-extension FidelityBricolage : ArrayLiteralConvertible {
+extension FidelityBricolage : ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: FidelityBricolage...) {
         self = .arr(elements)
     }
 }
 
-extension FidelityBricolage : DictionaryLiteralConvertible {
+extension FidelityBricolage : ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (String, FidelityBricolage)...) {
         self = .obj(elements.map({ (key, value) in (Array(key.unicodeScalars), value) }))
     }
@@ -351,10 +350,10 @@ extension Bric: Bricolage {
     public static func createFalse() -> BolType { return false }
     public static func createObject() -> ObjType { return ObjType() }
     public static func createArray() -> ArrType { return ArrType() }
-    public static func createString(scalars: [UnicodeScalar]) -> StrType? { return String(scalars: scalars) }
-    public static func createNumber(scalars: [UnicodeScalar]) -> NumType? { return Double(String(scalars: scalars)) }
-    public static func putElement(arr: ArrType, element: Bric) -> ArrType { return arr + [element] }
-    public static func putKeyValue(object: ObjType, key: StrType, value: Bric) -> ObjType {
+    public static func createString(_ scalars: [UnicodeScalar]) -> StrType? { return String(scalars: scalars) }
+    public static func createNumber(_ scalars: [UnicodeScalar]) -> NumType? { return Double(String(scalars: scalars)) }
+    public static func putElement(_ arr: ArrType, element: Bric) -> ArrType { return arr + [element] }
+    public static func putKeyValue(_ object: ObjType, key: StrType, value: Bric) -> ObjType {
         var obj = object
         obj[key] = value
         return obj
@@ -363,14 +362,14 @@ extension Bric: Bricolage {
 
 extension Bricolage {
     /// Parses the given JSON string and returns some Bric
-    public static func parse(string: String, options: JSONParser.Options = .Strict) throws -> Self {
+    public static func parse(_ string: String, options: JSONParser.Options = .Strict) throws -> Self {
         return try parseBricolage(Array(string.unicodeScalars), options: options)
         // the following also works fine, but converting to an array first is dramatically faster (over 2x faster for caliper.json)
         // return try Bric.parseBricolage(string.unicodeScalars, options: options)
     }
 
     /// Parses the given JSON array of unicode scalars and returns some Bric
-    public static func parse(scalars: [UnicodeScalar], options: JSONParser.Options = .Strict) throws -> Self {
+    public static func parse(_ scalars: [UnicodeScalar], options: JSONParser.Options = .Strict) throws -> Self {
         return try parseJSON(scalars, options: options)
     }
 }
@@ -378,12 +377,12 @@ extension Bricolage {
 
 extension Bricolage {
     /// Validates the given JSON string and throws an error if there was a problem
-    public static func validate(string: String, options: JSONParser.Options) throws {
+    public static func validate(_ string: String, options: JSONParser.Options) throws {
         try JSONParser(options: options).parse(Array(string.unicodeScalars), complete: true)
     }
 
     /// Validates the given array of JSON unicode scalars and throws an error if there was a problem
-    public static func validate(scalars: [UnicodeScalar], options: JSONParser.Options) throws {
+    public static func validate(_ scalars: [UnicodeScalar], options: JSONParser.Options) throws {
         try JSONParser(options: options).parse(scalars, complete: true)
     }
 }
@@ -394,11 +393,11 @@ private enum Container<T : Bricolage> {
 }
 
 extension Bricolage {
-    public static func parseJSON(scalars: [UnicodeScalar], options opts: JSONParser.Options) throws -> Self {
+    public static func parseJSON(_ scalars: [UnicodeScalar], options opts: JSONParser.Options) throws -> Self {
         return try parseBricolage(scalars, options: opts)
     }
 
-    public static func parseBricolage<S: SequenceType where S.Generator.Element == UnicodeScalar>(scalars: S, options opts: JSONParser.Options) throws -> Self {
+    public static func parseBricolage<S: Sequence>(_ scalars: S, options opts: JSONParser.Options) throws -> Self where S.Iterator.Element == UnicodeScalar {
         typealias T = Self
         var current: T = T(nul: T.createNull()) // the current object being processed
 
@@ -408,9 +407,9 @@ extension Bricolage {
             return bric
         }
 
-        assert(isUniquelyReferencedNonObjC(&parser))
+        assert(isKnownUniquelyReferenced(&parser))
         try parser.parse(scalars, complete: true)
-        assert(isUniquelyReferencedNonObjC(&parser)) // leak prevention
+        assert(isKnownUniquelyReferenced(&parser)) // leak prevention
         return current
     }
 
@@ -424,7 +423,7 @@ extension Bricolage {
     ///   actual Bricolage instance that should be added to the stack
     ///
     /// - returns: a configured JSON parser with the Bricolage delegate
-    public static func bricolageParser(options opts: JSONParser.Options, delegate: (Self, level: Int) -> Self) -> JSONParser {
+    public static func bricolageParser(options opts: JSONParser.Options, delegate: @escaping (Self, _ level: Int) -> Self) -> JSONParser {
 
         typealias T = Self
 
@@ -437,7 +436,7 @@ extension Bricolage {
 
         parser.delegate = { [unowned parser] event in
 
-            func err(msg: String) -> ParseError { return ParseError(msg: msg, line: parser.row, column: parser.col) }
+            func err(_ msg: String) -> ParseError { return ParseError(msg: msg, line: parser.row, column: parser.col) }
 
             func closeContainer() throws {
                 if stack.count <= 0 { throw err("Cannot close top-level container") }
@@ -447,27 +446,27 @@ extension Bricolage {
                 }
             }
 
-            func pushValue(x: T) throws {
+            func pushValue(_ x: T) throws {
                 // inform the delegate that we have seen a fully-formed Bric
-                let value = delegate(x, level: stack.count)
+                let value = delegate(x, stack.count)
 
                 switch stack.last {
-                case .Some(.object(let x, let key)):
+                case .some(.object(let x, let key)):
                     if let key = key {
-                        stack[stack.endIndex.predecessor()] = .object(T.putKeyValue(x, key: key, value: value), .None)
+                        stack[(stack.endIndex - 1)] = .object(T.putKeyValue(x, key: key, value: value), .none)
                     } else {
                         throw err("Put object with no key type")
                     }
-                case .Some(.array(let x)):
-                    stack[stack.endIndex.predecessor()] = .array(T.putElement(x, element: value))
-                case .None:
+                case .some(.array(let x)):
+                    stack[(stack.endIndex - 1)] = .array(T.putElement(x, element: value))
+                case .none:
                     break
                 }
             }
 
            switch event {
             case .objectStart:
-                stack.append(.object(T.createObject(), .None))
+                stack.append(.object(T.createObject(), .none))
             case .objectEnd:
                 try closeContainer()
             case .arrayStart:
@@ -477,9 +476,9 @@ extension Bricolage {
             case .stringContent(let s, let e):
                 let escaped = try JSONParser.unescape(s, escapeIndices: e, line: parser.row, column: parser.col)
                 if let str = T.createString(escaped) {
-                    if case .Some(.object(let x, let key)) = stack.last where key == nil {
-                        stack[stack.endIndex.predecessor()] = .object(x, str)
-                        delegate(T(str: str), level: stack.count)
+                    if case .some(.object(let x, let key)) = stack.last , key == nil {
+                        stack[(stack.endIndex - 1)] = .object(x, str)
+                        _ = delegate(T(str: str), stack.count)
                     } else {
                         try pushValue(T(str: str))
                     }
@@ -518,40 +517,40 @@ extension String {
 public protocol JSONWriter {
     associatedtype Target
 
-    func writeStart(inout output: Target)
-    func writeEnd(inout output: Target)
+    func writeStart(_ output: inout Target)
+    func writeEnd(_ output: inout Target)
 
-    func writeIndentation(inout output: Target, level: Int)
-    func writeNull(inout output: Target)
-    func writeBoolean(inout output: Target, boolean: Bool)
-    func writeNumber(inout output: Target, number: Double)
-    func writeString(inout output: Target, string: String)
+    func writeIndentation(_ output: inout Target, level: Int)
+    func writeNull(_ output: inout Target)
+    func writeBoolean(_ output: inout Target, boolean: Bool)
+    func writeNumber(_ output: inout Target, number: Double)
+    func writeString(_ output: inout Target, string: String)
 
-    func writePadding(inout output: Target, count: Int)
+    func writePadding(_ output: inout Target, count: Int)
 
-    func writeArrayOpen(inout output: Target)
-    func writeArrayClose(inout output: Target)
-    func writeArrayDelimiter(inout output: Target)
+    func writeArrayOpen(_ output: inout Target)
+    func writeArrayClose(_ output: inout Target)
+    func writeArrayDelimiter(_ output: inout Target)
 
-    func writeObjectOpen(inout output: Target)
-    func writeObjectClose(inout output: Target)
-    func writeObjectSeparator(inout output: Target)
-    func writeObjectDelimiter(inout output: Target)
+    func writeObjectOpen(_ output: inout Target)
+    func writeObjectClose(_ output: inout Target)
+    func writeObjectSeparator(_ output: inout Target)
+    func writeObjectDelimiter(_ output: inout Target)
 
-    func emit(inout output: Target, string: String)
+    func emit(_ output: inout Target, string: String)
 }
 
 /// Default implementations of common JSONWriter functions when the target is an output stream
 public extension JSONWriter {
-    func writeStart(inout output: Target) {
+    func writeStart(_ output: inout Target) {
 
     }
 
-    func writeEnd(inout output: Target) {
+    func writeEnd(_ output: inout Target) {
         
     }
 
-    func writeString(inout output: Target, string: String) {
+    func writeString(_ output: inout Target, string: String) {
         emit(&output, string: "\"")
         for c in string.unicodeScalars {
             switch c {
@@ -569,11 +568,11 @@ public extension JSONWriter {
         emit(&output, string: "\"")
     }
 
-    func writeNull(inout output: Target) {
+    func writeNull(_ output: inout Target) {
         emit(&output, string: "null")
     }
 
-    func writeBoolean(inout output: Target, boolean: Bool) {
+    func writeBoolean(_ output: inout Target, boolean: Bool) {
         if boolean == true {
             emit(&output, string: "true")
         } else {
@@ -581,53 +580,53 @@ public extension JSONWriter {
         }
     }
 
-    func writeNumber(inout output: Target, number: Double) {
+    func writeNumber(_ output: inout Target, number: Double) {
         // TODO: output exactly the same as the ECMA spec: http://es5.github.io/#x15.7.4.2
         // see also: http://www.netlib.org/fp/dtoa.c
         let str = String(number) // FIXME: this outputs exponential notation for some large numbers
         // when a string ends in ".0", we just append the rounded int FIXME: better string formatting
         let suffix = str.characters.suffix(2)
         if suffix.first == "." && suffix.last == "0" {
-            emit(&output, string: str[str.startIndex..<str.endIndex.predecessor().predecessor()])
+            emit(&output, string: String(str.characters.dropLast(2)))
         } else {
             emit(&output, string: str)
         }
     }
 
 
-    func writeArrayOpen(inout output: Target) {
+    func writeArrayOpen(_ output: inout Target) {
         emit(&output, string: "[")
     }
 
-    func writeArrayClose(inout output: Target) {
+    func writeArrayClose(_ output: inout Target) {
         emit(&output, string: "]")
     }
 
-    func writeArrayDelimiter(inout output: Target) {
+    func writeArrayDelimiter(_ output: inout Target) {
         emit(&output, string: ",")
     }
 
-    func writeObjectOpen(inout output: Target) {
+    func writeObjectOpen(_ output: inout Target) {
         emit(&output, string: "{")
     }
 
-    func writeObjectClose(inout output: Target) {
+    func writeObjectClose(_ output: inout Target) {
         emit(&output, string: "}")
     }
 
-    func writeObjectSeparator(inout output: Target) {
+    func writeObjectSeparator(_ output: inout Target) {
         emit(&output, string: ":")
     }
 
-    func writeObjectDelimiter(inout output: Target) {
+    func writeObjectDelimiter(_ output: inout Target) {
         emit(&output, string: ",")
     }
 }
 
-public struct FormattingJSONWriter<Target: OutputStreamType> : JSONWriter {
+public struct FormattingJSONWriter<Target: TextOutputStream> : JSONWriter {
     let spacer: String
 
-    public func writeIndentation(inout output: Target, level: Int) {
+    public func writeIndentation(_ output: inout Target, level: Int) {
         if !spacer.isEmpty {
             emit(&output, string: "\n")
             for _ in 0..<level {
@@ -636,13 +635,13 @@ public struct FormattingJSONWriter<Target: OutputStreamType> : JSONWriter {
         }
     }
 
-    public func writePadding(inout output: Target, count: Int) {
+    public func writePadding(_ output: inout Target, count: Int) {
         if !spacer.isEmpty {
-            emit(&output, string: String(count: count, repeatedValue: Character(" ")))
+            emit(&output, string: String(repeating: " ", count: count))
         }
     }
 
-    public func emit(inout output: Target, string: String) {
+    public func emit(_ output: inout Target, string: String) {
         output.write(string)
     }
 }
@@ -653,8 +652,8 @@ public enum BufferedJSONWriterToken {
 }
 
 /// A `JSONWriter` implementation that buffers the output in order to apply advanced formatting
-public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
-    public var tokens: [BufferedJSONWriterToken] = []
+open class BufferedJSONWriter<Target: TextOutputStream> : JSONWriter {
+    open var tokens: [BufferedJSONWriterToken] = []
     let spacer: String
     let maxline: Int
     let pad: String = " "
@@ -664,33 +663,33 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
         self.maxline = maxline
     }
 
-    public func writeIndentation(inout _: Target, level: Int) {
+    open func writeIndentation(_: inout Target, level: Int) {
         tokens.append(.indent(level))
     }
 
-    public func writePadding(inout output: Target, count: Int) {
+    open func writePadding(_ output: inout Target, count: Int) {
         for _ in 0..<count {
             emit(&output, string: pad)
         }
     }
 
-    public func emit<T: OutputStreamType>(inout _: T, string: String) {
+    open func emit<T: TextOutputStream>(_: inout T, string: String) {
         // we don't actually write to the output here, but instead buffer all the tokens so we can later reformat them
         tokens.append(.str(string))
     }
 
-    public func writeEnd(inout output: Target) {
+    open func writeEnd(_ output: inout Target) {
         // once we reach the end, compact and flush
         flush(&output)
     }
 
     /// Compact the tokens into peers that will fit on a single line of `maxline` length or less
-    public func compact() {
+    open func compact() {
         if tokens.isEmpty { return }
 
-        func rangeBlock(index: Int, level: Int) -> Range<Int>? {
-            let match = tokens.dropFirst(index).indexOf({
-                if case .indent(let lvl) = $0 where lvl == (level - 1) {
+        func rangeBlock(_ index: Int, level: Int) -> CountableClosedRange<Int>? {
+            let match = tokens.dropFirst(index).index(where: {
+                if case .indent(let lvl) = $0 , lvl == (level - 1) {
                     return true
                 } else {
                     return false
@@ -704,28 +703,28 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
             }
         }
 
-        func toklen(token: BufferedJSONWriterToken) -> Int {
+        func toklen(_ token: BufferedJSONWriterToken) -> Int {
             switch token {
             case .indent: return pad.characters.count // because indent will convert to a pad
             case .str(let str): return str.characters.count
             }
         }
 
-        func toklev(token: BufferedJSONWriterToken) -> Int {
+        func toklev(_ token: BufferedJSONWriterToken) -> Int {
             switch token {
             case .indent(let lvl): return lvl
             case .str: return 0
             }
         }
 
-        func isStringToken(token: BufferedJSONWriterToken) -> Bool {
+        func isStringToken(_ token: BufferedJSONWriterToken) -> Bool {
             switch token {
             case .indent: return false
             case .str: return true
             }
         }
 
-        func compactRange(range: Range<Int>, level: Int) -> Bool {
+        @discardableResult func compactRange(_ range: CountableClosedRange<Int>, level: Int) -> Bool {
             let strlen = tokens[range].reduce(0) { $0 + toklen($1) }
             let indentLen = level * spacer.characters.count
             if strlen + indentLen > maxline { return false }
@@ -739,12 +738,12 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
             return true
         }
 
-        func compactLevel(level: Int) {
-            for index in tokens.startIndex..<tokens.endIndex {
+        func compactLevel(_ level: Int) {
+            for index in tokens.indices {
                 let item = tokens[index]
                 switch item {
                 case .indent(let lvl) where lvl == level:
-                    if let range = rangeBlock(index, level: lvl) where range.endIndex > range.startIndex {
+                    if let range = rangeBlock(index, level: lvl) , range.upperBound > range.lowerBound {
                         compactRange(range, level: level)
                         return
                     }
@@ -754,13 +753,13 @@ public class BufferedJSONWriter<Target: OutputStreamType> : JSONWriter {
             }
         }
 
-        let maxlev = tokens.map(toklev).reduce(0, combine: max)
-        for level in Array(0...maxlev).reverse() {
+        let maxlev = tokens.map(toklev).reduce(0, max)
+        for level in Array(0...maxlev).reversed() {
             compactLevel(level)
         }
     }
 
-    public func flush<T: OutputStreamType>(inout output: T) {
+    open func flush<T: TextOutputStream>(_ output: inout T) {
         compact()
         for tok in tokens {
             switch tok {

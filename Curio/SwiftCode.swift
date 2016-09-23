@@ -9,11 +9,11 @@
 /// SwiftCode elements for code emission
 
 public protocol CodeEmitterType {
-    func emit(tokens: String?...)
+    func emit(_ tokens: String?...)
 }
 
 public extension CodeEmitterType {
-    public func emitComments(comments: [String]) {
+    public func emitComments(_ comments: [String]) {
         let comms = comments.flatMap({ $0.characters.split { $0 == "\n" || $0 == "\r" } })
 
         for comment in comms {
@@ -23,15 +23,15 @@ public extension CodeEmitterType {
 }
 
 
-public class CodeEmitter<T: OutputStreamType> : CodeEmitterType {
-    public var stream: T
-    public var level: UInt = 0
+open class CodeEmitter<T: TextOutputStream> : CodeEmitterType {
+    open var stream: T
+    open var level: UInt = 0
 
     public init(stream: T) {
         self.stream = stream
     }
 
-    public func emit(tokens: String?...) {
+    open func emit(_ tokens: String?...) {
         if tokens.count == 1 && tokens.last ?? "" == "}" {
             level -= 1
         }
@@ -45,7 +45,7 @@ public class CodeEmitter<T: OutputStreamType> : CodeEmitterType {
             }
         }
 
-        for (i, token) in toks.enumerate() {
+        for (i, token) in toks.enumerated() {
             if let token = token {
                 if i > 0 { stream.write(" ") }
                 stream.write(token)
@@ -62,42 +62,42 @@ public class CodeEmitter<T: OutputStreamType> : CodeEmitterType {
 }
 
 private class KeyCodeEmitter : CodeEmitterType {
-    private var string = ""
+    fileprivate var string = ""
 
-    private func emit(tokens: String?...) {
+    fileprivate func emit(_ tokens: String?...) {
         for token in tokens {
             if let token = token {
-                string.appendContentsOf(token)
-                string.appendContentsOf(" ")
+                string.append(token)
+                string.append(" ")
             }
         }
-        string.appendContentsOf("\n")
+        string.append("\n")
     }
 }
 
 public protocol CodeEmittable {
     var comments: [String] { get set }
-    func emit(emitter: CodeEmitterType)
+    func emit(_ emitter: CodeEmitterType)
 }
 
-public class CodeModule : CodeImplementationType {
-    public var types: [CodeNamedType] {
+open class CodeModule : CodeImplementationType {
+    open var types: [CodeNamedType] {
         get { return nestedTypes }
         set { nestedTypes = newValue }
     }
 
-    public var nestedTypes: [CodeNamedType] = []
-    public var comments: [String] = []
-    public var imports: [String] = []
+    open var nestedTypes: [CodeNamedType] = []
+    open var comments: [String] = []
+    open var imports: [String] = []
     /// Global functions in this module
-    public var funcs: [CodeFunction.Implementation] = []
+    open var funcs: [CodeFunction.Implementation] = []
     /// No-op at the module level (needed for CodeImplementationType : CodeConformantType)
-    public var conforms: [CodeProtocol] = []
+    open var conforms: [CodeProtocol] = []
 
     public init() {
     }
 
-    public func emit(emitter: CodeEmitterType) {
+    open func emit(_ emitter: CodeEmitterType) {
         for i in imports {
             emitter.emit("import", i)
         }
@@ -161,7 +161,7 @@ public struct CodeExternalType : CodeType {
         if generics.isEmpty {
             return name
         } else {
-            return name + "<" + (generics.map({ $0.identifier })).joinWithSeparator(", ") + ">"
+            return name + "<" + (generics.map({ $0.identifier })).joined(separator: ", ") + ">"
         }
     }
 
@@ -194,20 +194,20 @@ public protocol CodeImplementation : CodeEmittable {
 }
 
 public struct CodeProperty {
-    public class Declaration: CodeUnit {
-        public var name: CodePropName
+    open class Declaration: CodeUnit {
+        open var name: CodePropName
         /// The type of the property, which can be nil if we want it to be inferred
-        public var type: CodeType?
-        public var instance: Bool
-        public var access: CodeAccess
-        public var mutable: Bool = true
-        public var comments: [String] = []
+        open var type: CodeType?
+        open var instance: Bool
+        open var access: CodeAccess
+        open var mutable: Bool = true
+        open var comments: [String] = []
 
-        public var isDictionary: Bool {
+        open var isDictionary: Bool {
             return type?.identifier.hasPrefix("Dictionary") ?? false
         }
 
-        public var isArray: Bool {
+        open var isArray: Bool {
             return type?.identifier.hasPrefix("Array") ?? false
         }
 
@@ -219,12 +219,12 @@ public struct CodeProperty {
             self.mutable = mutable
         }
 
-        public func emit(emitter: CodeEmitterType) {
+        open func emit(_ emitter: CodeEmitterType) {
             emitter.emitComments(comments)
             emitter.emit(instance ? "" : "static", "var", name + (type == nil ? "" : ":"), type?.identifier, "{", "get", mutable ? "set" : "", "}")
         }
 
-        public var implementation: Implementation {
+        open var implementation: Implementation {
             return Implementation(declaration: self, value: nil, body: [], comments: comments)
         }
     }
@@ -236,7 +236,7 @@ public struct CodeProperty {
         public var body: [String] = []
         public var comments: [String] = []
 
-        public func emit(emitter: CodeEmitterType) {
+        public func emit(_ emitter: CodeEmitterType) {
             emitter.emitComments(declaration.comments)
             // TODO: allow declaration bodies (e.g., dynamic get/set, willSet/didSet)
             emitter.emit(declaration.access.rawValue, declaration.instance ? "" : "static", declaration.mutable || !body.isEmpty ? "var" : "let", declaration.name + (declaration.type == nil ? "" : ":"), declaration.type?.identifier, value == nil ? "" : "=", value, body.isEmpty ? "" : "{")
@@ -264,7 +264,7 @@ public struct CodeTuple : CodeCompoundType {
 
     public var identifier : String {
         // (foo: Bar, baz: String) or (Bar, String) or (foo: Bar? = nil, baz: String = "Foo") depending on whether they have names
-        func ename(element: CodeTupleElement) -> String {
+        func ename(_ element: CodeTupleElement) -> String {
             // slow compile!
             // return (element.name.flatMap({ $0 + ": " }) ?? "") + element.type.identifier + (element.value.flatMap({ " = " + $0 }) ?? "")
             let anondec = element.anon ? "_ " : ""
@@ -276,7 +276,7 @@ public struct CodeTuple : CodeCompoundType {
         let parts = elements.map(ename)
         // un-named single-element tuples do not need to be named
         let paren = arity != 1 || elements.first?.name != nil
-        return (paren ? "(" : "") + parts.joinWithSeparator(", ") + (paren ? ")" : "")
+        return (paren ? "(" : "") + parts.joined(separator: ", ") + (paren ? ")" : "")
     }
 
     public var directReferences : [CodeNamedType] {
@@ -284,7 +284,7 @@ public struct CodeTuple : CodeCompoundType {
     }
 
     /// Create a type alias for this tuple type, removing the name for single-tuple elements (since they are illegal)
-    public func makeTypeAlias(name: CodeTypeName, access: CodeAccess) -> CodeTypeAlias {
+    public func makeTypeAlias(_ name: CodeTypeName, access: CodeAccess) -> CodeTypeAlias {
         var t = self
         // single-element tuples are not allowed to have a name
         if t.elements.count == 1 {
@@ -302,18 +302,18 @@ public struct CodeTuple : CodeCompoundType {
 public protocol CodeAccessible : CodeType {
     var access: CodeAccess { get set }
 
-    func emit(emitter: CodeEmitterType)
+    func emit(_ emitter: CodeEmitterType)
 }
 
 public struct CodeFunction {
-    public class Declaration: CodeCompoundType {
-        public var name: CodePropName
-        public var instance: Bool
-        public var exception: Bool
-        public var access: CodeAccess
-        public var arguments: CodeTuple
-        public var returns: CodeTuple
-        public var comments: [String] = []
+    open class Declaration: CodeCompoundType {
+        open var name: CodePropName
+        open var instance: Bool
+        open var exception: Bool
+        open var access: CodeAccess
+        open var arguments: CodeTuple
+        open var returns: CodeTuple
+        open var comments: [String] = []
 
         public init(name: CodePropName, access: CodeAccess, instance: Bool = true, exception: Bool = false, arguments: CodeTuple = CodeTuple(), returns: CodeTuple = CodeTuple()) {
             self.access = access
@@ -324,22 +324,22 @@ public struct CodeFunction {
             self.returns = returns
         }
 
-        public var identifier : String {
+        open var identifier : String {
             // (foo: Bar, baz: String)->(Void)
             return arguments.identifier + (exception ? " throws" : "") + " -> " + returns.identifier
         }
 
-        public func emit(emitter: CodeEmitterType) {
+        open func emit(_ emitter: CodeEmitterType) {
             emitter.emitComments(comments)
             emitter.emit(access.rawValue, instance ? "" : "static", "func", name, identifier)
         }
 
-        public var directReferences : [CodeNamedType] {
+        open var directReferences : [CodeNamedType] {
             // a function is a reference type
             return []
         }
 
-        public var implementation: Implementation {
+        open var implementation: Implementation {
             return Implementation(declaration: self, body: [], comments: comments)
         }
 
@@ -350,7 +350,7 @@ public struct CodeFunction {
         public var body: [String] = []
         public var comments: [String] = []
 
-        public func emit(emitter: CodeEmitterType) {
+        public func emit(_ emitter: CodeEmitterType) {
             emitter.emitComments(declaration.comments)
 
             // TODO: if emitted by a class, "static" should be called "class"
@@ -395,7 +395,7 @@ public struct CodeTypeAlias : CodeNamedType {
         self.peers = peers
     }
 
-    public func emit(emitter: CodeEmitterType) {
+    public func emit(_ emitter: CodeEmitterType) {
         emitter.emitComments(comments)
         emitter.emit(access.rawValue, "typealias", name, "=", type.identifier)
 
@@ -429,7 +429,7 @@ private let reservedWords = Set(["class", "deinit", "enum", "extension", "func",
 private let reservedArgs = Set(["inout", "var", "let"])
 
 extension String {
-    func afterLast(sep: Character) -> String {
+    func afterLast(_ sep: Character) -> String {
         let lastPart: String = (self.characters.split { $0 == "." }).last.flatMap({ String($0) }) ?? self
         return lastPart
     }
@@ -461,7 +461,7 @@ public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType {
         self.props = props
     }
 
-    func quotedString(value: T) -> String {
+    func quotedString(_ value: T) -> String {
         if value is String {
             return "\"\(value)\""
         } else {
@@ -470,17 +470,17 @@ public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType {
     }
 
     var adoptions: String {
-        let typeName = String(T.self)
+        let typeName = String(describing: T.self)
         // get the last part of "Swift.String", "Swift.Int", etc.
         let lastPart: String = typeName.afterLast(".")
-        var exts = ([lastPart] + conforms.map({ $0.identifier })).joinWithSeparator(", ")
+        var exts = ([lastPart] + conforms.map({ $0.identifier })).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
         return exts
     }
 
-    public func emit(emitter: CodeEmitterType) {
+    public func emit(_ emitter: CodeEmitterType) {
         emitter.emitComments(comments)
 
         emitter.emit(access.rawValue, "enum", name, adoptions, "{")
@@ -550,14 +550,14 @@ public struct CodeEnum : CodeNamedType, CodeImplementationType {
     }
 
     public var adoptions: String {
-        var exts = conforms.map({ $0.identifier }).joinWithSeparator(", ")
+        var exts = conforms.map({ $0.identifier }).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
         return exts
     }
 
-    public func emit(emitter: CodeEmitterType) {
+    public func emit(_ emitter: CodeEmitterType) {
         emitter.emitComments(comments)
         emitter.emit(access.rawValue, "enum", name, adoptions, "{")
         for c in cases {
@@ -615,7 +615,7 @@ public struct CodeProtocol : CodeNamedType, CodeConformantType {
     }
 
     var adoptions: String {
-        var exts = conforms.map({ $0.identifier }).joinWithSeparator(", ")
+        var exts = conforms.map({ $0.identifier }).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
@@ -626,7 +626,7 @@ public struct CodeProtocol : CodeNamedType, CodeConformantType {
         return []
     }
 
-    public func emit(emitter: CodeEmitterType) {
+    public func emit(_ emitter: CodeEmitterType) {
         emitter.emitComments(comments)
         emitter.emit(access.rawValue, "protocol", name, adoptions, "{")
         for p in props { p.emit(emitter) }
@@ -662,7 +662,7 @@ public struct CodeStruct : CodeStateType {
 
     /// A struct's adoptions is the list of protocols it adopts
     var adoptions: String {
-        var exts = conforms.map({ $0.identifier }).joinWithSeparator(", ")
+        var exts = conforms.map({ $0.identifier }).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
@@ -673,7 +673,7 @@ public struct CodeStruct : CodeStateType {
         return [self] + props.flatMap({ $0.declaration.type }).flatMap({ $0.directReferences })
     }
 
-    public func emit(emitter: CodeEmitterType) {
+    public func emit(_ emitter: CodeEmitterType) {
         emitter.emitComments(comments)
         emitter.emit(access.rawValue, "struct", name, adoptions, "{")
         for p in props {
@@ -719,9 +719,9 @@ public struct CodeClass : CodeStateType {
     /// A class' adoptions is the list of protocols it adopts as well as its superclass
     var adoptions: String {
         var refs = conforms.map({ $0.identifier })
-        if let ext = extends.first { refs.insert(ext.identifier, atIndex: 0) }
+        if let ext = extends.first { refs.insert(ext.identifier, at: 0) }
 
-        var exts = refs.joinWithSeparator(", ")
+        var exts = refs.joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
@@ -734,7 +734,7 @@ public struct CodeClass : CodeStateType {
         // return [self] + props.flatMap({ $0.declaration.type })
     }
 
-    public func emit(emitter: CodeEmitterType) {
+    public func emit(_ emitter: CodeEmitterType) {
         emitter.emitComments(comments)
         emitter.emit(access.rawValue, final ? "final" : "", "class", name, adoptions, "{")
 

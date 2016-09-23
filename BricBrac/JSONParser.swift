@@ -83,21 +83,21 @@ public final class JSONParser {
 
 
         // cache of singleton scalar constants for fast delegate passing
-        private static let arrayStartScalars: [UnicodeScalar] = ["["]
-        private static let arrayEndScalars: [UnicodeScalar] = ["]"]
-        private static let objectStartScalars: [UnicodeScalar] = ["{"]
-        private static let objectEndScalars: [UnicodeScalar] = ["}"]
-        private static let stringStartScalars: [UnicodeScalar] = ["\""]
-        private static let stringEndScalars: [UnicodeScalar] = ["\""]
-        private static let elementSeparatorScalars: [UnicodeScalar] = [","]
-        private static let keyValueSeparatorScalars: [UnicodeScalar] = [":"]
-        private static let nullScalars: [UnicodeScalar] = ["n", "u", "l", "l"]
-        private static let trueScalars: [UnicodeScalar] = ["t", "r", "u", "e"]
-        private static let falseScalars: [UnicodeScalar] = ["f", "a", "l", "s", "e"]
+        fileprivate static let arrayStartScalars: [UnicodeScalar] = ["["]
+        fileprivate static let arrayEndScalars: [UnicodeScalar] = ["]"]
+        fileprivate static let objectStartScalars: [UnicodeScalar] = ["{"]
+        fileprivate static let objectEndScalars: [UnicodeScalar] = ["}"]
+        fileprivate static let stringStartScalars: [UnicodeScalar] = ["\""]
+        fileprivate static let stringEndScalars: [UnicodeScalar] = ["\""]
+        fileprivate static let elementSeparatorScalars: [UnicodeScalar] = [","]
+        fileprivate static let keyValueSeparatorScalars: [UnicodeScalar] = [":"]
+        fileprivate static let nullScalars: [UnicodeScalar] = ["n", "u", "l", "l"]
+        fileprivate static let trueScalars: [UnicodeScalar] = ["t", "r", "u", "e"]
+        fileprivate static let falseScalars: [UnicodeScalar] = ["f", "a", "l", "s", "e"]
     }
 
     /// Customization of the JSON parson process
-    public struct Options : OptionSetType {
+    public struct Options : OptionSet {
         public let rawValue: Int
 
         public init(rawValue: Int) { self.rawValue = rawValue }
@@ -133,7 +133,7 @@ public final class JSONParser {
     /// String parsing state contains an array of the escape indices
     typealias StringParse = ([Int])
 
-    private enum State {
+    fileprivate enum State {
         case idle, string(StringParse), number(NumberParse), literal, arrayOpen, arrayElement, objectOpen, objectKey, objectElement
 
         var isValue: Bool {
@@ -152,41 +152,41 @@ public final class JSONParser {
     }
 
     /// Options for parsing
-    private let options: Options
+    fileprivate let options: Options
 
     /// The delegate that will receive callback events
     public var delegate: (Event) throws -> ()
 
     /// The current row and column of the parser (for error reporting purposes)
-    public private(set) var row = 1, col = 0
+    public fileprivate(set) var row = 1, col = 0
 
     /// The current state
-    private var state = State.idle
+    fileprivate var state = State.idle
 
     /// The current processing result, such as a number being parsed or a string being assembled
-    private var processing = State.idle
+    fileprivate var processing = State.idle
 
     /// The current pending result, such as a parsed string that is waiting to be added to an array
-    private var pending = State.idle
+    fileprivate var pending = State.idle
 
     /// The current container (and array or object)
-    private var container = State.idle
+    fileprivate var container = State.idle
 
     /// The current stack of container states (arrays and objects)
-    private var stack: [State] = []
+    fileprivate var stack: [State] = []
 
-    private var trailingComma = false
+    fileprivate var trailingComma = false
 
     /// The current buffer for a running string, number, or true/false/null literal
-    private var buffer: Array<UnicodeScalar> = []
+    fileprivate var buffer: Array<UnicodeScalar> = []
 
-    public init(options: Options, delegate: (Event) throws -> () = { _ in }) {
+    public init(options: Options, delegate: @escaping (Event) throws -> () = { _ in }) {
         self.options = options
         self.delegate = delegate
     }
 
 
-    private func pushContainer(parse: State, _ value: State) throws {
+    fileprivate func pushContainer(_ parse: State, _ value: State) throws {
         stack.append(state)
         if container.isContainer {
             stack.append(container)
@@ -202,7 +202,7 @@ public final class JSONParser {
         }
     }
 
-    private func popContainer() throws {
+    fileprivate func popContainer() throws {
         let x = stack.removeLast()
 
         if case .objectElement = container {
@@ -221,11 +221,11 @@ public final class JSONParser {
         }
     }
 
-    private func err(msg: String) -> ParseError {
+    fileprivate func err(_ msg: String) -> ParseError {
         return ParseError(msg: msg, line: row, column: col)
     }
 
-    private func pushObjectKey() throws {
+    fileprivate func pushObjectKey() throws {
         if stack.isEmpty { throw err("Object key assignment with no container") }
         if !pending.isValue { throw err("Object key assignment with no value") }
         guard case .objectElement = container else { throw err("Object key assignment outside of object") }
@@ -233,7 +233,7 @@ public final class JSONParser {
         state = stack.removeLast()
     }
 
-    private func appendArrayValue() throws {
+    fileprivate func appendArrayValue() throws {
         if pending.isValue {
             if case .arrayElement = container {
                 container = .arrayElement
@@ -245,11 +245,11 @@ public final class JSONParser {
         pending = .idle
     }
 
-    private func clearBuffer() {
-        buffer.removeAll(keepCapacity: true)
+    fileprivate func clearBuffer() {
+        buffer.removeAll(keepingCapacity: true)
     }
 
-    private func flushString() throws {
+    fileprivate func flushString() throws {
         if case .string(let escapes) = processing {
             try delegate(.stringContent(buffer, escapes))
             pending = .string(escapes)
@@ -259,7 +259,7 @@ public final class JSONParser {
     }
 
     /// Takes any outstanding number buffer and flushes it
-    private func flushNumber() throws {
+    fileprivate func flushNumber() throws {
         guard case .number(let num) = processing else { return }
 
         try delegate(.number(buffer))
@@ -278,18 +278,18 @@ public final class JSONParser {
     }
     
     
-    public func parseString(string: String) throws -> Int {
+    @discardableResult public func parseString(_ string: String) throws -> Int {
         return try parse(string.unicodeScalars, complete: true)
     }
 
-    public func parseArray(scalars: Array<UnicodeScalar>) throws -> Int {
+    @discardableResult public func parseArray(_ scalars: Array<UnicodeScalar>) throws -> Int {
         return try parse(scalars, complete: true)
     }
 
     /// Feeds a single scalar to the parser
     ///
     /// - SeeAlso: `parse`
-    public func parseScalar(scalar: UnicodeScalar) throws -> Int {
+    @discardableResult public func parseScalar(_ scalar: UnicodeScalar) throws -> Int {
         return try parse(CollectionOfOne(scalar), complete: false)
     }
 
@@ -302,7 +302,7 @@ public final class JSONParser {
     /// - parameter complete: If `true`, the scalars parameter completes the JSON document
     ///
     /// - Returns: The number of scalars that were consumed during the parse operation
-    public func parse<S: SequenceType where S.Generator.Element == UnicodeScalar>(scalars: S, complete: Bool = false) throws -> Int {
+    @discardableResult public func parse<S: Sequence>(_ scalars: S, complete: Bool = false) throws -> Int where S.Iterator.Element == UnicodeScalar {
         var index = 0
 
         func processingNumber() -> Bool { if case .number = processing { return true } else { return false } }
@@ -323,7 +323,7 @@ public final class JSONParser {
                         if !trailing.isJSONWhitespace { throw err("Trailing content") }
                         try delegate(.whitespace([trailing]))
                     }
-                    buffer.removeAll(keepCapacity: false)
+                    buffer.removeAll(keepingCapacity: false)
                 }
 
                 // make sure we had at least one valid JSON item
@@ -381,7 +381,7 @@ public final class JSONParser {
                         buffer.append(scalar)
                         continue
                     case 0x45, 0x65: // e E
-                        if num.exponent > 0 || num.digitCount == 0 {
+                        if (num.exponent ?? 0) > 0 || num.digitCount == 0 {
                             throw err("Too many exponent signs in the number")
                         } else {
                             num.exponent = num.loc
@@ -391,7 +391,7 @@ public final class JSONParser {
                         buffer.append(scalar)
                         continue
                     case 0x2B, 0x2D: // + -
-                        if num.exponent != num.loc.predecessor() {
+                        if num.exponent != (num.loc - 1) {
                             throw err("Sign not following exponent")
                         }
                         num.trailingDigits = 0
@@ -409,7 +409,7 @@ public final class JSONParser {
                     if case .string(var escapeIndices) = processing {
                         func trailingEscapes() -> Int {
                             var slashes = 0
-                            for c in buffer.reverse() {
+                            for c in buffer.reversed() {
                                 if c == "\\" { slashes += 1 } else { break }
                             }
                             return slashes
@@ -500,7 +500,9 @@ public final class JSONParser {
                         throw err("Object key assignment outside of an object")
                     }
 
-                case 0x30...0x39, 0x2B, 0x2D, 0x2E, 0x45 where processingNumber(), 0x65 where processingNumber(): // digit, +, -, (.), (e), (E)
+                case 0x30...0x39, 0x2B, 0x2D, 0x2E,
+                     0x45 where processingNumber(),
+                     0x65 where processingNumber(): // digit, +, -, (.), (e), (E)
                     if case .objectOpen = state { throw err("Number within object start") }
                     if pending.isValue { throw err("Number found with pending result value") }
 
@@ -519,33 +521,33 @@ public final class JSONParser {
                     // finally, check for the JSON literals "true", "false", and "null"
 
                     buffer.append(scalar) // tack on to the current buffer to check for literals
-                    var gen = buffer.generate()
+                    var gen = buffer.makeIterator()
                     let lit = (gen.next(), gen.next(), gen.next(), gen.next(), gen.next())
 
                     switch lit {
-                    case (.Some("n"), .None, .None, .None, .None): break // n
-                    case (.Some("n"), .Some("u"), .None, .None, .None): break // nu
-                    case (.Some("n"), .Some("u"), .Some("l"), .None, .None): break // nul
-                    case (.Some("n"), .Some("u"), .Some("l"), .Some("l"), .None): // null
+                    case (.some("n"), .none, .none, .none, .none): break // n
+                    case (.some("n"), .some("u"), .none, .none, .none): break // nu
+                    case (.some("n"), .some("u"), .some("l"), .none, .none): break // nul
+                    case (.some("n"), .some("u"), .some("l"), .some("l"), .none): // null
                         pending = .literal
                         try delegate(.null(Event.nullScalars))
                         clearBuffer()
                         break
 
-                    case (.Some("t"), .None, .None, .None, .None): break // t
-                    case (.Some("t"), .Some("r"), .None, .None, .None): break // tr
-                    case (.Some("t"), .Some("r"), .Some("u"), .None, .None): break // tru
-                    case (.Some("t"), .Some("r"), .Some("u"), .Some("e"), .None): // true
+                    case (.some("t"), .none, .none, .none, .none): break // t
+                    case (.some("t"), .some("r"), .none, .none, .none): break // tr
+                    case (.some("t"), .some("r"), .some("u"), .none, .none): break // tru
+                    case (.some("t"), .some("r"), .some("u"), .some("e"), .none): // true
                         pending = .literal
                         try delegate(.`true`(Event.trueScalars))
                         clearBuffer()
                         break
 
-                    case (.Some("f"), .None, .None, .None, .None): break // f
-                    case (.Some("f"), .Some("a"), .None, .None, .None): break // fa
-                    case (.Some("f"), .Some("a"), .Some("l"), .None, .None): break // fal
-                    case (.Some("f"), .Some("a"), .Some("l"), .Some("s"), .None): break // fals
-                    case (.Some("f"), .Some("a"), .Some("l"), .Some("s"), .Some("e")): // false
+                    case (.some("f"), .none, .none, .none, .none): break // f
+                    case (.some("f"), .some("a"), .none, .none, .none): break // fa
+                    case (.some("f"), .some("a"), .some("l"), .none, .none): break // fal
+                    case (.some("f"), .some("a"), .some("l"), .some("s"), .none): break // fals
+                    case (.some("f"), .some("a"), .some("l"), .some("s"), .some("e")): // false
                         pending = .literal
                         try delegate(.`false`(Event.falseScalars))
                         clearBuffer()
@@ -580,7 +582,7 @@ public final class JSONParser {
     }
 
     /// Processes the given scalars as a JSON string, performing the appropriate unescaping and validation
-    public static func unescape<C: RangeReplaceableCollectionType where C.Generator.Element == UnicodeScalar, C.SubSequence.Generator.Element == UnicodeScalar, C.Index: BidirectionalIndexType, C.Index.Distance == Int>(scalars: C, escapeIndices: [C.Index], line: Int, column: Int) throws -> C {
+    public static func unescape<C: RangeReplaceableCollection>(_ scalars: C, escapeIndices: [C.Index], line: Int, column: Int) throws -> C where C.Iterator.Element == UnicodeScalar, C.SubSequence.Iterator.Element == UnicodeScalar, C.Index: Comparable, C.IndexDistance == Int {
         // when the string has no escapes, we can just pass it directly
         if escapeIndices.isEmpty { return scalars }
 
@@ -588,58 +590,59 @@ public final class JSONParser {
 
         // perform backslash escaping
         var slice = C()
-        slice.reserveCapacity(start.distanceTo(end))
+
+        slice.reserveCapacity(scalars.distance(from: start, to: end))
 
         var loc = start
         var highSurrogate: UInt32? = nil
 
         for i in escapeIndices {
-            slice.appendContentsOf(scalars[loc..<i.predecessor()])
+            slice.append(contentsOf: scalars[loc..<scalars.index(i, offsetBy: -1)])
             loc = i
             let s: UnicodeScalar = scalars[i]
 
             switch s.value {
             case 0x22: // " -> quote
                 slice.append(s)
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x5C: // \ -> backslash
                 slice.append(s)
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x2F: // / -> slash
                 slice.append(s)
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x62:  // \b -> backspace
                 slice.append(UnicodeScalar(0x08))
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x66: // \f -> formfeed
                 slice.append(UnicodeScalar(0x0C))
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x6e: // \n -> newline
                 slice.append("\n")
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x72: // \r -> carriage return
                 slice.append("\r")
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x74: // \t -> tab
                 slice.append("\t")
-                loc = loc.successor()
+                loc = scalars.index(after: loc)
             case 0x75: // \u -> unicode hex characters follow
-                if i.distanceTo(end) < 4 {
-                    throw ParseError(msg: "Unterminated hex escape", line: line, column: column + start.distanceTo(i))
+                if scalars.distance(from: i, to: end) < 4 {
+                    throw ParseError(msg: "Unterminated hex escape", line: line, column: column + scalars.distance(from: start, to: i))
                 }
 
                 var hex: UInt32 = 0
                 for (b, h) in [
-                    (12, scalars[i.advancedBy(1)].value),
-                    (8, scalars[i.advancedBy(2)].value),
-                    (4, scalars[i.advancedBy(3)].value),
-                    (0, scalars[i.advancedBy(4)].value)
+                    (12, scalars[scalars.index(i, offsetBy: 1)].value),
+                    (8, scalars[scalars.index(i, offsetBy: 2)].value),
+                    (4, scalars[scalars.index(i, offsetBy: 3)].value),
+                    (0, scalars[scalars.index(i, offsetBy: 4)].value)
                     ] {
                         switch h {
                         case 0x30...0x39: hex += (h - 0x30) << UInt32(b) // 0-9
                         case 0x41...0x46: hex += (10 + h - 0x41) << UInt32(b) // A-F
                         case 0x61...0x66: hex += (10 + h - 0x61) << UInt32(b) // a-f
-                        default: throw ParseError(msg: "Invalid hex digit in unicode escape", line: line, column: column + start.distanceTo(i))
+                        default: throw ParseError(msg: "Invalid hex digit in unicode escape", line: line, column: column + scalars.distance(from: start, to: i))
                         }
                 }
 
@@ -648,25 +651,26 @@ public final class JSONParser {
                 } else if hex >= 0xDC00 && hex <= 0xDFFF { // low surrogates
                     if let highSurrogate = highSurrogate {
                         let codepoint: UInt32 = ((highSurrogate - 0xD800) << 10) + (hex - 0xDC00) + 0x010000
-                        slice.append(UnicodeScalar(codepoint))
+                        slice.append(UnicodeScalar(codepoint)!)
                     } else {
-                        throw ParseError(msg: "Low surrogate not preceeded by high surrogate", line: line, column: column + start.distanceTo(i))
+                        throw ParseError(msg: "Low surrogate not preceeded by high surrogate", line: line, column: column + scalars.distance(from: start, to: i))
                     }
                     highSurrogate = nil
                 } else if hex >= 0x0000 && hex <= 0xFFFF { // basic codeplane
-                    slice.append(UnicodeScalar(hex))
+                    slice.append(UnicodeScalar(hex)!)
                 } else {
-                    throw ParseError(msg: "Hex escape not in a valid codeplane", line: line, column: column + start.distanceTo(i))
+                    throw ParseError(msg: "Hex escape not in a valid codeplane", line: line, column: column + scalars.distance(from: start, to: i))
                 }
 
-                loc = loc.advancedBy(5, limit: end) // skip past the escapes
+                guard let loc2 = scalars.index(loc, offsetBy: 5, limitedBy: end) else { break } // skip past the escapes
+                loc = loc2
 
             default:
-                throw ParseError(msg: "Illegal string escape: \(s)", line: line, column: column + start.distanceTo(i))
+                throw ParseError(msg: "Illegal string escape: \(s)", line: line, column: column + scalars.distance(from: start, to: i))
             }
         }
-        
-        slice.appendContentsOf(scalars[loc..<end]) // append the remainder
+
+        slice.append(contentsOf: scalars[loc..<end]) // append the remainder
         return slice
     }
     
@@ -684,7 +688,7 @@ public extension JSONParser {
     /// - parameter indent: the number of spaces to indent the output, zero for compact, nil for exact whitespace preservation
     ///
     /// - Returns: The processed JSON String
-    public static func formatJSON(json: String, indent: Int? = nil) throws -> String {
+    public static func formatJSON(_ json: String, indent: Int? = nil) throws -> String {
         var out = String()
         out.reserveCapacity(json.unicodeScalars.count)
         let src = Array(json.unicodeScalars)
@@ -697,20 +701,20 @@ public extension JSONParser {
     /// - parameter json: the source JSON scalars to process
     /// - parameter out: the `OutputStreamType` to write the result
     /// - parameter indent: the number of spaces to indent the output, zero for compact, nil for exact whitespace preservation
-    public static func processJSON<S: OutputStreamType>(src: [UnicodeScalar], inout out: S, indent: Int? = nil) throws {
+    public static func processJSON<S: TextOutputStream>(_ src: [UnicodeScalar], out: inout S, indent: Int? = nil) throws {
         let parser = JSONParser(options: Options.Strict)
 
         var depth = 0
 
         func pad() {
-            if let indent = indent where indent > 0 {
+            if let indent = indent , indent > 0 {
                 out.write("\n")
                 let space: UnicodeScalar = " "
-                out.write(String(count: depth * indent, repeatedValue: space))
+                out.write(String(repeating: String(space), count: depth * indent))
             }
         }
 
-        func put(scalars: [UnicodeScalar]) {
+        func put(_ scalars: [UnicodeScalar]) {
             out.write(String(String.UnicodeScalarView() + scalars))
         }
 
@@ -739,9 +743,9 @@ public extension JSONParser {
                 put(s)
                 pad()
             case .keyValueSeparator(let s):
-                if indent > 0 { out.write(" ") }
+                if (indent ?? 0) > 0 { put([" "]) }
                 put(s)
-                if indent > 0 { out.write(" ") }
+                if (indent ?? 0) > 0 { put([" "]) }
             default: // everything else just outputs the underlying value directly
                 put(event.value)
             }
@@ -752,7 +756,7 @@ public extension JSONParser {
 }
 
 /// A parsing error with information about the location of the failure in the JSON
-public struct ParseError : ErrorType, CustomDebugStringConvertible {
+public struct ParseError : Error, CustomDebugStringConvertible {
     public let msg: String
     public let line: Int
     public let column: Int
@@ -764,7 +768,7 @@ public struct ParseError : ErrorType, CustomDebugStringConvertible {
 
 private extension UnicodeScalar {
     /// Returns true iff this unicode scalar is a space, tab, carriage return, or newline
-    private var isJSONWhitespace: Bool {
+    var isJSONWhitespace: Bool {
         return self == "\t" || self == "\n" || self == "\r" || self == " "
     }
 }

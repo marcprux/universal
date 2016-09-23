@@ -43,18 +43,18 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
     public static func brac(bric: Bric) throws -> SampleModel {
         return try SampleModel( 
-        allOfField: bric.bracKey(Keys.allOfField), 
-        anyOfField: bric.bracKey(Keys.anyOfField), 
-        oneOfField: bric.bracKey(Keys.oneOfField), 
-        notField: bric.bracKey(Keys.notField), 
-        keywordFields: bric.bracKey(Keys.keywordFields), 
-        list: bric.bracKey(Keys.list), 
-        nested1: bric.bracKey(Keys.nested1), 
-        simpleOneOf: bric.bracKey(Keys.simpleOneOf) 
+        allOfField: bric.brac(key: Keys.allOfField), 
+        anyOfField: bric.brac(key: Keys.anyOfField), 
+        oneOfField: bric.brac(key: Keys.oneOfField), 
+        notField: bric.brac(key: Keys.notField), 
+        keywordFields: bric.brac(key: Keys.keywordFields), 
+        list: bric.brac(key: Keys.list), 
+        nested1: bric.brac(key: Keys.nested1), 
+        simpleOneOf: bric.brac(key: Keys.simpleOneOf) 
         ) 
     }
 
-    public func breq(other: SampleModel) -> Bool {
+    public func breq(_ other: SampleModel) -> Bool {
         return allOfField.breq(other.allOfField) 
             && anyOfField.breq(other.anyOfField) 
             && keywordFields.breq(other.keywordFields) 
@@ -102,12 +102,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public static func brac(bric: Bric) throws -> SampleModel.AllOfField {
             return try SampleModel.AllOfField( 
-            FirstAll.brac(bric), 
-            SecondAll.brac(bric) 
+            FirstAll.brac(bric: bric), 
+            SecondAll.brac(bric: bric) 
             ) 
         }
 
-        public func breq(other: SampleModel.AllOfField) -> Bool {
+        public func breq(_ other: SampleModel.AllOfField) -> Bool {
             return p0.breq(other.p0) 
                 && p1.breq(other.p1) 
         }
@@ -135,12 +135,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.AllOfField.FirstAll {
                 return try SampleModel.AllOfField.FirstAll( 
-                a1: bric.bracKey(Keys.a1), 
-                a2: bric.bracKey(Keys.a2) 
+                a1: bric.brac(key: Keys.a1), 
+                a2: bric.brac(key: Keys.a2) 
                 ) 
             }
 
-            public func breq(other: SampleModel.AllOfField.FirstAll) -> Bool {
+            public func breq(_ other: SampleModel.AllOfField.FirstAll) -> Bool {
                 return a1.breq(other.a1) 
                     && a2.breq(other.a2) 
             }
@@ -178,12 +178,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.AllOfField.SecondAll {
                 return try SampleModel.AllOfField.SecondAll( 
-                a3: bric.bracKey(Keys.a3), 
-                a4: bric.bracKey(Keys.a4) 
+                a3: bric.brac(key: Keys.a3), 
+                a4: bric.brac(key: Keys.a4) 
                 ) 
             }
 
-            public func breq(other: SampleModel.AllOfField.SecondAll) -> Bool {
+            public func breq(_ other: SampleModel.AllOfField.SecondAll) -> Bool {
                 return a3.breq(other.a3) 
                     && a4.breq(other.a4) 
             }
@@ -224,14 +224,14 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         public static func brac(bric: Bric) throws -> SampleModel.AnyOfField {
-            let anyOf: (Optional<FirstAny>, Optional<SecondAny>) = try bric.bracAny(FirstAny.brac, SecondAny.brac) 
+            let anyOf: (Optional<FirstAny>, Optional<SecondAny>) = try bric.brac(anyOf: FirstAny.brac, SecondAny.brac) 
             return SampleModel.AnyOfField( 
             anyOf.0,  
             anyOf.1 
             ) 
         }
 
-        public func breq(other: SampleModel.AnyOfField) -> Bool {
+        public func breq(_ other: SampleModel.AnyOfField) -> Bool {
             return p0.breq(other.p0) 
                 && p1.breq(other.p1) 
         }
@@ -259,12 +259,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.AnyOfField.FirstAny {
                 return try SampleModel.AnyOfField.FirstAny( 
-                b1: bric.bracKey(Keys.b1), 
-                b2: bric.bracKey(Keys.b2) 
+                b1: bric.brac(key: Keys.b1), 
+                b2: bric.brac(key: Keys.b2) 
                 ) 
             }
 
-            public func breq(other: SampleModel.AnyOfField.FirstAny) -> Bool {
+            public func breq(_ other: SampleModel.AnyOfField.FirstAny) -> Bool {
                 return b1.breq(other.b1) 
                     && b2.breq(other.b2) 
             }
@@ -302,12 +302,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.AnyOfField.SecondAny {
                 return try SampleModel.AnyOfField.SecondAny( 
-                b3: bric.bracKey(Keys.b3), 
-                b4: bric.bracKey(Keys.b4) 
+                b3: bric.brac(key: Keys.b3), 
+                b4: bric.brac(key: Keys.b4) 
                 ) 
             }
 
-            public func breq(other: SampleModel.AnyOfField.SecondAny) -> Bool {
+            public func breq(_ other: SampleModel.AnyOfField.SecondAny) -> Bool {
                 return b3.breq(other.b3) 
                     && b4.breq(other.b4) 
             }
@@ -345,13 +345,13 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         public static func brac(bric: Bric) throws -> SampleModel.OneOfField {
-            return try bric.bracOne([ 
-            { try .firstOneCase(FirstOne.brac(bric)) }, 
-            { try .secondOneCase(SecondOne.brac(bric)) }, 
+            return try bric.brac(oneOf: [ 
+            { try .firstOneCase(FirstOne.brac(bric: bric)) }, 
+            { try .secondOneCase(SecondOne.brac(bric: bric)) }, 
             ]) 
         }
 
-        public func breq(other: SampleModel.OneOfField) -> Bool {
+        public func breq(_ other: SampleModel.OneOfField) -> Bool {
             switch (self, other) { 
             case let (.firstOneCase(lhs), .firstOneCase(rhs)): return lhs.breq(rhs) 
             case let (.secondOneCase(lhs), .secondOneCase(rhs)): return lhs.breq(rhs) 
@@ -382,12 +382,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.OneOfField.FirstOne {
                 return try SampleModel.OneOfField.FirstOne( 
-                c1: bric.bracKey(Keys.c1), 
-                c2: bric.bracKey(Keys.c2) 
+                c1: bric.brac(key: Keys.c1), 
+                c2: bric.brac(key: Keys.c2) 
                 ) 
             }
 
-            public func breq(other: SampleModel.OneOfField.FirstOne) -> Bool {
+            public func breq(_ other: SampleModel.OneOfField.FirstOne) -> Bool {
                 return c1.breq(other.c1) 
                     && c2.breq(other.c2) 
             }
@@ -425,12 +425,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.OneOfField.SecondOne {
                 return try SampleModel.OneOfField.SecondOne( 
-                c3: bric.bracKey(Keys.c3), 
-                c4: bric.bracKey(Keys.c4) 
+                c3: bric.brac(key: Keys.c3), 
+                c4: bric.brac(key: Keys.c4) 
                 ) 
             }
 
-            public func breq(other: SampleModel.OneOfField.SecondOne) -> Bool {
+            public func breq(_ other: SampleModel.OneOfField.SecondOne) -> Bool {
                 return c3.breq(other.c3) 
                     && c4.breq(other.c4) 
             }
@@ -468,12 +468,12 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public static func brac(bric: Bric) throws -> SampleModel.NotField {
             return try SampleModel.NotField( 
-            P0.brac(bric), 
-            P1.brac(bric) 
+            P0.brac(bric: bric), 
+            P1.brac(bric: bric) 
             ) 
         }
 
-        public func breq(other: SampleModel.NotField) -> Bool {
+        public func breq(_ other: SampleModel.NotField) -> Bool {
             return p0.breq(other.p0) 
                 && p1.breq(other.p1) 
         }
@@ -497,11 +497,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.NotField.P0 {
                 return try SampleModel.NotField.P0( 
-                str: bric.bracKey(Keys.str) 
+                str: bric.brac(key: Keys.str) 
                 ) 
             }
 
-            public func breq(other: SampleModel.NotField.P0) -> Bool {
+            public func breq(_ other: SampleModel.NotField.P0) -> Bool {
                 return str.breq(other.str) 
             }
 
@@ -534,11 +534,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.NotField.NotP1 {
                 return try SampleModel.NotField.NotP1( 
-                str: bric.bracKey(Keys.str) 
+                str: bric.brac(key: Keys.str) 
                 ) 
             }
 
-            public func breq(other: SampleModel.NotField.NotP1) -> Bool {
+            public func breq(_ other: SampleModel.NotField.NotP1) -> Bool {
                 return str.breq(other.str) 
             }
 
@@ -596,17 +596,17 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public static func brac(bric: Bric) throws -> SampleModel.KeywordFields {
             return try SampleModel.KeywordFields( 
-            case: bric.bracKey(Keys.`case`), 
-            for: bric.bracKey(Keys.`for`), 
-            in: bric.bracKey(Keys.`in`), 
-            `inout`: bric.bracKey(Keys.`inout`), 
-            `let`: bric.bracKey(Keys.`let`), 
-            `var`: bric.bracKey(Keys.`var`), 
-            while: bric.bracKey(Keys.`while`) 
+            case: bric.brac(key: Keys.`case`), 
+            for: bric.brac(key: Keys.`for`), 
+            in: bric.brac(key: Keys.`in`), 
+            `inout`: bric.brac(key: Keys.`inout`), 
+            `let`: bric.brac(key: Keys.`let`), 
+            `var`: bric.brac(key: Keys.`var`), 
+            while: bric.brac(key: Keys.`while`) 
             ) 
         }
 
-        public func breq(other: SampleModel.KeywordFields) -> Bool {
+        public func breq(_ other: SampleModel.KeywordFields) -> Bool {
             return `case`.breq(other.`case`) 
                 && `for`.breq(other.`for`) 
                 && `in`.breq(other.`in`) 
@@ -650,11 +650,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public static func brac(bric: Bric) throws -> SampleModel.ListItem {
             return try SampleModel.ListItem( 
-            prop: bric.bracKey(Keys.prop) 
+            prop: bric.brac(key: Keys.prop) 
             ) 
         }
 
-        public func breq(other: SampleModel.ListItem) -> Bool {
+        public func breq(_ other: SampleModel.ListItem) -> Bool {
             return prop.breq(other.prop) 
         }
 
@@ -690,11 +690,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
         public static func brac(bric: Bric) throws -> SampleModel.Nested1 {
             return try SampleModel.Nested1( 
-            nested2: bric.bracKey(Keys.nested2) 
+            nested2: bric.brac(key: Keys.nested2) 
             ) 
         }
 
-        public func breq(other: SampleModel.Nested1) -> Bool {
+        public func breq(_ other: SampleModel.Nested1) -> Bool {
             return nested2.breq(other.nested2) 
         }
 
@@ -723,11 +723,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
             public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2 {
                 return try SampleModel.Nested1.Nested2( 
-                nested3: bric.bracKey(Keys.nested3) 
+                nested3: bric.brac(key: Keys.nested3) 
                 ) 
             }
 
-            public func breq(other: SampleModel.Nested1.Nested2) -> Bool {
+            public func breq(_ other: SampleModel.Nested1.Nested2) -> Bool {
                 return nested3.breq(other.nested3) 
             }
 
@@ -756,11 +756,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                 public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2.Nested3 {
                     return try SampleModel.Nested1.Nested2.Nested3( 
-                    nested4: bric.bracKey(Keys.nested4) 
+                    nested4: bric.brac(key: Keys.nested4) 
                     ) 
                 }
 
-                public func breq(other: SampleModel.Nested1.Nested2.Nested3) -> Bool {
+                public func breq(_ other: SampleModel.Nested1.Nested2.Nested3) -> Bool {
                     return nested4.breq(other.nested4) 
                 }
 
@@ -789,11 +789,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                     public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2.Nested3.Nested4 {
                         return try SampleModel.Nested1.Nested2.Nested3.Nested4( 
-                        nested5: bric.bracKey(Keys.nested5) 
+                        nested5: bric.brac(key: Keys.nested5) 
                         ) 
                     }
 
-                    public func breq(other: SampleModel.Nested1.Nested2.Nested3.Nested4) -> Bool {
+                    public func breq(_ other: SampleModel.Nested1.Nested2.Nested3.Nested4) -> Bool {
                         return nested5.breq(other.nested5) 
                     }
 
@@ -822,11 +822,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
 
                         public static func brac(bric: Bric) throws -> SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5 {
                             return try SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5( 
-                            single: bric.bracKey(Keys.single) 
+                            single: bric.brac(key: Keys.single) 
                             ) 
                         }
 
-                        public func breq(other: SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5) -> Bool {
+                        public func breq(_ other: SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5) -> Bool {
                             return single.breq(other.single) 
                         }
 

@@ -13,7 +13,7 @@ import BricBrac
 
 /// AutoBricBrac allows automatic implementations of `Bricable` and `Bracable` based on the type
 public protocol AutoBricBrac : BricBrac {
-    static var autobricbrac: (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) { get }
+    static var autobricbrac: (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) { get }
 }
 
 public extension AutoBricBrac {
@@ -28,65 +28,65 @@ public extension AutoBricBrac {
 
 
 /// Overloaded free-function for converting a Bricable or BricLayer into Bric
-private func abric<T where T: Bricable>(value: T) -> Bric {
+private func abric<T>(_ value: T) -> Bric where T: Bricable {
     return value.bric()
 }
 
 /// Overloaded free-function for converting a Bricable or BricLayer into Bric
-private func abric<T where T: BricLayer, T.BricSub : Bricable>(value: T) -> Bric {
+private func abric<T>(_ value: T) -> Bric where T: BricLayer, T.BricSub : Bricable {
     return value.bric()
 }
 
 /// Overloaded free-function for converting a Bricable or BricLayer into Bric
-private func abric<T where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : Bricable>(value: T) -> Bric {
+private func abric<T>(_ value: T) -> Bric where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : Bricable {
     return value.bric()
 }
 
 /// Overloaded free-function for converting a Bricable or BricLayer into Bric
-private func abric<T where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : Bricable>(value: T) -> Bric {
+private func abric<T>(_ value: T) -> Bric where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : Bricable {
     return value.bric()
 }
 
 /// Overloaded free-function for converting a Bricable or BricLayer into Bric
-private func abric<T where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : Bricable>(value: T) -> Bric {
+private func abric<T>(_ value: T) -> Bric where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : Bricable {
     return value.bric()
 }
 
 /// Overloaded free-function for converting a Bricable or BricLayer into Bric
-private func abric<T where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub.BricSub : Bricable>(value: T) -> Bric {
+private func abric<T>(_ value: T) -> Bric where T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub.BricSub : Bricable {
     return value.bric()
 }
 
 
 
 /// Overloaded free-function for converting a Bracable or BracLayer into the type
-private func abrac<T where T: Bracable>(bric: Bric) throws -> T {
-    return try T.brac(bric)
+private func abrac<T>(_ bric: Bric) throws -> T where T: Bracable {
+    return try T.brac(bric: bric)
 }
 
 /// Overloaded free-function for converting a Bracable or BracLayer into the type
-private func abrac<T where T: BracLayer, T.BracSub : Bracable>(bric: Bric) throws -> T {
-    return try T.brac(bric)
+private func abrac<T>(_ bric: Bric) throws -> T where T: BracLayer, T.BracSub : Bracable {
+    return try T.brac(bric: bric)
 }
 
 /// Overloaded free-function for converting a Bracable or BracLayer into the type
-private func abrac<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : Bracable>(bric: Bric) throws -> T {
-    return try T.brac(bric)
+private func abrac<T>(_ bric: Bric) throws -> T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : Bracable {
+    return try T.brac(bric: bric)
 }
 
 /// Overloaded free-function for converting a Bracable or BracLayer into the type
-private func abrac<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : Bracable>(bric: Bric) throws -> T {
-    return try T.brac(bric)
+private func abrac<T>(_ bric: Bric) throws -> T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : Bracable {
+    return try T.brac(bric: bric)
 }
 
 /// Overloaded free-function for converting a Bracable or BracLayer into the type
-private func abrac<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : Bracable>(bric: Bric) throws -> T {
-    return try T.brac(bric)
+private func abrac<T>(_ bric: Bric) throws -> T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : Bracable {
+    return try T.brac(bric: bric)
 }
 
 /// Overloaded free-function for converting a Bracable or BracLayer into the type
-private func abrac<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub.BracSub : Bracable>(bric: Bric) throws -> T {
-    return try T.brac(bric)
+private func abrac<T>(_ bric: Bric) throws -> T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub.BracSub : Bracable {
+    return try T.brac(bric: bric)
 }
 
 
@@ -94,140 +94,140 @@ private func abrac<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSu
 extension AutoBricBrac {
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, R: RawRepresentable>(_ factory: @escaping (F1, F2) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, F5, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4, F5) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4), _ key5: (key: R, getter: Self -> F5, writer: F5 -> Bric, reader: Bric throws -> F5)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, F5, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4, F5) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4), _ key5: (key: R, getter: (Self) -> F5, writer: (F5) -> Bric, reader: (Bric) throws -> F5)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))), (key5.key, key5.writer(key5.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, F5, F6, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4, F5, F6) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4), _ key5: (key: R, getter: Self -> F5, writer: F5 -> Bric, reader: Bric throws -> F5), _ key6: (key: R, getter: Self -> F6, writer: F6 -> Bric, reader: Bric throws -> F6)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, F5, F6, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4, F5, F6) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4), _ key5: (key: R, getter: (Self) -> F5, writer: (F5) -> Bric, reader: (Bric) throws -> F5), _ key6: (key: R, getter: (Self) -> F6, writer: (F6) -> Bric, reader: (Bric) throws -> F6)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))), (key5.key, key5.writer(key5.getter(value))), (key6.key, key6.writer(key6.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4, F5, F6, F7) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4), _ key5: (key: R, getter: Self -> F5, writer: F5 -> Bric, reader: Bric throws -> F5), _ key6: (key: R, getter: Self -> F6, writer: F6 -> Bric, reader: Bric throws -> F6), _ key7: (key: R, getter: Self -> F7, writer: F7 -> Bric, reader: Bric throws -> F7)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4, F5, F6, F7) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4), _ key5: (key: R, getter: (Self) -> F5, writer: (F5) -> Bric, reader: (Bric) throws -> F5), _ key6: (key: R, getter: (Self) -> F6, writer: (F6) -> Bric, reader: (Bric) throws -> F6), _ key7: (key: R, getter: (Self) -> F7, writer: (F7) -> Bric, reader: (Bric) throws -> F7)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))), (key5.key, key5.writer(key5.getter(value))), (key6.key, key6.writer(key6.getter(value))), (key7.key, key7.writer(key7.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4, F5, F6, F7, F8) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4), _ key5: (key: R, getter: Self -> F5, writer: F5 -> Bric, reader: Bric throws -> F5), _ key6: (key: R, getter: Self -> F6, writer: F6 -> Bric, reader: Bric throws -> F6), _ key7: (key: R, getter: Self -> F7, writer: F7 -> Bric, reader: Bric throws -> F7), _ key8: (key: R, getter: Self -> F8, writer: F8 -> Bric, reader: Bric throws -> F8)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4, F5, F6, F7, F8) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4), _ key5: (key: R, getter: (Self) -> F5, writer: (F5) -> Bric, reader: (Bric) throws -> F5), _ key6: (key: R, getter: (Self) -> F6, writer: (F6) -> Bric, reader: (Bric) throws -> F6), _ key7: (key: R, getter: (Self) -> F7, writer: (F7) -> Bric, reader: (Bric) throws -> F7), _ key8: (key: R, getter: (Self) -> F8, writer: (F8) -> Bric, reader: (Bric) throws -> F8)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))), (key5.key, key5.writer(key5.getter(value))), (key6.key, key6.writer(key6.getter(value))), (key7.key, key7.writer(key7.getter(value))), (key8.key, key8.writer(key8.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, F9, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4, F5, F6, F7, F8, F9) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4), _ key5: (key: R, getter: Self -> F5, writer: F5 -> Bric, reader: Bric throws -> F5), _ key6: (key: R, getter: Self -> F6, writer: F6 -> Bric, reader: Bric throws -> F6), _ key7: (key: R, getter: Self -> F7, writer: F7 -> Bric, reader: Bric throws -> F7), _ key8: (key: R, getter: Self -> F8, writer: F8 -> Bric, reader: Bric throws -> F8), _ key9: (key: R, getter: Self -> F9, writer: F9 -> Bric, reader: Bric throws -> F9)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, F9, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4, F5, F6, F7, F8, F9) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4), _ key5: (key: R, getter: (Self) -> F5, writer: (F5) -> Bric, reader: (Bric) throws -> F5), _ key6: (key: R, getter: (Self) -> F6, writer: (F6) -> Bric, reader: (Bric) throws -> F6), _ key7: (key: R, getter: (Self) -> F7, writer: (F7) -> Bric, reader: (Bric) throws -> F7), _ key8: (key: R, getter: (Self) -> F8, writer: (F8) -> Bric, reader: (Bric) throws -> F8), _ key9: (key: R, getter: (Self) -> F9, writer: (F9) -> Bric, reader: (Bric) throws -> F9)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))), (key5.key, key5.writer(key5.getter(value))), (key6.key, key6.writer(key6.getter(value))), (key7.key, key7.writer(key7.getter(value))), (key8.key, key8.writer(key8.getter(value))), (key9.key, key9.writer(key9.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4, F5, F6, F7, F8, F9, F10) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4), _ key5: (key: R, getter: Self -> F5, writer: F5 -> Bric, reader: Bric throws -> F5), _ key6: (key: R, getter: Self -> F6, writer: F6 -> Bric, reader: Bric throws -> F6), _ key7: (key: R, getter: Self -> F7, writer: F7 -> Bric, reader: Bric throws -> F7), _ key8: (key: R, getter: Self -> F8, writer: F8 -> Bric, reader: Bric throws -> F8), _ key9: (key: R, getter: Self -> F9, writer: F9 -> Bric, reader: Bric throws -> F9), _ key10: (key: R, getter: Self -> F10, writer: F10 -> Bric, reader: Bric throws -> F10)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4, F5, F6, F7, F8, F9, F10) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4), _ key5: (key: R, getter: (Self) -> F5, writer: (F5) -> Bric, reader: (Bric) throws -> F5), _ key6: (key: R, getter: (Self) -> F6, writer: (F6) -> Bric, reader: (Bric) throws -> F6), _ key7: (key: R, getter: (Self) -> F7, writer: (F7) -> Bric, reader: (Bric) throws -> F7), _ key8: (key: R, getter: (Self) -> F8, writer: (F8) -> Bric, reader: (Bric) throws -> F8), _ key9: (key: R, getter: (Self) -> F9, writer: (F9) -> Bric, reader: (Bric) throws -> F9), _ key10: (key: R, getter: (Self) -> F10, writer: (F10) -> Bric, reader: (Bric) throws -> F10)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))), (key5.key, key5.writer(key5.getter(value))), (key6.key, key6.writer(key6.getter(value))), (key7.key, key7.writer(key7.getter(value))), (key8.key, key8.writer(key8.getter(value))), (key9.key, key9.writer(key9.getter(value))), (key10.key, key10.writer(key10.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)) )
         }
 
         return (bricer, bracer)
     }
 
     /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators
-    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, R: RawRepresentable where R.RawValue == String>(factory: (F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11) -> Self, _ key1: (key: R, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: R, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2), _ key3: (key: R, getter: Self -> F3, writer: F3 -> Bric, reader: Bric throws -> F3), _ key4: (key: R, getter: Self -> F4, writer: F4 -> Bric, reader: Bric throws -> F4), _ key5: (key: R, getter: Self -> F5, writer: F5 -> Bric, reader: Bric throws -> F5), _ key6: (key: R, getter: Self -> F6, writer: F6 -> Bric, reader: Bric throws -> F6), _ key7: (key: R, getter: Self -> F7, writer: F7 -> Bric, reader: Bric throws -> F7), _ key8: (key: R, getter: Self -> F8, writer: F8 -> Bric, reader: Bric throws -> F8), _ key9: (key: R, getter: Self -> F9, writer: F9 -> Bric, reader: Bric throws -> F9), _ key10: (key: R, getter: Self -> F10, writer: F10 -> Bric, reader: Bric throws -> F10), _ key11: (key: R, getter: Self -> F11, writer: F11 -> Bric, reader: Bric throws -> F11)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {
+    public static func abricbrac<F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, R: RawRepresentable>(_ factory: @escaping (F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11) -> Self, _ key1: (key: R, getter: (Self) -> F1, writer: (F1) -> Bric, reader: (Bric) throws -> F1), _ key2: (key: R, getter: (Self) -> F2, writer: (F2) -> Bric, reader: (Bric) throws -> F2), _ key3: (key: R, getter: (Self) -> F3, writer: (F3) -> Bric, reader: (Bric) throws -> F3), _ key4: (key: R, getter: (Self) -> F4, writer: (F4) -> Bric, reader: (Bric) throws -> F4), _ key5: (key: R, getter: (Self) -> F5, writer: (F5) -> Bric, reader: (Bric) throws -> F5), _ key6: (key: R, getter: (Self) -> F6, writer: (F6) -> Bric, reader: (Bric) throws -> F6), _ key7: (key: R, getter: (Self) -> F7, writer: (F7) -> Bric, reader: (Bric) throws -> F7), _ key8: (key: R, getter: (Self) -> F8, writer: (F8) -> Bric, reader: (Bric) throws -> F8), _ key9: (key: R, getter: (Self) -> F9, writer: (F9) -> Bric, reader: (Bric) throws -> F9), _ key10: (key: R, getter: (Self) -> F10, writer: (F10) -> Bric, reader: (Bric) throws -> F10), _ key11: (key: R, getter: (Self) -> F11, writer: (F11) -> Bric, reader: (Bric) throws -> F11)) -> (bricer: ((Self) -> Bric), bracer: ((Bric) throws -> Self)) where R.RawValue == String {
 
-        let bricer: (Self -> Bric) = { value in
+        let bricer: ((Self) -> Bric) = { value in
             return Bric(object: [ (key1.key, key1.writer(key1.getter(value))), (key2.key, key2.writer(key2.getter(value))), (key3.key, key3.writer(key3.getter(value))), (key4.key, key4.writer(key4.getter(value))), (key5.key, key5.writer(key5.getter(value))), (key6.key, key6.writer(key6.getter(value))), (key7.key, key7.writer(key7.getter(value))), (key8.key, key8.writer(key8.getter(value))), (key9.key, key9.writer(key9.getter(value))), (key10.key, key10.writer(key10.getter(value))), (key11.key, key11.writer(key11.getter(value))) ])
         }
 
-        let bracer: (Bric throws -> Self) = { bric in
-            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)) )
+        let bracer: ((Bric) throws -> Self) = { bric in
+            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)) )
         }
 
         return (bricer, bracer)
@@ -241,7 +241,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -255,7 +255,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -269,7 +269,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -283,7 +283,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)), key15.reader(bric.bracKey(key15.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)), key15.reader(bric.brac(key: key15.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -297,7 +297,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)), key15.reader(bric.bracKey(key15.key)), key16.reader(bric.bracKey(key16.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)), key15.reader(bric.brac(key: key15.key)), key16.reader(bric.brac(key: key16.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -311,7 +311,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)), key15.reader(bric.bracKey(key15.key)), key16.reader(bric.bracKey(key16.key)), key17.reader(bric.bracKey(key17.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)), key15.reader(bric.brac(key: key15.key)), key16.reader(bric.brac(key: key16.key)), key17.reader(bric.brac(key: key17.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -325,7 +325,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)), key15.reader(bric.bracKey(key15.key)), key16.reader(bric.bracKey(key16.key)), key17.reader(bric.bracKey(key17.key)), key18.reader(bric.bracKey(key18.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)), key15.reader(bric.brac(key: key15.key)), key16.reader(bric.brac(key: key16.key)), key17.reader(bric.brac(key: key17.key)), key18.reader(bric.brac(key: key18.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -339,7 +339,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)), key15.reader(bric.bracKey(key15.key)), key16.reader(bric.bracKey(key16.key)), key17.reader(bric.bracKey(key17.key)), key18.reader(bric.bracKey(key18.key)), key19.reader(bric.bracKey(key19.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)), key15.reader(bric.brac(key: key15.key)), key16.reader(bric.brac(key: key16.key)), key17.reader(bric.brac(key: key17.key)), key18.reader(bric.brac(key: key18.key)), key19.reader(bric.brac(key: key19.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -353,7 +353,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)), key15.reader(bric.bracKey(key15.key)), key16.reader(bric.bracKey(key16.key)), key17.reader(bric.bracKey(key17.key)), key18.reader(bric.bracKey(key18.key)), key19.reader(bric.bracKey(key19.key)), key20.reader(bric.bracKey(key20.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)), key15.reader(bric.brac(key: key15.key)), key16.reader(bric.brac(key: key16.key)), key17.reader(bric.brac(key: key17.key)), key18.reader(bric.brac(key: key18.key)), key19.reader(bric.brac(key: key19.key)), key20.reader(bric.brac(key: key20.key)) )
 //        }
 //
 //        return (bricer, bracer)
@@ -367,7 +367,7 @@ extension AutoBricBrac {
 //        }
 //
 //        let bracer: (Bric throws -> Self) = { bric in
-//            try factory(key1.reader(bric.bracKey(key1.key)), key2.reader(bric.bracKey(key2.key)), key3.reader(bric.bracKey(key3.key)), key4.reader(bric.bracKey(key4.key)), key5.reader(bric.bracKey(key5.key)), key6.reader(bric.bracKey(key6.key)), key7.reader(bric.bracKey(key7.key)), key8.reader(bric.bracKey(key8.key)), key9.reader(bric.bracKey(key9.key)), key10.reader(bric.bracKey(key10.key)), key11.reader(bric.bracKey(key11.key)), key12.reader(bric.bracKey(key12.key)), key13.reader(bric.bracKey(key13.key)), key14.reader(bric.bracKey(key14.key)), key15.reader(bric.bracKey(key15.key)), key16.reader(bric.bracKey(key16.key)), key17.reader(bric.bracKey(key17.key)), key18.reader(bric.bracKey(key18.key)), key19.reader(bric.bracKey(key19.key)), key20.reader(bric.bracKey(key20.key)), key21.reader(bric.bracKey(key21.key)) )
+//            try factory(key1.reader(bric.brac(key: key1.key)), key2.reader(bric.brac(key: key2.key)), key3.reader(bric.brac(key: key3.key)), key4.reader(bric.brac(key: key4.key)), key5.reader(bric.brac(key: key5.key)), key6.reader(bric.brac(key: key6.key)), key7.reader(bric.brac(key: key7.key)), key8.reader(bric.brac(key: key8.key)), key9.reader(bric.brac(key: key9.key)), key10.reader(bric.brac(key: key10.key)), key11.reader(bric.brac(key: key11.key)), key12.reader(bric.brac(key: key12.key)), key13.reader(bric.brac(key: key13.key)), key14.reader(bric.brac(key: key14.key)), key15.reader(bric.brac(key: key15.key)), key16.reader(bric.brac(key: key16.key)), key17.reader(bric.brac(key: key17.key)), key18.reader(bric.brac(key: key18.key)), key19.reader(bric.brac(key: key19.key)), key20.reader(bric.brac(key: key20.key)), key21.reader(bric.brac(key: key21.key)) )
 //        }
 //        
 //        return (bricer, bracer)
@@ -375,38 +375,38 @@ extension AutoBricBrac {
 
 
     /// An autobricbrac key argument
-    @warn_unused_result
-    public static func bbkey<T: Bricable where T: Bracable>(key: String, _ getter: (Self)->(T)) -> (String, (Self)->(T), (T -> Bric), (Bric throws -> T)) {
+    
+    public static func bbkey<T: Bricable>(_ key: String, _ getter: @escaping (Self)->(T)) -> (String, (Self)->(T), ((T) -> Bric), ((Bric) throws -> T)) where T: Bracable {
         return (key, getter, abric, abrac)
     }
 
     /// An autobricbrac key argument
-    @warn_unused_result
-    public static func bbkey<T where T: BracLayer, T.BracSub : Bracable, T: BricLayer, T.BricSub : Bricable>(key: String, _ getter: (Self)->(T)) -> (String, (Self)->(T), (T -> Bric), (Bric throws -> T)) {
+    
+    public static func bbkey<T>(_ key: String, _ getter: @escaping (Self)->(T)) -> (String, (Self)->(T), ((T) -> Bric), ((Bric) throws -> T)) where T: BracLayer, T.BracSub : Bracable, T: BricLayer, T.BricSub : Bricable {
         return (key, getter, abric, abrac)
     }
 
     /// An autobricbrac key argument
-    @warn_unused_result
-    public static func bbkey<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : Bricable>(key: String, _ getter: (Self)->(T)) -> (String, (Self)->(T), (T -> Bric), (Bric throws -> T)) {
+    
+    public static func bbkey<T>(_ key: String, _ getter: @escaping (Self)->(T)) -> (String, (Self)->(T), ((T) -> Bric), ((Bric) throws -> T)) where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : Bricable {
         return (key, getter, abric, abrac)
     }
 
     /// An autobricbrac key argument
-    @warn_unused_result
-    public static func bbkey<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : Bricable>(key: String, _ getter: (Self)->(T)) -> (String, (Self)->(T), (T -> Bric), (Bric throws -> T)) {
+    
+    public static func bbkey<T>(_ key: String, _ getter: @escaping (Self)->(T)) -> (String, (Self)->(T), ((T) -> Bric), ((Bric) throws -> T)) where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : Bricable {
         return (key, getter, abric, abrac)
     }
 
     /// An autobricbrac key argument
-    @warn_unused_result
-    public static func bbkey<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : Bricable>(key: String, _ getter: (Self)->(T)) -> (String, (Self)->(T), (T -> Bric), (Bric throws -> T)) {
+    
+    public static func bbkey<T>(_ key: String, _ getter: @escaping (Self)->(T)) -> (String, (Self)->(T), ((T) -> Bric), ((Bric) throws -> T)) where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : Bricable {
         return (key, getter, abric, abrac)
     }
 
     /// An autobricbrac key argument
-    @warn_unused_result
-    public static func bbkey<T where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub.BricSub : Bricable>(key: String, _ getter: (Self)->(T)) -> (String, (Self)->(T), (T -> Bric), (Bric throws -> T)) {
+    
+    public static func bbkey<T>(_ key: String, _ getter: @escaping (Self)->(T)) -> (String, (Self)->(T), ((T) -> Bric), ((Bric) throws -> T)) where T: BracLayer, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub.BracSub : Bracable, T: BricLayer, T.BricSub : BricLayer, T.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub : BricLayer, T.BricSub.BricSub.BricSub.BricSub.BricSub : Bricable {
         return (key, getter, abric, abrac)
     }
 }

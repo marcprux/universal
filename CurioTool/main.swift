@@ -11,4 +11,4 @@
 // The pure swift process handling is woefully simplistic; there is no stderr or process exiting, so
 // for the time being we throw errors when there is a problem with the arguments
 // We could alternatively import Darwin, but we'd like to keep this 100% pure Swift
-try Curio.runWithArguments(Process.arguments)
+try Curio.runWithArguments(CommandLine.arguments)

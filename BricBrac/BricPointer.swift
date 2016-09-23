@@ -10,7 +10,7 @@
 
 /// Extension to Bric that supports JSON Pointers and JSON References
 public extension Bric {
-    public enum BricReferenceError : ErrorType, CustomDebugStringConvertible {
+    public enum BricReferenceError : Error, CustomDebugStringConvertible {
         case invalidReferenceURI(String)
         case unresolvableReferenceRoot(String)
         case referenceToNonObject(String)
@@ -19,11 +19,11 @@ public extension Bric {
 
         public var debugDescription : String {
             switch self {
-            case invalidReferenceURI(let x): return "InvalidReferenceURI: \(x)"
-            case unresolvableReferenceRoot(let x): return "UnresolvableReferenceRoot: \(x)"
-            case referenceToNonObject(let x): return "ReferenceToNonObject: \(x)"
-            case objectKeyNotFound(let x): return "ObjectKeyNotFound: \(x)"
-            case arrayIndexNotFound(let x): return "ArrayIndexNotFound: \(x)"
+            case .invalidReferenceURI(let x): return "InvalidReferenceURI: \(x)"
+            case .unresolvableReferenceRoot(let x): return "UnresolvableReferenceRoot: \(x)"
+            case .referenceToNonObject(let x): return "ReferenceToNonObject: \(x)"
+            case .objectKeyNotFound(let x): return "ObjectKeyNotFound: \(x)"
+            case .arrayIndexNotFound(let x): return "ArrayIndexNotFound: \(x)"
             }
         }
     }
@@ -36,7 +36,7 @@ public extension Bric {
         case key(String)
         case index(Int)
 
-        public init<R: RawRepresentable where R.RawValue == String>(key: R) {
+        public init<R: RawRepresentable>(key: R) where R.RawValue == String {
             self = .key(key.rawValue)
         }
 
@@ -44,7 +44,7 @@ public extension Bric {
             self = .key(key)
         }
 
-        public init<R: RawRepresentable where R.RawValue == Int>(index: R) {
+        public init<R: RawRepresentable>(index: R) where R.RawValue == Int {
             self = .index(index.rawValue)
         }
 
@@ -69,7 +69,7 @@ public extension Bric {
 
     /// Returns a map of all references in the Bric
     /// See: <http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03>
-    public func resolve(obj: [String : Bric] = [:], resolver: (String) throws -> Bric) throws -> [String : Bric] {
+    public func resolve(_ obj: [String : Bric] = [:], resolver: (String) throws -> Bric) throws -> [String : Bric] {
         var rmap = obj
         switch self {
         case .arr(let arr):
@@ -80,8 +80,8 @@ public extension Bric {
 
         case .obj(var dict):
             // { "$ref": "http://example.com/example.json#/foo/bar" }
-            if case .Some(.str(let ref)) = dict["$ref"] {
-                var parts = ref.characters.split(allowEmptySlices: true, isSeparator: { $0 == "#" }).map({ String($0) })
+            if case .some(.str(let ref)) = dict["$ref"] {
+                var parts = ref.characters.split(omittingEmptySubsequences: false, whereSeparator: { $0 == "#" }).map({ String($0) })
                 if parts.count != 2 { throw BricReferenceError.unresolvableReferenceRoot(ref) }
 
                 // resolve the absolute root: "http://example.com/example.json"
@@ -100,7 +100,7 @@ public extension Bric {
         }
     }
 
-    public func find(pointer: Pointer) throws -> Bric {
+    public func find(_ pointer: Pointer) throws -> Bric {
         var node: Bric = self
         for ref in pointer {
             if case .arr(let arr) = node {
@@ -131,17 +131,17 @@ public extension Bric {
     }
 
     /// Resolve the relative part "/foo/bar" as per http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
-    public func reference(pointer: String) throws -> Bric {
+    public func reference(_ pointer: String) throws -> Bric {
         // Note: this logic is somewhat duplicated in find(), but when parsing a string we don't know if "1" means object key or array index until we resolve it against the Bric, so we cannot first parse it into a Bric.Pointer before we resolve it
-        let frags = pointer.characters.split(allowEmptySlices: false, isSeparator: { $0 == "/" }).map({ String($0) })
+        let frags = pointer.characters.split(omittingEmptySubsequences: true, whereSeparator: { $0 == "/" }).map({ String($0) })
         var node = self
         for var frag in frags {
             // funky JSON pointer escaping scheme (section 4)
-            frag = frag.replace("~1", replacement: "/")
-            frag = frag.replace("~0", replacement: "~")
+            frag = frag.replace(string: "~1", with: "/")
+            frag = frag.replace(string: "~0", with: "~")
 
             if case .arr(let arr) = node {
-                if let index = Int(frag) where index < arr.count && index >= 0 {
+                if let index = Int(frag) , index < arr.count && index >= 0 {
                     node = arr[index]
                 } else {
                     throw BricReferenceError.arrayIndexNotFound(frag)
@@ -156,7 +156,7 @@ public extension Bric {
         }
 
         // special case: trailing slashes will map to the "" key of an object
-        if case .obj(let obj) = node where pointer.characters.last == "/" {
+        if case .obj(let obj) = node , pointer.characters.last == "/" {
             node = obj[""] ?? node
         }
 
@@ -166,7 +166,7 @@ public extension Bric {
 
 extension Bric.Ref : Equatable { }
 
-extension Bric.Ref : StringLiteralConvertible {
+extension Bric.Ref : ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = .key(value)
     }
@@ -180,7 +180,7 @@ extension Bric.Ref : StringLiteralConvertible {
     }
 }
 
-extension Bric.Ref : IntegerLiteralConvertible {
+extension Bric.Ref : ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         self = .index(value)
     }
@@ -205,27 +205,27 @@ extension Bric.Ref : Hashable {
 
 public extension Bric {
     /// Updated the bric at the given existant path and sets the specified value
-    @warn_unused_result public func update(value: Bric, pointer: Bric.Ref...) -> Bric {
+    public func update(_ value: Bric, pointer: Bric.Ref...) -> Bric {
         return alter { return $0 == pointer ? value : $1 }
     }
 
     /// Recursively visits each node in this Bric and performs the alteration specified by the mutator
-    @warn_unused_result public func alter(mutator: (Pointer, Bric) throws -> Bric) rethrows -> Bric {
-        return try alterPath([], mutator)
+    public func alter(mutator: (Pointer, Bric) throws -> Bric) rethrows -> Bric {
+        return try alterPath(path: [], mutator)
     }
 
-    @warn_unused_result private func alterPath(path: Pointer = [], _ mutator: (Pointer, Bric) throws -> Bric) rethrows -> Bric {
+    fileprivate func alterPath(path: Pointer = [], _ mutator: (Pointer, Bric) throws -> Bric) rethrows -> Bric {
         switch self {
         case .arr(var values):
-            for (i, v) in values.enumerate() {
+            for (i, v) in values.enumerated() {
                 let p = path + [.index(i)]
-                values[i] = try mutator(p, v.alterPath(p, mutator))
+                values[i] = try mutator(p, v.alterPath(path: p, mutator))
             }
             return try mutator(path, .arr(values))
         case .obj(var dict):
             for (k, v) in dict {
                 let p = path + [.key(k)]
-                dict[k] = try mutator(p, v.alterPath(p, mutator))
+                dict[k] = try mutator(p, v.alterPath(path: p, mutator))
             }
             return try mutator(path, .obj(dict))
         default:
@@ -236,54 +236,54 @@ public extension Bric {
 
 public extension String {
     /// Returns a list of non-overlapping ranges of substring indices that equal the given find string in ascending order
-    private func rangesOfString(find: String) -> [Range<Index>] {
-        var ranges : [Range<String.Index>] = []
-        let flen = find.startIndex.distanceTo(find.endIndex)
+    fileprivate func ranges(ofString find: String) -> [ClosedRange<Index>] {
+        var ranges : [ClosedRange<String.Index>] = []
+        let flen = find.characters.distance(from: find.startIndex, to: find.endIndex)
         let end = self.endIndex
         var i1 = self.startIndex
-        var i2 = self.startIndex.advancedBy(flen-1, limit: end)
         let chars = self.characters
+        guard var i2 = chars.index(self.startIndex, offsetBy: flen-1, limitedBy: end) else { return ranges }
 
         while i2 != end {
             if String(chars[i1...i2]) == find {
                 ranges.append(i1...i2)
-                i1 = i1.advancedBy(flen, limit: end)
-                i2 = i2.advancedBy(flen, limit: end)
+                i1 = chars.index(i1, offsetBy: flen, limitedBy: end) ?? end
+                i2 = chars.index(i2, offsetBy: flen, limitedBy: end) ?? end
             } else {
-                i1 = i1.advancedBy(1, limit: end)
-                i2 = i2.advancedBy(1, limit: end)
+                i1 = chars.index(i1, offsetBy: 1, limitedBy: end) ?? end
+                i2 = chars.index(i2, offsetBy: 1, limitedBy: end) ?? end
             }
         }
         return ranges
     }
 
-    @warn_unused_result
-    public func replace(find: String, replacement: String) -> String {
+    
+    public func replace(string find: String, with replacement: String) -> String {
         var replaced = self
-        for range in self.rangesOfString(find).reverse() {
-            replaced.replaceRange(range, with: replacement)
+        for range in self.ranges(ofString: find).reversed() {
+            replaced.replaceSubrange(range, with: replacement)
         }
         return replaced
     }
 
-    public func replace(find: Character, replacement: String) -> String {
+    public func replace(character find: Character, with replacement: String) -> String {
         // when replacing a single character, optimize by doing a faster check
         if !self.characters.contains(find) {
             return self
         }
 
-        return replace(String(find), replacement: replacement)
+        return replace(string: String(find), with: replacement)
     }
 
-    public mutating func replaceInPlace(find: String, replacement: String) {
-        self = self.replace(find, replacement: replacement)
+    public mutating func replaceInPlace(_ find: String, replacement: String) {
+        self = self.replace(string: find, with: replacement)
     }
 
     /// Quotes the given string with the specified quote string and the given escape
-    public func enquote(c: String, escape: String? = "\\") -> String {
+    public func enquote(_ c: String, escape: String? = "\\") -> String {
         if !c.isEmpty {
             if let escape = escape {
-                return c + self.replace(c, replacement: escape + c) + c
+                return c + self.replace(string: c, with: escape + c) + c
             } else {
                 return c + self + c
             }

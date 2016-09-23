@@ -55,8 +55,8 @@ public func ==(lhs: Bric, rhs: Bric) -> Bool {
 extension Bric : Hashable {
     public var hashValue: Int {
         switch self {
-        case .arr(let a): return a.reduce(0, combine: { sum, bric in Int.multiplyWithOverflow(37, Int.addWithOverflow(sum, bric.hashValue).0).0 })
-        case .obj(let o): return o.reduce(0, combine: { sum, keyValue in Int.multiplyWithOverflow(37, Int.addWithOverflow(Int.addWithOverflow(sum, keyValue.0.hashValue).0, keyValue.1.hashValue).0).0 })
+        case .arr(let a): return a.reduce(0, { sum, bric in Int.multiplyWithOverflow(37, Int.addWithOverflow(sum, bric.hashValue).0).0 })
+        case .obj(let o): return o.reduce(0, { sum, keyValue in Int.multiplyWithOverflow(37, Int.addWithOverflow(Int.addWithOverflow(sum, keyValue.0.hashValue).0, keyValue.1.hashValue).0).0 })
         case .str(let s): return s.hashValue
         case .num(let d): return d.hashValue
         case .bol(let b): return b.hashValue
@@ -86,7 +86,7 @@ extension Bric {
     ///
     /// - Warning: note that value types are always added as collections,
     ///   such that 1 + 1 yields [1, 1] and "foo" + "bar" yields ["foo", "bar"]
-    public mutating func appendContentsOf(bric: Bric) {
+    public mutating func append(contentsOf bric: Bric) {
         switch (self, bric) {
         case (.obj(var obj1), .obj(let obj2)):
             for (k, v) in obj2 { obj1[k] = v }
@@ -108,19 +108,19 @@ public extension Bric {
     /// returning the union of the objects
     ///
     /// - See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-    @warn_unused_result
+    
     public func assign(bric: Bric) -> Bric {
-        return merge(bric, depth: 1)
+        return merge(bric: bric, depth: 1)
     }
 
     /// Performs a deep merge of all the object & array elements of the given Bric
-    @warn_unused_result
+    
     public func merge(bric: Bric, depth: Int = Int.max) -> Bric {
         if depth <= 0 { return self }
 
         if case .arr(var a1) = self, case .arr(let a2) = bric {
-            for (i, (e1, e2)) in zip(a1, a2).enumerate() {
-                a1[i] = e1.merge(e2, depth: depth - 1)
+            for (i, (e1, e2)) in zip(a1, a2).enumerated() {
+                a1[i] = e1.merge(bric: e2, depth: depth - 1)
             }
             return .arr(a1)
         }
@@ -128,7 +128,7 @@ public extension Bric {
         guard case .obj(var dest) = self, case .obj(let src) = bric else { return self }
         for (srckey, srcval) in src {
             if let destval = dest[srckey] {
-                dest[srckey] = destval.merge(srcval, depth: depth - 1)
+                dest[srckey] = destval.merge(bric: srcval, depth: depth - 1)
             } else {
                 dest[srckey] = srcval
             }
@@ -138,22 +138,6 @@ public extension Bric {
 }
 
 
-/// Object keyed subscription helpers for fluent dictionary-like access to Bric
-public extension Bric {
-
-    /// Bric has a string subscript when it is an object type
-    public subscript(key: String)->Bric? {
-        get { return try? bracKey(key) }
-
-        set {
-            switch self {
-            case .obj(var ob): ob[key] = newValue; self = .obj(ob)
-            default: break
-            }
-        }
-    }
-}
-
 /// Array indexed subscription helpers for fluent dictionary-like access to Bric
 public extension Bric {
 
@@ -162,9 +146,9 @@ public extension Bric {
         get {
             switch self {
             case .arr(let arr):
-                return index < 0 || index >= arr.count ? .None : arr[index]
+                return index < 0 || index >= arr.count ? .none : arr[index]
             default:
-                return .None
+                return .none
             }
         }
 
@@ -183,42 +167,42 @@ public extension Bric {
     }
 }
 
-extension Bric : NilLiteralConvertible {
+extension Bric : ExpressibleByNilLiteral {
     /// Creates some null Bric
     public init(nilLiteral: ()) {
         self = .nul
     }
 }
 
-extension Bric : BooleanLiteralConvertible {
+extension Bric : ExpressibleByBooleanLiteral {
     /// Creates some boolean Bric
     public init(booleanLiteral value: BooleanLiteralType) {
         self = .bol(value)
     }
 }
 
-extension Bric : FloatLiteralConvertible {
+extension Bric : ExpressibleByFloatLiteral {
     /// Creates some numeric Bric
     public init(floatLiteral value: FloatLiteralType) {
         self = .num(value)
     }
 }
 
-extension Bric : IntegerLiteralConvertible {
+extension Bric : ExpressibleByIntegerLiteral {
     /// Creates some numeric Bric
     public init(integerLiteral value: IntegerLiteralType) {
         self = .num(Double(value))
     }
 }
 
-extension Bric : ArrayLiteralConvertible {
+extension Bric : ExpressibleByArrayLiteral {
     /// Creates an array of Bric
     public init(arrayLiteral elements: Bric...) {
         self = .arr(elements)
     }
 }
 
-extension Bric : StringLiteralConvertible {
+extension Bric : ExpressibleByStringLiteral {
     /// Creates some String Bric
     public init(stringLiteral value: String) {
         self = .str(value)
@@ -235,7 +219,7 @@ extension Bric : StringLiteralConvertible {
     }
 }
 
-extension Bric : DictionaryLiteralConvertible {
+extension Bric : ExpressibleByDictionaryLiteral {
     /// Creates a dictonary of some Bric
     public init(dictionaryLiteral elements: (String, Bric)...) {
         var d: Dictionary<String, Bric> = [:]
@@ -245,7 +229,7 @@ extension Bric : DictionaryLiteralConvertible {
 
 
     /// Creates a Bric.obj with the given key/value pairs
-    public init<R: RawRepresentable where R.RawValue == String>(object: [(R, Bric)]) {
+    public init<R: RawRepresentable>(object: [(R, Bric)]) where R.RawValue == String {
         var d: Dictionary<String, Bric> = [:]
         for (k, v) in object {
             if !k.rawValue.isEmpty {
@@ -268,7 +252,7 @@ extension Bric : DictionaryLiteralConvertible {
     }
 
     /// Creates a Bric.obj with the given dictionary where the key is a String RawRepresentable
-    public init<R: RawRepresentable where R.RawValue == String>(obj: [R: Bric]) {
+    public init<R: RawRepresentable>(obj: [R: Bric]) where R.RawValue == String {
         self.init(object: Array(obj))
     }
 
@@ -278,7 +262,7 @@ extension Bric : DictionaryLiteralConvertible {
         for b in merge { // .reverse() { // reverse because initial elements take precedence
             if case .obj(let dict) = b {
                 for (key, value) in dict {
-                    if let oldValue = d[key] where oldValue != value {
+                    if let oldValue = d[key] , oldValue != value {
                         print("warning: overwriting dictionary key «\(key)» value «\(oldValue)» with «\(value)»")
                     }
                     d[key] = value
@@ -292,7 +276,7 @@ extension Bric : DictionaryLiteralConvertible {
     public func disjoint(keys: [String]) -> Bric {
         if case .obj(var dict) = self {
             for key in keys {
-                dict.removeValueForKey(key)
+                dict.removeValue(forKey: key)
             }
             return .obj(dict)
         } else {
@@ -302,7 +286,7 @@ extension Bric : DictionaryLiteralConvertible {
 }
 
 extension Bric {
-    public init<R: RawRepresentable where R.RawValue == String>(_ elements: [R: Bric]) {
+    public init<R: RawRepresentable>(elements: [R: Bric]) where R.RawValue == String {
         var d: Dictionary<String, Bric> = [:]
         for (k, v) in elements { d[k.rawValue] = v }
         self = .obj(d)
@@ -311,7 +295,7 @@ extension Bric {
 
 extension Bric {
     /// Construct a `Bric.num` from any supported numeric type
-    public init(_ num: BricableDoubleConvertible) {
+    public init(num: BricableDoubleConvertible) {
         self = .num(num.bricNum)
     }
 }
@@ -351,48 +335,48 @@ public protocol BricLayer {
     associatedtype BricSub
 
     /// Construct an instance of self by invoking the function on the given bric
-    func bricMap(f: BricSub -> Bric) -> Bric
+    func bric(map f: (BricSub) -> Bric) -> Bric
 }
 
 public extension BricLayer where Self.BricSub : Bricable {
     /// Brics through one level of `BricLayer`
     public func bric() -> Bric {
-        return bricMap { $0.bric() }
+        return bric(map: { $0.bric() })
     }
 }
 
 public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : Bricable {
     /// Brics through two levels of `BricLayer`
     public func bric() -> Bric {
-        return bricMap { $0.bricMap { $0.bric() } }
+        return bric(map: { $0.bric(map: { $0.bric() }) })
     }
 }
 
 public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub : Bricable {
     /// Brics through three levels of `BricLayer`
     public func bric() -> Bric {
-        return bricMap { $0.bricMap { $0.bricMap { $0.bric() } } }
+        return bric(map: { $0.bric(map: { $0.bric(map: { $0.bric() }) }) })
     }
 }
 
 public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub.BricSub : Bricable {
     /// Brics through four levels of `BricLayer`
     public func bric() -> Bric {
-        return bricMap { $0.bricMap { $0.bricMap { $0.bricMap { $0.bric() } } } }
+        return bric(map: { $0.bric(map: { $0.bric(map: { $0.bric(map: { $0.bric() }) }) }) })
     }
 }
 
 public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub.BricSub.BricSub : Bricable {
     /// Brics through five levels of `BricLayer`
     public func bric() -> Bric {
-        return bricMap { $0.bricMap { $0.bricMap { $0.bricMap { $0.bricMap { $0.bric() } } } } }
+        return bric(map: { $0.bric(map: { $0.bric(map: { $0.bric(map: { $0.bric(map: { $0.bric() }) }) }) }) })
     }
 }
 
 
 extension WrapperType {
     /// Maps the underlying layer, or `Bric.nul` if it is nil
-    public func bricMap(f: Wrapped -> Bric) -> Bric {
+    public func bric(map f: (Wrapped) -> Bric) -> Bric {
         if let x = flatMap({$0}) {
             return f(x)
         } else {
@@ -410,55 +394,55 @@ extension Indirect : BricLayer {
 }
 
 extension RawRepresentable where RawValue : Bricable {
-    public func bricMap(f: RawValue -> Bric) -> Bric {
+    public func bric(map f: (RawValue) -> Bric) -> Bric {
         return f(rawValue)
     }
 }
 
-extension SequenceType {
+extension Sequence {
     /// All sequences bric to a `Bric.arr` array
-    public func bricMap(f: Generator.Element -> Bric) -> Bric {
+    public func bric(map f: (Iterator.Element) -> Bric) -> Bric {
         return Bric.arr(map(f))
     }
 }
 
 extension Array : BricLayer {
-    public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
+    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
 }
 
 extension ArraySlice : BricLayer {
-    public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
+    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
 }
 
 extension ContiguousArray : BricLayer {
-    public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
+    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
 }
 
 extension Set : BricLayer {
-    public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
+    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
 }
 
 extension CollectionOfOne : BricLayer {
-    public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
+    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
 }
 
 extension EmptyCollection : BricLayer {
-    public typealias BricSub = Generator.Element // inherits bricMap via SequenceType conformance
+    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
 }
 
-extension NonEmptyCollection : BricLayer {
-    public typealias BricSub = Element // inherits bricMap via SequenceType conformance
-}
+//extension NonEmptyCollection : BricLayer {
+//    public typealias BricSub = Element // inherits bricMap via SequenceType conformance
+//}
 
-extension Dictionary : BricLayer { // TODO: Swift 3: where Key == String
+extension Dictionary : BricLayer { // TODO: Swift 4: where Key == String
     public typealias BricSub = Value
 
     /// A Dictionary brics to a `Bric.obj` with stringifed keys
-    public func bricMap(f: Value -> Bric) -> Bric {
+    public func bric(map f: (Value) -> Bric) -> Bric {
         var dict: [String : Bric] = [:]
         for keyValue in self {
             // we manually stringify the keys since we aren't able to enforce string-key conformance via generics
-            dict[String(keyValue.0)] = f(keyValue.1)
+            dict[String(describing: keyValue.0)] = f(keyValue.1)
         }
         return Bric.obj(dict)
     }
@@ -560,9 +544,9 @@ extension Mirror : Bricable {
     /// A mirror can bric using reflection on all the child structures; note that any reference cycles will cause a stack overflow
     public func bric() -> Bric {
         switch displayStyle {
-        case .None:
+        case .none:
             return Bric.nul
-        case .Some(.Collection), .Some(.Set), .Some(.Tuple):
+        case .some(.collection), .some(.set), .some(.tuple):
             var arr: [Bric] = []
             for (_, value) in self.children {
                 if let bricable = value as? Bricable {
@@ -572,7 +556,7 @@ extension Mirror : Bricable {
                 }
             }
             return Bric.arr(arr)
-        case .Some(.Optional):
+        case .some(.optional):
             assert(self.children.count <= 1)
             if let (_, value) = self.children.first {
                 if let bricable = value as? Bricable {
@@ -583,18 +567,18 @@ extension Mirror : Bricable {
             } else {
                 return Bric.nul
             }
-        case .Some(.Struct), .Some(.Class), .Some(.Enum), .Some(.Dictionary):
-            var bric: Bric = [:]
+        case .some(.struct), .some(.class), .some(.enum), .some(.dictionary):
+            var dict: [String: Bric] = [:]
             for (label, value) in self.children {
                 if let label = label {
                     if let bricable = value as? Bricable {
-                        bric[label] = bricable.bric()
+                        dict[label] = bricable.bric()
                     } else {
-                        bric[label] = Mirror(reflecting: value).bric()
+                        dict[label] = Mirror(reflecting: value).bric()
                     }
                 }
             }
-            return bric
+            return .obj(dict)
         }
     }
 }

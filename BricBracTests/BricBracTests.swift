@@ -14,7 +14,7 @@ class BricBracTests : XCTestCase {
 
     func testBricConversion() {
         let bric: Bric = ["a": [1, 2, true, false, nil]]
-        let cocoa = FoundationBricolage.brac(bric)
+        let cocoa = FoundationBricolage.brac(bric: bric)
         XCTAssertNotNil(cocoa.object)
         let bric2 = cocoa.bric()
         XCTAssertEqual(bric, bric2)
@@ -25,19 +25,19 @@ class BricBracTests : XCTestCase {
         // let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/caliper.json", ofType: "")!
 
         // json no with escapes
-        let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/rap.json", ofType: "")!
+        let path: String! = Bundle(for: BricBracTests.self).path(forResource: "test/profile/rap.json", ofType: "")!
 
 //        let data: NSData! = NSData(contentsOfFile: path)!
 
-        let contents: NSString! = try? NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding)
+        let contents: NSString! = try? NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
         let scalars = Array((contents as String).unicodeScalars)
 
         var t = CFAbsoluteTimeGetCurrent()
         var c = 0
         while true {
-            let _ = try? Bric.parse(scalars) // caliper.json: ~64/sec, rap.json: 105/sec
-//            let _ = try? Bric.validate(scalars, options: .Strict) // caliper.json: ~185/sec, rap.json: ~380/sec
-//            let _ = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) // caliper.json: ~985/sec, rap.json: 1600/sec
+            _ = try? Bric.parse(scalars) // caliper.json: ~64/sec, rap.json: 105/sec
+//            _ = try? Bric.validate(scalars, options: .Strict) // caliper.json: ~185/sec, rap.json: ~380/sec
+//            _ = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) // caliper.json: ~985/sec, rap.json: 1600/sec
             c += 1
             let t2 = CFAbsoluteTimeGetCurrent()
             if t2 > (t + 1.0) {
@@ -50,7 +50,7 @@ class BricBracTests : XCTestCase {
     }
 
     func testEscaping() throws {
-        func q(s: String)->String { return "\"" + s + "\"" }
+        func q(_ s: String)->String { return "\"" + s + "\"" }
 
         expectPass(q("\\/"), "/")
         expectPass(q("http:\\/\\/glimpse.io\\/"), "http://glimpse.io/")
@@ -93,20 +93,20 @@ class BricBracTests : XCTestCase {
     }
 
     func testISO8601JSONDates() {
-        func testDateParse(str: Bric, _ unix: Int64?, canonical: Bool = false, line: UInt = #line) {
+        func testDateParse(_ str: Bric, _ unix: Int64?, canonical: Bool = false, line: UInt = #line) {
             guard let dtm = str.dtm else { return XCTAssertEqual(nil, unix, line: line) }
 
             // we extracted a date/time; convert it to a UNIX timestamp
-            let dc = NSDateComponents()
+            var dc = DateComponents()
             dc.year = dtm.year
             dc.month = dtm.month
             dc.day = dtm.day
             dc.hour = dtm.hour
             dc.minute = dtm.minute
             dc.second = Int(floor(dtm.second))
-            dc.nanosecond = Int((dtm.second - Double(dc.second)) * 1e9)
-            dc.timeZone = NSTimeZone(forSecondsFromGMT: ((dtm.zone.hours * 60) + dtm.zone.minutes) * 60)
-            guard let date = NSCalendar.currentCalendar().dateFromComponents(dc) else { return XCTFail("could not convert calendar from \(dc)", line: line) }
+            dc.nanosecond = Int((dtm.second - Double(dc.second!)) * 1e9)
+            dc.timeZone = TimeZone(secondsFromGMT: ((dtm.zone.hours * 60) + dtm.zone.minutes) * 60)
+            guard let date = Calendar.current.date(from: dc) else { return XCTFail("could not convert calendar from \(dc)", line: line) }
             let unixsecs = date.timeIntervalSince1970
             if unixsecs > 8640000000000.000 { XCTAssertEqual(unix, nil, line: line) } // over the max permitted
             if unixsecs < -8640000000000.000 { XCTAssertEqual(unix, nil, line: line) } // under the min permitted
@@ -174,15 +174,15 @@ class BricBracTests : XCTestCase {
 
     func testBricBracPerson() {
         do {
-            let p1 = try Person.brac(["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]) // , "children": []])
+            let p1 = try Person.brac(bric: ["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]) // , "children": []])
             print("p1: \(p1)")
             XCTAssertEqual(41, p1.age)
 
             XCTAssertEqual(p1.bric(), ["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]])
-            let p2 = try Person.brac(p1.bric())
+            let p2 = try Person.brac(bric: p1.bric())
             XCTAssertEqual(p1, p2, "Default bric equatability should work")
 
-            let p3 = try Person.brac(["name": "Marc", "age": 41, "male": true, "children": ["Beatrix"]])
+            let p3 = try Person.brac(bric: ["name": "Marc", "age": 41, "male": true, "children": ["Beatrix"]])
             XCTAssertNotEqual(p1, p3, "Default bric equatability should work")
 
         } catch {
@@ -191,7 +191,7 @@ class BricBracTests : XCTestCase {
 
         do {
             // test numeric overflow throwing exception
-            let _ = try Person.brac(["name": "Marc", "age": .num(Double(Int.min)), "male": true, "children": ["Bebe"]])
+            _ = try Person.brac(bric: ["name": "Marc", "age": .num(Double(Int.min)), "male": true, "children": ["Bebe"]])
         } catch BracError.numericOverflow {
             // as expected
         } catch {
@@ -199,7 +199,7 @@ class BricBracTests : XCTestCase {
         }
 
         do {
-            try Person.brac(["name": "Marc", "male": true])
+            _ = try Person.brac(bric: ["name": "Marc", "male": true])
             XCTFail("should not have been able to deserialize with required fields")
         } catch BracError.missingRequiredKey {
             // as expected
@@ -218,7 +218,7 @@ class BricBracTests : XCTestCase {
             XCTAssertEqual(bric["status"], "public")
             XCTAssertEqual(bric["employees"]?[0]?["children"]?[0], "Bebe")
 
-            let c = try Company.brac(bric)
+            let c = try Company.brac(bric: bric)
 
             let bric2 = c.bric()
             XCTAssertEqual(bric2["ceo"]?["name"], "Tim")
@@ -233,7 +233,7 @@ class BricBracTests : XCTestCase {
 
         do { // Robot CEO
             let bric: Bric = ["name": "Apple", "ceo": "Stevebot", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]], "status": "public", "subsidiaries": nil]
-            let c = try Company.brac(bric)
+            let c = try Company.brac(bric: bric)
             XCTAssertEqual(bric, c.bric())
         } catch {
             XCTFail("unexpected error when deserializing: \(error)")
@@ -241,7 +241,7 @@ class BricBracTests : XCTestCase {
 
         do { // No CEO
             let bric: Bric = ["name": "Apple", "ceo": nil, "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]], "subsidiaries": nil]
-            let c = try Company.brac(bric)
+            let c = try Company.brac(bric: bric)
             XCTAssertEqual(bric, c.bric())
         } catch {
             XCTFail("unexpected error when deserializing: \(error)")
@@ -259,60 +259,60 @@ class BricBracTests : XCTestCase {
     func testLayers() {
         do {
             do {
-                let x = try Array<String>.brac(["foo", "bar"])
+                let x = try Array<String>.brac(bric: ["foo", "bar"])
                 XCTAssertEqual(x, ["foo", "bar"])
             }
 
             do {
-                let x = try Optional<Array<Double>>.brac([1,2,3])
+                let x = try Optional<Array<Double>>.brac(bric: [1,2,3])
                 XCTAssertEqual(x.bric(), [1,2,3])
             }
 
             do {
-                let x = try Optional<Array<Double>>.brac(nil)
+                let x = try Optional<Array<Double>>.brac(bric: nil)
                 if x != nil {
                     XCTFail("not nil")
                 }
             }
 
             do {
-                let x = try Array<Optional<Array<Bool>>>.brac([[false] as Bric, nil, [true, true] as Bric, [] as Bric])
+                let x = try Array<Optional<Array<Bool>>>.brac(bric: [[false] as Bric, nil, [true, true] as Bric, [] as Bric])
                 XCTAssertEqual(x.bric(), [[false], nil, [true, true], []])
             }
 
             do {
-                let x = try Optional<Optional<Optional<Optional<Optional<Int>>>>>.brac(1.1)
+                let x = try Optional<Optional<Optional<Optional<Optional<Int>>>>>.brac(bric: 1.1)
                 XCTAssertEqual(x.bric(), 1)
             }
 
             do {
-                let x1 = try Optional<Int>.brac(nil)
-                let x2 = try Optional<Optional<Int>>.brac(nil)
-                let x3 = try Optional<Optional<Optional<Int>>>.brac(nil)
-                let x4 = try Optional<Optional<Optional<Optional<Int>>>>.brac(nil)
-                let x5 = try Optional<Optional<Optional<Optional<Optional<Int>>>>>.brac(nil)
+                let x1 = try Optional<Int>.brac(bric: nil)
+                let x2 = try Optional<Optional<Int>>.brac(bric: nil)
+                let x3 = try Optional<Optional<Optional<Int>>>.brac(bric: nil)
+                let x4 = try Optional<Optional<Optional<Optional<Int>>>>.brac(bric: nil)
+                let x5 = try Optional<Optional<Optional<Optional<Optional<Int>>>>>.brac(bric: nil)
                 if x1 != nil || x2 != nil || x3 != nil || x4 != nil || x5 != nil {
                     XCTFail("bad value")
                 } else {
-                    x1.bric()
-                    x2.bric()
-                    x3.bric()
-                    x4.bric()
-                    x5.bric()
+                    _ = x1.bric()
+                    _ = x2.bric()
+                    _ = x3.bric()
+                    _ = x4.bric()
+                    _ = x5.bric()
                 }
             }
 
             do {
-                let x1 = try Array<Int>.brac([1])
-                let x2 = try Array<Array<Int>>.brac([[2, 1]])
-                let x3 = try Array<Array<Array<Int>>>.brac([[[3, 2, 1]]])
-                let x4 = try Array<Array<Array<Array<Int>>>>.brac([[[[4, 3, 2, 1]]]])
-                let x5 = try Array<Array<Array<Array<Array<Int>>>>>.brac([[[[[5, 4, 3, 2, 1]]]]])
-                XCTAssertEqual(x1, [1])
-                XCTAssertEqual(x2, [[2,1]])
-                XCTAssertEqual(x3, [[[3,2,1]]])
-                XCTAssertEqual(x4, [[[[4,3,2,1]]]])
-                XCTAssertEqual(x5, [[[[[5, 4, 3, 2, 1]]]]])
+                let x1 = try Array<Int>.brac(bric: [1])
+                let x2 = try Array<Array<Int>>.brac(bric: [[2, 1]])
+                let x3 = try Array<Array<Array<Int>>>.brac(bric: [[[3, 2, 1]]])
+                let x4 = try Array<Array<Array<Array<Int>>>>.brac(bric: [[[[4, 3, 2, 1]]]])
+                let x5 = try Array<Array<Array<Array<Array<Int>>>>>.brac(bric: [[[[[5, 4, 3, 2, 1]]]]])
+                XCTAssertEqual(x1.bric(), [1])
+                XCTAssertEqual(x2.bric(), [[2,1]])
+                XCTAssertEqual(x3.bric(), [[[3,2,1]]])
+                XCTAssertEqual(x4.bric(), [[[[4,3,2,1]]]])
+                XCTAssertEqual(x5.bric(), [[[[[5, 4, 3, 2, 1]]]]])
 
                 XCTAssertEqual(x1.bric(), [1])
                 XCTAssertEqual(x2.bric(), [[2,1]])
@@ -322,7 +322,7 @@ class BricBracTests : XCTestCase {
             }
 
             do {
-                if let x = try Optional<CollectionOfOne<Double>>.brac([1.111]) {
+                if let x = try Optional<CollectionOfOne<Double>>.brac(bric: [1.111]) {
                     XCTAssertEqual(x.first ?? 0, 1.111)
                     XCTAssertEqual(x.bric(), [1.111])
                 } else {
@@ -331,29 +331,29 @@ class BricBracTests : XCTestCase {
             }
 
             do {
-                if let x = try Optional<CollectionOfOne<Dictionary<String, Set<Int>>>>.brac([["foo": [1,1,2]]]) {
+                if let x = try Optional<CollectionOfOne<Dictionary<String, Set<Int>>>>.brac(bric: [["foo": [1,1,2]]]) {
                     XCTAssertEqual(x.first ?? [:], ["foo": Set([1,2])])
-                    x.bric()
+                    _ = x.bric()
                 } else {
                     XCTFail("error")
                 }
             }
 
-            do {
-                let bric: Bric = [["foo": 1.1], ["bar": 2.3]]
-
-                let x = try Optional<Array<Dictionary<String, Double>>>.brac(bric)
-                if let x = x {
-                    XCTAssertEqual(x, [["foo": 1.1], ["bar": 2.3]])
-                    x.bric()
-                } else {
-                    XCTFail()
-                }
-            }
+//            do {
+//                let bric: Bric = [["foo": 1.1], ["bar": 2.3]]
+//
+//                let x = try Optional<Array<Dictionary<String, Double>>>.brac(bric: bric)
+//                if let x = x {
+//                    XCTAssertEqual(x, [["foo": 1.1], ["bar": 2.3]])
+//                    x.bric()
+//                } else {
+//                    XCTFail()
+//                }
+//            }
 
             do {
                 enum StringEnum : String, Bricable, Bracable { case foo, bar }
-                let _ = try Array<Optional<StringEnum>>.brac(["foo", nil, "bar"])
+                _ = try Array<Optional<StringEnum>>.brac(bric: ["foo", nil, "bar"])
             }
 
         } catch {
@@ -362,63 +362,63 @@ class BricBracTests : XCTestCase {
 
         // now do some that should fail
         do {
-            let _ = try Array<String>.brac(["foo", 1])
+            _ = try Array<String>.brac(bric: ["foo", 1])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Optional<Array<Double>>.brac([1,2,nil])
+            _ = try Optional<Array<Double>>.brac(bric: [1,2,nil])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Optional<CollectionOfOne<Double>>.brac([1,2])
+            _ = try Optional<CollectionOfOne<Double>>.brac(bric: [1,2])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Optional<CollectionOfOne<Double>>.brac([])
+            _ = try Optional<CollectionOfOne<Double>>.brac(bric: [])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Array<Int>.brac([[1]])
+            _ = try Array<Int>.brac(bric: [[1]])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Array<Array<Int>>.brac([[[2, 1]]])
+            _ = try Array<Array<Int>>.brac(bric: [[[2, 1]]])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Array<Array<Array<Int>>>.brac([[[[3, 2, 1]]]])
+            _ = try Array<Array<Array<Int>>>.brac(bric: [[[[3, 2, 1]]]])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Array<Array<Array<Array<Int>>>>.brac([[[[[4, 3, 2, 1]]]]])
+            _ = try Array<Array<Array<Array<Int>>>>.brac(bric: [[[[[4, 3, 2, 1]]]]])
             XCTFail("should have failed")
         } catch {
             // good
         }
 
         do {
-            let _ = try Array<Array<Array<Array<Array<Int>>>>>.brac([[[[[[5, 4, 3, 2, 1]]]]]])
+            _ = try Array<Array<Array<Array<Array<Int>>>>>.brac(bric: [[[[[[5, 4, 3, 2, 1]]]]]])
             XCTFail("should have failed")
         } catch {
             // good
@@ -439,10 +439,11 @@ class BricBracTests : XCTestCase {
     }
 
     func testBricBracSerialization() {
-        let json = "{\"customers\":[{\"age\":41,\"male\":false,\"children\":[\"Bebe\"],\"name\":\"Emily\"}],\"employees\":[{\"age\":41,\"male\":true,\"children\":[\"Bebe\"],\"name\":\"Marc\"}],\"ceo\":{\"age\":50,\"male\":true,\"children\":[],\"name\":\"Tim\"},\"status\":\"public\",\"name\":\"Apple\"}"
+        let json = "{\"name\":\"Apple\",\"status\":\"public\",\"customers\":[{\"name\":\"Emily\",\"age\":41,\"male\":false,\"children\":[\"Bebe\"]}],\"ceo\":{\"name\":\"Tim\",\"age\":50,\"male\":true,\"children\":[]},\"employees\":[{\"name\":\"Marc\",\"age\":41,\"male\":true,\"children\":[\"Bebe\"]}]}"
 
         do {
             let bric: Bric = ["name": "Apple", "ceo": ["name": "Tim", "age": 50, "male": true, "children": []], "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]]]
+
             let str = bric.stringify()
             // note that key order differs on MacOS and iOS, probably due to different hashing
             #if os(OSX)
@@ -457,18 +458,18 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func expectFail(s: String, _ msg: String? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
+    func expectFail(_ s: String, _ msg: String? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
         do {
-            try Bric.parse(s, options: options)
+            _ = try Bric.parse(s, options: options)
             XCTFail("Should have failed to parse", file: file, line: line)
         } catch {
             if let m = msg {
-                XCTAssertEqual(m, String(error), file: file, line: line)
+                XCTAssertEqual(m, String(describing: error), file: file, line: line)
             }
         }
     }
 
-    func expectPass(s: String, _ bric: Bric? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
+    func expectPass(_ s: String, _ bric: Bric? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
         do {
             let b = try Bric.parse(s, options: options)
             if let bric = bric {
@@ -482,7 +483,7 @@ class BricBracTests : XCTestCase {
     }
 
     func testBricBracParsing() {
-        func q(s: String)->String { return "\"" + s + "\"" }
+        func q(_ s: String)->String { return "\"" + s + "\"" }
 
         expectPass("1", 1)
         expectPass("1.0", 1.0)
@@ -633,29 +634,29 @@ class BricBracTests : XCTestCase {
         compareCocoaParsing("01.0", msg: "preceeding zero should fail")
     }
 
-    func profileJSON(str: String, count: Int, validate: Bool, cocoa: Bool, cf: Bool) throws {
+    func profileJSON(_ str: String, count: Int, validate: Bool, cocoa: Bool, cf: Bool) throws {
         let scalars = Array((str as String).unicodeScalars)
 
-        if let data = str.dataUsingEncoding(NSUTF8StringEncoding) {
+        if let data = str.data(using: String.Encoding.utf8) {
 
             let js = CFAbsoluteTimeGetCurrent()
             for _ in 1...count {
                 if cf {
-                    let _ = try CoreFoundationBricolage.parseJSON(scalars, options: JSONParser.Options.Strict)
+                    _ = try CoreFoundationBricolage.parseJSON(scalars, options: JSONParser.Options.Strict)
 //                    let nsobj = Unmanaged<NSObject>.fromOpaque(COpaquePointer(fbric.ptr)).takeRetainedValue()
                 } else if cocoa {
                     let _: NSObject = try Bric.parseCocoa(scalars)
                 } else if validate {
                     try Bric.validate(scalars, options: JSONParser.Options.Strict)
                 } else {
-                    try Bric.parse(scalars)
+                    _ = try Bric.parse(scalars)
                 }
             }
             let je = CFAbsoluteTimeGetCurrent()
 
             let cs = CFAbsoluteTimeGetCurrent()
             for _ in 1...count {
-                try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)
+                try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.allowFragments)
             }
             let ce = CFAbsoluteTimeGetCurrent()
 
@@ -663,8 +664,8 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func parsePath(path: String, strict: Bool, file: StaticString = #file, line: UInt = #line) throws -> Bric {
-        let str = try NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding)
+    @discardableResult func parsePath(_ path: String, strict: Bool, file: StaticString = #file, line: UInt = #line) throws -> Bric {
+        let str = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
         let bric = try Bric.parse(str as String, options: strict ? .Strict : .Lenient)
 
         // always check to ensure that our strinification matches that of JavaScriptCore
@@ -672,16 +673,16 @@ class BricBracTests : XCTestCase {
         return bric
     }
 
-    func compareCocoaParsing(string: String, msg: String, file: StaticString = #file, line: UInt = #line) {
+    func compareCocoaParsing(_ string: String, msg: String, file: StaticString = #file, line: UInt = #line) {
         var cocoaBric: NSObject?
-        var bricError: ErrorType?
+        var bricError: Error?
         var cocoa: NSObject?
-        var cocoaError: ErrorType?
+        var cocoaError: Error?
 
         do {
             // NSJSONSerialization doesn't always ignore trailing spaces: http://openradar.appspot.com/21472364
-            let str = string.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            cocoa = try NSJSONSerialization.JSONObjectWithData(str.dataUsingEncoding(NSUTF8StringEncoding)!, options: NSJSONReadingOptions.AllowFragments) as? NSObject
+            let str = string.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            cocoa = try JSONSerialization.jsonObject(with: str.data(using: String.Encoding.utf8)!, options: JSONSerialization.ReadingOptions.allowFragments) as? NSObject
         } catch {
             cocoaError = error
         }
@@ -693,7 +694,7 @@ class BricBracTests : XCTestCase {
         }
 
         switch (cocoaBric, cocoa, bricError, cocoaError) {
-        case (.Some(let j), .Some(let c), _, _):
+        case (.some(let j), .some(let c), _, _):
             if j != c {
 //                dump(j)
 //                dump(c)
@@ -702,16 +703,16 @@ class BricBracTests : XCTestCase {
 //                assert(j == c)
             }
             XCTAssertTrue(j == c, "Parsed contents differed for «\(msg)»", file: file, line: line)
-        case (_, _, .Some(let je), .Some(let ce)):
+        case (_, _, .some(let je), .some(let ce)):
             // for manual inspection of error messages, change equality to inequality
-            if String(je) == String(ce) {
+            if String(describing: je) == String(describing: ce) {
                 print("Bric Error «\(msg)»: \(je)")
                 print("Cocoa Error «\(msg)»: \(ce)")
             }
             break
-        case (_, _, _, .Some(let ce)):
+        case (_, _, _, .some(let ce)):
             XCTFail("Cocoa failed/BricBrac passed «\(msg)»: \(ce)", file: file, line: line)
-        case (_, _, .Some(let je), _):
+        case (_, _, .some(let je), _):
             XCTFail("BricBrac failed/Cocoa passed «\(msg)»: \(je)", file: file, line: line)
         default:
             XCTFail("Unexpected scenario «\(msg)»", file: file, line: line)
@@ -726,7 +727,7 @@ class BricBracTests : XCTestCase {
     ///   Swift Dictionaries and JSC Objects)
     ///
     /// * We outputs exponential notation for some large integers, whereas JSC nevers appears to do so
-    func compareJSCStringification(b: Bric, space: Int = 2, msg: String, file: StaticString = #file, line: UInt = #line) {
+    func compareJSCStringification(_ b: Bric, space: Int = 2, msg: String, file: StaticString = #file, line: UInt = #line) {
         // JSC only allows dictionaries and arrays, so wrap any primitives in an array
         let bric: Bric = ["ob": b] // we just wrap everything in an array
 
@@ -734,26 +735,26 @@ class BricBracTests : XCTestCase {
         // and Swift and JavaScriptCore list keys in a different order; so to test this properly,
         // we need to serialize the swift key order the same as JavaScriptCore; we do this by
         // having the mapper query the JSContents for the order in which the keys would be output
-        func mapper(dict: [String: Bric]) -> AnyGenerator<(String, Bric)> {
-            return AnyGenerator(Array(dict).sort({ kv1, kv2 in
+        func mapper(_ dict: [String: Bric]) -> AnyIterator<(key: String, value: Bric)> {
+            return AnyIterator(Array(dict).sorted(by: { kv1, kv2 in
                 return kv1.0 < kv2.0
-            }).generate())
+            }).makeIterator())
         }
 
         let bstr = bric.stringify()
 
-        let evaluated = ctx.evaluateScript("testOb = " + bstr)
-        XCTAssertTrue(evaluated.isObject, "\(msg) parsed instance was not an object: \(bstr)", file: file, line: line)
-        XCTAssertNil(ctx.exception, "\(msg) error evaluating brac'd string: \(ctx.exception)", file: file, line: line)
+        let evaluated = ctx?.evaluateScript("testOb = " + bstr)
+        XCTAssertTrue((evaluated?.isObject)!, "\(msg) parsed instance was not an object: \(bstr)", file: file, line: line)
+        XCTAssertNil(ctx?.exception, "\(msg) error evaluating brac'd string: \(ctx?.exception)", file: file, line: line)
 
         let bricString = bric.stringify(space: space, mapper: mapper)
 
-        let stringified = ctx.evaluateScript("JSON.stringify(testOb, function(key, value) { if (value === null || value === void(0) || value.constructor !== Object) { return value; } else { return Object.keys(value).sort().reduce(function (sorted, key) { sorted[key] = value[key]; return sorted; }, {}); } }, \(space))")
-        if !stringified.isString {
-            XCTFail("\(msg) could not stringify instance in JS context: \(ctx.exception)", file: file, line: line)
+        let stringified = ctx?.evaluateScript("JSON.stringify(testOb, function(key, value) { if (value === null || value === void(0) || value.constructor !== Object) { return value; } else { return Object.keys(value).sort().reduce(function (sorted, key) { sorted[key] = value[key]; return sorted; }, {}); } }, \(space))")
+        if !(stringified?.isString)! {
+            XCTFail("\(msg) could not stringify instance in JS context: \(ctx?.exception)", file: file, line: line)
         } else {
-            let str = stringified.toString()
-            if bricString.containsString("e+") { // we differ in that we output exponential notation
+            let str = stringified?.toString()
+            if bricString.contains("e+") { // we differ in that we output exponential notation
                 return
             }
 
@@ -772,7 +773,7 @@ class BricBracTests : XCTestCase {
             XCTAssertNotEqual(j1, j2)
 
             // ... and the two underlying dictionaries are the same ...
-            if case .obj(let d1) = j1, .obj(let d2) = j2 {
+            if case let .obj(d1) = j1, case let .obj(d2) = j2 {
                 XCTAssertNotEqual(d1, d2)
             }
 
@@ -781,7 +782,7 @@ class BricBracTests : XCTestCase {
             XCTAssertEqual(j2, j3)
 
             // ... and the two underlying dictionaries are the same ...
-            if case .obj(let d2) = j2, .obj(let d3) = j3 {
+            if case .obj(let d2) = j2, case .obj(let d3) = j3 {
                 XCTAssertEqual(d2, d3)
             }
 
@@ -812,7 +813,7 @@ class BricBracTests : XCTestCase {
             let b1: Bric = [["foo": 1, "bar": 2], ["foo": 1, "bar": 2]]
             let b2: Bric = [["foo": 1, "bar": 2], ["foo": "XXX", "bar": "XXX"]]
             let path: Bric.Pointer = [.index(1) ]
-            XCTAssertEqual(b2, b1.alter { return $0.startsWith(path) && $0 != path ? "XXX" : $1 })
+            XCTAssertEqual(b2, b1.alter { return $0.starts(with: path) && $0 != path ? "XXX" : $1 })
         }
     }
 
@@ -844,24 +845,24 @@ class BricBracTests : XCTestCase {
 
     func testBricBracCompatability() {
 
-        let fm = NSFileManager.defaultManager()
+        let fm = FileManager.default
         do {
-            if let folder = NSBundle(forClass: BricBracTests.self).pathForResource("test", ofType: "") {
-                let types = try fm.contentsOfDirectoryAtPath(folder)
+            if let folder = Bundle(for: BricBracTests.self).path(forResource: "test", ofType: "") {
+                let types = try fm.contentsOfDirectory(atPath: folder)
                 XCTAssertEqual(types.count, 5) // data, jsonchecker, profile, schema
                 for type in types {
-                    let dir = (folder as NSString).stringByAppendingPathComponent(type)
-                    let jsons = try fm.contentsOfDirectoryAtPath(dir)
+                    let dir = (folder as NSString).appendingPathComponent(type)
+                    let jsons = try fm.contentsOfDirectory(atPath: dir)
                     for file in jsons {
                         do {
-                            let fullPath = (dir as NSString).stringByAppendingPathComponent(file)
+                            let fullPath = (dir as NSString).appendingPathComponent(file)
 
                             // first check to ensure that NSJSONSerialization's results match BricBrac's
 
                             if file.hasSuffix(".json") {
 
                                 // make sure our round-trip validing parser works
-                                let contents = try NSString(contentsOfFile: fullPath, encoding: NSUTF8StringEncoding) as String
+                                let contents = try NSString(contentsOfFile: fullPath, encoding: String.Encoding.utf8.rawValue) as String
 
 
                                 do {
@@ -882,7 +883,7 @@ class BricBracTests : XCTestCase {
                                 if type == "profile" {
                                     let count = 6
                                     print("\nProfiling \((fullPath as NSString).lastPathComponent) \(count) times:")
-                                    let str = try NSString(contentsOfFile: fullPath, encoding: NSUTF8StringEncoding) as String
+                                    let str = try NSString(contentsOfFile: fullPath, encoding: String.Encoding.utf8.rawValue) as String
                                     try profileJSON(str, count: count, validate: true, cocoa: false, cf: false)
                                     try profileJSON(str, count: count, validate: false, cocoa: false, cf: false)
                                     try profileJSON(str, count: count, validate: false, cocoa: false, cf: true)
@@ -895,12 +896,12 @@ class BricBracTests : XCTestCase {
                                         XCTFail("No top-level array in \(file)")
                                         continue
                                     }
-                                    for (_, item) in items.enumerate() {
+                                    for (_, item) in items.enumerated() {
                                         guard case let .obj(def) = item else {
                                             XCTFail("Array element was not an object: \(file)")
                                             continue
                                         }
-                                        guard case let .Some(schem) = def["schema"] else {
+                                        guard case let .some(schem) = def["schema"] else {
                                             XCTFail("Schema object did not contain a schema object key: \(file)")
                                             continue
                                         }
@@ -918,8 +919,8 @@ class BricBracTests : XCTestCase {
                                     }
                                 } else if type == "schemas" {
                                     // try to codegen all the schemas
-                                    let _ = try parsePath(fullPath, strict: true)
-//                                    let _ = try Schema.brac(bric)
+                                    _ = try parsePath(fullPath, strict: true)
+//                                    _ = try Schema.brac(bric: bric)
 //                                    if false {
 //                                        let swift = try schema.generateType()
 //                                        print("##### swift for \(file):\n\(swift)")
@@ -958,14 +959,14 @@ class BricBracTests : XCTestCase {
 
 
     func testStringReplace() {
-        XCTAssertEqual("foo".replace("oo", replacement: "X"), "fX")
-        XCTAssertEqual("foo".replace("o", replacement: "X"), "fXX")
-        XCTAssertEqual("foo".replace("o", replacement: "XXXX"), "fXXXXXXXX")
-        XCTAssertEqual("foo".replace("ooo", replacement: "XXXX"), "foo")
-        XCTAssertEqual("123".replace("3", replacement: ""), "12")
-        XCTAssertEqual("123".replace("1", replacement: ""), "23")
-        XCTAssertEqual("123".replace("2", replacement: ""), "13")
-        XCTAssertEqual("abcabcbcabcbcbc".replace("bc", replacement: "XYZ"), "aXYZaXYZXYZaXYZXYZXYZ")
+        XCTAssertEqual("foo".replace(string: "oo", with: "X"), "fX")
+        XCTAssertEqual("foo".replace(string: "o", with: "X"), "fXX")
+        XCTAssertEqual("foo".replace(string: "o", with: "XXXX"), "fXXXXXXXX")
+        XCTAssertEqual("foo".replace(string: "ooo", with: "XXXX"), "foo")
+        XCTAssertEqual("123".replace(string: "3", with: ""), "12")
+        XCTAssertEqual("123".replace(string: "1", with: ""), "23")
+        XCTAssertEqual("123".replace(string: "2", with: ""), "13")
+        XCTAssertEqual("abcabcbcabcbcbc".replace(string: "bc", with: "XYZ"), "aXYZaXYZXYZaXYZXYZXYZ")
     }
 
     func testJSONPointers() {
@@ -1024,7 +1025,7 @@ class BricBracTests : XCTestCase {
                 let cb: (JSONParser.Event)->() = { event in events.append(event) }
 
                 let parser = JSONParser(options: opts, delegate: cb)
-                func one(c: UnicodeScalar) -> [UnicodeScalar] { return [c] }
+                func one(_ c: UnicodeScalar) -> [UnicodeScalar] { return [c] }
 
                 try parser.parse(one("["))
                 XCTAssertEqual(events, [.arrayStart(one("["))])
@@ -1045,12 +1046,12 @@ class BricBracTests : XCTestCase {
 
             // break up the parse into a variety of subsets to test that the streaming parser emits the exact same events
             let strm = Array("{\"object\": 1234.56E2}".unicodeScalars)
-            let rangesList: [[Range<Int>]] = [
-                Array<Range<Int>>(arrayLiteral: 0..<1, 1..<2, 2..<3, 3..<4, 4..<5, 5..<6, 6..<7, 7..<8, 8..<9, 9..<10, 10..<11, 11..<12, 12..<13, 13..<14, 14..<15, 15..<16, 16..<17, 17..<18, 18..<19, 19..<20, 20..<21),
-                Array<Range<Int>>(arrayLiteral: 0..<10, 10..<15, 15..<16, 16..<19, 19..<21),
-                Array<Range<Int>>(arrayLiteral: 0..<7, 7..<8, 8..<9, 9..<10, 10..<15, 15..<16, 16..<17, 17..<20, 20..<21),
-                Array<Range<Int>>(arrayLiteral: 0..<9, 9..<10, 10..<11, 11..<18, 18..<19, 19..<20, 20..<21),
-                Array<Range<Int>>(arrayLiteral: 0..<21),
+            let rangesList: [[CountableRange<Int>]] = [
+                Array<CountableRange<Int>>(arrayLiteral: 0..<1, 1..<2, 2..<3, 3..<4, 4..<5, 5..<6, 6..<7, 7..<8, 8..<9, 9..<10, 10..<11, 11..<12, 12..<13, 13..<14, 14..<15, 15..<16, 16..<17, 17..<18, 18..<19, 19..<20, 20..<21),
+                Array<CountableRange<Int>>(arrayLiteral: 0..<10, 10..<15, 15..<16, 16..<19, 19..<21),
+                Array<CountableRange<Int>>(arrayLiteral: 0..<7, 7..<8, 8..<9, 9..<10, 10..<15, 15..<16, 16..<17, 17..<20, 20..<21),
+                Array<CountableRange<Int>>(arrayLiteral: 0..<9, 9..<10, 10..<11, 11..<18, 18..<19, 19..<20, 20..<21),
+                Array<CountableRange<Int>>(arrayLiteral: 0..<21),
                 ]
 
             for ranges in rangesList {
@@ -1077,7 +1078,7 @@ class BricBracTests : XCTestCase {
 //            expectEvents("[{\"x\": 2.2}]", [.arrayStart, .objectStart, .string(["x"], []), .keyValueSeparator, .whitespace([" "]), .number(["2", ".", "2"]), .objectEnd, .arrayEnd])
 
        } catch {
-            XCTFail(String(error))
+            XCTFail(String(describing: error))
         }
     }
 
@@ -1097,7 +1098,7 @@ class BricBracTests : XCTestCase {
 
                 XCTAssertEqual(brics, expected)
             } catch {
-                XCTFail(String(error))
+                XCTFail(String(describing: error))
             }
 
             do {
@@ -1119,7 +1120,7 @@ class BricBracTests : XCTestCase {
                 try parser.parse(["["]) // open a top-level array
                 XCTAssertEqual([], processed) // no events yet
 
-                for (i, input) in inputs.enumerate() { // parse each of the strings
+                for (i, input) in inputs.enumerated() { // parse each of the strings
                     try parser.parse(input.stringify().unicodeScalars)
                     XCTAssertEqual(i + 1, processed.count) // one event per input
                     try parser.parse([","]) // trailing delimiter to continue the array
@@ -1128,14 +1129,14 @@ class BricBracTests : XCTestCase {
                 // note that we never complete the parse (we end with a trailing comma)
                 XCTAssertEqual(processed, inputs)
             } catch {
-                XCTFail(String(error))
+                XCTFail(String(describing: error))
             }
 
         }
     }
 
     /// Assert that the given events are emitted by the parser
-    func expectEvents(string: String, _ events: [JSONParser.Event], file: StaticString = #file, line: UInt = #line) {
+    func expectEvents(_ string: String, _ events: [JSONParser.Event], file: StaticString = #file, line: UInt = #line) {
         do {
             var evts: [JSONParser.Event] = []
             let cb: (JSONParser.Event)->() = { e in evts.append(e) }
@@ -1144,7 +1145,7 @@ class BricBracTests : XCTestCase {
             try parser.parseString(string)
             XCTAssertEqual(evts, events, file: file, line: line)
         } catch {
-            XCTFail(String(error), file: file, line: line)
+            XCTFail(String(describing: error), file: file, line: line)
         }
     }
 
@@ -1160,7 +1161,7 @@ class BricBracTests : XCTestCase {
                 // there's no nice "utf32" convenience property on String, so we manually build it up
                 var utf32: [UTF32.CodeUnit] = []
                 for scalar in input.unicodeScalars {
-                    UTF32.encode(scalar, output: { utf32.append($0) })
+                    UTF32.encode(scalar, into: { utf32.append($0) })
                 }
 
                 // print("utf8: \(utf8)") // 14 elements: [91, 34, 240, 159, 152, 130, 34, 44, 32, 110, 117, 108, 108, 93]
@@ -1171,14 +1172,14 @@ class BricBracTests : XCTestCase {
                     let utf8out = try parseCodec(UTF8.self, utf8)
                     XCTAssertEqual(utf8out, expected)
                 } catch {
-                    XCTFail(String(error))
+                    XCTFail(String(describing: error))
                 }
 
                 do {
                     let utf16out = try parseCodec(UTF16.self, utf16)
                     XCTAssertEqual(utf16out, expected)
                 } catch {
-                    XCTFail(String(error))
+                    XCTFail(String(describing: error))
                 }
 
 
@@ -1186,7 +1187,7 @@ class BricBracTests : XCTestCase {
                     let utf32out = try parseCodec(UTF32.self, utf32)
                     XCTAssertEqual(utf32out, expected)
                 } catch {
-                    XCTFail(String(error))
+                    XCTFail(String(describing: error))
                 }
         }
     }
@@ -1195,18 +1196,18 @@ class BricBracTests : XCTestCase {
         // U+1F602 (Emoji: "face with tears of joy") in UTF-8 is: 240, 159, 152, 130
         var units: [UTF8.CodeUnit] = [240, 159, 152, 130]
 
-        transcode(UTF8.self, UTF32.self, units.generate(), {
+        _ = transcode(units.makeIterator(), from: UTF8.self, to: UTF32.self, stoppingOnError: true, into: {
             assert(UnicodeScalar($0) == "\u{1F602}")
-            }, stopOnError: true)
+            })
 
 
         do {
             var codec = UTF8()
-            var g = units.generate()
+            var g = units.makeIterator()
             switch codec.decode(&g) {
-            case .EmptyInput: fatalError("No Input")
-            case .Error: fatalError("Decoding Error")
-            case .Result(let scalar): assert(scalar == "\u{1F602}")
+            case .emptyInput: fatalError("No Input")
+            case .error: fatalError("Decoding Error")
+            case .scalarValue(let scalar): assert(scalar == "\u{1F602}")
             }
 
         }
@@ -1215,25 +1216,25 @@ class BricBracTests : XCTestCase {
             var codec = UTF8()
 
             do {
-                var g1 = GeneratorOfOne(units[0])
+                var g1 = IteratorOverOne(_elements: units[0])
                 let r1 = codec.decode(&g1)
                 print("r1: \(r1)") // .Error
             }
 
             do {
-                var g2 = GeneratorOfOne(units[1])
+                var g2 = IteratorOverOne(_elements: units[1])
                 let r2 = codec.decode(&g2)
                 print("r2: \(r2)") // .EmptyInput
             }
 
             do {
-                var g3 = GeneratorOfOne(units[2])
+                var g3 = IteratorOverOne(_elements: units[2])
                 let r3 = codec.decode(&g3)
                 print("r3: \(r3)") // .EmptyInput
             }
 
             do {
-                var g4 = GeneratorOfOne(units[3])
+                var g4 = IteratorOverOne(_elements: units[3])
                 let r4 = codec.decode(&g4)
                 print("r4: \(r4)") // .EmptyInput
             }
@@ -1261,18 +1262,18 @@ class BricBracTests : XCTestCase {
 
     func testSerializationPerformance() throws {
         do {
-            let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/rap.json", ofType: "")!
-            let contents = try NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding)
+            let path: String! = Bundle(for: BricBracTests.self).path(forResource: "test/profile/rap.json", ofType: "")!
+            let contents = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
             let bric = try Bric.parse(contents as String)
-            let cocoa = try NSJSONSerialization.JSONObjectWithData(contents.dataUsingEncoding(NSUTF8StringEncoding)!, options: NSJSONReadingOptions())
+            let cocoa = try JSONSerialization.jsonObject(with: contents.data(using: String.Encoding.utf8.rawValue)!, options: JSONSerialization.ReadingOptions())
 
             for _ in 0...10 {
                 var strs: [String] = [] // hang onto the strings so we don't include ARC releases in the profile
-                var datas: [NSData] = []
+                var datas: [Data] = []
 
                 let natives: [Bool] = [false, true]
                 let styleNames = natives.map({ $0 ? "bric" : "cocoa" })
-                var times: [NSTimeInterval] = []
+                var times: [TimeInterval] = []
 
                 for native in natives {
                     let start = CFAbsoluteTimeGetCurrent()
@@ -1280,7 +1281,7 @@ class BricBracTests : XCTestCase {
                         if native {
                             strs.append(bric.stringify(space: 2))
                         } else {
-                            datas.append(try NSJSONSerialization.dataWithJSONObject(cocoa, options: NSJSONWritingOptions.PrettyPrinted))
+                            datas.append(try JSONSerialization.data(withJSONObject: cocoa, options: JSONSerialization.WritingOptions.prettyPrinted))
                         }
                     }
                     let end = CFAbsoluteTimeGetCurrent()
@@ -1292,22 +1293,22 @@ class BricBracTests : XCTestCase {
     }
 
     func testBricDate() throws {
-        let now = NSDate(timeIntervalSince1970: 500000)
+        let now = Date(timeIntervalSince1970: 500000)
         let dict = ["timestamp": now]
         let bric = dict.bric()
         do {
-            let brac = try [String:NSDate].brac(bric)
+            let brac = try [String:Date].brac(bric: bric)
             XCTAssertEqual(dict, brac)
         }
     }
 
     func testNestedBricDate() throws {
-        typealias X = Dictionary<String, Optional<Optional<Optional<Optional<NSDate>>>>>
-        let now = NSDate(timeIntervalSince1970: 500000)
+        typealias X = Dictionary<String, Optional<Optional<Optional<Optional<Date>>>>>
+        let now = Date(timeIntervalSince1970: 500000)
         let dict: X = X(dictionaryLiteral: ("timestamp", now))
         let bric = dict.bric()
         do {
-            let brac: X = try X.brac(bric)
+            let brac: X = try X.brac(bric: bric)
             let t1 = dict["timestamp"]!!!!
             let t2 = brac["timestamp"]!!!!
             XCTAssertTrue(t1 == t2)
@@ -1318,7 +1319,7 @@ class BricBracTests : XCTestCase {
         let template: Bric = ["manufacturer": "audi", "model": "a4", "displ": 1.8, "year": 1999, "cyl": 4, "trans": "auto(l5)", "drv": "f", "cty": 18, "hwy": 29, "fl": "p", "class": "compact"]
 
         do {
-            let audi1 = try Car.brac(template)
+            let audi1 = try Car.brac(bric: template)
             XCTAssertEqual(audi1.manufacturer, "audi")
             XCTAssertEqual(audi1.model, "a4")
         }
@@ -1329,7 +1330,7 @@ class BricBracTests : XCTestCase {
         let bric = audi2.bric()
         XCTAssertEqual(bric, template)
         do {
-            let audi3 = try Car.brac(bric)
+            let audi3 = try Car.brac(bric: bric)
             XCTAssertEqual(audi3, audi2)
         }
 
@@ -1337,85 +1338,20 @@ class BricBracTests : XCTestCase {
             //
             let list: Bric = ["year": 1999, "type": "efficiency", "cars": [template, template]]
             let uniqueList: Bric = ["year": 1999, "type": "efficiency", "cars": [template]]
-            let report = try CarReport.brac(list)
+            let report = try CarReport.brac(bric: list)
             XCTAssertEqual(report.bric(), uniqueList, "re-serialized list should only contain a single unique element")
         }
     }
 
-    func testNonEmptyCollection() throws {
-        var nec = NonEmptyCollection("foo", tail: [])
-
-        nec.appendContentsOf(["bar", "baz"])
-        XCTAssertEqual(nec.bric(), ["foo", "bar", "baz"])
-
-        nec.removeFirst()
-        XCTAssertEqual(nec.bric(), ["bar", "baz"])
-
-        nec.removeLast()
-        XCTAssertEqual(nec.bric(), ["bar"])
-        XCTAssertEqual(nec.head, "bar")
-
-        nec.insertContentsOf(["z", "x"], at: 0)
-        XCTAssertEqual(nec.bric(), ["z", "x", "bar"])
-        XCTAssertEqual(nec.head, "z")
-
-        nec[0] = "0"
-        nec[1] = "1"
-        nec[2] = "2"
-
-        XCTAssertEqual(nec.bric(), ["0", "1", "2"])
-        XCTAssertEqual(nec.reverse(), ["2", "1", "0"])
-
-        nec.removeAll()
-        XCTAssertEqual(nec.count, 1)
-
-        typealias ThreeOrMoreStrings = NonEmptyCollection<String, NonEmptyCollection<String, NonEmptyCollection<String, Array<String>>>>
-        var nec2: ThreeOrMoreStrings = NonEmptyCollection("foo", tail: NonEmptyCollection("bar", tail: NonEmptyCollection("baz", tail: [])))
-        XCTAssertEqual(nec2.bric(), ["foo", "bar", "baz"])
-        nec2.append("buzz")
-        XCTAssertEqual(nec2.bric(), ["foo", "bar", "baz", "buzz"])
-        nec2.removeFirst()
-        XCTAssertEqual(nec2.bric(), ["bar", "baz", "buzz"])
-
-
-        nec2.insert("fizz", atIndex: 0)
-        XCTAssertEqual(nec2.bric(), ["fizz", "bar", "baz", "buzz"])
-
-        nec2.removeLast()
-        XCTAssertEqual(nec2.bric(), ["fizz", "bar", "baz"])
-
-        do {
-            let _ = try NonEmptyCollection<String, [String]>.brac(["foo"])
-        }
-
-        do {
-            let _ = try NonEmptyCollection<String, [String]>.brac([])
-            XCTFail("should not have been able to brac an empty array")
-        } catch {
-        }
-
-//        do {
-//            let _ = try NonEmptyCollection<String, NonEmptyCollection<String, [String]>>.brac(["foo", "bar"])
-//        } catch {
-//            XCTFail(String(error))
-//        }
-//
-//        do {
-//            let _ = try NonEmptyCollection<String, NonEmptyCollection<String, [String]>>.brac(["foo"])
-//            XCTFail("should not have been able to brac an empty array")
-//        } catch {
-//        }
-
-    }
 
     /// Generates code for the experimental AutoBric type
     func XXXtestAutobricerMaker() {
         for i in 2...21 {
-            let typeList = (1...i).map({ "F\($0)" }).joinWithSeparator(", ")
+            let typeList = (1...i).map({ "F\($0)" }).joined(separator: ", ")
 //            let keyList = Array(count: i, repeatedValue: "R").joinWithSeparator(", ")
 //            let mediatorList = (1...i).map({ "(bricer: (T\($0) -> Bric), bracer: (Bric throws -> T\($0)))" }).joinWithSeparator(", ")
 
-            let arglist = (1...i).map({ "_ key\($0): (key: R, getter: Self -> F\($0), writer: F\($0) -> Bric, reader: Bric throws -> F\($0))" }).joinWithSeparator(", ")
+            let arglist = (1...i).map({ "_ key\($0): (key: R, getter: Self -> F\($0), writer: F\($0) -> Bric, reader: Bric throws -> F\($0))" }).joined(separator: ", ")
 
             // (factory: (F1, F2) -> Self, _ key1: (key: String, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: String, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2))
 
@@ -1433,8 +1369,8 @@ class BricBracTests : XCTestCase {
 //
 //            let bracer: (Bric throws -> Self) = { bric in
 //                try factory(
-//                    key1.reader(bric.bracKey(key1.key)),
-//                    key2.reader(bric.bracKey(key2.key))
+//                    key1.reader(bric.brac(key: key1.key)),
+//                    key2.reader(bric.brac(key: key2.key))
 //                )
 //            }
 
@@ -1449,7 +1385,7 @@ class BricBracTests : XCTestCase {
             print("        let bracer: (Bric throws -> Self) = { bric in")
             print("            try factory(", terminator: "")
             for j in 1...i {
-                print("key\(j).reader(bric.bracKey(key\(j).key))" + (j == i ? "" : ","), terminator: " ")
+                print("key\(j).reader(bric.brac(key: key\(j).key))" + (j == i ? "" : ","), terminator: " ")
             }
             print(")")
             print("        }")
@@ -1484,7 +1420,7 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual(x, 1)
         XCTAssertEqual(y, 2.2)
 
-        do { try bracSwap(&x, &y) } catch { XCTFail(String(error)) }
+        do { try bracSwap(&x, &y) } catch { XCTFail(String(describing: error)) }
 
         XCTAssertEqual(x, 2)
         XCTAssertEqual(y, 1.0)
@@ -1528,9 +1464,9 @@ class BricBracTests : XCTestCase {
     func testIndirectPerformance() {
         var array = Array<Indirect<Bool>>()
         array.reserveCapacity(RefPerformanceCount)
-        measureBlock { // 0.209
-            for _ in 1...self.RefPerformanceCount { array.append(.Some(true)) }
-            let allTrue = array.reduce(true, combine: { (x, y) in x && (y.value ?? false) })
+        measure { // 0.209
+            for _ in 1...self.RefPerformanceCount { array.append(.some(true)) }
+            let allTrue = array.reduce(true, { (x, y) in x && (y.value ?? false) })
             XCTAssertEqual(allTrue, true)
         }
     }
@@ -1538,9 +1474,9 @@ class BricBracTests : XCTestCase {
     func testOptionalPerformance() {
         var array = Array<Optional<Bool>>()
         array.reserveCapacity(RefPerformanceCount)
-        measureBlock { // 0.160
-            for _ in 1...self.RefPerformanceCount { array.append(.Some(true)) }
-            let allTrue = array.reduce(true, combine: { (x, y) in x && (y ?? false) })
+        measure { // 0.160
+            for _ in 1...self.RefPerformanceCount { array.append(.some(true)) }
+            let allTrue = array.reduce(true, { (x, y) in x && (y ?? false) })
             XCTAssertEqual(allTrue, true)
         }
     }
@@ -1548,19 +1484,19 @@ class BricBracTests : XCTestCase {
     let BreqPerformanceCount = 1_000_000
 
     func testOptimizedBreqPerformance() {
-        let array1 = Array(count: BreqPerformanceCount, repeatedValue: true)
+        let array1 = Array(repeating: true, count: BreqPerformanceCount)
         let array2 = array1
-        measureBlock { // 0.626 ... hmmm...
+        measure { // 0.626 ... hmmm...
             let allEqual = array1.breq(array2)
             XCTAssertEqual(allEqual, true)
         }
     }
 
     func testUnoptimizedBreqPerformance() {
-        let array1 = Array(count: BreqPerformanceCount, repeatedValue: true)
+        let array1 = Array(repeating: true, count: BreqPerformanceCount)
         let array2 = array1
-        measureBlock { // 0.575
-            let allEqual = zip(array1, array2).reduce(true, combine: { (b, vals) in b && (vals.0 == vals.1) })
+        measure { // 0.575
+            let allEqual = zip(array1, array2).reduce(true, { (b, vals) in b && (vals.0 == vals.1) })
             XCTAssertEqual(allEqual, true)
         }
     }
@@ -1595,20 +1531,20 @@ class BricBracTests : XCTestCase {
 
 //        let brq = Person.breq
 
-        let afp1 = AnyForwardCollection(ap1)
-        let afp2 = AnyForwardCollection(ap2)
-        XCTAssertTrue(afp1 === afp1, "equivalence check should be true")
-        XCTAssertTrue(afp1 !== afp2, "equivalence check should be false")
+        let afp1 = UnsafeRawPointer(ap1)
+        let afp2 = UnsafeRawPointer(ap2)
+        XCTAssertTrue(afp1 == afp1, "equivalence check should be true")
+        XCTAssertTrue(afp1 != afp2, "equivalence check should be false")
 
-        // also test if optimized comparison works for dictionaries wrapped in AnyForwardCollection
-        let dct1: [String: Int] = ["foo": 1, "bar": 2]
-        let dct2: [String: Int] = ["foo": 1, "bar": 2]
-        let afdct1 = AnyForwardCollection(dct1)
-        let afdct2 = AnyForwardCollection(dct2)
-        XCTAssertTrue(afdct1 === afdct1, "equivalence check should be true")
-        XCTAssertTrue(afdct1 !== afdct2, "equivalence check should be false")
-        XCTAssertTrue(dct1 == dct1, "equality check should be true")
-        XCTAssertTrue(dct1 == dct2, "equality check should be true")
+        // also test if optimized comparison works for dictionaries wrapped in AnyCollection
+//        let dct1: [String: Int] = ["foo": 1, "bar": 2]
+//        let dct2: [String: Int] = ["foo": 1, "bar": 2]
+//        let afdct1 = UnsafeRawPointer(dct1)
+//        let afdct2 = UnsafeRawPointer(dct2)
+//        XCTAssertTrue(afdct1 === afdct1, "equivalence check should be true")
+//        XCTAssertTrue(afdct1 !== afdct2, "equivalence check should be false")
+//        XCTAssertTrue(dct1 == dct1, "equality check should be true")
+//        XCTAssertTrue(dct1 == dct2, "equality check should be true")
 
         bc = Person.Breqs
 
@@ -1638,38 +1574,38 @@ class BricBracTests : XCTestCase {
     }
 
     func testDeepMerge() {
-        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).merge(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).merge(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[[["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[[["a": "b"]]]]]]), ["foo": [1, 2, [[[["a": "b", "x": "y"]]]]], "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[2, [["x": "y"]]]]]]).merge(["bar": "baz", "foo": [1, 2, [[2, [["a": "b"]]]]]]), ["foo": [1, 2, [[2, [["a": "b", "x": "y"]]]]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(bric: ["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(bric: ["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).merge(bric: ["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).merge(bric: ["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[[["x": "y"]]]]]]).merge(bric: ["bar": "baz", "foo": [1, 2, [[[["a": "b"]]]]]]), ["foo": [1, 2, [[[["a": "b", "x": "y"]]]]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[2, [["x": "y"]]]]]]).merge(bric: ["bar": "baz", "foo": [1, 2, [[2, [["a": "b"]]]]]]), ["foo": [1, 2, [[2, [["a": "b", "x": "y"]]]]], "bar": "baz"])
     }
 
     func testShallowMerge() {
-        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(["bar": "baz"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).assign(["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
-        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).assign(["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(bric: ["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(bric: ["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).assign(bric: ["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).assign(bric: ["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
     }
 
 }
 
 /// Parses the given stream of elements with the associated codec
-func parseCodec<C: UnicodeCodecType, S: SequenceType where S.Generator.Element == C.CodeUnit>(codecType: C.Type, _ seq: S) throws -> Bric {
+func parseCodec<C: UnicodeCodec, S: Sequence>(_ codecType: C.Type, _ seq: S) throws -> Bric where S.Iterator.Element == C.CodeUnit {
     var top: Bric = nil
     let parser = Bric.bricolageParser(options: .Strict) { (b, l) in
         if l == 0 { top = b }
         return b
     }
 
-    let success: Bool = transcode(codecType, UTF32.self, seq.generate(), {
+    let success: Bool = transcode(seq.makeIterator(), from: codecType, to: UTF32.self, stoppingOnError: true, into: {
         do {
-            try parser.parse(CollectionOfOne(UnicodeScalar($0)))
+            try parser.parse(CollectionOfOne(UnicodeScalar($0)!))
         } catch {
             fatalError("decoding error")
         }
-        }, stopOnError: true)
+        })
 
     if success {
     } else {
@@ -1680,10 +1616,10 @@ func parseCodec<C: UnicodeCodecType, S: SequenceType where S.Generator.Element =
 
 
 /// Takes any collection of UnicodeScalars and parses it, returning the exact same collection
-func roundTrip<C: RangeReplaceableCollectionType where C.Generator.Element == UnicodeScalar>(src: C) throws -> C {
+func roundTrip<C: RangeReplaceableCollection>(_ src: C) throws -> C where C.Iterator.Element == UnicodeScalar {
     var out: C = C.init()
     out.reserveCapacity(src.count)
-    try JSONParser(options: .Strict, delegate: { out.appendContentsOf($0.value) }).parse(src, complete: true)
+    try JSONParser(options: .Strict, delegate: { out.append(contentsOf: $0.value) }).parse(src, complete: true)
     return out
 }
 
@@ -1696,7 +1632,7 @@ struct Person {
 
 /// Example of using an enum in a type extension for BricBrac with automatic hashability and equatability
 extension Person : BricBrac, Equatable {
-    private static var Breqs = 0
+    fileprivate static var Breqs = 0
 
     enum Keys: String {
         case name, male, age, children
@@ -1713,16 +1649,16 @@ extension Person : BricBrac, Equatable {
 
     static func brac(bric: Bric) throws -> Person {
         return try Person(
-            name: bric.bracKey(Keys.name),
-            male: bric.bracKey(Keys.male),
-            age: bric.bracKey(Keys.age),
-            children: bric.bracKey(Keys.children)
+            name: bric.brac(key: Keys.name),
+            male: bric.brac(key: Keys.male),
+            age: bric.brac(key: Keys.age),
+            children: bric.brac(key: Keys.children)
         )
     }
 
     /// A more efficient implementation of Breqable that perform direct field comparison
     /// ordered by the fastest comparisons to the slowest
-    func breq(other: Person) -> Bool {
+    func breq(_ other: Person) -> Bool {
         Person.Breqs += 1 // for testing whether brequals is called
         return male == other.male && age == other.age && name == other.name && children == other.children
     }
@@ -1743,7 +1679,7 @@ enum Executive : BricBrac {
     static func brac(bric: Bric) throws -> Executive {
         switch bric {
         case .str(let id): return .robot(serialNumber: id)
-        case .obj(let dict) where dict["name"] != nil: return try .human(Person.brac(bric))
+        case .obj(let dict) where dict["name"] != nil: return try .human(Person.brac(bric: bric))
         default: return try bric.invalidType()
         }
     }
@@ -1759,7 +1695,7 @@ enum CorporateCode : Int, BricBrac {
 
 /// Example of using a class and a tuple in the type itself to define the keys for BricBrac
 final class Company : BricBrac {
-    private static let keys = (
+    fileprivate static let keys = (
         name: "name",
         ceo: "ceo",
         status: "status",
@@ -1798,12 +1734,12 @@ final class Company : BricBrac {
 
     static func brac(bric: Bric) throws -> Company {
         return try Company(
-            name: bric.bracKey(keys.name),
-            ceo: bric.bracKey(keys.ceo),
-            status: bric.bracKey(keys.status),
-            customers: bric.bracKey(keys.customers),
-            employees: bric.bracKey(keys.employees),
-            subsidiaries: bric.bracKey(keys.subsidiaries))
+            name: bric.brac(key: keys.name),
+            ceo: bric.brac(key: keys.ceo),
+            status: bric.brac(key: keys.status),
+            customers: bric.brac(key: keys.customers),
+            employees: bric.brac(key: keys.employees),
+            subsidiaries: bric.brac(key: keys.subsidiaries))
     }
 }
 
@@ -1842,17 +1778,17 @@ struct Car {
 extension Car : AutoBricBrac {
     /// type annotations as workaround for expression taking too long to solve (we can only get away with about 4 unannotated arguments)
     static let autobricbrac = Car.abricbrac(Car.init,
-        Car.bbkey("manufacturer", { $0.manufacturer }) as (String, (Car) -> (String), (String -> Bric), (Bric throws -> String)),
-        Car.bbkey("model", { $0.model }) as (String, (Car) -> (String?), (String? -> Bric), (Bric throws -> String?)),
-        Car.bbkey("displ", { $0.displacement }) as (String, (Car) -> (Double), (Double -> Bric), (Bric throws -> Double)),
-        Car.bbkey("year", { $0.year }) as (String, (Car) -> (UInt16), (UInt16 -> Bric), (Bric throws -> UInt16)),
-        Car.bbkey("cyl", { $0.cylinders }) as (String, (Car) -> (Car.Cylinders), (Car.Cylinders -> Bric), (Bric throws -> Car.Cylinders)),
-        Car.bbkey("trans", { $0.transmissionType }) as (String, (Car) -> (String), (String -> Bric), (Bric throws -> String)),
-        Car.bbkey("drv", { $0.drive }) as (String, (Car) -> (Car.Drive), (Car.Drive -> Bric), (Bric throws -> Car.Drive)),
-        Car.bbkey("cty", { $0.cityMileage }) as (String, (Car) -> (Int), (Int -> Bric), (Bric throws -> Int)),
-        Car.bbkey("hwy", { $0.highwayMileage }) as (String, (Car) -> (Int), (Int -> Bric), (Bric throws -> Int)),
-        Car.bbkey("fl", { $0.fuel }) as (String, (Car) -> (Car.Fuel), (Car.Fuel -> Bric), (Bric throws -> Car.Fuel)),
-        Car.bbkey("class", { $0.`class` }) as (String, (Car) -> (Car.Class), (Car.Class -> Bric), (Bric throws -> Car.Class))
+        Car.bbkey("manufacturer", { $0.manufacturer }) as (String, (Car) -> (String), ((String) -> Bric), ((Bric) throws -> String)),
+        Car.bbkey("model", { $0.model }) as (String, (Car) -> (String?), ((String?) -> Bric), ((Bric) throws -> String?)),
+        Car.bbkey("displ", { $0.displacement }) as (String, (Car) -> (Double), ((Double) -> Bric), ((Bric) throws -> Double)),
+        Car.bbkey("year", { $0.year }) as (String, (Car) -> (UInt16), ((UInt16) -> Bric), ((Bric) throws -> UInt16)),
+        Car.bbkey("cyl", { $0.cylinders }) as (String, (Car) -> (Car.Cylinders), ((Car.Cylinders) -> Bric), ((Bric) throws -> Car.Cylinders)),
+        Car.bbkey("trans", { $0.transmissionType }) as (String, (Car) -> (String), ((String) -> Bric), ((Bric) throws -> String)),
+        Car.bbkey("drv", { $0.drive }) as (String, (Car) -> (Car.Drive), ((Car.Drive) -> Bric), ((Bric) throws -> Car.Drive)),
+        Car.bbkey("cty", { $0.cityMileage }) as (String, (Car) -> (Int), ((Int) -> Bric), ((Bric) throws -> Int)),
+        Car.bbkey("hwy", { $0.highwayMileage }) as (String, (Car) -> (Int), ((Int) -> Bric), ((Bric) throws -> Int)),
+        Car.bbkey("fl", { $0.fuel }) as (String, (Car) -> (Car.Fuel), ((Car.Fuel) -> Bric), ((Bric) throws -> Car.Fuel)),
+        Car.bbkey("class", { $0.`class` }) as (String, (Car) -> (Car.Class), ((Car.Class) -> Bric), ((Bric) throws -> Car.Class))
     )
 }
 
@@ -1903,23 +1839,23 @@ extension CarReport.ReportType : BricBrac { }
 
 extension CGPoint : Bricable, Bracable {
     public func bric() -> Bric {
-        return ["x": Bric(x.native), "y": Bric(y.native)]
+        return ["x": Bric(num: x.native), "y": Bric(num: y.native)]
     }
 
     public static func brac(bric: Bric) throws -> CGPoint {
-        return try CGPoint(x: CGFloat(bric.bracKey("x") as CGFloat.NativeType), y: CGFloat(bric.bracKey("y") as CGFloat.NativeType))
+        return try CGPoint(x: CGFloat(bric.brac(key: "x") as CGFloat.NativeType), y: CGFloat(bric.brac(key: "y") as CGFloat.NativeType))
     }
 }
 
 /// Example of conferring JSON serialization on an existing non-final class
-extension NSDate : Bricable, Bracable {
+extension Date : Bricable, Bracable {
     /// NSDate will be saved by simply storing it as a double with the number of seconds since 1970
     public func bric() -> Bric {
-        return Bric(timeIntervalSince1970)
+        return Bric(num: timeIntervalSince1970)
     }
 
     /// Restore an NSDate from a "time" field
-    public static func brac(bric: Bric) throws -> Self {
+    public static func brac(bric: Bric) throws -> Date {
         return self.init(timeIntervalSince1970: try bric.bracNum())
     }
 

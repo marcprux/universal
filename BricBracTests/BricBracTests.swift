@@ -10,8 +10,28 @@ import XCTest
 import BricBrac
 import JavaScriptCore
 
+
+// TODO: implement this in BricBrac once we have Swift 4 support for conditional protocol conformance
+
+extension AutoBricBrac {
+    static func bricr<T, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(_ `init`: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) -> T, _ keys: (String, String, String, String, String, String, String, String, String, String, String), accessor: (T) -> (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)) -> Int {
+        return 1
+    }
+}
+
+extension Car {
+    static let make = bricr(Car.init,
+                            ("manufacturer", "model", "displacement", "year", "cylinders", "transmissionType", "drive", "cityMileage", "highwayMileage", "fuel", "class")) {x in
+                                (x.manufacturer, x.model, x.displacement, x.year, x.cylinders, x.transmissionType, x.drive, x.cityMileage, x.highwayMileage, x.fuel, x.class) }
+}
+
 class BricBracTests : XCTestCase {
 
+    func testInitString() {
+        dump(Mirror(reflecting: Car.make).children.first?.label)
+//        XCTAssertEqual("\(type(of: Car.make))", "(String, Optional<String>, Double, UInt16, Cylinders, String, Drive, Int, Int, Fuel, Class) -> Car")
+    }
+    
     func testBricConversion() {
         let bric: Bric = ["a": [1, 2, true, false, nil]]
         let cocoa = FoundationBricolage.brac(bric: bric)
@@ -745,20 +765,20 @@ class BricBracTests : XCTestCase {
 
         let evaluated = ctx?.evaluateScript("testOb = " + bstr)
         XCTAssertTrue((evaluated?.isObject)!, "\(msg) parsed instance was not an object: \(bstr)", file: file, line: line)
-        XCTAssertNil(ctx?.exception, "\(msg) error evaluating brac'd string: \(ctx?.exception)", file: file, line: line)
+        XCTAssertNil(ctx?.exception, "\(msg) error evaluating brac'd string: \(String(describing: ctx?.exception))", file: file, line: line)
 
         let bricString = bric.stringify(space: space, mapper: mapper)
 
         let stringified = ctx?.evaluateScript("JSON.stringify(testOb, function(key, value) { if (value === null || value === void(0) || value.constructor !== Object) { return value; } else { return Object.keys(value).sort().reduce(function (sorted, key) { sorted[key] = value[key]; return sorted; }, {}); } }, \(space))")
         if !(stringified?.isString)! {
-            XCTFail("\(msg) could not stringify instance in JS context: \(ctx?.exception)", file: file, line: line)
+            XCTFail("\(msg) could not stringify instance in JS context: \(String(describing: ctx?.exception))", file: file, line: line)
         } else {
             let str = stringified?.toString()
             if bricString.contains("e+") { // we differ in that we output exponential notation
                 return
             }
 
-            XCTAssertTrue(str == bricString, "\(msg) did not match:\n\(str)\n\(bricString)", file: file, line: line)
+            XCTAssertTrue(str == bricString, "\(msg) did not match:\n\(String(describing: str))\n\(bricString)", file: file, line: line)
         }
 
     }

@@ -79,13 +79,21 @@ extension FoundationBricolage : Bricable, Bracable {
     fileprivate static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
     fileprivate static func toBric(_ object: Any) -> Bric {
         if let bol = object as? BolType , bolTypes.contains(String(cString: bol.objCType)) {
-            return Bric.bol(bol as Bool)
+            if let b = bol as? Bool {
+                return Bric.bol(b)
+            } else {
+                return Bric.bol(false)
+            }
         }
         if let str = object as? StrType {
             return Bric.str(str as String)
         }
         if let num = object as? NumType {
-            return Bric.num(num as Double)
+            if let d = num as? Double {
+                return Bric.num(d)
+            } else {
+                return Bric.num(0.0)
+            }
         }
         if let arr = object as? ArrType {
             return Bric.arr(arr.map(toBric))

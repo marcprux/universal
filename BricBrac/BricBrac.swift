@@ -45,6 +45,6 @@ public struct NotBrac<T: Bricable> : BricBrac, ExpressibleByNilLiteral where T: 
     }
 }
 
-public func ==<T: Bricable>(lhs: NotBrac<T>, rhs: NotBrac<T>) -> Bool {
+public func ==<T>(lhs: NotBrac<T>, rhs: NotBrac<T>) -> Bool {
     return lhs.breq(rhs)
 }

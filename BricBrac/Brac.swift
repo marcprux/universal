@@ -682,7 +682,7 @@ public enum BracError: Error, CustomDebugStringConvertible {
         case .unrecognizedKey(let key, let path):
             return "Unrecognized key «\(key)»\(at(path: path))"
         case .invalidType(let type, let actual, let path):
-            return "Invalid type\(at(path: path)): expected \(_typeName(type)), found \(_typeName(type(of: actual)))"
+            return "Invalid type\(at(path: path)): expected \(_typeName(type)), found \(_typeName(Swift.type(of: actual)))"
         case .invalidRawValue(let type, let value, let path):
             return "Invalid value “\(value)”\(at(path: path)) of type \(_typeName(type))"
         case .numericOverflow(let type, let value, let path):

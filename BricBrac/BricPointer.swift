@@ -81,7 +81,7 @@ public extension Bric {
         case .obj(var dict):
             // { "$ref": "http://example.com/example.json#/foo/bar" }
             if case .some(.str(let ref)) = dict["$ref"] {
-                var parts = ref.characters.split(omittingEmptySubsequences: false, whereSeparator: { $0 == "#" }).map({ String($0) })
+                var parts = ref.split(omittingEmptySubsequences: false, whereSeparator: { $0 == "#" }).map({ String($0) })
                 if parts.count != 2 { throw BricReferenceError.unresolvableReferenceRoot(ref) }
 
                 // resolve the absolute root: "http://example.com/example.json"
@@ -133,7 +133,7 @@ public extension Bric {
     /// Resolve the relative part "/foo/bar" as per http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
     public func reference(_ pointer: String) throws -> Bric {
         // Note: this logic is somewhat duplicated in find(), but when parsing a string we don't know if "1" means object key or array index until we resolve it against the Bric, so we cannot first parse it into a Bric.Pointer before we resolve it
-        let frags = pointer.characters.split(omittingEmptySubsequences: true, whereSeparator: { $0 == "/" }).map({ String($0) })
+        let frags = pointer.split(omittingEmptySubsequences: true, whereSeparator: { $0 == "/" }).map({ String($0) })
         var node = self
         for var frag in frags {
             // funky JSON pointer escaping scheme (section 4)
@@ -156,7 +156,7 @@ public extension Bric {
         }
 
         // special case: trailing slashes will map to the "" key of an object
-        if case .obj(let obj) = node , pointer.characters.last == "/" {
+        if case .obj(let obj) = node , pointer.last == "/" {
             node = obj[""] ?? node
         }
 
@@ -238,10 +238,10 @@ public extension String {
     /// Returns a list of non-overlapping ranges of substring indices that equal the given find string in ascending order
     fileprivate func ranges(ofString find: String) -> [ClosedRange<Index>] {
         var ranges : [ClosedRange<String.Index>] = []
-        let flen = find.characters.distance(from: find.startIndex, to: find.endIndex)
+        let flen = find.distance(from: find.startIndex, to: find.endIndex)
         let end = self.endIndex
         var i1 = self.startIndex
-        let chars = self.characters
+        let chars = self
         guard var i2 = chars.index(self.startIndex, offsetBy: flen-1, limitedBy: end) else { return ranges }
 
         while i2 != end {
@@ -268,7 +268,7 @@ public extension String {
 
     public func replace(character find: Character, with replacement: String) -> String {
         // when replacing a single character, optimize by doing a faster check
-        if !self.characters.contains(find) {
+        if !self.contains(find) {
             return self
         }
 

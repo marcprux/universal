@@ -280,7 +280,7 @@ extension FidelityBricolage : Bricolagable {
 }
 
 extension FidelityBricolage : ExpressibleByNilLiteral {
-    public init(nilLiteral: ()) { self = .nul() }
+    public init(nilLiteral: ()) { self = .nul(FidelityBricolage.createNull()) }
 }
 
 extension FidelityBricolage : ExpressibleByBooleanLiteral {
@@ -585,9 +585,9 @@ public extension JSONWriter {
         // see also: http://www.netlib.org/fp/dtoa.c
         let str = String(number) // FIXME: this outputs exponential notation for some large numbers
         // when a string ends in ".0", we just append the rounded int FIXME: better string formatting
-        let suffix = str.characters.suffix(2)
+        let suffix = str.suffix(2)
         if suffix.first == "." && suffix.last == "0" {
-            emit(&output, string: String(str.characters.dropLast(2)))
+            emit(&output, string: String(str.dropLast(2)))
         } else {
             emit(&output, string: str)
         }
@@ -705,8 +705,8 @@ open class BufferedJSONWriter<Target: TextOutputStream> : JSONWriter {
 
         func toklen(_ token: BufferedJSONWriterToken) -> Int {
             switch token {
-            case .indent: return pad.characters.count // because indent will convert to a pad
-            case .str(let str): return str.characters.count
+            case .indent: return pad.count // because indent will convert to a pad
+            case .str(let str): return str.count
             }
         }
 
@@ -726,7 +726,7 @@ open class BufferedJSONWriter<Target: TextOutputStream> : JSONWriter {
 
         @discardableResult func compactRange(_ range: CountableClosedRange<Int>, level: Int) -> Bool {
             let strlen = tokens[range].reduce(0) { $0 + toklen($1) }
-            let indentLen = level * spacer.characters.count
+            let indentLen = level * spacer.count
             if strlen + indentLen > maxline { return false }
 
             // the sum of the contiguous tokens are less than max line; replace all indents with a single space

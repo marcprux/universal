@@ -514,7 +514,7 @@ public extension ISO8601DateTime {
     public func toFormattedString(timesep: String = "T", utctz: String? = "Z", padsec: Int = 3) -> String {
         func pad(_ num: Int, _ len: Int) -> String {
             var str = String(num)
-            while str.characters.count < len {
+            while str.count < len {
                 str = "0" + str
             }
             return str
@@ -523,10 +523,10 @@ public extension ISO8601DateTime {
         /// Secs need to be padded to 2 at the beginning and 3 at the end, e.g.: 00.000
         func sec(_ secs: Double) -> String {
             var str = String(secs)
-            let chars = str.characters
+            let chars = str
             if padsec > 0 {
                 if chars.count >= 2 && chars.dropFirst().first == "." { str = "0" + str }
-                while str.characters.count < (padsec + 3) { str += "0" }
+                while str.count < (padsec + 3) { str += "0" }
             }
             return str
         }
@@ -541,7 +541,7 @@ public extension ISO8601DateTime {
 
     /// Attempt to parse the given String as an ISO-8601 date-time structure
     public func parseISO8601String(_ str: String) -> Self? {
-        var gen = str.characters.makeIterator()
+        var gen = str.makeIterator()
 
         func scan(_ skip: Int = 0, _ until: Character...) -> (String, Character?)? {
             var num = 0

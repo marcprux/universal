@@ -582,7 +582,7 @@ public final class JSONParser {
     }
 
     /// Processes the given scalars as a JSON string, performing the appropriate unescaping and validation
-    public static func unescape<C: RangeReplaceableCollection>(_ scalars: C, escapeIndices: [C.Index], line: Int, column: Int) throws -> C where C.Iterator.Element == UnicodeScalar, C.SubSequence.Iterator.Element == UnicodeScalar, C.Index: Comparable, C.IndexDistance == Int {
+    public static func unescape<C: RangeReplaceableCollection>(_ scalars: C, escapeIndices: [C.Index], line: Int, column: Int) throws -> C where C.Iterator.Element == UnicodeScalar, C.IndexDistance == Int {
         // when the string has no escapes, we can just pass it directly
         if escapeIndices.isEmpty { return scalars }
 

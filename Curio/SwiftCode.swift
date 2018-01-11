@@ -14,7 +14,7 @@ public protocol CodeEmitterType {
 
 public extension CodeEmitterType {
     public func emitComments(_ comments: [String]) {
-        let comms = comments.flatMap({ $0.characters.split { $0 == "\n" || $0 == "\r" } })
+        let comms = comments.flatMap({ $0.split { $0 == "\n" || $0 == "\r" } })
 
         for comment in comms {
             emit("///", String(comment))
@@ -430,7 +430,7 @@ private let reservedArgs = Set(["inout", "var", "let"])
 
 extension String {
     func afterLast(_ sep: Character) -> String {
-        let lastPart: String = (self.characters.split { $0 == "." }).last.flatMap({ String($0) }) ?? self
+        let lastPart: String = (self.split { $0 == "." }).last.flatMap({ String($0) }) ?? self
         return lastPart
     }
 
@@ -635,11 +635,11 @@ public struct CodeProtocol : CodeNamedType, CodeConformantType {
 }
 
 /// An implementation type is a named type that can hold state and functions
-public protocol CodePropertyImplementationType : CodeNamedType, CodeConformantType, CodeImplementationType {
+public protocol CodePropertyImplementationType : CodeNamedType, CodeImplementationType {
     var props: [CodeProperty.Implementation] { get set }
 }
 
-public protocol CodeStateType : CodePropertyImplementationType, CodeImplementationType {
+public protocol CodeStateType : CodePropertyImplementationType {
     var conforms: [CodeProtocol] { get set }
     var props: [CodeProperty.Implementation] { get set }
     var funcs: [CodeFunction.Implementation] { get set }

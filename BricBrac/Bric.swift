@@ -55,8 +55,8 @@ public func ==(lhs: Bric, rhs: Bric) -> Bool {
 extension Bric : Hashable {
     public var hashValue: Int {
         switch self {
-        case .arr(let a): return a.reduce(0, { sum, bric in Int.multiplyWithOverflow(37, Int.addWithOverflow(sum, bric.hashValue).0).0 })
-        case .obj(let o): return o.reduce(0, { sum, keyValue in Int.multiplyWithOverflow(37, Int.addWithOverflow(Int.addWithOverflow(sum, keyValue.0.hashValue).0, keyValue.1.hashValue).0).0 })
+        case .arr(let a): return a.reduce(0, { sum, bric in (37.multipliedReportingOverflow(by: (sum.addingReportingOverflow(bric.hashValue).partialValue)).partialValue) })
+        case .obj(let o): return o.reduce(0, { sum, keyValue in (37.multipliedReportingOverflow(by: sum.addingReportingOverflow(keyValue.0.hashValue).partialValue.addingReportingOverflow(keyValue.1.hashValue).partialValue).partialValue) })
         case .str(let s): return s.hashValue
         case .num(let d): return d.hashValue
         case .bol(let b): return b.hashValue

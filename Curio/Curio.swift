@@ -22,6 +22,9 @@ public struct Curio {
     /// Whether to generate support for autoBricBrac
     public var autoBricBrac = false
 
+    /// Whether to generate a BricState unit
+    public var bricState = false
+
     /// whether to generate structs or classes (classes are faster to compiler for large models)
     public var generateValueTypes = true
 
@@ -100,10 +103,10 @@ public struct Curio {
     static let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     /// “Identifiers begin with an uppercase or lowercase letter A through Z, an underscore (_), a noncombining alphanumeric Unicode character in the Basic Multilingual Plane, or a character outside the Basic Multilingual Plane that isn’t in a Private Use Area.”
-    static let nameStart = Set((alphabet.uppercased() + "_" + alphabet.lowercased()).characters)
+    static let nameStart = Set((alphabet.uppercased() + "_" + alphabet.lowercased()))
 
     /// “After the first character, digits and combining Unicode characters are also allowed.”
-    static let nameBody = Set(Array(nameStart) + "0123456789".characters)
+    static let nameBody = Set(Array(nameStart) + "0123456789")
 
 
     func propName(_ parents: [CodeTypeName], _ id: String, arg: Bool = false) -> CodePropName {
@@ -114,8 +117,8 @@ public struct Curio {
         // enums can't have a prop named "init", since it will conflict with the constructor name
         var idx = id == "init" ? "initx" : id
 
-        while let first = idx.characters.first , !Curio.nameStart.contains(first) {
-            idx = String(idx.characters.dropFirst())
+        while let first = idx.first , !Curio.nameStart.contains(first) {
+            idx = String(idx.dropFirst())
         }
 
         // swift version 2.2+ allow unescaped keywords as argument names: https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
@@ -133,8 +136,8 @@ public struct Curio {
     }
 
     func unescape(_ name: String) -> String {
-        if name.hasPrefix("`") && name.hasSuffix("`") && name.characters.count >= 2 {
-            return name[name.characters.index(after: name.startIndex)..<name.characters.index(before: name.endIndex)]
+        if name.hasPrefix("`") && name.hasSuffix("`") && name.count >= 2 {
+            return name[name.index(after: name.startIndex)..<name.index(before: name.endIndex)]
         } else {
             return name
         }
@@ -144,7 +147,7 @@ public struct Curio {
         var name = ""
 
         var capnext = capitalize
-        for c in nm.characters {
+        for c in nm {
             let validCharacters = name.isEmpty ? Curio.nameStart : Curio.nameBody
             if !validCharacters.contains(c) {
                 capnext = name.isEmpty ? capitalize : true
@@ -375,15 +378,15 @@ public struct Curio {
                 let cname = typeName(parents, casetype.identifier, capitalize: enumCase == .upper) + caseSuffix
 
                 var casename = cname
-                if enumCase == .lower && casename.characters.count > 2 {
+                if enumCase == .lower && casename.count > 2 {
                     // lower-case the case; just because it was not capitalized above does not mean it
                     // was lower-cases, because the case name may have been derived from a type name (list ArrayStringCase)
-                    let initial = casename[casename.startIndex..<casename.characters.index(after: casename.startIndex)]
-                    let second = casename[casename.characters.index(after: casename.startIndex)..<casename.index(after: casename.characters.index(after: casename.startIndex))]
+                    let initial = casename[casename.startIndex..<casename.index(after: casename.startIndex)]
+                    let second = casename[casename.index(after: casename.startIndex)..<casename.index(after: casename.index(after: casename.startIndex))]
                     // only lower-case the type name if the second character is *not* upper-case; this heuristic
                     // is to prevent downcasing synonym types (e.g., we don't want "RGBCase" to be "rGBCase")
                     if second.uppercased() != second {
-                        let remaining = casename[casename.characters.index(after: casename.startIndex)..<casename.endIndex]
+                        let remaining = casename[casename.index(after: casename.startIndex)..<casename.endIndex]
                         casename = initial.lowercased() + remaining
                     }
                 }
@@ -688,18 +691,20 @@ public struct Curio {
                 if !cases.isEmpty {
                     var keysType = CodeSimpleEnum(name: keyName, access: accessor(parents), cases: cases)
 
-                    // also add an "asList" static field for key enumeration
-                    let klpropd = CodeProperty.Declaration(name: "asList", type: arrayType(keysType), access: accessor(parents), instance: false, mutable: false)
-                    var klpropi = klpropd.implementation
-                    klpropi.value = "[" + cases.map({ $0.name }).joined(separator: ", ") + "]"
-                    keysType.props.append(klpropi)
+                    if bricState {
+                        // also add an "asList" static field for key enumeration
+                        let klpropd = CodeProperty.Declaration(name: "asList", type: arrayType(keysType), access: accessor(parents), instance: false, mutable: false)
+                        var klpropi = klpropd.implementation
+                        klpropi.value = "[" + cases.map({ $0.name }).joined(separator: ", ") + "]"
+                        keysType.props.append(klpropi)
 
-                    // also add an "asTuple" static field for key lineup
-                    let ktpropd = CodeProperty.Declaration(name: "asTuple", type: nil, access: accessor(parents), instance: false, mutable: false)
-                    var ktpropi = ktpropd.implementation
-                    ktpropi.value = "(" + cases.map({ $0.name }).joined(separator: ", ") + ")"
-                    keysType.props.append(ktpropi)
-
+                        // also add an "asTuple" static field for key lineup
+                        let ktpropd = CodeProperty.Declaration(name: "asTuple", type: nil, access: accessor(parents), instance: false, mutable: false)
+                        var ktpropi = ktpropd.implementation
+                        ktpropi.value = "(" + cases.map({ $0.name }).joined(separator: ", ") + ")"
+                        keysType.props.append(ktpropi)
+                    }
+                    
                     code.nestedTypes.insert(keysType, at: 0)
                 }
             }
@@ -753,15 +758,17 @@ public struct Curio {
                 code.nestedTypes.append(stateType)
 
                 // make a dynamic `bricState` variable that converts to & from the `State` tuple
-                let spropd = CodeProperty.Declaration(name: "bricState", type: stateType, access: accessor(parents))
-                var spropi = spropd.implementation
-                let valuesTuple = "(" + elements.map({ $0.name ?? "_" }).joined(separator: ", ") + ")"
-                spropi.body = [
-                    "get { return " + valuesTuple + " }",
-                    "set($) { " + valuesTuple + " = $ }",
-                ]
-                code.props.append(spropi)
-
+                if bricState {
+                    let spropd = CodeProperty.Declaration(name: "bricState", type: stateType, access: accessor(parents))
+                    var spropi = spropd.implementation
+                    let valuesTuple = "(" + elements.map({ $0.name ?? "_" }).joined(separator: ", ") + ")"
+                    spropi.body = [
+                        "get { return " + valuesTuple + " }",
+                        "set($) { " + valuesTuple + " = $ }",
+                    ]
+                    code.props.append(spropi)
+                }
+                
                 // generate support for AutoBricBrac (not yet supported)
                 if autoBricBrac {
                     var bricKeys: [(key: String, value: String)] = []
@@ -1138,7 +1145,7 @@ public extension Schema {
 
     /// Support for JSON $ref <http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03>
     func resolve(_ path: String) throws -> Schema {
-        var parts = path.characters.split(whereSeparator: { $0 == "/" }).map { String($0) }
+        var parts = path.split(whereSeparator: { $0 == "/" }).map { String($0) }
 //        print("parts: \(parts)")
         if parts.isEmpty { throw BracReferenceError.referenceRequiredRoot(path) }
         let first = parts.remove(at: 0)

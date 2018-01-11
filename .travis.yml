@@ -1,4 +1,4 @@
-osx_image: xcode8
+osx_image: xcode9
 language: Objective-C
 xcode_project: BricBrac.xcodeproj
 xcode_scheme: BricBrac

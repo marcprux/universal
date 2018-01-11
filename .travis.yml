@@ -3,8 +3,8 @@ language: Objective-C
 xcode_project: BricBrac.xcodeproj
 xcode_scheme: BricBrac
 script:
-  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme BricBrac
-  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme Curio
+  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme BricBrac
+  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme Curio
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

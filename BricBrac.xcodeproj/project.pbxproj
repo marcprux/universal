@@ -122,7 +122,6 @@
 		7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleModel.swift; sourceTree = "<group>"; };
 		7E348EE21B9F3DD700945F86 /* Curio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Curio.h; sourceTree = "<group>"; };
 		7E34B1691C67B68300E50A71 /* Breq.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Breq.swift; sourceTree = "<group>"; };
-		7E5BC8991BA711A300E98CA6 /* BricBracPlay.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = BricBracPlay.playground; sourceTree = "<group>"; };
 		7E5DA2D11B9F5F1E0013FCB9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7E75A8F51BA46894002BA7F8 /* Food.jsonschema */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Food.jsonschema; sourceTree = "<group>"; };
 		7E75A8F61BA46894002BA7F8 /* Person.jsonschema */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Person.jsonschema; sourceTree = "<group>"; };
@@ -245,7 +244,6 @@
 			isa = PBXGroup;
 			children = (
 				7E5DA2D11B9F5F1E0013FCB9 /* README.md */,
-				7E5BC8991BA711A300E98CA6 /* BricBracPlay.playground */,
 				7E7F9B1E1B3615850058706A /* BricBrac */,
 				7E7F9B2A1B3615860058706A /* BricBracTests */,
 				7E28A5BD1B5AD5EE00A5F27F /* Curio */,

@@ -137,7 +137,7 @@ public struct Curio {
 
     func unescape(_ name: String) -> String {
         if name.hasPrefix("`") && name.hasSuffix("`") && name.count >= 2 {
-            return name[name.index(after: name.startIndex)..<name.index(before: name.endIndex)]
+            return String(name[name.index(after: name.startIndex)..<name.index(before: name.endIndex)])
         } else {
             return name
         }
@@ -169,7 +169,7 @@ public struct Curio {
         var nm = id
         for pre in trimPrefixes {
             if nm.hasPrefix(pre) {
-                nm = nm[pre.endIndex..<nm.endIndex]
+                nm = String(nm[pre.endIndex..<nm.endIndex])
             }
         }
 
@@ -1176,11 +1176,11 @@ public extension Schema {
         for (key, value) in refmap {
             let subschema = try Schema.brac(bric: value)
             refschema[key] = subschema
-            schemas.append(key, subschema)
+            schemas.append((key, subschema))
         }
 
         let schema = try Schema.brac(bric: json)
-        schemas.append(rootName, schema)
+        schemas.append((rootName, schema))
         return schemas
     }
 
@@ -1202,7 +1202,7 @@ public extension Schema {
             var sub = FidelityBricolage.createObject()
 
             for (key, value) in obj {
-                sub.append(key, imputePropertyOrdering(value))
+                sub.append((key, imputePropertyOrdering(value)))
                 // if the key is "properties" then also add a "propertyOrder" property with the order that the props appear in the raw JSON
                 if case .obj(let dict) = value , !dict.isEmpty && String(String.UnicodeScalarView() + key) == "properties" {
                     // ### FIXME: we hack in a check for "type" to determine if we are in a schema element and not,

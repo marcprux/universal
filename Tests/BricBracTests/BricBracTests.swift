@@ -40,16 +40,15 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual(bric, bric2)
     }
 
-    func testAllocatonProfiling() {
+    func testAllocatonProfiling() throws {
         // json with unicode escapes
         // let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/caliper.json", ofType: "")!
 
         // json no with escapes
-        let path: String! = Bundle(for: BricBracTests.self).path(forResource: "test/profile/rap.json", ofType: "")!
+        let path = testResourcePath() + "/profile/rap.json"
 
-//        let data: NSData! = NSData(contentsOfFile: path)!
-
-        let contents: NSString! = try? NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
+        print("loading resource: " + path)
+        let contents = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
         let scalars = Array((contents as String).unicodeScalars)
 
         var t = CFAbsoluteTimeGetCurrent()
@@ -449,7 +448,7 @@ class BricBracTests : XCTestCase {
     func testOutputNulls() {
         let bric: Bric = ["num": 1, "nul": nil]
         // note that key order differs on MacOS and iOS, probably due to different hashing
-        #if os(OSX)
+        #if os(macOS)
             XCTAssertEqual("{\"num\":1,\"nul\":null}", bric.stringify())
         #endif
 
@@ -466,7 +465,7 @@ class BricBracTests : XCTestCase {
 
             let str = bric.stringify()
             // note that key order differs on MacOS and iOS, probably due to different hashing
-            #if os(OSX)
+            #if os(macOS)
                 XCTAssertEqual(str, json)
             #endif
         }
@@ -867,7 +866,8 @@ class BricBracTests : XCTestCase {
 
         let fm = FileManager.default
         do {
-            if let folder = Bundle(for: BricBracTests.self).path(forResource: "test", ofType: "") {
+            let rsrc: String? = testResourcePath()
+            if let folder = rsrc {
                 let types = try fm.contentsOfDirectory(atPath: folder)
                 XCTAssertEqual(types.count, 5) // data, jsonchecker, profile, schema
                 for type in types {
@@ -1280,9 +1280,14 @@ class BricBracTests : XCTestCase {
 
     }
 
+    /// Returns the path of the folder containing test resources
+    func testResourcePath() -> String {
+        return String(#file.reversed().drop(while: { $0 != "/" }).reversed()) + "test/"
+    }
+    
     func testSerializationPerformance() throws {
         do {
-            let path: String! = Bundle(for: BricBracTests.self).path(forResource: "test/profile/rap.json", ofType: "")!
+            let path = testResourcePath() + "/profile/rap.json"
             let contents = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
             let bric = try Bric.parse(contents as String)
             let cocoa = try JSONSerialization.jsonObject(with: contents.data(using: String.Encoding.utf8.rawValue)!, options: JSONSerialization.ReadingOptions())

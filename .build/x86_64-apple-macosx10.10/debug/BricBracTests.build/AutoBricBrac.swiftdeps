@@ -1,0 +1,207 @@
+### Swift dependencies file v0 ###
+provides-top-level:
+- "AutoBricBrac"
+provides-nominal:
+- "13BricBracTests04AutoaB0P"
+provides-member:
+- ["13BricBracTests04AutoaB0P", ""]
+- ["13BricBracTests04AutoaB0P", "bric"]
+- ["13BricBracTests04AutoaB0P", "brac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "bbkey"]
+- ["13BricBracTests04AutoaB0P", "bbkey"]
+- ["13BricBracTests04AutoaB0P", "bbkey"]
+- ["13BricBracTests04AutoaB0P", "bbkey"]
+- ["13BricBracTests04AutoaB0P", "bbkey"]
+- ["13BricBracTests04AutoaB0P", "bbkey"]
+provides-dynamic-lookup:
+depends-top-level:
+- !private "Array"
+- "AutoBricBrac"
+- "BracLayer"
+- "Bracable"
+- "Bric"
+- "BricBrac"
+- "BricLayer"
+- "Bricable"
+- "RawRepresentable"
+- "String"
+- !private "abrac"
+- !private "abric"
+depends-member:
+- ["13BricBracTests04AutoaB0P", "BracLayer"]
+- ["13BricBracTests04AutoaB0P", "Bracable"]
+- ["13BricBracTests04AutoaB0P", "Bric"]
+- ["13BricBracTests04AutoaB0P", "BricLayer"]
+- ["13BricBracTests04AutoaB0P", "Bricable"]
+- ["13BricBracTests04AutoaB0P", "RawRepresentable"]
+- ["13BricBracTests04AutoaB0P", "Self"]
+- ["13BricBracTests04AutoaB0P", "String"]
+- !private ["13BricBracTests04AutoaB0P", "abrac"]
+- !private ["13BricBracTests04AutoaB0P", "abric"]
+- ["13BricBracTests04AutoaB0P", "abricbrac"]
+- ["13BricBracTests04AutoaB0P", "autobricbrac"]
+- ["13BricBracTests04AutoaB0P", "bbkey"]
+- ["13BricBracTests04AutoaB0P", "brac"]
+- ["13BricBracTests04AutoaB0P", "bric"]
+- !private ["8BricBrac0B5LayerP", "brac"]
+- ["8BricBrac8BracableP", "BracLayer"]
+- ["8BricBrac8BracableP", "Bracable"]
+- ["8BricBrac8BracableP", "Bric"]
+- ["8BricBrac8BracableP", "BricLayer"]
+- ["8BricBrac8BracableP", "Bricable"]
+- ["8BricBrac8BracableP", "RawRepresentable"]
+- ["8BricBrac8BracableP", "Self"]
+- ["8BricBrac8BracableP", "String"]
+- !private ["8BricBrac8BracableP", "abrac"]
+- !private ["8BricBrac8BracableP", "abric"]
+- ["8BricBrac8BracableP", "autobricbrac"]
+- !private ["8BricBrac8BracableP", "brac"]
+- !private ["8BricBrac8BracableP", "init"]
+- ["8BricBrac8BreqableP", "BracLayer"]
+- ["8BricBrac8BreqableP", "Bracable"]
+- ["8BricBrac8BreqableP", "Bric"]
+- ["8BricBrac8BreqableP", "BricLayer"]
+- ["8BricBrac8BreqableP", "Bricable"]
+- ["8BricBrac8BreqableP", "RawRepresentable"]
+- ["8BricBrac8BreqableP", "Self"]
+- ["8BricBrac8BreqableP", "String"]
+- !private ["8BricBrac8BreqableP", "abrac"]
+- !private ["8BricBrac8BreqableP", "abric"]
+- ["8BricBrac8BreqableP", "autobricbrac"]
+- !private ["8BricBrac8BreqableP", "brac"]
+- !private ["8BricBrac8BreqableP", "init"]
+- !private ["8BricBrac0A0O", "brac"]
+- !private ["8BricBrac0A0O", "init"]
+- ["8BricBracAAP", "BracLayer"]
+- ["8BricBracAAP", "Bracable"]
+- ["8BricBracAAP", "Bric"]
+- ["8BricBracAAP", "BricLayer"]
+- ["8BricBracAAP", "Bricable"]
+- ["8BricBracAAP", "RawRepresentable"]
+- ["8BricBracAAP", "Self"]
+- ["8BricBracAAP", "String"]
+- !private ["8BricBracAAP", "abrac"]
+- !private ["8BricBracAAP", "abric"]
+- ["8BricBracAAP", "autobricbrac"]
+- ["8BricBracAAP", ""]
+- !private ["8BricBrac0A5LayerP", "bric"]
+- ["8BricBrac8BricableP", "BracLayer"]
+- ["8BricBrac8BricableP", "Bracable"]
+- ["8BricBrac8BricableP", "Bric"]
+- ["8BricBrac8BricableP", "BricLayer"]
+- ["8BricBrac8BricableP", "Bricable"]
+- ["8BricBrac8BricableP", "RawRepresentable"]
+- ["8BricBrac8BricableP", "Self"]
+- ["8BricBrac8BricableP", "String"]
+- !private ["8BricBrac8BricableP", "abrac"]
+- !private ["8BricBrac8BricableP", "abric"]
+- ["8BricBrac8BricableP", "autobricbrac"]
+- !private ["8BricBrac8BricableP", "brac"]
+- !private ["8BricBrac8BricableP", "bric"]
+- !private ["8BricBrac8BricableP", "init"]
+- !private ["8BricBrac9BricolageP", "brac"]
+- !private ["8BricBrac9BricolageP", "init"]
+- !private ["s28CustomDebugStringConvertibleP", "brac"]
+- !private ["s28CustomDebugStringConvertibleP", "init"]
+- ["s9EquatableP", "BracLayer"]
+- ["s9EquatableP", "Bracable"]
+- ["s9EquatableP", "Bric"]
+- ["s9EquatableP", "BricLayer"]
+- ["s9EquatableP", "Bricable"]
+- ["s9EquatableP", "RawRepresentable"]
+- ["s9EquatableP", "Self"]
+- ["s9EquatableP", "String"]
+- !private ["s9EquatableP", "abrac"]
+- !private ["s9EquatableP", "abric"]
+- ["s9EquatableP", "autobricbrac"]
+- !private ["s9EquatableP", "brac"]
+- !private ["s9EquatableP", "init"]
+- !private ["s25ExpressibleByArrayLiteralP", "brac"]
+- !private ["s25ExpressibleByArrayLiteralP", "init"]
+- !private ["s27ExpressibleByBooleanLiteralP", "brac"]
+- !private ["s27ExpressibleByBooleanLiteralP", "init"]
+- !private ["s30ExpressibleByDictionaryLiteralP", "brac"]
+- !private ["s30ExpressibleByDictionaryLiteralP", "init"]
+- !private ["s43ExpressibleByExtendedGraphemeClusterLiteralP", "brac"]
+- !private ["s43ExpressibleByExtendedGraphemeClusterLiteralP", "init"]
+- !private ["s25ExpressibleByFloatLiteralP", "brac"]
+- !private ["s25ExpressibleByFloatLiteralP", "init"]
+- !private ["s27ExpressibleByIntegerLiteralP", "brac"]
+- !private ["s27ExpressibleByIntegerLiteralP", "init"]
+- !private ["s23ExpressibleByNilLiteralP", "brac"]
+- !private ["s23ExpressibleByNilLiteralP", "init"]
+- !private ["s26ExpressibleByStringLiteralP", "brac"]
+- !private ["s26ExpressibleByStringLiteralP", "init"]
+- !private ["s33ExpressibleByUnicodeScalarLiteralP", "brac"]
+- !private ["s33ExpressibleByUnicodeScalarLiteralP", "init"]
+- !private ["s8HashableP", "brac"]
+- !private ["s8HashableP", "init"]
+- !private ["s20TextOutputStreamableP", "brac"]
+- !private ["s20TextOutputStreamableP", "init"]
+depends-nominal:
+- "13BricBracTests04AutoaB0P"
+- !private "8BricBrac0B5LayerP"
+- "8BricBrac8BracableP"
+- "8BricBrac8BreqableP"
+- !private "8BricBrac0A0O"
+- "8BricBracAAP"
+- !private "8BricBrac0A5LayerP"
+- "8BricBrac8BricableP"
+- !private "8BricBrac9BricolageP"
+- !private "s28CustomDebugStringConvertibleP"
+- "s9EquatableP"
+- !private "s25ExpressibleByArrayLiteralP"
+- !private "s27ExpressibleByBooleanLiteralP"
+- !private "s30ExpressibleByDictionaryLiteralP"
+- !private "s43ExpressibleByExtendedGraphemeClusterLiteralP"
+- !private "s25ExpressibleByFloatLiteralP"
+- !private "s27ExpressibleByIntegerLiteralP"
+- !private "s23ExpressibleByNilLiteralP"
+- !private "s26ExpressibleByStringLiteralP"
+- !private "s33ExpressibleByUnicodeScalarLiteralP"
+- !private "s8HashableP"
+- !private "s20TextOutputStreamableP"
+depends-dynamic-lookup:
+depends-external:
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.apinotesc"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/XPC.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreData.swiftmodule"
+- "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBrac.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreImage.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/QuartzCore.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Metal.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreFoundation.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/CoreGraphics.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Swift.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/IOKit.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/AppKit.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/SwiftOnoneSupport.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/XCTest.swiftmodule"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Modules/module.modulemap"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include/xpc/XPC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include/objc/ObjectiveC.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/CoreData.framework/Headers/CoreData.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/CoreImage.framework/Headers/CoreImage.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/QuartzCore.framework/Headers/QuartzCore.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/Metal.framework/Headers/Metal.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include/Darwin.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/CoreGraphics.framework/Headers/CoreGraphics.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/AppKit.framework/Headers/AppKit.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Headers/XCTest.apinotes"
+- "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/CoreText.framework/Headers/CoreText.apinotes"
+interface-hash: "43c9b2517dc159ea6782d49b7b16af51"

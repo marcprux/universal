@@ -1,0 +1,6 @@
+version: "Apple Swift version 4.0.3 (swiftlang-900.0.74.1 clang-900.0.39.2)"
+options: "32bbe335f536c8badd65d3704575ec89"
+build_time: [1515937546, 873524000]
+inputs:
+  "/opt/src/glimpse/GIO/BricBrac/Tests/BricBracTests/AutoBricBrac.swift": [1496710836, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Tests/BricBracTests/BricBracTests.swift": [1515936895, 0]

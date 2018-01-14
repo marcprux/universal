@@ -1,0 +1,17 @@
+{
+  "": {
+    "swift-dependencies": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/master.swiftdeps"
+  },
+  "/opt/src/glimpse/GIO/BricBrac/Tests/BricBracTests/AutoBricBrac.swift": {
+    "dependencies": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/AutoBricBrac.d",
+    "object": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/AutoBricBrac.swift.o",
+    "swiftmodule": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/AutoBricBrac~partial.swiftmodule",
+    "swift-dependencies": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/AutoBricBrac.swiftdeps"
+  },
+  "/opt/src/glimpse/GIO/BricBrac/Tests/BricBracTests/BricBracTests.swift": {
+    "dependencies": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/BricBracTests.d",
+    "object": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/BricBracTests.swift.o",
+    "swiftmodule": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/BricBracTests~partial.swiftmodule",
+    "swift-dependencies": "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/BricBracTests.swiftdeps"
+  }
+}

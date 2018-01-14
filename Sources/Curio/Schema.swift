@@ -91,7 +91,7 @@ public struct Schema : BricBrac {
     }
 
     public func bric() -> Bric {
-        return Bric(object: Array(_additionalProperties) + [
+        return Bric(object: Array<(key: String, value: Bric)>(_additionalProperties) + ([
             (Keys.ref.rawValue, ref.bric()) as (String, Bric),
             (Keys.type.rawValue, type.bric()) as (String, Bric),
             (Keys.id.rawValue, id.bric()) as (String, Bric),
@@ -126,7 +126,7 @@ public struct Schema : BricBrac {
             (Keys.anyOf.rawValue, anyOf.bric()) as (String, Bric),
             (Keys.oneOf.rawValue, oneOf.bric()) as (String, Bric),
             (Keys.not.rawValue, not.bric()) as (String, Bric)
-            ]
+            ] as [(key: String, value: Bric)])
         )
     }
 

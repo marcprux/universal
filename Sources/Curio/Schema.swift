@@ -6,6 +6,8 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
+import BricBrac
+
 public extension Schema {
     public init(type: SimpleTypes?) {
         var schema = Schema()

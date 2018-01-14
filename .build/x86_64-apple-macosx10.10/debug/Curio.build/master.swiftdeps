@@ -1,8 +1,8 @@
 version: "Apple Swift version 4.0.3 (swiftlang-900.0.74.1 clang-900.0.39.2)"
 options: "d102314a930739707c57e0a1a7776581"
-build_time: [1515938101, 623210000]
+build_time: [1515953586, 749859000]
 inputs:
-  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio+Cocoa.swift": !dirty [1515695016, 0]
-  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio.swift": !dirty [1515706940, 0]
-  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Schema.swift": !dirty [1515935175, 0]
-  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/SwiftCode.swift": !dirty [1515695016, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio+Cocoa.swift": [1515953585, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio.swift": [1515953570, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Schema.swift": [1515953552, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/Curio/SwiftCode.swift": [1515695016, 0]

@@ -32,6 +32,21 @@ depends-member:
 - !private ["s23BidirectionalCollectionP", "init"]
 - !private ["s23BidirectionalCollectionP", "write"]
 - !private ["Sb", "_getBuiltinLogicValue"]
+- !private ["8BricBrac0B5LayerP", "append"]
+- !private ["8BricBrac8BracableP", "Encoding"]
+- !private ["8BricBrac8BracableP", "_getBuiltinLogicValue"]
+- !private ["8BricBrac8BracableP", "init"]
+- !private ["8BricBrac8BracableP", "write"]
+- !private ["8BricBrac9BreqLayerP", "append"]
+- !private ["8BricBrac8BreqableP", "Encoding"]
+- !private ["8BricBrac8BreqableP", "_getBuiltinLogicValue"]
+- !private ["8BricBrac8BreqableP", "init"]
+- !private ["8BricBrac8BreqableP", "write"]
+- !private ["8BricBrac0A5LayerP", "append"]
+- !private ["8BricBrac8BricableP", "Encoding"]
+- !private ["8BricBrac8BricableP", "_getBuiltinLogicValue"]
+- !private ["8BricBrac8BricableP", "init"]
+- !private ["8BricBrac8BricableP", "write"]
 - !private ["s7CVarArgP", "Encoding"]
 - !private ["s7CVarArgP", "append"]
 - !private ["s7CVarArgP", "appendingPathComponent"]
@@ -212,8 +227,11 @@ depends-member:
 - !private ["s26RangeReplaceableCollectionP", "append"]
 - !private ["s26RangeReplaceableCollectionP", "init"]
 - !private ["s26RangeReplaceableCollectionP", "write"]
+- !private ["s16RawRepresentableP", "Encoding"]
+- !private ["s16RawRepresentableP", "init"]
 - !private ["s16RawRepresentableP", "rawValue"]
 - !private ["s16RawRepresentableP", "utf8"]
+- !private ["s16RawRepresentableP", "write"]
 - !private ["10Foundation20ReferenceConvertibleP", "init"]
 - !private ["s8SequenceP", "Encoding"]
 - !private ["s8SequenceP", "append"]
@@ -291,6 +309,12 @@ depends-nominal:
 - !private "Sa"
 - !private "s23BidirectionalCollectionP"
 - !private "Sb"
+- !private "8BricBrac0B5LayerP"
+- !private "8BricBrac8BracableP"
+- !private "8BricBrac9BreqLayerP"
+- !private "8BricBrac8BreqableP"
+- !private "8BricBrac0A5LayerP"
+- !private "8BricBrac8BricableP"
 - !private "s7CVarArgP"
 - !private "5Curio18CodeConformantTypeP"
 - !private "5Curio13CodeEmittableP"
@@ -365,6 +389,7 @@ depends-dynamic-lookup:
 depends-external:
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.apinotesc"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBrac.swiftmodule"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/simd.swiftmodule"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"

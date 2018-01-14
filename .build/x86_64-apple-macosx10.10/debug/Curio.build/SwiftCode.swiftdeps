@@ -199,6 +199,92 @@ depends-member:
 - !private ["s23BidirectionalCollectionP", "value"]
 - !private ["s13BinaryIntegerP", "hashValue"]
 - !private ["Sb", "_getBuiltinLogicValue"]
+- !private ["8BricBrac0B5LayerP", "anon"]
+- !private ["8BricBrac0B5LayerP", "contains"]
+- !private ["8BricBrac0B5LayerP", "count"]
+- !private ["8BricBrac0B5LayerP", "directReferences"]
+- !private ["8BricBrac0B5LayerP", "enumerated"]
+- !private ["8BricBrac0B5LayerP", "filter"]
+- !private ["8BricBrac0B5LayerP", "first"]
+- !private ["8BricBrac0B5LayerP", "flatMap"]
+- ["8BricBrac0B5LayerP", "init"]
+- !private ["8BricBrac0B5LayerP", "insert"]
+- !private ["8BricBrac0B5LayerP", "isEmpty"]
+- !private ["8BricBrac0B5LayerP", "joined"]
+- !private ["8BricBrac0B5LayerP", "last"]
+- !private ["8BricBrac0B5LayerP", "map"]
+- !private ["8BricBrac0B5LayerP", "subscript"]
+- !private ["8BricBrac0B5LayerP", "value"]
+- !private ["8BricBrac8BracableP", "String"]
+- !private ["8BricBrac8BracableP", "_getBuiltinLogicValue"]
+- !private ["8BricBrac8BracableP", "afterLast"]
+- !private ["8BricBrac8BracableP", "append"]
+- !private ["8BricBrac8BracableP", "directReferences"]
+- !private ["8BricBrac8BracableP", "hasPrefix"]
+- !private ["8BricBrac8BracableP", "hashValue"]
+- ["8BricBrac8BracableP", "init"]
+- !private ["8BricBrac8BracableP", "isEmpty"]
+- !private ["8BricBrac8BracableP", "reservedArgs"]
+- !private ["8BricBrac8BracableP", "reservedWords"]
+- !private ["8BricBrac8BracableP", "split"]
+- !private ["8BricBrac25BracableNumberConvertibleP", "hashValue"]
+- !private ["8BricBrac9BreqLayerP", "anon"]
+- !private ["8BricBrac9BreqLayerP", "contains"]
+- !private ["8BricBrac9BreqLayerP", "count"]
+- !private ["8BricBrac9BreqLayerP", "directReferences"]
+- !private ["8BricBrac9BreqLayerP", "enumerated"]
+- !private ["8BricBrac9BreqLayerP", "filter"]
+- !private ["8BricBrac9BreqLayerP", "first"]
+- !private ["8BricBrac9BreqLayerP", "flatMap"]
+- ["8BricBrac9BreqLayerP", "init"]
+- !private ["8BricBrac9BreqLayerP", "insert"]
+- !private ["8BricBrac9BreqLayerP", "isEmpty"]
+- !private ["8BricBrac9BreqLayerP", "joined"]
+- !private ["8BricBrac9BreqLayerP", "last"]
+- !private ["8BricBrac9BreqLayerP", "map"]
+- !private ["8BricBrac9BreqLayerP", "subscript"]
+- !private ["8BricBrac9BreqLayerP", "value"]
+- !private ["8BricBrac8BreqableP", "String"]
+- !private ["8BricBrac8BreqableP", "_getBuiltinLogicValue"]
+- !private ["8BricBrac8BreqableP", "afterLast"]
+- !private ["8BricBrac8BreqableP", "append"]
+- !private ["8BricBrac8BreqableP", "directReferences"]
+- !private ["8BricBrac8BreqableP", "hasPrefix"]
+- !private ["8BricBrac8BreqableP", "hashValue"]
+- ["8BricBrac8BreqableP", "init"]
+- !private ["8BricBrac8BreqableP", "isEmpty"]
+- !private ["8BricBrac8BreqableP", "reservedArgs"]
+- !private ["8BricBrac8BreqableP", "reservedWords"]
+- !private ["8BricBrac8BreqableP", "split"]
+- !private ["8BricBrac0A5LayerP", "anon"]
+- !private ["8BricBrac0A5LayerP", "contains"]
+- !private ["8BricBrac0A5LayerP", "count"]
+- !private ["8BricBrac0A5LayerP", "directReferences"]
+- !private ["8BricBrac0A5LayerP", "enumerated"]
+- !private ["8BricBrac0A5LayerP", "filter"]
+- !private ["8BricBrac0A5LayerP", "first"]
+- !private ["8BricBrac0A5LayerP", "flatMap"]
+- ["8BricBrac0A5LayerP", "init"]
+- !private ["8BricBrac0A5LayerP", "insert"]
+- !private ["8BricBrac0A5LayerP", "isEmpty"]
+- !private ["8BricBrac0A5LayerP", "joined"]
+- !private ["8BricBrac0A5LayerP", "last"]
+- !private ["8BricBrac0A5LayerP", "map"]
+- !private ["8BricBrac0A5LayerP", "subscript"]
+- !private ["8BricBrac0A5LayerP", "value"]
+- !private ["8BricBrac8BricableP", "String"]
+- !private ["8BricBrac8BricableP", "_getBuiltinLogicValue"]
+- !private ["8BricBrac8BricableP", "afterLast"]
+- !private ["8BricBrac8BricableP", "append"]
+- !private ["8BricBrac8BricableP", "directReferences"]
+- !private ["8BricBrac8BricableP", "hasPrefix"]
+- !private ["8BricBrac8BricableP", "hashValue"]
+- ["8BricBrac8BricableP", "init"]
+- !private ["8BricBrac8BricableP", "isEmpty"]
+- !private ["8BricBrac8BricableP", "reservedArgs"]
+- !private ["8BricBrac8BricableP", "reservedWords"]
+- !private ["8BricBrac8BricableP", "split"]
+- !private ["8BricBrac25BricableDoubleConvertibleP", "hashValue"]
 - !private ["s7CVarArgP", "String"]
 - !private ["s7CVarArgP", "afterLast"]
 - !private ["s7CVarArgP", "append"]
@@ -1197,9 +1283,18 @@ depends-member:
 - !private ["s26RangeReplaceableCollectionP", "subscript"]
 - !private ["s26RangeReplaceableCollectionP", "value"]
 - ["s16RawRepresentableP", "RawValue"]
+- !private ["s16RawRepresentableP", "String"]
+- !private ["s16RawRepresentableP", "afterLast"]
+- !private ["s16RawRepresentableP", "append"]
+- !private ["s16RawRepresentableP", "directReferences"]
+- !private ["s16RawRepresentableP", "hasPrefix"]
 - ["s16RawRepresentableP", "hashValue"]
 - ["s16RawRepresentableP", "init"]
+- !private ["s16RawRepresentableP", "isEmpty"]
 - ["s16RawRepresentableP", "rawValue"]
+- !private ["s16RawRepresentableP", "reservedArgs"]
+- !private ["s16RawRepresentableP", "reservedWords"]
+- !private ["s16RawRepresentableP", "split"]
 - ["s16RawRepresentableP", ""]
 - !private ["s8SequenceP", "String"]
 - !private ["s8SequenceP", "afterLast"]
@@ -1276,6 +1371,10 @@ depends-member:
 - !private ["s20TextOutputStreamableP", "reservedArgs"]
 - !private ["s20TextOutputStreamableP", "reservedWords"]
 - !private ["s20TextOutputStreamableP", "split"]
+- !private ["8BricBrac9WrappableP", "directReferences"]
+- !private ["8BricBrac9WrappableP", "flatMap"]
+- !private ["8BricBrac11WrapperTypeP", "directReferences"]
+- !private ["8BricBrac11WrapperTypeP", "flatMap"]
 - !private ["s14_ArrayProtocolP", "anon"]
 - !private ["s14_ArrayProtocolP", "count"]
 - !private ["s14_ArrayProtocolP", "enumerated"]
@@ -1526,6 +1625,14 @@ depends-nominal:
 - "s23BidirectionalCollectionP"
 - !private "s13BinaryIntegerP"
 - !private "Sb"
+- "8BricBrac0B5LayerP"
+- "8BricBrac8BracableP"
+- !private "8BricBrac25BracableNumberConvertibleP"
+- "8BricBrac9BreqLayerP"
+- "8BricBrac8BreqableP"
+- "8BricBrac0A5LayerP"
+- "8BricBrac8BricableP"
+- !private "8BricBrac25BricableDoubleConvertibleP"
 - "s7CVarArgP"
 - "5Curio8CodeEnumV4CaseV"
 - !private "s9CharacterV"
@@ -1605,6 +1712,8 @@ depends-nominal:
 - "s14StringProtocolP"
 - "s16TextOutputStreamP"
 - "s20TextOutputStreamableP"
+- !private "8BricBrac9WrappableP"
+- !private "8BricBrac11WrapperTypeP"
 - !private "s14_ArrayProtocolP"
 - "s23_BidirectionalIndexableP"
 - !private "s18_BitwiseOperationsP"
@@ -1631,6 +1740,7 @@ depends-dynamic-lookup:
 depends-external:
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.apinotesc"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/ObjectiveC.swiftmodule"
+- "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBrac.swiftmodule"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Dispatch.swiftmodule"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Darwin.swiftmodule"
 - "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/x86_64/Foundation.swiftmodule"

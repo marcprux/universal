@@ -620,7 +620,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.Curio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = Curio/Curio.h;
+				SWIFT_OBJC_BRIDGING_HEADER = Sources/Curio/Curio.h;
 			};
 			name = Debug;
 		};
@@ -640,7 +640,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.Curio;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = Curio/Curio.h;
+				SWIFT_OBJC_BRIDGING_HEADER = Sources/Curio/Curio.h;
 			};
 			name = Release;
 		};

@@ -6,6 +6,7 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
+import BricBrac
 import Foundation
 
 public extension Curio {

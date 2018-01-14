@@ -14,8 +14,8 @@ matrix:
       osx_image: xcode9
       script:
         - set -o pipefail
-        - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme BricBrac
-        - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme Curio
+        - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme BricBrac | xcpretty -c
+        - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme Curio | xcpretty -c
         - xcodebuild test -project BricBrac.xcodepro -scheme BricBrac -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone X,OS=11.0" | xcpretty -c
         - swift test
     - os: linux

@@ -2,10 +2,11 @@ client:
   name: swift-build
 tools: {}
 targets:
-  "main": ["<BricBrac.module>"]
-  "test": ["<BricBracTests.module>","<BricBrac.module>","<Bric-à-bracPackageTests.test>"]
-  "BricBracTests.module": ["<BricBracTests.module>"]
+  "main": ["<BricBrac.module>","<Curio.module>"]
+  "test": ["<BricBrac.module>","<Curio.module>","<BricBracTests.module>","<Bric-à-bracPackageTests.test>"]
   "BricBrac.module": ["<BricBrac.module>"]
+  "Curio.module": ["<Curio.module>"]
+  "BricBracTests.module": ["<BricBracTests.module>"]
   "Bric-à-bracPackageTests.test": ["<Bric-à-bracPackageTests.test>"]
 default: "main"
 commands: 
@@ -23,6 +24,11 @@ commands:
     tool: phony
     inputs: ["/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.swiftmodule"]
     outputs: ["<BricBracTests.module>"]
+
+  "<C.Curio.module>":
+    tool: phony
+    inputs: ["/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.swiftmodule"]
+    outputs: ["<Curio.module>"]
 
   "C.Bric-à-bracPackageTests.test":
     tool: shell
@@ -59,6 +65,22 @@ commands:
     objects: ["/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/AutoBricBrac.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBracTests.build/BricBracTests.swift.o"]
     other-args: ["-swift-version","4","-target","x86_64-apple-macosx10.10","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Onone","-g","-enable-testing","-j8","-DSWIFT_PACKAGE","-module-cache-path","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/ModuleCache"]
     sources: ["/opt/src/glimpse/GIO/BricBrac/Tests/BricBracTests/AutoBricBrac.swift","/opt/src/glimpse/GIO/BricBrac/Tests/BricBracTests/BricBracTests.swift"]
+    is-library: true
+    enable-whole-module-optimization: false
+    num-threads: "8"
+
+  "C.Curio.module":
+    tool: swift-compiler
+    executable: "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    module-name: "Curio"
+    module-output-path: "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.swiftmodule"
+    inputs: ["/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/BricBrac.swiftmodule","/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio+Cocoa.swift","/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio.swift","/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Schema.swift","/opt/src/glimpse/GIO/BricBrac/Sources/Curio/SwiftCode.swift"]
+    outputs: ["/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/Curio+Cocoa.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/Curio.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/Schema.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/SwiftCode.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.swiftmodule"]
+    import-paths: ["/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug"]
+    temps-path: "/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build"
+    objects: ["/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/Curio+Cocoa.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/Curio.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/Schema.swift.o","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/Curio.build/SwiftCode.swift.o"]
+    other-args: ["-swift-version","4","-target","x86_64-apple-macosx10.10","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Onone","-g","-enable-testing","-j8","-DSWIFT_PACKAGE","-module-cache-path","/opt/src/glimpse/GIO/BricBrac/.build/x86_64-apple-macosx10.10/debug/ModuleCache"]
+    sources: ["/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio+Cocoa.swift","/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Curio.swift","/opt/src/glimpse/GIO/BricBrac/Sources/Curio/Schema.swift","/opt/src/glimpse/GIO/BricBrac/Sources/Curio/SwiftCode.swift"]
     is-library: true
     enable-whole-module-optimization: false
     num-threads: "8"

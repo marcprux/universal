@@ -6,6 +6,7 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
+import BricBrac
 
 /// A JSON Schema processor that emits Swift code using the Bric-a-Brac framework for marshalling and unmarshalling.
 ///
@@ -764,7 +765,7 @@ public struct Curio {
                     let valuesTuple = "(" + elements.map({ $0.name ?? "_" }).joined(separator: ", ") + ")"
                     spropi.body = [
                         "get { return " + valuesTuple + " }",
-                        "set($) { " + valuesTuple + " = $ }",
+                        "set(value) { " + valuesTuple + " = value }",
                     ]
                     code.props.append(spropi)
                 }

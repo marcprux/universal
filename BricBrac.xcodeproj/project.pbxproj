@@ -201,7 +201,8 @@
 				7E28A5C01B5AD5EE00A5F27F /* Info.plist */,
 				7E348EE21B9F3DD700945F86 /* Curio.h */,
 			);
-			path = Curio;
+			name = Curio;
+			path = Sources/Curio;
 			sourceTree = "<group>";
 		};
 		7E28A5C91B5AD5EE00A5F27F /* CurioTests */ = {
@@ -213,7 +214,8 @@
 				7E75A8F41BA46894002BA7F8 /* schemas */,
 				7E75A9001BA46F06002BA7F8 /* Generated Schemas */,
 			);
-			path = CurioTests;
+			name = CurioTests;
+			path = Tests/CurioTests;
 			sourceTree = "<group>";
 		};
 		7E75A8F41BA46894002BA7F8 /* schemas */ = {
@@ -279,7 +281,8 @@
 				7E8930141BEA570A00F245C5 /* Structures.swift */,
 				7E7F9B211B3615850058706A /* Info.plist */,
 			);
-			path = BricBrac;
+			name = BricBrac;
+			path = Sources/BricBrac;
 			sourceTree = "<group>";
 		};
 		7E7F9B2A1B3615860058706A /* BricBracTests */ = {
@@ -290,7 +293,8 @@
 				7E7F9B3E1B3615B00058706A /* test */,
 				7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */,
 			);
-			path = BricBracTests;
+			name = BricBracTests;
+			path = Tests/BricBracTests;
 			sourceTree = "<group>";
 		};
 		7E8E745B1B9F31E8004EA61F /* CurioTool */ = {
@@ -298,7 +302,8 @@
 			children = (
 				7E8E745C1B9F31E8004EA61F /* main.swift */,
 			);
-			path = CurioTool;
+			name = CurioTool;
+			path = Sources/CurioTool;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -608,7 +613,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = Curio/Info.plist;
+				INFOPLIST_FILE = Sources/Curio/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
@@ -628,7 +633,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = Curio/Info.plist;
+				INFOPLIST_FILE = Sources/Curio/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
@@ -643,7 +648,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = CurioTests/Info.plist;
+				INFOPLIST_FILE = Tests/CurioTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.CurioTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -654,7 +659,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = CurioTests/Info.plist;
+				INFOPLIST_FILE = Tests/CurioTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.CurioTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -775,7 +780,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = BricBrac/Info.plist;
+				INFOPLIST_FILE = Sources/BricBrac/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.BricBrac;
@@ -794,7 +799,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = BricBrac/Info.plist;
+				INFOPLIST_FILE = Sources/BricBrac/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.BricBrac;
@@ -809,7 +814,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BricBracTests/Info.plist;
+				INFOPLIST_FILE = Tests/BricBracTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.BricBracTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -821,7 +826,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BricBracTests/Info.plist;
+				INFOPLIST_FILE = Tests/BricBracTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.BricBracTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -1,0 +1,13 @@
+version: "Apple Swift version 4.0.3 (swiftlang-900.0.74.1 clang-900.0.39.2)"
+options: "e7221045cd9c6bf402a2e3e17f738608"
+build_time: [1515937425, 32440000]
+inputs:
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/Brac.swift": [1515695016, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/Breq.swift": [1496710836, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/Bric.swift": [1515695016, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/BricBrac.swift": [1515695016, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/BricIO+Foundation.swift": [1493555598, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/BricIO.swift": [1515695016, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/BricPointer.swift": [1515695016, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/JSONParser.swift": [1515695016, 0]
+  "/opt/src/glimpse/GIO/BricBrac/Sources/BricBrac/Structures.swift": [1515695016, 0]

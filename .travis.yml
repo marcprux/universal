@@ -3,9 +3,30 @@ language: Objective-C
 xcode_project: BricBrac.xcodeproj
 xcode_scheme: BricBrac
 script:
-  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme BricBrac
-  - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme Curio
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
+matrix:
+  include:
+    - os: osx
+      language: objective-c
+      osx_image: xcode9
+      script:
+        - set -o pipefail
+        - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme BricBrac
+        - xcodebuild test -project BricBrac.xcodeproj -sdk macosx10.13 -scheme Curio
+        - xcodebuild test -project BricBrac.xcodepro -scheme BricBrac -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone X,OS=11.0" | xcpretty -c
+        - swift test
+    - os: linux
+      language: generic
+      sudo: required
+      dist: trusty
+      before_install:
+      - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+      - wget https://swift.org/builds/swift-4.0-release/ubuntu1404/swift-4.0-RELEASE/swift-4.0-RELEASE-ubuntu14.04.tar.gz
+      - tar xzf swift-4.0-RELEASE-ubuntu14.04.tar.gz
+      - export PATH=${PWD}/swift-4.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+      script:
+        - swift test
 

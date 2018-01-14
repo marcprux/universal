@@ -1,0 +1,18 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Stuff",
+    "type": "array",
+    "items": {
+      "$ref": "#/definitions/thing"
+    },
+    "definitions": {
+      "thing": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+}

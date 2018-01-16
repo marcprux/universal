@@ -1,6 +1,0 @@
-version: "Apple Swift version 4.0.3 (swiftlang-900.0.74.1 clang-900.0.39.2)"
-options: "71a94cd43342668c1727529c264543b3"
-build_time: [1515953596, 994613000]
-inputs:
-  "/opt/src/glimpse/GIO/BricBrac/Tests/CurioTests/CurioTests.swift": !dirty [1474660587, 0]
-  "/opt/src/glimpse/GIO/BricBrac/Tests/CurioTests/SampleModel.swift": [1515953350, 0]

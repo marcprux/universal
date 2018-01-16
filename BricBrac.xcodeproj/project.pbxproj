@@ -15,10 +15,7 @@
 		7E28A5D71B5AD66A00A5F27F /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		7E28A5D81B5AD66A00A5F27F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
 		7E28A5DD1B5ADD3500A5F27F /* SampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */; };
-		7E348EE11B9F3CFE00945F86 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
 		7E34B16A1C67B68300E50A71 /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
-		7E34B16B1C67E4B400E50A71 /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
-		7E5DA2CF1B9F401A0013FCB9 /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		7E75A8FA1BA46894002BA7F8 /* Food.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F51BA46894002BA7F8 /* Food.jsonschema */; };
 		7E75A8FB1BA46894002BA7F8 /* Person.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F61BA46894002BA7F8 /* Person.jsonschema */; };
 		7E75A8FC1BA46894002BA7F8 /* Products.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F71BA46894002BA7F8 /* Products.jsonschema */; };
@@ -31,15 +28,7 @@
 		7E7F9B3D1B3615AB0058706A /* BricBracTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B3C1B3615AB0058706A /* BricBracTests.swift */; };
 		7E7F9B3F1B3615B00058706A /* test in Resources */ = {isa = PBXBuildFile; fileRef = 7E7F9B3E1B3615B00058706A /* test */; };
 		7E8930151BEA570A00F245C5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8930141BEA570A00F245C5 /* Structures.swift */; };
-		7E8930161BEBE7A000F245C5 /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8930141BEA570A00F245C5 /* Structures.swift */; };
 		7E8E745D1B9F31E8004EA61F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8E745C1B9F31E8004EA61F /* main.swift */; };
-		7E8E74671B9F35A2004EA61F /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
-		7E8E74701B9F3643004EA61F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
-		7E8E74711B9F364B004EA61F /* Brac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B371B36159A0058706A /* Brac.swift */; };
-		7E8E74721B9F3651004EA61F /* BricPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */; };
-		7E8E74731B9F36AC004EA61F /* BricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */; };
-		7E8E74741B9F36CD004EA61F /* BricIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B381B36159A0058706A /* BricIO.swift */; };
-		7E8E74751B9F36DF004EA61F /* JSONParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E10201F1B858F6000171AFE /* JSONParser.swift */; };
 		7EB235BE1BA7000500377FBB /* Food.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BA1BA7000500377FBB /* Food.swift */; };
 		7EB235BF1BA7000500377FBB /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BB1BA7000500377FBB /* Person.swift */; };
 		7EB235C01BA7000500377FBB /* Products.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB235BC1BA7000500377FBB /* Products.swift */; };
@@ -109,6 +98,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		7E10201F1B858F6000171AFE /* JSONParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONParser.swift; sourceTree = "<group>"; };
 		7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricBrac.swift; sourceTree = "<group>"; };
 		7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Curio.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -246,6 +236,7 @@
 			isa = PBXGroup;
 			children = (
 				7E5DA2D11B9F5F1E0013FCB9 /* README.md */,
+				494DEA80200E94C800D81AAF /* Package.swift */,
 				7E7F9B1E1B3615850058706A /* BricBrac */,
 				7E7F9B2A1B3615860058706A /* BricBracTests */,
 				7E28A5BD1B5AD5EE00A5F27F /* Curio */,
@@ -563,17 +554,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7E8E74671B9F35A2004EA61F /* Bric.swift in Sources */,
-				7E8E74711B9F364B004EA61F /* Brac.swift in Sources */,
-				7E34B16B1C67E4B400E50A71 /* Breq.swift in Sources */,
-				7E8E74731B9F36AC004EA61F /* BricBrac.swift in Sources */,
-				7E8E74721B9F3651004EA61F /* BricPointer.swift in Sources */,
-				7E8E74751B9F36DF004EA61F /* JSONParser.swift in Sources */,
-				7E8E74741B9F36CD004EA61F /* BricIO.swift in Sources */,
-				7E8E74701B9F3643004EA61F /* SwiftCode.swift in Sources */,
-				7E8930161BEBE7A000F245C5 /* Structures.swift in Sources */,
-				7E348EE11B9F3CFE00945F86 /* Schema.swift in Sources */,
-				7E5DA2CF1B9F401A0013FCB9 /* Curio.swift in Sources */,
 				7E8E745D1B9F31E8004EA61F /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -9,6 +9,49 @@
 import Foundation
 import CoreFoundation
 
+
+public extension Encodable {
+    /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric
+    public func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
+        let encoder = JSONEncoder()
+
+        if let outputFormatting = outputFormatting { encoder.outputFormatting = outputFormatting }
+        if let dateEncodingStrategy = dateEncodingStrategy { encoder.dateEncodingStrategy = dateEncodingStrategy }
+        if let dataEncodingStrategy = dataEncodingStrategy { encoder.dataEncodingStrategy = dataEncodingStrategy }
+        if let nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy { encoder.nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy }
+        if let userInfo = userInfo { encoder.userInfo = userInfo }
+        
+        let data = try encoder.encode(self)
+        guard let str = String(data: data, encoding: .utf8) else { return .nul } // unlikely
+        return try Bric.parse(str)
+    }
+}
+
+public extension Bricable {
+    /// Decode this bric into a decodable instance
+    public func decode<T: Decodable>(_ type: T.Type, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> T {
+        let decoder = JSONDecoder()
+        
+        if let dateDecodingStrategy = dateDecodingStrategy {
+            decoder.dateDecodingStrategy = dateDecodingStrategy
+        }
+        
+        if let dataDecodingStrategy = dataDecodingStrategy {
+            decoder.dataDecodingStrategy = dataDecodingStrategy
+        }
+        
+        if let nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy {
+            decoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
+        }
+        
+        if let userInfo = userInfo {
+            decoder.userInfo = userInfo
+        }
+        
+        return try decoder.decode(type, from: bric().stringify().data(using: .utf8) ?? Data())
+    }
+}
+
 public extension Bric {
 
     /// Validates the given JSON string and throws an error if there was a problem

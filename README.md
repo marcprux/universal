@@ -1,7 +1,7 @@
 Bric-à-brac
 =======
 
-[![Swift 2.0](https://img.shields.io/badge/Swift-2.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
+[![Swift 4.1](https://img.shields.io/badge/Swift-4.1-orange.svg?style=flat)](https://developer.apple.com/swift/)
 [![Platforms OS X | iOS](https://img.shields.io/badge/Platforms-OS%20X%20%7C%20iOS%20%7C%20Linux-lightgray.svg?style=flat)](https://developer.apple.com/swift/)
 [![Carthage Compatible](https://img.shields.io/badge/Carthage-Compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![License MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)](https://github.com/Carthage/Carthage)
@@ -9,7 +9,7 @@ Bric-à-brac
 [![Join the chat at https://gitter.im/glimpseio/BricBrac](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glimpseio/BricBrac?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![codecov.io](http://codecov.io/github/glimpseio/BricBrac/coverage.svg?branch=master)](http://codecov.io/github/glimpseio/BricBrac?branch=master)
 
-**Bric-à-brac** is a lightweight, clean and efficient JSON toolkit for **Swift 2**.
+**Bric-à-brac** is a lightweight, clean and efficient JSON toolkit for **Swift 4.1**.
 
 ## Features
 

@@ -7,6 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		49DB613720633ABE00022D2C /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
+		49DB613820633AD100022D2C /* Curio+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */; };
+		49DB613920633AD100022D2C /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
+		49DB613A20633AD100022D2C /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
+		49DB613B20633B2300022D2C /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
+		49DB613C20633B2300022D2C /* BricPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */; };
+		49DB613D20633B2300022D2C /* Brac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B371B36159A0058706A /* Brac.swift */; };
+		49DB613E20633B2300022D2C /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
+		49DB613F20633B2300022D2C /* BricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */; };
+		49DB614020633B2300022D2C /* BricIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B381B36159A0058706A /* BricIO.swift */; };
+		49DB614120633B2300022D2C /* BricIO+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */; };
+		49DB614220633B2300022D2C /* JSONParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E10201F1B858F6000171AFE /* JSONParser.swift */; };
+		49DB614320633B2300022D2C /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8930141BEA570A00F245C5 /* Structures.swift */; };
+		49DB61562063426E00022D2C /* CurioDemoModels.h in Headers */ = {isa = PBXBuildFile; fileRef = 49DB61542063426E00022D2C /* CurioDemoModels.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		49DB6165206343CF00022D2C /* schema.json in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F81BA46894002BA7F8 /* schema.json */; };
+		49DB6166206343CF00022D2C /* Food.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F51BA46894002BA7F8 /* Food.jsonschema */; };
+		49DB6167206343CF00022D2C /* Person.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F61BA46894002BA7F8 /* Person.jsonschema */; };
+		49DB6168206343CF00022D2C /* Products.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F71BA46894002BA7F8 /* Products.jsonschema */; };
+		49DB6169206343CF00022D2C /* Stuff.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F91BA46894002BA7F8 /* Stuff.jsonschema */; };
+		49DB616A206344FE00022D2C /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
+		49DB616B2063451A00022D2C /* CurioDemoModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DB61522063426D00022D2C /* CurioDemoModels.framework */; };
+		49DB616D206345EB00022D2C /* DerivedSources in Resources */ = {isa = PBXBuildFile; fileRef = 49DB616C206345EA00022D2C /* DerivedSources */; };
+		49DB616E2063467600022D2C /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
 		7E1020201B858F6000171AFE /* JSONParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E10201F1B858F6000171AFE /* JSONParser.swift */; };
 		7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */; };
 		7E28A5C61B5AD5EE00A5F27F /* Curio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */; };
@@ -16,11 +39,6 @@
 		7E28A5D81B5AD66A00A5F27F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
 		7E28A5DD1B5ADD3500A5F27F /* SampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */; };
 		7E34B16A1C67B68300E50A71 /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
-		7E75A8FA1BA46894002BA7F8 /* Food.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F51BA46894002BA7F8 /* Food.jsonschema */; };
-		7E75A8FB1BA46894002BA7F8 /* Person.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F61BA46894002BA7F8 /* Person.jsonschema */; };
-		7E75A8FC1BA46894002BA7F8 /* Products.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F71BA46894002BA7F8 /* Products.jsonschema */; };
-		7E75A8FD1BA46894002BA7F8 /* schema.json in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F81BA46894002BA7F8 /* schema.json */; };
-		7E75A8FE1BA46894002BA7F8 /* Stuff.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F91BA46894002BA7F8 /* Stuff.jsonschema */; };
 		7E7F9B271B3615860058706A /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
 		7E7F9B391B36159A0058706A /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
 		7E7F9B3A1B36159A0058706A /* Brac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B371B36159A0058706A /* Brac.swift */; };
@@ -36,21 +54,41 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-		7E75A8F21BA4653E002BA7F8 /* PBXBuildRule */ = {
+		49DB615A2063428000022D2C /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
 			filePatterns = "*.jsonschema";
 			fileType = pattern.proxy;
 			isEditable = 1;
-			name = "JSON Schema Compiler";
 			outputFiles = (
-				"$(BUILT_PRODUCTS_DIR)/$(INPUT_FILE_BASE).swift",
+				"$(DERIVED_SOURCES_DIR)/$(INPUT_FILE_BASE).swift",
 			);
-			script = "cat ${INPUT_FILE_PATH} | ${BUILT_PRODUCTS_DIR}/curio -name ${INPUT_FILE_BASE} > ${BUILT_PRODUCTS_DIR}/${INPUT_FILE_BASE}.swift";
+			script = "cat ${INPUT_FILE_PATH} | ${BUILT_PRODUCTS_DIR}/curio -name ${INPUT_FILE_BASE} > ${DERIVED_SOURCES_DIR}/${INPUT_FILE_BASE}.swift";
 		};
 /* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
+		49DB615B206342B800022D2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 49DB61512063426D00022D2C;
+			remoteInfo = CurioDemoModels;
+		};
+		49DB615D206342C100022D2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7E8E74591B9F31E8004EA61F;
+			remoteInfo = CurioTool;
+		};
+		49DB616F2063487E00022D2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7E7F9B1B1B3615850058706A;
+			remoteInfo = BricBrac;
+		};
 		7E23650C1B5B3DAF007D53AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
@@ -95,6 +133,10 @@
 
 /* Begin PBXFileReference section */
 		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		49DB61522063426D00022D2C /* CurioDemoModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CurioDemoModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		49DB61542063426E00022D2C /* CurioDemoModels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurioDemoModels.h; sourceTree = "<group>"; };
+		49DB61552063426E00022D2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		49DB616C206345EA00022D2C /* DerivedSources */ = {isa = PBXFileReference; lastKnownFileType = text; name = DerivedSources; path = ../../Intermediates.noindex/BricBrac.build/Debug/CurioDemoModels.build/DerivedSources; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E10201F1B858F6000171AFE /* JSONParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONParser.swift; sourceTree = "<group>"; };
 		7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricBrac.swift; sourceTree = "<group>"; };
 		7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Curio.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -133,6 +175,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		49DB614E2063426D00022D2C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49DB616A206344FE00022D2C /* BricBrac.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7E28A5B81B5AD5EE00A5F27F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -144,6 +194,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49DB616E2063467600022D2C /* BricBrac.framework in Frameworks */,
+				49DB616B2063451A00022D2C /* CurioDemoModels.framework in Frameworks */,
 				7E28A5C61B5AD5EE00A5F27F /* Curio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -173,6 +225,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		49DB6128206338D900022D2C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		49DB61532063426E00022D2C /* CurioDemoModels */ = {
+			isa = PBXGroup;
+			children = (
+				49DB61542063426E00022D2C /* CurioDemoModels.h */,
+				49DB616C206345EA00022D2C /* DerivedSources */,
+				7E75A8F41BA46894002BA7F8 /* schemas */,
+				49DB61552063426E00022D2C /* Info.plist */,
+			);
+			path = CurioDemoModels;
+			sourceTree = "<group>";
+		};
 		7E28A5BD1B5AD5EE00A5F27F /* Curio */ = {
 			isa = PBXGroup;
 			children = (
@@ -193,7 +263,6 @@
 				7E28A5CA1B5AD5EE00A5F27F /* CurioTests.swift */,
 				7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */,
 				7E28A5CC1B5AD5EE00A5F27F /* Info.plist */,
-				7E75A8F41BA46894002BA7F8 /* schemas */,
 			);
 			name = CurioTests;
 			path = Tests/CurioTests;
@@ -221,7 +290,9 @@
 				7E28A5BD1B5AD5EE00A5F27F /* Curio */,
 				7E8E745B1B9F31E8004EA61F /* CurioTool */,
 				7E28A5C91B5AD5EE00A5F27F /* CurioTests */,
+				49DB61532063426E00022D2C /* CurioDemoModels */,
 				7E7F9B1D1B3615850058706A /* Products */,
+				49DB6128206338D900022D2C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -233,6 +304,7 @@
 				7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */,
 				7E28A5C51B5AD5EE00A5F27F /* CurioTests.xctest */,
 				7E8E745A1B9F31E8004EA61F /* curio */,
+				49DB61522063426D00022D2C /* CurioDemoModels.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -279,6 +351,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		49DB614F2063426D00022D2C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49DB61562063426E00022D2C /* CurioDemoModels.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7E28A5B91B5AD5EE00A5F27F /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -296,6 +376,26 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		49DB61512063426D00022D2C /* CurioDemoModels */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 49DB61572063426E00022D2C /* Build configuration list for PBXNativeTarget "CurioDemoModels" */;
+			buildPhases = (
+				49DB614D2063426D00022D2C /* Sources */,
+				49DB614E2063426D00022D2C /* Frameworks */,
+				49DB614F2063426D00022D2C /* Headers */,
+				49DB61502063426D00022D2C /* Resources */,
+			);
+			buildRules = (
+				49DB615A2063428000022D2C /* PBXBuildRule */,
+			);
+			dependencies = (
+				49DB615E206342C100022D2C /* PBXTargetDependency */,
+			);
+			name = CurioDemoModels;
+			productName = CurioDemoModels;
+			productReference = 49DB61522063426D00022D2C /* CurioDemoModels.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		7E28A5BB1B5AD5EE00A5F27F /* Curio */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7E28A5CD1B5AD5EE00A5F27F /* Build configuration list for PBXNativeTarget "Curio" */;
@@ -325,9 +425,10 @@
 				7E28A5C31B5AD5EE00A5F27F /* Resources */,
 			);
 			buildRules = (
-				7E75A8F21BA4653E002BA7F8 /* PBXBuildRule */,
 			);
 			dependencies = (
+				49DB61702063487E00022D2C /* PBXTargetDependency */,
+				49DB615C206342B800022D2C /* PBXTargetDependency */,
 				7E28A5C81B5AD5EE00A5F27F /* PBXTargetDependency */,
 			);
 			name = CurioTests;
@@ -398,6 +499,11 @@
 				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = io.glimpse;
 				TargetAttributes = {
+					49DB61512063426D00022D2C = {
+						CreatedOnToolsVersion = 9.2;
+						DevelopmentTeam = 2HFBY6N8ZN;
+						ProvisioningStyle = Automatic;
+					};
 					7E28A5BB1B5AD5EE00A5F27F = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 0800;
@@ -436,6 +542,7 @@
 				7E7F9B1B1B3615850058706A /* BricBrac */,
 				7E7F9B251B3615860058706A /* BricBracTests */,
 				7E28A5BB1B5AD5EE00A5F27F /* Curio */,
+				49DB61512063426D00022D2C /* CurioDemoModels */,
 				7E28A5C41B5AD5EE00A5F27F /* CurioTests */,
 				7E8E74591B9F31E8004EA61F /* CurioTool */,
 			);
@@ -443,6 +550,19 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		49DB61502063426D00022D2C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				49DB6169206343CF00022D2C /* Stuff.jsonschema in Resources */,
+				49DB616D206345EB00022D2C /* DerivedSources in Resources */,
+				49DB6168206343CF00022D2C /* Products.jsonschema in Resources */,
+				49DB6167206343CF00022D2C /* Person.jsonschema in Resources */,
+				49DB6166206343CF00022D2C /* Food.jsonschema in Resources */,
+				49DB6165206343CF00022D2C /* schema.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7E28A5BA1B5AD5EE00A5F27F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -454,11 +574,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7E75A8FD1BA46894002BA7F8 /* schema.json in Resources */,
-				7E75A8FE1BA46894002BA7F8 /* Stuff.jsonschema in Resources */,
-				7E75A8FC1BA46894002BA7F8 /* Products.jsonschema in Resources */,
-				7E75A8FA1BA46894002BA7F8 /* Food.jsonschema in Resources */,
-				7E75A8FB1BA46894002BA7F8 /* Person.jsonschema in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -480,6 +595,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		49DB614D2063426D00022D2C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7E28A5B71B5AD5EE00A5F27F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -529,6 +651,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49DB613B20633B2300022D2C /* Bric.swift in Sources */,
+				49DB613C20633B2300022D2C /* BricPointer.swift in Sources */,
+				49DB613D20633B2300022D2C /* Brac.swift in Sources */,
+				49DB613E20633B2300022D2C /* Breq.swift in Sources */,
+				49DB613F20633B2300022D2C /* BricBrac.swift in Sources */,
+				49DB614020633B2300022D2C /* BricIO.swift in Sources */,
+				49DB614120633B2300022D2C /* BricIO+Foundation.swift in Sources */,
+				49DB614220633B2300022D2C /* JSONParser.swift in Sources */,
+				49DB614320633B2300022D2C /* Structures.swift in Sources */,
+				49DB613820633AD100022D2C /* Curio+Cocoa.swift in Sources */,
+				49DB613920633AD100022D2C /* Schema.swift in Sources */,
+				49DB613A20633AD100022D2C /* SwiftCode.swift in Sources */,
+				49DB613720633ABE00022D2C /* Curio.swift in Sources */,
 				7E8E745D1B9F31E8004EA61F /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -536,6 +671,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		49DB615C206342B800022D2C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 49DB61512063426D00022D2C /* CurioDemoModels */;
+			targetProxy = 49DB615B206342B800022D2C /* PBXContainerItemProxy */;
+		};
+		49DB615E206342C100022D2C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7E8E74591B9F31E8004EA61F /* CurioTool */;
+			targetProxy = 49DB615D206342C100022D2C /* PBXContainerItemProxy */;
+		};
+		49DB61702063487E00022D2C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
+			targetProxy = 49DB616F2063487E00022D2C /* PBXContainerItemProxy */;
+		};
 		7E23650D1B5B3DAF007D53AB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
@@ -559,6 +709,68 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		49DB61582063426E00022D2C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 2HFBY6N8ZN;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = CurioDemoModels/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.CurioDemoModels;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		49DB61592063426E00022D2C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 2HFBY6N8ZN;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = CurioDemoModels/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				PRODUCT_BUNDLE_IDENTIFIER = io.glimpse.CurioDemoModels;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
 		7E28A5CE1B5AD5EE00A5F27F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -792,8 +1004,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
+				CLANG_MODULES_AUTOLINK = NO;
 				EXECUTABLE_NAME = curio;
+				LD_RUNPATH_SEARCH_PATHS = "";
 				PRODUCT_NAME = "${TARGET_NAME}";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Debug;
 		};
@@ -801,14 +1017,27 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
+				CLANG_MODULES_AUTOLINK = NO;
 				EXECUTABLE_NAME = curio;
+				LD_RUNPATH_SEARCH_PATHS = "";
 				PRODUCT_NAME = "${TARGET_NAME}";
+				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		49DB61572063426E00022D2C /* Build configuration list for PBXNativeTarget "CurioDemoModels" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				49DB61582063426E00022D2C /* Debug */,
+				49DB61592063426E00022D2C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7E28A5CD1B5AD5EE00A5F27F /* Build configuration list for PBXNativeTarget "Curio" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

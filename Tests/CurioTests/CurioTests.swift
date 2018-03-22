@@ -8,7 +8,8 @@
 
 import XCTest
 import BricBrac
-@testable import Curio
+import Curio
+import CurioDemoModels
 
 class CurioTests: XCTestCase {
     
@@ -185,19 +186,19 @@ class CurioTests: XCTestCase {
         }
     }
 
-    func testDerivedSchemas() {
-        do {
-            // Food-schema.json
-            let x = Food(title: "gruel", calories: 120, type: .carbohydrate)
-            XCTAssertEqual(x.bric(), ["title": "gruel", "type": "carbohydrate", "calories": 120])
-        }
-
-        do {
-            // Products-schema.json
-            let x = ProductsItem(id: 10, name: "Stuff", price: 12.34, tags: ["thingy", "stuffy"], dimensions: ProductsItem.Dimensions(length: 11, width: 12, height: 13), warehouseLocation: nil)
-            XCTAssertEqual(x.bric(), ["price":12.34,"dimensions":["length":11,"width":12,"height":13],"tags":["thingy","stuffy"],"id":10,"name":"Stuff"])
-        }
-    }
+//    func testDerivedSchemas() {
+//        do {
+//            // Food-schema.json
+//            let x = Food(title: "gruel", calories: 120, type: .carbohydrate)
+//            XCTAssertEqual(x.bric(), ["title": "gruel", "type": "carbohydrate", "calories": 120])
+//        }
+//
+//        do {
+//            // Products-schema.json
+//            let x = ProductsItem(id: 10, name: "Stuff", price: 12.34, tags: ["thingy", "stuffy"], dimensions: ProductsItem.Dimensions(length: 11, width: 12, height: 13), warehouseLocation: nil)
+//            XCTAssertEqual(x.bric(), ["price":12.34,"dimensions":["length":11,"width":12,"height":13],"tags":["thingy","stuffy"],"id":10,"name":"Stuff"])
+//        }
+//    }
 
 //    func testSchemaFiles() {
 //        let fm = NSFileManager.defaultManager()

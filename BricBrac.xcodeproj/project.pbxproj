@@ -1009,6 +1009,7 @@
 				EXECUTABLE_NAME = curio;
 				LD_RUNPATH_SEARCH_PATHS = "";
 				PRODUCT_NAME = "${TARGET_NAME}";
+				SKIP_INSTALL = YES;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Debug;
@@ -1022,6 +1023,7 @@
 				EXECUTABLE_NAME = curio;
 				LD_RUNPATH_SEARCH_PATHS = "";
 				PRODUCT_NAME = "${TARGET_NAME}";
+				SKIP_INSTALL = YES;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 			};
 			name = Release;

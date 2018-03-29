@@ -699,7 +699,7 @@ public enum BracError: Error, CustomDebugStringConvertible {
             return "Too many matches\(at(path: path)): «\(_typeName(type))»"
         case .multipleErrors(let errs, let path):
             let nberrs: [String] = errs.filter({ !($0 is BracError) }).map({ String(describing: $0) })
-            let brerrs: [String] = errs.map({ $0 as? BracError }).flatMap({ $0?.prepend(path: path) }).map({ $0.describeErrors(space: space == 0 ? 0 : space + 2) })
+            let brerrs: [String] = errs.map({ $0 as? BracError }).compactMap({ $0?.prepend(path: path) }).map({ $0.describeErrors(space: space == 0 ? 0 : space + 2) })
 
             return "\(errs.count) errors\(at(path: path)):" + ([""] + nberrs + brerrs).joined(separator: "\n" + String(repeating: " ", count: space))
         }

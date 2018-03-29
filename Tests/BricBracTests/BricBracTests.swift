@@ -1614,7 +1614,37 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).assign(bric: ["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
     }
 
+    func testCodableConversion() throws {
+        let alien = Alien(name: "Zaphod", home: Planet(name: "Betelgeuse", coordinates: [123, 456, 789.5]))
+        let coder = BricEncoder()
+//        let json = try String(data: coder.encodeData(alien), encoding: .utf8)
+//        XCTAssertEqual("""
+//{"name":"Zaphod","home":{"name":"Betelgeuse","coordinates":[123,456,789.5]}}
+//""", json)
+
+        let bricObj = try coder.encodeObject(alien)
+        XCTAssertEqual(bricObj, ["name":"Zaphod","home":["name":"Betelgeuse","coordinates": [123, 456, 789.5]]] as NSDictionary)
+
+        let bric = try coder.encode(alien)
+        XCTAssertEqual(bric, ["name":"Zaphod","home":["name":"Betelgeuse","coordinates": [123, 456, 789.5]]])
+        
+//        let enc = BricEncoder()
+////        try alien.encode(to: enc)
+//        let bric = try enc.encode(alien)
+    }
+    
 }
+
+struct Alien : Codable {
+    let name: String
+    let home: Planet
+}
+
+struct Planet : Codable {
+    let name: String
+    let coordinates: Array<Float>
+}
+
 
 /// Parses the given stream of elements with the associated codec
 func parseCodec<C: UnicodeCodec, S: Sequence>(_ codecType: C.Type, _ seq: S) throws -> Bric where S.Iterator.Element == C.CodeUnit {

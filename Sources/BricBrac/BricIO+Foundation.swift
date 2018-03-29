@@ -83,6 +83,25 @@ public final class FoundationBricolage: NSObject, Bricolage {
     public init(arr: ArrType) { self.object = arr }
     public init(obj: ObjType) { self.object = obj }
     public init(nul: NulType) { self.object = nul }
+    public convenience init(encodable: BricolageEncodable) {
+        switch encodable {
+        case .null: self.init(nul: NulType())
+        case .bool(let x): self.init(bol: x as BolType)
+        case .int(let x): self.init(num: x as NumType)
+        case .int8(let x): self.init(num: x as NumType)
+        case .int16(let x): self.init(num: x as NumType)
+        case .int32(let x): self.init(num: x as NumType)
+        case .int64(let x): self.init(num: x as NumType)
+        case .uint(let x): self.init(num: x as NumType)
+        case .uint8(let x): self.init(num: x as NumType)
+        case .uint16(let x): self.init(num: x as NumType)
+        case .uint32(let x): self.init(num: x as NumType)
+        case .uint64(let x): self.init(num: x as NumType)
+        case .string(let x): self.init(str: x as StrType)
+        case .float(let x): self.init(num: x as NumType)
+        case .double(let x): self.init(num: x as NumType)
+        }
+    }
 
     public static func createNull() -> NulType { return NSNull() }
     public static func createTrue() -> BolType { return true }
@@ -195,6 +214,25 @@ public final class CoreFoundationBricolage: Bricolage {
     public init(arr: ArrType) { self.ptr = Unmanaged.passRetained(arr).toOpaque() }
     public init(obj: ObjType) { self.ptr = Unmanaged.passRetained(obj).toOpaque() }
     public init(nul: NulType) { self.ptr = Unmanaged.passRetained(nul).toOpaque() }
+    public convenience init(encodable: BricolageEncodable) {
+        switch encodable {
+        case .null: self.init(nul: kCFNull)
+        case .bool(let x): self.init(bol: x as BolType)
+        case .int(let x): self.init(num: x as NumType)
+        case .int8(let x): self.init(num: x as NumType)
+        case .int16(let x): self.init(num: x as NumType)
+        case .int32(let x): self.init(num: x as NumType)
+        case .int64(let x): self.init(num: x as NumType)
+        case .uint(let x): self.init(num: x as NumType)
+        case .uint8(let x): self.init(num: x as NumType)
+        case .uint16(let x): self.init(num: x as NumType)
+        case .uint32(let x): self.init(num: x as NumType)
+        case .uint64(let x): self.init(num: x as NumType)
+        case .string(let x): self.init(str: x as StrType)
+        case .float(let x): self.init(num: x as NumType)
+        case .double(let x): self.init(num: x as NumType)
+        }
+    }
 
     deinit {
         Unmanaged<AnyObject>.fromOpaque(ptr).release()

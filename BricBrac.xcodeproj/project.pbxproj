@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4932B3FE206A79B100424366 /* BricEncoder.swift */; };
 		49DB613720633ABE00022D2C /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		49DB613820633AD100022D2C /* Curio+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */; };
 		49DB613920633AD100022D2C /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
@@ -132,6 +133,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4932B3FE206A79B100424366 /* BricEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BricEncoder.swift; sourceTree = "<group>"; };
 		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		49DB61522063426D00022D2C /* CurioDemoModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CurioDemoModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		49DB61542063426E00022D2C /* CurioDemoModels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurioDemoModels.h; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 				7E34B1691C67B68300E50A71 /* Breq.swift */,
 				7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */,
 				7E7F9B381B36159A0058706A /* BricIO.swift */,
+				4932B3FE206A79B100424366 /* BricEncoder.swift */,
 				7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */,
 				7E10201F1B858F6000171AFE /* JSONParser.swift */,
 				7E8930141BEA570A00F245C5 /* Structures.swift */,
@@ -496,7 +499,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = io.glimpse;
 				TargetAttributes = {
 					49DB61512063426D00022D2C = {
@@ -628,6 +631,7 @@
 			files = (
 				7EFA1FFD1B5D72DC00B2F12E /* BricIO+Foundation.swift in Sources */,
 				7E7F9B391B36159A0058706A /* Bric.swift in Sources */,
+				4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */,
 				7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */,
 				7E1020201B858F6000171AFE /* JSONParser.swift in Sources */,
 				7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */,
@@ -717,7 +721,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -749,7 +753,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -846,12 +850,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -902,12 +908,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

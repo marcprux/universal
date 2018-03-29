@@ -6,7 +6,7 @@
 //  Copyright © 2016 io.glimpse. All rights reserved.
 //
 
-// Swift 4 TODO: Breqable is obsolete with https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#extensions-of-structural-types
+// Swift 4.1 TODO: Breqable is obsolete with https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#extensions-of-structural-types
 
 /// Brequality allows Bricable instances to have a default equality implementation that
 /// compares the serialized instances, while allowing individual instances to provide their

@@ -134,6 +134,25 @@ extension Bric : CustomDebugStringConvertible {
     }
 }
 
+/// The various types that are encodable to bricolage
+public enum BricolageEncodable {
+    case null
+    case bool(Bool)
+    case int(Int)
+    case int8(Int8)
+    case int16(Int16)
+    case int32(Int32)
+    case int64(Int64)
+    case uint(UInt)
+    case uint8(UInt8)
+    case uint16(UInt16)
+    case uint32(UInt32)
+    case uint64(UInt64)
+    case string(String)
+    case float(Float)
+    case double(Double)
+}
+
 
 /// **bricolage (brēˌkō-läzhˈ, brĭkˌō-)** *n. Something made or put together using whatever materials happen to be available*
 ///
@@ -159,7 +178,7 @@ public protocol Bricolage {
     init(bol: BolType)
     init(arr: ArrType)
     init(obj: ObjType)
-
+    init?(encodable: BricolageEncodable)
     
     static func createNull() -> NulType
     
@@ -195,6 +214,7 @@ public struct EmptyBricolage: Bricolage {
     public init(num: NumType) { }
     public init(arr: ArrType) { }
     public init(obj: ObjType) { }
+    public init(encodable: BricolageEncodable) { }
 
     public static func createNull() -> NulType { }
     public static func createTrue() -> BolType { }
@@ -230,6 +250,7 @@ public enum FidelityBricolage : Bricolage {
     public init(num: NumType) { self = .num(num) }
     public init(arr: ArrType) { self = .arr(arr) }
     public init(obj: ObjType) { self = .obj(obj) }
+    public init?(encodable: BricolageEncodable) { return nil } // cannot encode to fidelity
 
     public static func createNull() -> NulType { }
     public static func createTrue() -> BolType { return true }
@@ -344,6 +365,25 @@ extension Bric: Bricolage {
     public init(num: NumType) { self = .num(num) }
     public init(arr: ArrType) { self = .arr(arr) }
     public init(obj: ObjType) { self = .obj(obj) }
+    public init(encodable: BricolageEncodable) {
+        switch encodable {
+        case .null: self = .nul
+        case .bool(let x): self = .bol(x)
+        case .int(let x): self = .num(Double(x))
+        case .int8(let x): self = .num(Double(x))
+        case .int16(let x): self = .num(Double(x))
+        case .int32(let x): self = .num(Double(x))
+        case .int64(let x): self = .num(Double(x))
+        case .uint(let x): self = .num(Double(x))
+        case .uint8(let x): self = .num(Double(x))
+        case .uint16(let x): self = .num(Double(x))
+        case .uint32(let x): self = .num(Double(x))
+        case .uint64(let x): self = .num(Double(x))
+        case .string(let x): self = .str(x)
+        case .float(let x): self = .num(Double(x))
+        case .double(let x): self = .num(x)
+        }
+    }
 
     public static func createNull() -> NulType { }
     public static func createTrue() -> BolType { return true }

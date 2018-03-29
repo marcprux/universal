@@ -296,7 +296,7 @@ public struct Curio {
         let breqfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "breq", access: self.accessor(parents), instance: true, exception: false, arguments: CodeTuple(elements: [selfType($0, name: "_ other")]), returns: CodeTuple(elements: [(name: nil, type: BoolType, value: nil, anon: false)])) }
 
 
-        let comments = [schema.title, schema.description].flatMap { $0 }
+        let comments = [schema.title, schema.description].compactMap { $0 }
 
 
         func schemaTypeName(_ schema: Schema, types: [CodeType], suffix: String = "") -> String {
@@ -646,7 +646,7 @@ public struct Curio {
                     ]
                 }
 
-                propd.comments = [prop.title, prop.description].flatMap { $0 }
+                propd.comments = [prop.title, prop.description].compactMap { $0 }
                 
                 code.props.append(propi)
                 let pt: PropNameType = (name: propn, type: proptype)
@@ -928,11 +928,13 @@ public struct Curio {
 
             if bracbody.isEmpty { bracbody.append("fatalError()") }
             code.conforms.append(bracable)
-            code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
+            let bracfunc = bracfun(code)
+            code.funcs.append(CodeFunction.Implementation(declaration: bracfunc, body: bracbody, comments: []))
 
             if generateEquals {
                 code.conforms.append(breqable)
-                code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
+                let breqfunc = breqfun(code)
+                code.funcs.append(CodeFunction.Implementation(declaration: breqfunc, body: breqbody, comments: []))
             }
 
             return code

@@ -282,7 +282,7 @@ public struct CodeTuple : CodeCompoundType {
     }
 
     public var directReferences : [CodeNamedType] {
-        return elements.flatMap({ $0.type?.directReferences }).flatMap({ $0 })
+        return elements.compactMap({ $0.type?.directReferences }).flatMap({ $0 })
     }
 
     /// Create a type alias for this tuple type, removing the name for single-tuple elements (since they are illegal)
@@ -672,7 +672,7 @@ public struct CodeStruct : CodeStateType {
     }
 
     public var directReferences : [CodeNamedType] {
-        return [self] + props.flatMap({ $0.declaration.type }).flatMap({ $0.directReferences })
+        return [self] + props.compactMap({ $0.declaration.type }).flatMap({ $0.directReferences })
     }
 
     public func emit(_ emitter: CodeEmitterType) {

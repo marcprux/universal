@@ -436,7 +436,7 @@ public protocol ISO8601DateTime {
     var hour: Int { get set }
     var minute: Int { get set }
     var second: Double { get set }
-    var zone: (hours: Int, minutes: Int) { get set }
+    var zone: BricZone { get set }
 }
 
 
@@ -451,23 +451,27 @@ public extension Bric {
     }
 }
 
-public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, CustomStringConvertible, Bricable, Bracable, Breqable {
+public struct BricZone : Equatable, Codable, Hashable {
+    public let hours: Int
+    public let minutes: Int
+}
+
+public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, CustomStringConvertible, Bricable, Bracable, Breqable {
     public typealias BricDate = (year: Int, month: Int, day: Int)
     public typealias BricTime = (hour: Int, minute: Int, second: Double)
-    public typealias BricZone = (hours: Int, minutes: Int)
 
     public var year, month, day, hour, minute: Int
     public var second: Double
     public var zone: BricZone
 
-    public init(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Double, zone: BricZone) {
+    public init(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Double, zone: (Int, Int)) {
         self.year = year
         self.month = month
         self.day = day
         self.hour = hour
         self.minute = minute
         self.second = second
-        self.zone = zone
+        self.zone = BricZone(hours: zone.0, minutes: zone.1)
     }
 
     /// Attempt to parse the given String as an ISO-8601 date-time structure
@@ -599,7 +603,7 @@ public extension ISO8601DateTime {
         dtm.hour = hour
         dtm.minute = minute
         dtm.second = second
-        dtm.zone = (tzh, tzm)
+        dtm.zone = BricZone(hours: tzh, minutes: tzm)
         return dtm
     }
 }

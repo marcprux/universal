@@ -357,7 +357,7 @@ public struct CodeFunction {
 
             // TODO: if emitted by a class, "static" should be called "class"
             if declaration.name == "init" {
-                emitter.emit(declaration.access.rawValue, declaration.name + declaration.arguments.identifier, "{")
+                emitter.emit(declaration.access.rawValue, declaration.name + declaration.arguments.identifier, declaration.exception ? "throws" : "", "{")
             } else {
                 emitter.emit(declaration.access.rawValue, declaration.instance ? "" : "static", "func", declaration.name + declaration.identifier, "{")
             }

@@ -51,7 +51,6 @@
 		7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */; };
 		7EFA1FFD1B5D72DC00B2F12E /* BricIO+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */; };
 		7EFA1FFF1B5D735400B2F12E /* Curio+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */; };
-		7EFD4F341BA5D98200802D99 /* AutoBricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -173,7 +172,6 @@
 		7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricPointer.swift; sourceTree = "<group>"; };
 		7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BricIO+Foundation.swift"; sourceTree = "<group>"; };
 		7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Curio+Cocoa.swift"; sourceTree = "<group>"; };
-		7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoBricBrac.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -336,7 +334,6 @@
 				7E7F9B3C1B3615AB0058706A /* BricBracTests.swift */,
 				7E7F9B2D1B3615860058706A /* Info.plist */,
 				7E7F9B3E1B3615B00058706A /* test */,
-				7EFD4F331BA5D98200802D99 /* AutoBricBrac.swift */,
 			);
 			name = BricBracTests;
 			path = Tests/BricBracTests;
@@ -646,7 +643,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EFD4F341BA5D98200802D99 /* AutoBricBrac.swift in Sources */,
 				7E7F9B3D1B3615AB0058706A /* BricBracTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -1,7 +1,7 @@
 import BricBrac
 
 
-public struct SampleModel : Bricable, Bracable, Breqable {
+public struct SampleModel : Bricable, Bracable, Equatable, Codable {
     public var allOfField: AllOfField
     public var anyOfField: AnyOfField
     public var oneOfField: OneOfField
@@ -50,17 +50,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         ) 
     }
 
-    public func breq(_ other: SampleModel) -> Bool {
-        return allOfField.breq(other.allOfField) 
-            && anyOfField.breq(other.anyOfField) 
-            && keywordFields.breq(other.keywordFields) 
-            && nested1.breq(other.nested1) 
-            && notField.breq(other.notField) 
-            && oneOfField.breq(other.oneOfField) 
-            && list.breq(other.list) 
-            && simpleOneOf.breq(other.simpleOneOf) 
-    }
-
     public enum Keys : String {
         case allOfField = "allOfField"
         case anyOfField = "anyOfField"
@@ -72,7 +61,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         case simpleOneOf = "simpleOneOf"
     }
 
-    public struct AllOfField : Bricable, Bracable, Breqable {
+    public struct AllOfField : Bricable, Bracable, Equatable, Codable {
         /// FirstAll
         public var p0: FirstAll
         /// SecondAll
@@ -97,13 +86,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             ) 
         }
 
-        public func breq(_ other: SampleModel.AllOfField) -> Bool {
-            return p0.breq(other.p0) 
-                && p1.breq(other.p1) 
-        }
-
         /// FirstAll
-        public struct FirstAll : Bricable, Bracable, Breqable {
+        public struct FirstAll : Bricable, Bracable, Equatable, Codable {
             public var a1: Int
             public var a2: String
 
@@ -126,11 +110,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.AllOfField.FirstAll) -> Bool {
-                return a1.breq(other.a1) 
-                    && a2.breq(other.a2) 
-            }
-
             public enum Keys : String {
                 case a1 = "a1"
                 case a2 = "a2"
@@ -140,7 +119,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         /// SecondAll
-        public struct SecondAll : Bricable, Bracable, Breqable {
+        public struct SecondAll : Bricable, Bracable, Equatable, Codable {
             public var a3: Bool
             public var a4: Double
 
@@ -163,11 +142,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.AllOfField.SecondAll) -> Bool {
-                return a3.breq(other.a3) 
-                    && a4.breq(other.a4) 
-            }
-
             public enum Keys : String {
                 case a3 = "a3"
                 case a4 = "a4"
@@ -179,7 +153,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public typealias BricState = (p0: FirstAll, p1: SecondAll)
     }
 
-    public struct AnyOfField : Bricable, Bracable, Breqable {
+    public struct AnyOfField : Bricable, Bracable, Equatable, Codable {
         /// FirstAny
         public var p0: Optional<FirstAny>
         /// SecondAny
@@ -205,13 +179,8 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             ) 
         }
 
-        public func breq(_ other: SampleModel.AnyOfField) -> Bool {
-            return p0.breq(other.p0) 
-                && p1.breq(other.p1) 
-        }
-
         /// FirstAny
-        public struct FirstAny : Bricable, Bracable, Breqable {
+        public struct FirstAny : Bricable, Bracable, Equatable, Codable {
             public var b1: Int
             public var b2: String
 
@@ -234,11 +203,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.AnyOfField.FirstAny) -> Bool {
-                return b1.breq(other.b1) 
-                    && b2.breq(other.b2) 
-            }
-
             public enum Keys : String {
                 case b1 = "b1"
                 case b2 = "b2"
@@ -248,7 +212,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         /// SecondAny
-        public struct SecondAny : Bricable, Bracable, Breqable {
+        public struct SecondAny : Bricable, Bracable, Equatable, Codable {
             public var b3: Bool
             public var b4: Double
 
@@ -271,11 +235,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.AnyOfField.SecondAny) -> Bool {
-                return b3.breq(other.b3) 
-                    && b4.breq(other.b4) 
-            }
-
             public enum Keys : String {
                 case b3 = "b3"
                 case b4 = "b4"
@@ -287,7 +246,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public typealias BricState = (p0: Optional<FirstAny>, p1: Optional<SecondAny>)
     }
 
-    public enum OneOfField : Bricable, Bracable, Breqable {
+    public enum OneOfField : Bricable, Bracable, Equatable, Codable {
         case firstOneCase(FirstOne)
         case secondOneCase(SecondOne)
 
@@ -313,16 +272,22 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             ]) 
         }
 
-        public func breq(_ other: SampleModel.OneOfField) -> Bool {
-            switch (self, other) { 
-            case let (.firstOneCase(lhs), .firstOneCase(rhs)): return lhs.breq(rhs) 
-            case let (.secondOneCase(lhs), .secondOneCase(rhs)): return lhs.breq(rhs) 
-            default: return false 
+        public func encode(to encoder: Encoder) throws -> () {
+            switch self { 
+            case .firstOneCase(let x): try x.encode(to: encoder) 
+            case .secondOneCase(let x): try x.encode(to: encoder) 
             } 
         }
 
+        public init(from decoder: Decoder) throws {
+            var errors: [Error] = [] 
+            do { self = try .firstOneCase(FirstOne(from: decoder)); return } catch { errors.append(error) } 
+            do { self = try .secondOneCase(SecondOne(from: decoder)); return } catch { errors.append(error) } 
+            throw OneOfDecodingError(errors: errors) 
+        }
+
         /// FirstOne
-        public struct FirstOne : Bricable, Bracable, Breqable {
+        public struct FirstOne : Bricable, Bracable, Equatable, Codable {
             public var c1: Int
             public var c2: String
 
@@ -345,11 +310,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.OneOfField.FirstOne) -> Bool {
-                return c1.breq(other.c1) 
-                    && c2.breq(other.c2) 
-            }
-
             public enum Keys : String {
                 case c1 = "c1"
                 case c2 = "c2"
@@ -359,7 +319,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         /// SecondOne
-        public struct SecondOne : Bricable, Bracable, Breqable {
+        public struct SecondOne : Bricable, Bracable, Equatable, Codable {
             public var c3: Bool
             public var c4: Double
 
@@ -382,11 +342,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.OneOfField.SecondOne) -> Bool {
-                return c3.breq(other.c3) 
-                    && c4.breq(other.c4) 
-            }
-
             public enum Keys : String {
                 case c3 = "c3"
                 case c4 = "c4"
@@ -396,7 +351,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
     }
 
-    public struct NotField : Bricable, Bracable, Breqable {
+    public struct NotField : Bricable, Bracable, Equatable, Codable {
         public var p0: P0
         public var p1: P1
 
@@ -419,12 +374,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             ) 
         }
 
-        public func breq(_ other: SampleModel.NotField) -> Bool {
-            return p0.breq(other.p0) 
-                && p1.breq(other.p1) 
-        }
-
-        public struct P0 : Bricable, Bracable, Breqable {
+        public struct P0 : Bricable, Bracable, Equatable, Codable {
             public var str: String
 
             public init(str: String) {
@@ -443,10 +393,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.NotField.P0) -> Bool {
-                return str.breq(other.str) 
-            }
-
             public enum Keys : String {
                 case str = "str"
             }
@@ -455,7 +401,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         }
 
         public typealias P1 = NotBrac<NotP1>
-        public struct NotP1 : Bricable, Bracable, Breqable {
+        public struct NotP1 : Bricable, Bracable, Equatable, Codable {
             public var str: Str
 
             public init(str: Str = .illegal) {
@@ -474,15 +420,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.NotField.NotP1) -> Bool {
-                return str.breq(other.str) 
-            }
-
             public enum Keys : String {
                 case str = "str"
             }
 
-            public enum Str : String, Bricable, Bracable, Breqable {
+            public enum Str : String, Bricable, Bracable, Equatable, Codable {
                 case illegal = "illegal"
             }
 
@@ -493,7 +435,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
     }
 
     /// Should not escape keyword arguments
-    public struct KeywordFields : Bricable, Bracable, Breqable {
+    public struct KeywordFields : Bricable, Bracable, Equatable, Codable {
         public var `case`: Optional<String>
         public var `for`: Optional<String>
         public var `in`: Optional<String>
@@ -536,16 +478,6 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             ) 
         }
 
-        public func breq(_ other: SampleModel.KeywordFields) -> Bool {
-            return `case`.breq(other.`case`) 
-                && `for`.breq(other.`for`) 
-                && `in`.breq(other.`in`) 
-                && `inout`.breq(other.`inout`) 
-                && `let`.breq(other.`let`) 
-                && `var`.breq(other.`var`) 
-                && `while`.breq(other.`while`) 
-        }
-
         public enum Keys : String {
             case `case` = "case"
             case `for` = "for"
@@ -559,7 +491,7 @@ public struct SampleModel : Bricable, Bracable, Breqable {
         public typealias BricState = (`case`: Optional<String>, `for`: Optional<String>, `in`: Optional<String>, `inout`: Optional<String>, `let`: Optional<String>, `var`: Optional<String>, `while`: Optional<String>)
     }
 
-    public struct ListItem : Bricable, Bracable, Breqable {
+    public struct ListItem : Bricable, Bracable, Equatable, Codable {
         public var prop: Prop
 
         public init(prop: Prop = .value) {
@@ -578,22 +510,18 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             ) 
         }
 
-        public func breq(_ other: SampleModel.ListItem) -> Bool {
-            return prop.breq(other.prop) 
-        }
-
         public enum Keys : String {
             case prop = "prop"
         }
 
-        public enum Prop : String, Bricable, Bracable, Breqable {
+        public enum Prop : String, Bricable, Bracable, Equatable, Codable {
             case value = "value"
         }
 
         public typealias BricState = Prop
     }
 
-    public struct Nested1 : Bricable, Bracable, Breqable {
+    public struct Nested1 : Bricable, Bracable, Equatable, Codable {
         public var nested2: Nested2
 
         public init(nested2: Nested2) {
@@ -612,15 +540,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
             ) 
         }
 
-        public func breq(_ other: SampleModel.Nested1) -> Bool {
-            return nested2.breq(other.nested2) 
-        }
-
         public enum Keys : String {
             case nested2 = "nested2"
         }
 
-        public struct Nested2 : Bricable, Bracable, Breqable {
+        public struct Nested2 : Bricable, Bracable, Equatable, Codable {
             public var nested3: Nested3
 
             public init(nested3: Nested3) {
@@ -639,15 +563,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                 ) 
             }
 
-            public func breq(_ other: SampleModel.Nested1.Nested2) -> Bool {
-                return nested3.breq(other.nested3) 
-            }
-
             public enum Keys : String {
                 case nested3 = "nested3"
             }
 
-            public struct Nested3 : Bricable, Bracable, Breqable {
+            public struct Nested3 : Bricable, Bracable, Equatable, Codable {
                 public var nested4: Nested4
 
                 public init(nested4: Nested4) {
@@ -666,15 +586,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                     ) 
                 }
 
-                public func breq(_ other: SampleModel.Nested1.Nested2.Nested3) -> Bool {
-                    return nested4.breq(other.nested4) 
-                }
-
                 public enum Keys : String {
                     case nested4 = "nested4"
                 }
 
-                public struct Nested4 : Bricable, Bracable, Breqable {
+                public struct Nested4 : Bricable, Bracable, Equatable, Codable {
                     public var nested5: Nested5
 
                     public init(nested5: Nested5) {
@@ -693,15 +609,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                         ) 
                     }
 
-                    public func breq(_ other: SampleModel.Nested1.Nested2.Nested3.Nested4) -> Bool {
-                        return nested5.breq(other.nested5) 
-                    }
-
                     public enum Keys : String {
                         case nested5 = "nested5"
                     }
 
-                    public struct Nested5 : Bricable, Bracable, Breqable {
+                    public struct Nested5 : Bricable, Bracable, Equatable, Codable {
                         public var single: Single
 
                         public init(single: Single = .value) {
@@ -720,15 +632,11 @@ public struct SampleModel : Bricable, Bracable, Breqable {
                             ) 
                         }
 
-                        public func breq(_ other: SampleModel.Nested1.Nested2.Nested3.Nested4.Nested5) -> Bool {
-                            return single.breq(other.single) 
-                        }
-
                         public enum Keys : String {
                             case single = "single"
                         }
 
-                        public enum Single : String, Bricable, Bracable, Breqable {
+                        public enum Single : String, Bricable, Bracable, Equatable, Codable {
                             case value = "value"
                         }
 

@@ -85,7 +85,7 @@ public enum Indirect<Wrapped> : WrapperType, Wrappable, ExpressibleByNilLiteral 
 }
 
 /// An Object Bric type that cannot contain anything
-public struct HollowBric : Bricable, Bracable, Breqable {
+public struct HollowBric : Bricable, Bracable {
     public init() {
     }
 
@@ -96,19 +96,15 @@ public struct HollowBric : Bricable, Bracable, Breqable {
     public static func brac(bric: Bric) throws -> HollowBric {
         return HollowBric()
     }
-
-    public func breq(_ other: HollowBric) -> Bool {
-        return true
-    }
 }
 
 public func ==(lhs: HollowBric, rhs: HollowBric) -> Bool {
-    return lhs.breq(rhs)
+    return true
 }
 
 // Swift 4 TODO: Variadic Generics: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#variadic-generics
 
-public protocol OneOf: BricBrac {
+public protocol OneOf: Bricable, Bracable {
     associatedtype T
 
     /// Returns a tuple of the possible value types for this OneOf
@@ -117,7 +113,7 @@ public protocol OneOf: BricBrac {
 
 
 /// A simple union type that can be one of either T1 or T2
-public enum OneOf2<T1, T2> : OneOf where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable {
+public enum OneOf2<T1, T2> : OneOf where T1: Bricable, T1: Bracable, T2: Bricable, T2: Bracable {
     case v1(T1), v2(T2)
 
     public init(t1: T1) { self = .v1(t1) }
@@ -158,23 +154,41 @@ public enum OneOf2<T1, T2> : OneOf where T1: Bricable, T1: Bracable, T1: Breqabl
             { try .v2(T2.brac(bric: bric)) }
             ])
     }
+}
 
-    public func breq(_ other: OneOf2) -> Bool {
-        switch (self, other) {
-        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
-        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
-        case (.v1, .v2), (.v2, .v1): return false
+extension OneOf2 : Encodable where T1 : Encodable, T2 : Encodable {
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case .v1(let x): try x.encode(to: encoder)
+        case .v2(let x): try x.encode(to: encoder)
         }
     }
 }
 
-public func ==<T1, T2>(lhs: OneOf2<T1, T2>, rhs: OneOf2<T1, T2>) -> Bool {
-    return lhs.breq(rhs)
+extension OneOf2 : Decodable where T1 : Decodable, T2 : Decodable {
+
+    public init(from decoder: Decoder) throws {
+        var errors: [Error] = []
+        do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        throw OneOfDecodingError(errors: errors)
+    }
+}
+
+extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable {
+    public static func ==(lhs: OneOf2<T1, T2>, rhs: OneOf2<T1, T2>) -> Bool {
+        switch (lhs, rhs) {
+        case (.v1(let a), .v1(let b)): return a == b
+        case (.v2(let a), .v2(let b)): return a == b
+        default: return false
+        }
+    }
 }
 
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public enum OneOf3<T1, T2, T3> : OneOf where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable {
+public enum OneOf3<T1, T2, T3> : OneOf where T1: Bricable, T1: Bracable, T2: Bricable, T2: Bracable, T3: Bricable, T3: Bracable {
     case v1(T1), v2(T2), v3(T3)
 
     public init(t1: T1) { self = .v1(t1) }
@@ -228,24 +242,44 @@ public enum OneOf3<T1, T2, T3> : OneOf where T1: Bricable, T1: Bracable, T1: Bre
             { try .v3(T3.brac(bric: bric)) },
             ])
     }
+}
 
-    public func breq(_ other: OneOf3) -> Bool {
-        switch (self, other) {
-        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
-        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
-        case (.v3(let v3l), .v3(let v3r)): return v3l.breq(v3r)
+extension OneOf3 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable {
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case .v1(let x): try x.encode(to: encoder)
+        case .v2(let x): try x.encode(to: encoder)
+        case .v3(let x): try x.encode(to: encoder)
+        }
+    }
+}
+
+extension OneOf3 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable {
+
+    public init(from decoder: Decoder) throws {
+        var errors: [Error] = []
+        do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        throw OneOfDecodingError(errors: errors)
+    }
+}
+
+extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable {
+    public static func ==(lhs: OneOf3<T1, T2, T3>, rhs: OneOf3<T1, T2, T3>) -> Bool {
+        switch (lhs, rhs) {
+        case (.v1(let a), .v1(let b)): return a == b
+        case (.v2(let a), .v2(let b)): return a == b
+        case (.v3(let a), .v3(let b)): return a == b
         default: return false
         }
     }
 }
 
-public func ==<T1, T2, T3>(lhs: OneOf3<T1, T2, T3>, rhs: OneOf3<T1, T2, T3>) -> Bool {
-    return lhs.breq(rhs)
-}
-
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public enum OneOf4<T1, T2, T3, T4> : OneOf where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable {
+public enum OneOf4<T1, T2, T3, T4> : OneOf where T1: Bricable, T1: Bracable, T2: Bricable, T2: Bracable, T3: Bricable, T3: Bracable, T4: Bricable, T4: Bracable {
     case v1(T1), v2(T2), v3(T3), v4(T4)
 
     public init(t1: T1) { self = .v1(t1) }
@@ -313,24 +347,47 @@ public enum OneOf4<T1, T2, T3, T4> : OneOf where T1: Bricable, T1: Bracable, T1:
             ])
     }
 
-    public func breq(_ other: OneOf4) -> Bool {
-        switch (self, other) {
-        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
-        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
-        case (.v3(let v3l), .v3(let v3r)): return v3l.breq(v3r)
-        case (.v4(let v4l), .v4(let v4r)): return v4l.breq(v4r)
+}
+
+extension OneOf4 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable {
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case .v1(let x): try x.encode(to: encoder)
+        case .v2(let x): try x.encode(to: encoder)
+        case .v3(let x): try x.encode(to: encoder)
+        case .v4(let x): try x.encode(to: encoder)
+        }
+    }
+}
+
+extension OneOf4 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable {
+
+    public init(from decoder: Decoder) throws {
+        var errors: [Error] = []
+        do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        throw OneOfDecodingError(errors: errors)
+    }
+}
+
+extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable {
+    public static func ==(lhs: OneOf4<T1, T2, T3, T4>, rhs: OneOf4<T1, T2, T3, T4>) -> Bool {
+        switch (lhs, rhs) {
+        case (.v1(let a), .v1(let b)): return a == b
+        case (.v2(let a), .v2(let b)): return a == b
+        case (.v3(let a), .v3(let b)): return a == b
+        case (.v4(let a), .v4(let b)): return a == b
         default: return false
         }
     }
 }
 
-public func ==<T1, T2, T3, T4>(lhs: OneOf4<T1, T2, T3, T4>, rhs: OneOf4<T1, T2, T3, T4>) -> Bool {
-    return lhs.breq(rhs)
-}
-
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public enum OneOf5<T1, T2, T3, T4, T5> : OneOf where T1: Bricable, T1: Bracable, T1: Breqable, T2: Bricable, T2: Bracable, T2: Breqable, T3: Bricable, T3: Bracable, T3: Breqable, T4: Bricable, T4: Bracable, T4: Breqable, T5: Bricable, T5: Bracable, T5: Breqable {
+public enum OneOf5<T1, T2, T3, T4, T5> : OneOf where T1: Bricable, T1: Bracable, T2: Bricable, T2: Bracable, T3: Bricable, T3: Bracable, T4: Bricable, T4: Bracable, T5: Bricable, T5: Bracable {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5)
 
     public init(t1: T1) { self = .v1(t1) }
@@ -410,21 +467,55 @@ public enum OneOf5<T1, T2, T3, T4, T5> : OneOf where T1: Bricable, T1: Bracable,
             { try .v5(T5.brac(bric: bric)) },
             ])
     }
+}
 
-    public func breq(_ other: OneOf5) -> Bool {
-        switch (self, other) {
-        case (.v1(let v1l), .v1(let v1r)): return v1l.breq(v1r)
-        case (.v2(let v2l), .v2(let v2r)): return v2l.breq(v2r)
-        case (.v3(let v3l), .v3(let v3r)): return v3l.breq(v3r)
-        case (.v4(let v4l), .v4(let v4r)): return v4l.breq(v4r)
-        case (.v5(let v5l), .v5(let v5r)): return v5l.breq(v5r)
+extension OneOf5 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable {
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case .v1(let x): try x.encode(to: encoder)
+        case .v2(let x): try x.encode(to: encoder)
+        case .v3(let x): try x.encode(to: encoder)
+        case .v4(let x): try x.encode(to: encoder)
+        case .v5(let x): try x.encode(to: encoder)
+        }
+    }
+}
+
+extension OneOf5 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable, T5 : Decodable {
+
+    public init(from decoder: Decoder) throws {
+        var errors: [Error] = []
+        do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
+        throw OneOfDecodingError(errors: errors)
+    }
+}
+
+extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable {
+    public static func ==(lhs: OneOf5<T1, T2, T3, T4, T5>, rhs: OneOf5<T1, T2, T3, T4, T5>) -> Bool {
+        switch (lhs, rhs) {
+        case (.v1(let a), .v1(let b)): return a == b
+        case (.v2(let a), .v2(let b)): return a == b
+        case (.v3(let a), .v3(let b)): return a == b
+        case (.v4(let a), .v4(let b)): return a == b
+        case (.v5(let a), .v5(let b)): return a == b
         default: return false
         }
     }
 }
 
-public func ==<T1, T2, T3, T4, T5>(lhs: OneOf5<T1, T2, T3, T4, T5>, rhs: OneOf5<T1, T2, T3, T4, T5>) -> Bool {
-    return lhs.breq(rhs)
+/// An error that indicates that multiple errors occured when decoding the type;
+/// Each error should correspond to one of the choices for this type.
+public struct OneOfDecodingError : Error {
+    public let errors: [Error]
+
+    public init(errors: [Error]) {
+        self.errors = errors
+    }
 }
 
 /// An ISO-8601 date-time structure, the common JSON format for dates and times
@@ -456,7 +547,7 @@ public struct BricZone : Equatable, Codable, Hashable {
     public let minutes: Int
 }
 
-public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, CustomStringConvertible, Bricable, Bracable, Breqable {
+public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, CustomStringConvertible, Bricable, Bracable {
     public typealias BricDate = (year: Int, month: Int, day: Int)
     public typealias BricTime = (hour: Int, minute: Int, second: Double)
 
@@ -486,17 +577,6 @@ public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, Custo
     public var description: String { return toISO8601String() }
 
     public var hashValue: Int { return year }
-
-    public func breq(_ other: BricDateTime) -> Bool {
-        return self.year == other.year
-            && self.month == other.month
-            && self.day == other.day
-            && self.hour == other.hour
-            && self.minute == other.minute
-            && self.second == other.second
-            && self.zone.hours == other.zone.hours
-            && self.zone.minutes == other.zone.minutes
-    }
 
     /// BricDateTime instances are serialized to ISO-8601 strings
     public func bric() -> Bric {
@@ -607,10 +687,3 @@ public extension ISO8601DateTime {
         return dtm
     }
 }
-
-/// Two BricDateTime instances are equal iff all their components are equal; actual temporal equality is not considered
-public func ==(lhs: BricDateTime, rhs: BricDateTime) -> Bool {
-    return lhs.breq(rhs)
-}
-
-

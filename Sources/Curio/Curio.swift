@@ -29,11 +29,11 @@ public struct Curio {
     /// whether to generate structs or classes (classes are faster to compiler for large models)
     public var generateValueTypes = true
 
-    /// whether to generate breqable functions for each type
-    /// Not yet supported due to inability to equate nested types (e.g.: binary operator '==' cannot be applied to two 'Optional<Array<ValuesItem>>' (aka 'Optional<Array<Dictionary<String, Bric>>>') operands)
-    /// Unless we want to write a ton more code for equatability, we'll need to wait for Swift 3's
-    /// ability to declare constrained protocol conformance
+    /// whether to generate equatable functions for each type
     public var generateEquals = true
+
+    /// whether to generate codable implementations for each type
+    public var generateCodable = true
 
     /// Whether to output simple union types as a typealias to a BricBrac.OneOf<T1, T2, ...> enum
     public var useOneOfEnums = true
@@ -275,6 +275,8 @@ public struct Curio {
         let ArrayType = CodeExternalType("Array", generics: [BricType], access: accessor(parents))
         let ObjectType = dictionaryType(StringType, BricType)
         let HollowBricType = CodeExternalType("HollowBric", access: accessor(parents))
+        let EncoderType = CodeExternalType("Encoder", access: accessor(parents))
+        let DecoderType = CodeExternalType("Decoder", access: accessor(parents))
 
         /// Calculate the fully-qualified name of the given type
         func fullName(_ type: CodeType) -> String {
@@ -292,8 +294,11 @@ public struct Curio {
         let bracable = CodeProtocol(name: "Bracable", access: accessor(parents))
         let bracfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "brac", access: self.accessor(parents), instance: false, exception: true, arguments: CodeTuple(elements: [(name: "bric", type: BricType, value: nil, anon: false)]), returns: CodeTuple(elements: [selfType($0, name: nil)])) }
 
-        let breqable = CodeProtocol(name: "Breqable", access: accessor(parents))
-        let breqfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "breq", access: self.accessor(parents), instance: true, exception: false, arguments: CodeTuple(elements: [selfType($0, name: "_ other")]), returns: CodeTuple(elements: [(name: nil, type: BoolType, value: nil, anon: false)])) }
+        let equatable = CodeProtocol(name: "Equatable", access: accessor(parents))
+
+        let codable = CodeProtocol(name: "Codable", access: accessor(parents))
+        let encodefun = CodeFunction.Declaration(name: "encode", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "to encoder", type: EncoderType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
+        let decodefun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "from decoder", type: DecoderType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
 
 
         let comments = [schema.title, schema.description].compactMap { $0 }
@@ -335,10 +340,21 @@ public struct Curio {
             var code = CodeEnum(name: ename, access: accessor(parents))
             code.comments = comments
 
+            var encodebody : [String] = []
+            var decodebody : [String] = []
             var bricbody : [String] = []
             var bracbody : [String] = []
             var breqbody : [String] = []
 
+//            public init(from decoder: Decoder) throws {
+//                var errors: [Error] = []
+//                do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+//                do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+//                throw OneOfDecodingError(errors: errors)
+//            }
+
+            encodebody.append("switch self {")
+            decodebody.append("var errors: [Error] = []")
             bricbody.append("switch self {")
             bracbody.append("return try bric.brac(oneOf: [")
             breqbody.append("switch (self, other) {")
@@ -403,11 +419,14 @@ public struct Curio {
 
                 if casetype.identifier == "Void" {
                     // Void can't be extended, so we need to special-case it to avoid calling methods on the type
+                    encodebody.append("case .\(casename): try NSNull().encode(to: encoder)")
+                    decodebody.append("do { try let _ = NSNull(from: decoder); self = .\(casename); return } catch { errors.append(error) }")
                     bricbody.append("case .\(casename): return .nul")
-//                    bracbody.append("{ Void() },") // just skip it
                     bracbody.append("{ try .\(casename)(bric.bracNul()) },")
                     breqbody.append("case (.\(casename), .\(casename)): return true")
                 } else {
+                    encodebody.append("case .\(casename)(let x): try x.encode(to: encoder)")
+                    decodebody.append("do { self = try .\(casename)(\(casetype.identifier)(from: decoder)); return } catch { errors.append(error) }")
                     bricbody.append("case .\(casename)(let x): return x.bric()")
                     bracbody.append("{ try .\(casename)(\(casetype.identifier).brac(bric: bric)) },")
                     breqbody.append("case let (.\(casename)(lhs), .\(casename)(rhs)): return lhs.breq(rhs)")
@@ -423,6 +442,8 @@ public struct Curio {
 
             breqbody.append("default: return false")
 
+            encodebody.append("}")
+            decodebody.append("throw OneOfDecodingError(errors: errors)")
             bricbody.append("}")
             bracbody.append("])")
             breqbody.append("}")
@@ -435,8 +456,13 @@ public struct Curio {
             code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
 
             if generateEquals {
-                code.conforms.append(breqable)
-                code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
+                code.conforms.append(equatable)
+            }
+
+            if generateCodable {
+                code.conforms.append(codable)
+                code.funcs.append(CodeFunction.Implementation(declaration: encodefun, body: encodebody, comments: []))
+                code.funcs.append(CodeFunction.Implementation(declaration: decodefun, body: decodebody, comments: []))
             }
 
             // lastly, analyze the generated code; if it contains no nested type and none of the cases are Void or Array,
@@ -529,8 +555,11 @@ public struct Curio {
             assoc.funcs.append(CodeFunction.Implementation(declaration: bracfun(assoc), body: bracbody, comments: []))
 
             if generateEquals {
-                assoc.conforms.append(breqable)
-                assoc.funcs.append(CodeFunction.Implementation(declaration: breqfun(assoc), body: breqbody, comments: []))
+                assoc.conforms.append(equatable)
+            }
+
+            if generateCodable {
+                assoc.conforms.append(codable)
             }
 
             parents = Array(parents.dropLast())
@@ -800,47 +829,6 @@ public struct Curio {
             }
 
             makeInit(false)
-//            if isUnionType { makeInit(true) } // TODO: make convenience initializers for merged (i.e., allOf) nested properties
-
-            var breqbody : [String] = []
-//        case array = "array"
-//        case boolean = "boolean"
-//        case integer = "integer"
-//        case null = "null"
-//        case number = "number"
-//        case object = "object"
-//        case string = "string"
-
-            /// order by the ease of comparison
-            func breqOrdering(_ p1: PropDec, p2: PropDec) -> Bool {
-                switch (p1.prop.type, p2.prop.type) {
-                case (.some(.a(let x)), .some(.a(let y))) where x == y: return p1.name < p2.name
-                case (.some(.a(.boolean)), _): return true
-                case (_, .some(.a(.boolean))): return false
-                case (.some(.a(.integer)), _): return true
-                case (_, .some(.a(.integer))): return false
-                case (.some(.a(.number)), _): return true
-                case (_, .some(.a(.number))): return false
-                case (.some(.a(.string)), _): return true
-                case (_, .some(.a(.string))): return false
-                case (.some(.a(.object)), _): return true
-                case (_, .some(.a(.object))): return false
-                case (.some(.a(.array)), _): return true
-                case (_, .some(.a(.array))): return false
-                default: return p1.name < p2.name
-                }
-            }
-
-            // breq implementation is the same for allOf/anyOf/standard
-            for (i, pt) in props.sorted(by: breqOrdering).enumerated() {
-                let pname = propName(parents + [typename], pt.name)
-
-                let ret = (i == 0 ? "return " : "    && ")
-                breqbody.append(ret + pname + ".breq(other." + pname + ")")
-            }
-            if hasAdditionalProps == true {
-                breqbody.append((props.isEmpty ? "return " : "    && ") + addPropName + ".breq(other." + addPropName + ")")
-            }
 
             var bricbody : [String] = []
             switch mode {
@@ -932,9 +920,11 @@ public struct Curio {
             code.funcs.append(CodeFunction.Implementation(declaration: bracfunc, body: bracbody, comments: []))
 
             if generateEquals {
-                code.conforms.append(breqable)
-                let breqfunc = breqfun(code)
-                code.funcs.append(CodeFunction.Implementation(declaration: breqfunc, body: breqbody, comments: []))
+                code.conforms.append(equatable)
+            }
+
+            if generateCodable {
+                code.conforms.append(codable)
             }
 
             return code
@@ -997,8 +987,11 @@ public struct Curio {
 //            code.funcs.append(CodeFunction.Implementation(declaration: bracfun(code), body: bracbody, comments: []))
 
             if generateEquals {
-                code.conforms.append(breqable)
-//                code.funcs.append(CodeFunction.Implementation(declaration: breqfun(code), body: breqbody, comments: []))
+                code.conforms.append(equatable)
+            }
+
+            if generateCodable {
+                code.conforms.append(codable)
             }
 
             return code
@@ -1260,6 +1253,7 @@ extension Curio {
         var typeType: String?
         var useOneOfEnums: Bool?
         var generateEquals: Bool?
+        var generateCodable: Bool?
 
         while let arg = args.next() {
             switch arg {
@@ -1284,6 +1278,8 @@ extension Curio {
                 useOneOfEnums = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-generateEquals":
                 generateEquals = (args.next() ?? "true").hasPrefix("t") == true ? true : false
+            case "-generateCodable":
+                generateCodable = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             default:
                 throw UsageError("Unrecognized argument: \(arg)")
             }
@@ -1315,6 +1311,7 @@ extension Curio {
             if let maxdirect = maxdirect { curio.indirectCountThreshold = maxdirect }
             if let useOneOfEnums = useOneOfEnums  { curio.useOneOfEnums = useOneOfEnums }
             if let generateEquals = generateEquals { curio.generateEquals = generateEquals }
+            if let generateCodable = generateCodable { curio.generateCodable = generateCodable }
 
             if let typeType = typeType {
                 switch typeType {

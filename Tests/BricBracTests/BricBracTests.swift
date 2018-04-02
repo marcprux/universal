@@ -11,27 +11,8 @@ import BricBrac
 import JavaScriptCore
 
 
-// TODO: implement this in BricBrac once we have Swift 4 support for conditional protocol conformance
-
-extension AutoBricBrac {
-    static func bricr<T, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(_ `init`: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) -> T, _ keys: (String, String, String, String, String, String, String, String, String, String, String), accessor: (T) -> (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)) -> Int {
-        return 1
-    }
-}
-
-extension Car {
-    static let make = bricr(Car.init,
-                            ("manufacturer", "model", "displacement", "year", "cylinders", "transmissionType", "drive", "cityMileage", "highwayMileage", "fuel", "class")) {x in
-                                (x.manufacturer, x.model, x.displacement, x.year, x.cylinders, x.transmissionType, x.drive, x.cityMileage, x.highwayMileage, x.fuel, x.class) }
-}
-
 class BricBracTests : XCTestCase {
 
-    func testInitString() {
-        dump(Mirror(reflecting: Car.make).children.first?.label)
-//        XCTAssertEqual("\(type(of: Car.make))", "(String, Optional<String>, Double, UInt16, Cylinders, String, Drive, Int, Int, Fuel, Class) -> Car")
-    }
-    
     func testBricConversion() {
         let bric: Bric = ["a": [1, 2, true, false, nil]]
         let cocoa = FoundationBricolage.brac(bric: bric)
@@ -1340,87 +1321,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func testAutoBricBrac() throws {
-        let template: Bric = ["manufacturer": "audi", "model": "a4", "displ": 1.8, "year": 1999, "cyl": 4, "trans": "auto(l5)", "drv": "f", "cty": 18, "hwy": 29, "fl": "p", "class": "compact"]
 
-        do {
-            let audi1 = try Car.brac(bric: template)
-            XCTAssertEqual(audi1.manufacturer, "audi")
-            XCTAssertEqual(audi1.model, "a4")
-        }
-
-
-        // "1","audi","a4",1.8,1999,4,"auto(l5)","f",18,29,"p","compact"
-        let audi2 = Car(manufacturer: "audi", model: "a4", displacement: 1.8, year: 1999, cylinders: .four, transmissionType: "auto(l5)", drive: .front, cityMileage: 18, highwayMileage: 29, fuel: .premium, class: .compact)
-        let bric = audi2.bric()
-        XCTAssertEqual(bric, template)
-        do {
-            let audi3 = try Car.brac(bric: bric)
-            XCTAssertEqual(audi3, audi2)
-        }
-
-        do {
-            //
-            let list: Bric = ["year": 1999, "type": "efficiency", "cars": [template, template]]
-            let uniqueList: Bric = ["year": 1999, "type": "efficiency", "cars": [template]]
-            let report = try CarReport.brac(bric: list)
-            XCTAssertEqual(report.bric(), uniqueList, "re-serialized list should only contain a single unique element")
-        }
-    }
-
-
-    /// Generates code for the experimental AutoBric type
-    func XXXtestAutobricerMaker() {
-        for i in 2...21 {
-            let typeList = (1...i).map({ "F\($0)" }).joined(separator: ", ")
-//            let keyList = Array(count: i, repeatedValue: "R").joinWithSeparator(", ")
-//            let mediatorList = (1...i).map({ "(bricer: (T\($0) -> Bric), bracer: (Bric throws -> T\($0)))" }).joinWithSeparator(", ")
-
-            let arglist = (1...i).map({ "_ key\($0): (key: R, getter: Self -> F\($0), writer: F\($0) -> Bric, reader: Bric throws -> F\($0))" }).joined(separator: ", ")
-
-            // (factory: (F1, F2) -> Self, _ key1: (key: String, getter: Self -> F1, writer: F1 -> Bric, reader: Bric throws -> F1), _ key2: (key: String, getter: Self -> F2, writer: F2 -> Bric, reader: Bric throws -> F2))
-
-            print("    /// Returns a pair of functions that will bric and brac this type based on the passed in factory, keys, accessors, and field mediators")
-            print("        @warn_unused_result public static func abricbrac<\(typeList), R: RawRepresentable where R.RawValue == String>(factory: (\(typeList)) -> Self, \(arglist)) -> (bricer: (Self -> Bric), bracer: (Bric throws -> Self)) {")
-            print("")
-
-
-//            let bricer: (Self -> Bric) = { value in
-//                return Bric(object: [
-//                    (key1.key, key1.writer(key1.getter(value))),
-//                    (key2.key, key2.writer(key2.getter(value)))
-//                    ])
-//            }
-//
-//            let bracer: (Bric throws -> Self) = { bric in
-//                try factory(
-//                    key1.reader(bric.brac(key: key1.key)),
-//                    key2.reader(bric.brac(key: key2.key))
-//                )
-//            }
-
-            print("        let bricer: (Self -> Bric) = { value in")
-            print("            return Bric(object: [", terminator: " ")
-            for j in 1...i {
-                print("(key\(j).key, key\(j).writer(key\(j).getter(value)))" + (j == i ? "" : ","), terminator: " ")
-            }
-            print("])")
-            print("        }")
-            print("")
-            print("        let bracer: (Bric throws -> Self) = { bric in")
-            print("            try factory(", terminator: "")
-            for j in 1...i {
-                print("key\(j).reader(bric.brac(key: key\(j).key))" + (j == i ? "" : ","), terminator: " ")
-            }
-            print(")")
-            print("        }")
-            print("")
-            print("        return (bricer, bracer)")
-            print("    }")
-            print("")
-
-        }
-    }
 
     func testMirrorBric() {
         do {
@@ -1506,98 +1407,6 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    let BreqPerformanceCount = 1_000_000
-
-    func testOptimizedBreqPerformance() {
-        let array1 = Array(repeating: true, count: BreqPerformanceCount)
-        let array2 = array1
-        measure { // 0.626 ... hmmm...
-            let allEqual = array1.breq(array2)
-            XCTAssertEqual(allEqual, true)
-        }
-    }
-
-    func testUnoptimizedBreqPerformance() {
-        let array1 = Array(repeating: true, count: BreqPerformanceCount)
-        let array2 = array1
-        measure { // 0.575
-            let allEqual = zip(array1, array2).reduce(true, { (b, vals) in b && (vals.0 == vals.1) })
-            XCTAssertEqual(allEqual, true)
-        }
-    }
-
-    func testBreqable() {
-        var bc = Person.Breqs
-        let p1 = Person(name: "Marc", male: true, age: 42, children: [])
-        var p2 = p1
-
-        XCTAssertTrue(p1.breq(p2))
-        XCTAssertEqual(bc + 1, Person.Breqs); bc = Person.Breqs
-
-        XCTAssertTrue(p1 == p2)
-        XCTAssertEqual(bc + 1, Person.Breqs); bc = Person.Breqs
-
-        p2.name = "Marcus"
-        XCTAssertTrue(p1 != p2)
-        XCTAssertEqual(bc + 1, Person.Breqs); bc = Person.Breqs
-
-        var p3 = p2
-        p3.age = nil
-
-        let ap1 = [p1, p2, p3]
-        var ap2 = [p1, p2, p3]
-
-        XCTAssertTrue(ap1 == ap2)
-        XCTAssertEqual(bc + 3, Person.Breqs); bc = Person.Breqs
-
-        ap2[1] = p1
-        XCTAssertTrue(ap1 != ap2) // only 2 calls should be made because it should stop at 2
-        XCTAssertEqual(bc + 2, Person.Breqs); bc = Person.Breqs
-
-//        let brq = Person.breq
-
-        let afp1 = UnsafeRawPointer(ap1)
-        let afp2 = UnsafeRawPointer(ap2)
-        XCTAssertTrue(afp1 == afp1, "equivalence check should be true")
-        XCTAssertTrue(afp1 != afp2, "equivalence check should be false")
-
-        // also test if optimized comparison works for dictionaries wrapped in AnyCollection
-//        let dct1: [String: Int] = ["foo": 1, "bar": 2]
-//        let dct2: [String: Int] = ["foo": 1, "bar": 2]
-//        let afdct1 = UnsafeRawPointer(dct1)
-//        let afdct2 = UnsafeRawPointer(dct2)
-//        XCTAssertTrue(afdct1 === afdct1, "equivalence check should be true")
-//        XCTAssertTrue(afdct1 !== afdct2, "equivalence check should be false")
-//        XCTAssertTrue(dct1 == dct1, "equality check should be true")
-//        XCTAssertTrue(dct1 == dct2, "equality check should be true")
-
-        bc = Person.Breqs
-
-        // now try with an array of optionals, which should utilize the BricLayer implementation
-        let aoap1: Array<Optional<Array<Person>>> = [ap1, ap2, ap1]
-        var aoap2 = aoap1
-        XCTAssertTrue(aoap1.breq(aoap2))
-//        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
-        XCTAssertEqual(bc + 0, Person.Breqs); bc = Person.Breqs // zero due to fast array equivalence checking
-
-        aoap2.append(nil)
-        XCTAssertFalse(aoap1.breq(aoap2)) // should fail due to different number of elements
-//        XCTAssertEqual(bc + 9, Person.Breqs); bc = Person.Breqs
-        XCTAssertEqual(bc + 0, Person.Breqs); bc = Person.Breqs // zero due to fast array equivalence checking
-
-        aoap2[1] = nil
-        XCTAssertFalse(aoap1.breq(aoap2)) // should short-circuit after 3
-//        XCTAssertEqual(bc + 3, Person.Breqs); bc = Person.Breqs
-        XCTAssertEqual(bc + 0, Person.Breqs); bc = Person.Breqs // zero due to fast array equivalence checking
-
-//        XCTAssertTrue(aoap1 == aoap2)
-//        XCTAssertEqual(bc + 6, Person.Breqs); bc = Person.Breqs
-
-        let x: Array<Optional<Array<Array<Int>>>> = [[[1]], [[2, 3]]]
-        XCTAssertTrue(x.breq(x))
-        // XCTAssertTrue(x == x) // also check to see if the equals implementation works
-    }
-
     func testDeepMerge() {
         XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(bric: ["bar": "baz"]), ["foo": "bar", "bar": "baz"])
         XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(bric: ["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
@@ -1678,7 +1487,7 @@ func roundTrip<C: RangeReplaceableCollection>(_ src: C) throws -> C where C.Iter
     return out
 }
 
-struct Person {
+struct Person : Equatable {
     var name: String
     var male: Bool
     var age: UInt8?
@@ -1686,9 +1495,7 @@ struct Person {
 }
 
 /// Example of using an enum in a type extension for BricBrac with automatic hashability and equatability
-extension Person : BricBrac, Equatable {
-    fileprivate static var Breqs = 0
-
+extension Person : BricBrac {
     enum Keys: String {
         case name, male, age, children
     }
@@ -1710,17 +1517,10 @@ extension Person : BricBrac, Equatable {
             children: bric.brac(key: Keys.children)
         )
     }
-
-    /// A more efficient implementation of Breqable that perform direct field comparison
-    /// ordered by the fastest comparisons to the slowest
-    func breq(_ other: Person) -> Bool {
-        Person.Breqs += 1 // for testing whether brequals is called
-        return male == other.male && age == other.age && name == other.name && children == other.children
-    }
 }
 
 
-enum Executive : BricBrac {
+enum Executive : Equatable, BricBrac {
     case human(Person)
     case robot(serialNumber: String)
 
@@ -1740,7 +1540,7 @@ enum Executive : BricBrac {
     }
 }
 
-enum CorporateStatus : String, BricBrac {
+enum CorporateStatus : String, Equatable, BricBrac {
     case `public`, `private`
 }
 
@@ -1749,7 +1549,16 @@ enum CorporateCode : Int, BricBrac {
 }
 
 /// Example of using a class and a tuple in the type itself to define the keys for BricBrac
-final class Company : BricBrac {
+final class Company : Equatable, BricBrac {
+    static func == (lhs: Company, rhs: Company) -> Bool {
+        return lhs.name == rhs.name
+            && lhs.ceo == rhs.ceo
+            && lhs.status == rhs.status
+            && lhs.customers == rhs.customers
+            && lhs.employees == rhs.employees
+            && lhs.subsidiaries == rhs.subsidiaries
+    }
+
     fileprivate static let keys = (
         name: "name",
         ceo: "ceo",
@@ -1828,69 +1637,6 @@ struct Car {
     enum Fuel : String { case regular = "r", premium = "p" }
     enum Class : String { case subcompact, compact, midsize, suv, minivan, pickup }
 }
-
-
-extension Car : AutoBricBrac {
-    /// type annotations as workaround for expression taking too long to solve (we can only get away with about 4 unannotated arguments)
-    static let autobricbrac = Car.abricbrac(Car.init,
-        Car.bbkey("manufacturer", { $0.manufacturer }) as (String, (Car) -> (String), ((String) -> Bric), ((Bric) throws -> String)),
-        Car.bbkey("model", { $0.model }) as (String, (Car) -> (String?), ((String?) -> Bric), ((Bric) throws -> String?)),
-        Car.bbkey("displ", { $0.displacement }) as (String, (Car) -> (Double), ((Double) -> Bric), ((Bric) throws -> Double)),
-        Car.bbkey("year", { $0.year }) as (String, (Car) -> (UInt16), ((UInt16) -> Bric), ((Bric) throws -> UInt16)),
-        Car.bbkey("cyl", { $0.cylinders }) as (String, (Car) -> (Car.Cylinders), ((Car.Cylinders) -> Bric), ((Bric) throws -> Car.Cylinders)),
-        Car.bbkey("trans", { $0.transmissionType }) as (String, (Car) -> (String), ((String) -> Bric), ((Bric) throws -> String)),
-        Car.bbkey("drv", { $0.drive }) as (String, (Car) -> (Car.Drive), ((Car.Drive) -> Bric), ((Bric) throws -> Car.Drive)),
-        Car.bbkey("cty", { $0.cityMileage }) as (String, (Car) -> (Int), ((Int) -> Bric), ((Bric) throws -> Int)),
-        Car.bbkey("hwy", { $0.highwayMileage }) as (String, (Car) -> (Int), ((Int) -> Bric), ((Bric) throws -> Int)),
-        Car.bbkey("fl", { $0.fuel }) as (String, (Car) -> (Car.Fuel), ((Car.Fuel) -> Bric), ((Bric) throws -> Car.Fuel)),
-        Car.bbkey("class", { $0.`class` }) as (String, (Car) -> (Car.Class), ((Car.Class) -> Bric), ((Bric) throws -> Car.Class))
-    )
-}
-
-extension Car: Hashable {
-    var hashValue: Int { return bric().hashValue }
-}
-
-struct Foo {
-    var str: String
-    var num: Array<Int?>?
-}
-
-extension Foo : AutoBricBrac {
-    static let autobricbrac = Foo.abricbrac(Foo.init,
-        Foo.bbkey("str", { $0.str }),
-        Foo.bbkey("num", { $0.num })
-    )
-}
-
-extension Car.Cylinders : BricBrac { }
-extension Car.Drive : BricBrac { }
-extension Car.Fuel : BricBrac { }
-extension Car.Class : BricBrac { }
-
-struct CarReport {
-    var year: UInt
-    var type: ReportType
-    var cars: Set<Car>
-
-    enum ReportType: String { case efficiency, style, reliability }
-}
-
-extension CarReport : AutoBricBrac {
-    static let autobricbrac = CarReport.abricbrac(CarReport.init,
-        CarReport.bbkey("year", { $0.year }),
-        CarReport.bbkey("type", { $0.type }),
-        CarReport.bbkey("cars", { $0.cars })
-    )
-}
-
-extension CarReport.ReportType : BricBrac { }
-
-//extension CGPoint : AutoBricBrac {
-//    static let autobricbrac = CGPoint.abricbrac({ (x: CGFloat, y: CGFloat) in CGPoint(x: x, y: x) },
-//        CGPoint.bbkey("x", { $0.x }),
-//        CGPoint.bbkey("y", { $0.y }))
-//}
 
 extension CGPoint : Bricable, Bracable {
     public func bric() -> Bric {

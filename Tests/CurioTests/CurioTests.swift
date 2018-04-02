@@ -411,10 +411,8 @@ public class TestSampleModel : XCTestCase {
 //            XCTAssertTrue(sample.allOfField.breq(sample.allOfField))
 //            XCTAssertTrue(sample.anyOfField.breq(sample.anyOfField))
 //            XCTAssertTrue(sample.oneOfField.breq(sample.oneOfField))
-            XCTAssertTrue(sample.notField.breq(sample.notField))
-            XCTAssertTrue(sample.simpleOneOf.breq(sample.simpleOneOf))
-//            XCTAssertTrue(sample.breq(sample))
-//            XCTAssertTrue(sample == sample)
+//            XCTAssertTrue(sample.notField.breq(sample.notField))
+            XCTAssertTrue(sample == sample)
         }
 
         do {

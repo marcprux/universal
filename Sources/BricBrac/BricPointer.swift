@@ -170,14 +170,6 @@ extension Bric.Ref : ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = .key(value)
     }
-
-    public init(extendedGraphemeClusterLiteral value: StringLiteralType) {
-        self = .key(value)
-    }
-
-    public init(unicodeScalarLiteral value: StringLiteralType) {
-        self = .key(value)
-    }
 }
 
 extension Bric.Ref : ExpressibleByIntegerLiteral {

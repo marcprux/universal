@@ -207,16 +207,6 @@ extension Bric : ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = .str(value)
     }
-
-    /// Creates some String Bric
-    public init(extendedGraphemeClusterLiteral value: StringLiteralType) {
-        self = .str(value)
-    }
-
-    /// Creates some String Bric
-    public init(unicodeScalarLiteral value: StringLiteralType) {
-        self = .str(value)
-    }
 }
 
 extension Bric : ExpressibleByDictionaryLiteral {

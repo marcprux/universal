@@ -17,6 +17,7 @@ DerivedData/
 xcuserdata/
 
 ## Other
+.*.swp
 *.moved-aside
 *.xcuserstate
 

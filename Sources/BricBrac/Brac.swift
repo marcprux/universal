@@ -388,7 +388,7 @@ public extension BracLayer where Self.BracSub : BracLayer, Self.BracSub.BracSub 
     }
 }
 
-extension Wrappable {
+extension Wrappable where Self : ExpressibleByNilLiteral {
     /// Returns this wrapper around the bracMap, or returns `.None` if the parameter is `Bric.nul`
     public static func brac(map bric: Bric, f: (Bric) throws -> Wrapped) throws -> Self {
         if case .nul = bric { return nil } // an optional is allowed to be nil
@@ -400,7 +400,7 @@ extension Optional : BracLayer {
     public typealias BracSub = Wrapped // inherits bracMap via Wrappable conformance
 }
 
-extension Indirect : BracLayer {
+extension Optionally : BracLayer {
     public typealias BracSub = Wrapped // inherits bracMap via Wrappable conformance
 }
 

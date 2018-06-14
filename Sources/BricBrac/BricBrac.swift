@@ -28,13 +28,33 @@ public extension BricBrac {
 
 /// A BricBrac that only bracs elements that do not conform to the underlying type
 /// Useful for handling "not" elements of the JSON Schema spec
-public struct NotBrac<T: Bricable> : Bricable, Bracable, Codable, ExpressibleByNilLiteral where T: Bracable {
+public struct NotBrac<T> : ExpressibleByNilLiteral {
     public init() { }
     public init(nilLiteral: ()) { }
+}
 
+extension NotBrac : Encodable where T : Encodable {
+    /// Encoding a NotBrac is a no-op
+    public func encode(to encoder: Encoder) throws { }
+}
+
+extension NotBrac : Decodable where T : Decodable {
+    public init(from decoder: Decoder) throws {
+        do {
+            _ = try T.init(from: decoder)
+        } catch {
+            self = NotBrac()
+        }
+        throw BracError.shouldNotBracError(type: T.self, path: [])
+    }
+}
+
+extension NotBrac : Bricable where T : Bricable {
     /// this type does not bric to anything
     public func bric() -> Bric { return .nul }
+}
 
+extension NotBrac : Bracable where T : Bracable {
     public static func brac(bric: Bric) throws -> NotBrac {
         do {
             _ = try T.brac(bric: bric)
@@ -47,7 +67,6 @@ public struct NotBrac<T: Bricable> : Bricable, Bracable, Codable, ExpressibleByN
 
 extension NotBrac : Equatable where T : Equatable {
     public static func ==<T>(lhs: NotBrac<T>, rhs: NotBrac<T>) -> Bool {
-        return true
+        return true // two Nots are always equal because their existance just signifies the absence of the underlying type to deserialize
     }
-
 }

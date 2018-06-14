@@ -34,7 +34,7 @@ open class CodeEmitter<T: TextOutputStream> : CodeEmitterType {
     }
 
     open func emit(_ tokens: String?...) {
-        if tokens.count == 1 && tokens.last ?? "" == "}" {
+        if tokens.count == 1 && tokens.last ?? "" == "}" && (tokens.first ?? "")?.hasPrefix("//") != true {
             level -= 1
         }
 
@@ -55,7 +55,7 @@ open class CodeEmitter<T: TextOutputStream> : CodeEmitterType {
         }
 
         // increase/decrease indentation based on trailing code blocks
-        if tokens.last ?? "" == "{" {
+        if tokens.last ?? "" == "{" && (tokens.first ?? "")?.hasPrefix("//") != true {
             level += 1
         }
 
@@ -100,7 +100,7 @@ open class CodeModule : CodeImplementationType {
     }
 
     open func emit(_ emitter: CodeEmitterType) {
-        for i in imports {
+        for i in imports + ["BricBrac"] {
             emitter.emit("import", i)
         }
 
@@ -152,31 +152,37 @@ public struct CodeExternalType : CodeType {
     public var generics : [CodeType]
     public var access: CodeAccess
     public var comments: [String] = []
+    public var defaultValue: String? = nil
+    public var shorthand: (prefix: String?, suffix: String?)?
 
-    public init(_ name: CodeTypeName, generics: [CodeType] = [], access: CodeAccess) {
+    public init(_ name: CodeTypeName, generics: [CodeType] = [], access: CodeAccess = CodeAccess.public, defaultValue: String? = nil, shorthand: (prefix: String?, suffix: String?)? = nil) {
         self.name = name
         self.generics = generics
         self.access = access
+        self.defaultValue = defaultValue
+        self.shorthand = shorthand
     }
 
     public var identifier : String {
         if generics.isEmpty {
             return name
+        } else if let shorthand = shorthand {
+            return (shorthand.prefix ?? "") + (generics.map({ $0.identifier })).joined(separator: ", ") + (shorthand.suffix ?? "")
         } else {
             return name + "<" + (generics.map({ $0.identifier })).joined(separator: ", ") + ">"
         }
     }
 
-    public var defaultValue : String? {
-        if name == "Array" { return "[]" }
-        if name == "Dictionary" { return "[:]" }
-        if name == "Optional" { return "nil" }
-        if name == "Indirect" { return "nil" }
-        if name == "NotBrac" { return "nil" }
-        if name == "Bric" { return "nil" }
-
-        return nil
-    }
+//    public var defaultValue : String? {
+//        if name == "Array" { return "[]" }
+//        if name == "Dictionary" { return "[:]" }
+//        if name == "Optional" { return "nil" }
+//        if name == "Indirect" { return "nil" }
+//        if name == "NotBrac" { return "nil" }
+//        if name == "Bric" { return "nil" }
+//
+//        return nil
+//    }
 
     public var directReferences : [CodeNamedType] {
         return [CodeTypeAlias(name: name, type: self, access: access)]
@@ -425,9 +431,9 @@ public protocol CodeImplementationType : CodeConformantType, CodeEmittable {
 }
 
 /// Reserved words as per the Swift language guide
-private let reservedWords = Set(["class", "deinit", "enum", "extension", "func", "import", "init", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript", "typealias", "var", "break", "case", "continue", "default", "do", "else", "fallthrough", "for", "if", "in", "retu", ", switch", "where", "while", "as", "dynamicType", "false", "is", "nil", "self", "Self", "super", "true", "#column", "#file", "#function", "#line", "associativity", "convenience", "dynamic", "didSet", "final", "get", "infix", "inout", "lazy", "left", "mutating", "none", "nonmutating", "optional", "override", "postfix", "precedence", "prefix", "Protocol", "required", "right", "set", "Type", "unowned", "weak", "willSet"])
+private let reservedWords = Set(["class", "deinit", "enum", "extension", "func", "import", "init", "internal", "let", "operator", "private", "protocol", "public", "static", "struct", "subscript", "typealias", "var", "break", "case", "continue", "default", "do", "else", "fallthrough", "for", "if", "in", "retu", ", switch", "where", "while", "as", "dynamicType", "false", "is", "nil", "self", "Self", "super", "true", "#column", "#file", "#function", "#line", "associativity", "convenience", "dynamic", "didSet", "final", "get", "infix", "inout", "lazy", "mutating", "nonmutating", "optional", "override", "postfix", "precedence", "prefix", "Protocol", "repeat", "required", "set", "Type", "unowned", "weak", "willSet"])
 
-// Wwift version 2.2+ allow unescaped keywords as argument names: https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
+// Swift version 2.2+ allow unescaped keywords as argument names: https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
 private let reservedArgs = Set(["inout", "var", "let"])
 
 extension String {
@@ -487,7 +493,11 @@ public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType {
 
         emitter.emit(access.rawValue, "enum", name, adoptions, "{")
         for c in cases {
-            emitter.emit("case", c.name, c.value.flatMap({ "= " + quotedString($0) }))
+            if let v = c.value, c.name == "\(v)" {
+                emitter.emit("case", c.name) // don't emit string cases when they are the same as the enum name
+            } else {
+                emitter.emit("case", c.name, c.value.flatMap({ "= " + quotedString($0) }))
+            }
         }
 
         for p in props {
@@ -606,7 +616,7 @@ public struct CodeProtocol : CodeNamedType, CodeConformantType {
     public var funcs: [CodeFunction.Declaration] = []
     public var comments: [String] = []
 
-    public init(name: CodeTypeName, access: CodeAccess, props: [CodeProperty.Declaration] = []) {
+    public init(name: CodeTypeName, access: CodeAccess = CodeAccess.public, props: [CodeProperty.Declaration] = []) {
         self.access = access
         self.name = name
         self.props = props

@@ -9,6 +9,12 @@
 import Foundation
 import CoreFoundation
 
+extension Decodable {
+    /// Any decodable can be brac'd from a Bric via the built-in decoding
+    public static func bracDecoded(bric: Bric) throws -> Self {
+        return try JSONDecoder().decode(Self.self, from: bric.stringify().data(using: .utf8) ?? Data())
+    }
+}
 
 public extension Encodable {
     /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric
@@ -24,6 +30,38 @@ public extension Encodable {
         let data = try encoder.encode(self)
         guard let str = String(data: data, encoding: .utf8) else { return .nul } // unlikely
         return try Bric.parse(str)
+    }
+}
+
+extension Bric : Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .arr(let x): try container.encode(x)
+        case .obj(let x): try container.encode(x)
+        case .str(let x): try container.encode(x)
+        case .num(let x): try container.encode(x)
+        case .bol(let x): try container.encode(x)
+        case .nul: try container.encodeNil()
+        }
+    }
+}
+
+extension Bric : Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() {
+            self = .nul
+        }  else {
+            switch try OneOf5<String, Double, Bool, Array<Bric>, Dictionary<String, Bric>>(from: decoder) {
+            case .v1(let x): self = .str(x)
+            case .v2(let x): self = .num(x)
+            case .v3(let x): self = .bol(x)
+            case .v4(let x): self = .arr(x)
+            case .v5(let x): self = .obj(x)
+            }
+        }
+
     }
 }
 

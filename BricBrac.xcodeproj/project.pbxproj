@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4932B3FE206A79B100424366 /* BricEncoder.swift */; };
+		49BD181B20CD578D00692A3D /* CurioDemoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BD181A20CD578D00692A3D /* CurioDemoModels.swift */; };
+		49BD181D20CD594600692A3D /* schemas in Resources */ = {isa = PBXBuildFile; fileRef = 49BD181C20CD594600692A3D /* schemas */; };
 		49DB613720633ABE00022D2C /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		49DB613820633AD100022D2C /* Curio+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */; };
 		49DB613920633AD100022D2C /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
@@ -22,11 +24,6 @@
 		49DB614220633B2300022D2C /* JSONParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E10201F1B858F6000171AFE /* JSONParser.swift */; };
 		49DB614320633B2300022D2C /* Structures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8930141BEA570A00F245C5 /* Structures.swift */; };
 		49DB61562063426E00022D2C /* CurioDemoModels.h in Headers */ = {isa = PBXBuildFile; fileRef = 49DB61542063426E00022D2C /* CurioDemoModels.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		49DB6165206343CF00022D2C /* schema.json in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F81BA46894002BA7F8 /* schema.json */; };
-		49DB6166206343CF00022D2C /* Food.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F51BA46894002BA7F8 /* Food.jsonschema */; };
-		49DB6167206343CF00022D2C /* Person.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F61BA46894002BA7F8 /* Person.jsonschema */; };
-		49DB6168206343CF00022D2C /* Products.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F71BA46894002BA7F8 /* Products.jsonschema */; };
-		49DB6169206343CF00022D2C /* Stuff.jsonschema in Resources */ = {isa = PBXBuildFile; fileRef = 7E75A8F91BA46894002BA7F8 /* Stuff.jsonschema */; };
 		49DB616A206344FE00022D2C /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
 		49DB616B2063451A00022D2C /* CurioDemoModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DB61522063426D00022D2C /* CurioDemoModels.framework */; };
 		49DB616D206345EB00022D2C /* DerivedSources in Resources */ = {isa = PBXBuildFile; fileRef = 49DB616C206345EA00022D2C /* DerivedSources */; };
@@ -134,6 +131,8 @@
 /* Begin PBXFileReference section */
 		4932B3FE206A79B100424366 /* BricEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BricEncoder.swift; sourceTree = "<group>"; };
 		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		49BD181A20CD578D00692A3D /* CurioDemoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurioDemoModels.swift; sourceTree = "<group>"; };
+		49BD181C20CD594600692A3D /* schemas */ = {isa = PBXFileReference; lastKnownFileType = folder; path = schemas; sourceTree = "<group>"; };
 		49DB61522063426D00022D2C /* CurioDemoModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CurioDemoModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		49DB61542063426E00022D2C /* CurioDemoModels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurioDemoModels.h; sourceTree = "<group>"; };
 		49DB61552063426E00022D2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -152,11 +151,6 @@
 		7E348EE21B9F3DD700945F86 /* Curio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Curio.h; sourceTree = "<group>"; };
 		7E34B1691C67B68300E50A71 /* Breq.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Breq.swift; sourceTree = "<group>"; };
 		7E5DA2D11B9F5F1E0013FCB9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		7E75A8F51BA46894002BA7F8 /* Food.jsonschema */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Food.jsonschema; sourceTree = "<group>"; };
-		7E75A8F61BA46894002BA7F8 /* Person.jsonschema */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Person.jsonschema; sourceTree = "<group>"; };
-		7E75A8F71BA46894002BA7F8 /* Products.jsonschema */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Products.jsonschema; sourceTree = "<group>"; };
-		7E75A8F81BA46894002BA7F8 /* schema.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = schema.json; sourceTree = "<group>"; };
-		7E75A8F91BA46894002BA7F8 /* Stuff.jsonschema */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Stuff.jsonschema; sourceTree = "<group>"; };
 		7E7F9B1C1B3615850058706A /* BricBrac.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BricBrac.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E7F9B211B3615850058706A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7E7F9B261B3615860058706A /* BricBracTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BricBracTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -236,8 +230,9 @@
 			isa = PBXGroup;
 			children = (
 				49DB61542063426E00022D2C /* CurioDemoModels.h */,
+				49BD181A20CD578D00692A3D /* CurioDemoModels.swift */,
 				49DB616C206345EA00022D2C /* DerivedSources */,
-				7E75A8F41BA46894002BA7F8 /* schemas */,
+				49BD181C20CD594600692A3D /* schemas */,
 				49DB61552063426E00022D2C /* Info.plist */,
 			);
 			path = CurioDemoModels;
@@ -266,18 +261,6 @@
 			);
 			name = CurioTests;
 			path = Tests/CurioTests;
-			sourceTree = "<group>";
-		};
-		7E75A8F41BA46894002BA7F8 /* schemas */ = {
-			isa = PBXGroup;
-			children = (
-				7E75A8F81BA46894002BA7F8 /* schema.json */,
-				7E75A8F51BA46894002BA7F8 /* Food.jsonschema */,
-				7E75A8F61BA46894002BA7F8 /* Person.jsonschema */,
-				7E75A8F71BA46894002BA7F8 /* Products.jsonschema */,
-				7E75A8F91BA46894002BA7F8 /* Stuff.jsonschema */,
-			);
-			path = schemas;
 			sourceTree = "<group>";
 		};
 		7E7F9B121B3615850058706A = {
@@ -502,6 +485,7 @@
 					49DB61512063426D00022D2C = {
 						CreatedOnToolsVersion = 9.2;
 						DevelopmentTeam = 2HFBY6N8ZN;
+						LastSwiftMigration = 0940;
 						ProvisioningStyle = Automatic;
 					};
 					7E28A5BB1B5AD5EE00A5F27F = {
@@ -554,12 +538,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49DB6169206343CF00022D2C /* Stuff.jsonschema in Resources */,
 				49DB616D206345EB00022D2C /* DerivedSources in Resources */,
-				49DB6168206343CF00022D2C /* Products.jsonschema in Resources */,
-				49DB6167206343CF00022D2C /* Person.jsonschema in Resources */,
-				49DB6166206343CF00022D2C /* Food.jsonschema in Resources */,
-				49DB6165206343CF00022D2C /* schema.json in Resources */,
+				49BD181D20CD594600692A3D /* schemas in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -599,6 +579,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49BD181B20CD578D00692A3D /* CurioDemoModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -715,6 +696,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "";
@@ -747,6 +729,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "";
@@ -814,6 +797,7 @@
 		7E28A5D11B5AD5EE00A5F27F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/CurioTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -825,6 +809,7 @@
 		7E28A5D21B5AD5EE00A5F27F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/CurioTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";

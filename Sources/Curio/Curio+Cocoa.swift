@@ -13,7 +13,7 @@ import Foundation
 public extension Curio {
     public func emit(_ module: CodeModule, name: String, dir: String) throws {
         let locpath = (dir as NSString).appendingPathComponent(name)
-        module.imports.append("BricBrac")
+        if generateBricBrac { module.imports.append("BricBrac") }
 
         let emitter = CodeEmitter(stream: "")
         module.emit(emitter)

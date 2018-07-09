@@ -428,27 +428,20 @@ class BricBracTests : XCTestCase {
 
     func testOutputNulls() {
         let bric: Bric = ["num": 1, "nul": nil]
-        // note that key order differs on MacOS and iOS, probably due to different hashing
-        #if os(macOS)
-            XCTAssertEqual("{\"num\":1,\"nul\":null}", bric.stringify())
-        #endif
-
-        #if os(iOS)
-            XCTAssertEqual("{\"nul\":null,\"num\":1}", bric.stringify())
-        #endif
+        XCTAssertEqual("{\"nul\":null,\"num\":1}", bric.stringify())
     }
 
     func testBricBracSerialization() {
-        let json = "{\"name\":\"Apple\",\"status\":\"public\",\"customers\":[{\"name\":\"Emily\",\"age\":41,\"male\":false,\"children\":[\"Bebe\"]}],\"ceo\":{\"name\":\"Tim\",\"age\":50,\"male\":true,\"children\":[]},\"employees\":[{\"name\":\"Marc\",\"age\":41,\"male\":true,\"children\":[\"Bebe\"]}]}"
+        let json = """
+{"customers":[{"age":41,"male":false,"children":["Bebe"],"name":"Emily"}],"status":"public","employees":[{"age":41,"male":true,"children":["Bebe"],"name":"Marc"}],"ceo":{"age":50,"male":true,"children":[],"name":"Tim"},"name":"Apple"}
+"""
 
         do {
             let bric: Bric = ["name": "Apple", "ceo": ["name": "Tim", "age": 50, "male": true, "children": []], "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]]]
 
             let str = bric.stringify()
             // note that key order differs on MacOS and iOS, probably due to different hashing
-            #if os(macOS)
-                XCTAssertEqual(str, json)
-            #endif
+            XCTAssertEqual(str, json)
         }
 
         do { // test quote serialization

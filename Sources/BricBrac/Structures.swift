@@ -19,12 +19,16 @@ public extension WrapperType where Wrapped : Defaultable {
         get { return self.flatMap({ $0 }) ?? Wrapped.init(defaulting: ()) }
         set { self = Self(newValue) }
     }
-
 }
 
 extension Array : Defaultable { public init(defaulting: Void) { self.init() } }
 extension Set : Defaultable { public init(defaulting: Void) { self.init() } }
 extension Dictionary : Defaultable { public init(defaulting: Void) { self.init() } }
+
+public extension Defaultable where Self : Equatable {
+    /// Returns true if this instance is the same as the defaulted value
+    public var isDefaultedValue: Bool { return self == Self.init(defaulting: ()) }
+}
 
 /// A WrapperType is able to map itself through a wrapped optional
 public protocol WrapperType {

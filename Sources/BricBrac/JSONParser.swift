@@ -632,16 +632,15 @@ public final class JSONParser {
                 }
 
                 var hex: UInt32 = 0
-                for (b, h) in [
-                    (12, scalars[scalars.index(i, offsetBy: 1)].value),
-                    (8, scalars[scalars.index(i, offsetBy: 2)].value),
-                    (4, scalars[scalars.index(i, offsetBy: 3)].value),
-                    (0, scalars[scalars.index(i, offsetBy: 4)].value)
-                    ] {
+                let bh1: (UInt32, UInt32) = (UInt32(12), scalars[scalars.index(i, offsetBy: 1)].value)
+                let bh2: (UInt32, UInt32) = (UInt32(8), scalars[scalars.index(i, offsetBy: 2)].value)
+                let bh3: (UInt32, UInt32) = (UInt32(4), scalars[scalars.index(i, offsetBy: 3)].value)
+                let bh4: (UInt32, UInt32) = (UInt32(0), scalars[scalars.index(i, offsetBy: 4)].value)
+                for (b, h) in [bh1, bh2, bh3, bh4 ] {
                         switch h {
-                        case 0x30...0x39: hex += (h - 0x30) << UInt32(b) // 0-9
-                        case 0x41...0x46: hex += (10 + h - 0x41) << UInt32(b) // A-F
-                        case 0x61...0x66: hex += (10 + h - 0x61) << UInt32(b) // a-f
+                        case 0x30...0x39: hex += (h - 0x30) << b // 0-9
+                        case 0x41...0x46: hex += (10 + h - 0x41) << b // A-F
+                        case 0x61...0x66: hex += (10 + h - 0x61) << b // a-f
                         default: throw ParseError(msg: "Invalid hex digit in unicode escape", line: line, column: column + scalars.distance(from: start, to: i))
                         }
                 }
@@ -650,7 +649,9 @@ public final class JSONParser {
                     highSurrogate = hex // save the high surrogate and move along
                 } else if hex >= 0xDC00 && hex <= 0xDFFF { // low surrogates
                     if let highSurrogate = highSurrogate {
-                        let codepoint: UInt32 = ((highSurrogate - 0xD800) << 10) + (hex - 0xDC00) + 0x010000
+                        let s1: UInt32 = (highSurrogate - 0xD800) << 10
+                        let s2: UInt32 = hex - 0xDC00
+                        let codepoint: UInt32 = s1 + s2 + 0x010000
                         slice.append(UnicodeScalar(codepoint)!)
                     } else {
                         throw ParseError(msg: "Low surrogate not preceeded by high surrogate", line: line, column: column + scalars.distance(from: start, to: i))

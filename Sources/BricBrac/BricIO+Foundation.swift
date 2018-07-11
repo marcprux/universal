@@ -17,6 +17,12 @@ extension Decodable {
 }
 
 public extension Encodable {
+    /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)
+    public func encodedString(encoder: (Self) throws -> (Data) = JSONEncoder().encode) rethrows -> String {
+        let data = try encoder(self)
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
     /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric
     public func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
         let encoder = JSONEncoder()

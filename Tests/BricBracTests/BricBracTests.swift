@@ -1700,11 +1700,96 @@ extension BricBracTests {
     }
 }
 
-
-
 extension Decodable where Self: Encodable, Self: Decodable {
     /// Returns a deserialized copy of this instance's encoded data
     public func roundtripped(encoder: (Self) throws -> (Data) = JSONEncoder().encode, decoder: (Self.Type, Data) throws -> (Self) = JSONDecoder().decode) rethrows -> Self {
         return try decoder(Self.self, encoder(self))
+    }
+}
+
+/// A ColumnMap is a `Succinct data structure` representing a list of arbitrary JSON objects.
+/// It is optimized for object lists that share many key names and have a number of similar
+/// values. It encodes each value a single time along with the compact list of ranges
+/// that the values occupy in the list.
+public struct ColumnMap<T : Codable & Hashable> : Codable, Equatable {
+    /// The total number of rows this represents; we need to store this since the list map contain trailing empty dictionaries, which wouldn't be other expressed in the column map
+    public var count: Int
+    /// The map of column names to the set of value items & indices
+    public var columns: [String: Set<ColumnValue>]
+
+    public struct ColumnValue : Codable, Equatable, Hashable {
+        /// The value represented by this value
+        public var value: T
+        /// The ranges indicate where in the column array the values will be placed
+        /// TODO: change to a compact serialized representation, since
+        /// the default IndexSet serialization is somewhat verbose: {"indexes":[{"location":0,"length":1}]}
+        /// and doesn't have a guarantee of maintaining serialization future-compatibility
+        public var ranges: IndexSet
+
+        public var hashValue: Int { return value.hashValue }
+    }
+
+    /// Dehydrates a list of JSON objects into an optimized column map
+    public static func fromObjectList(_ list: [[String: T]]) -> ColumnMap {
+        // our intermediate structure is keyed in name then the value; we won't be able
+        // to store it like this because JSON dictionaries need to be keyed by strings
+        var keyValueSet: [String: [T: IndexSet]] = [:]
+
+        for (index, keyValues) in list.enumerated() {
+            for (key, value) in keyValues {
+                var keyColumns = keyValueSet[key] ?? [:]
+                var valueIndices = keyColumns[value] ?? []
+                valueIndices.insert(index)
+                keyColumns[value] = valueIndices
+                keyValueSet[key] = keyColumns
+            }
+        }
+
+        // now convert the [Bric: IndexSet] values into ColumnValue instances
+        let columns: [String: Set<ColumnValue>] = keyValueSet.mapValues { Set($0.map(ColumnValue.init)) }
+
+        return ColumnMap(count: list.count, columns: columns)
+    }
+
+    /// Hydrate this column map as a traditional list of JSON objects
+    public func toObjectList() -> [[String: T]] {
+        var rows: [[String: T]] = Array(repeating: [:], count: count)
+
+        for (key, value) in columns {
+            for colValue in value {
+                for index in colValue.ranges {
+                    rows[index][key] = colValue.value
+                }
+            }
+        }
+
+        return rows
+    }
+}
+
+extension BricBracTests {
+    public func testColumnMap() throws {
+        let values: [[String: Bric]] = [
+            ["foo": 1, "bar": "X"],
+            ["foo": 2, "bar": nil],
+            [:],
+            ["foo": 2, "bar": []],
+            [:],
+            ["foo": 3, "bar": [:]],
+            ["foo": 3, "bar": ["a": "b"]],
+            ["foo": 3, "bar": ["a": ["b", "c"]]],
+            ["foo": 1, "bar": 1.234],
+            ["foo": 1, "bar": 1.234],
+            ["foo": 1, "bar": true],
+            ["foo": 1, "baz": true, "biz": 0.01],
+            [:],
+        ]
+
+        let cl = ColumnMap.fromObjectList(values)
+        print("encoded: \(try cl.bricEncoded().stringify())")
+
+        let values2 = cl.toObjectList()
+        XCTAssertEqual(values2, values)
+
     }
 }

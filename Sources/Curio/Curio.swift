@@ -78,6 +78,9 @@ public struct Curio {
     public var accessor: ([CodeTypeName])->(CodeAccess) = { _ in .`public` }
     public var renamer: ([CodeTypeName], String)->(CodeTypeName?) = { (parents, id) in nil }
 
+    /// The list of type names to exclude from the generates file
+    public var excludes: Set<CodeTypeName> = []
+
     /// The case of the generated enums
     public var enumCase: EnumCase = .lower
 
@@ -1205,7 +1208,10 @@ public struct Curio {
 
         let rootSchema = schemas.filter({ $0.0 == rootName }).first?.1
         let module = CodeModule()
-        
+
+        // lastly we filter out all the excluded types we want to skip
+        types = types.filter({ !excludes.contains($0.name) })
+
         if let rootSchema = rootSchema {
             let code = try reify(rootSchema, id: rootName ?? "Schema", parents: [])
             if var root = code as? CodeStateType {
@@ -1264,11 +1270,11 @@ public extension Schema {
     }
 
     /// Parse the given JSON info an array of resolved schema references, maintaining property order from the source JSON
-    public static func parse(_ source: String, rootName: String) throws -> [(String, Schema)] {
+    public static func parse(_ source: String, rootName: String?) throws -> [(String, Schema)] {
         return try generate(impute(source), rootName: rootName)
     }
 
-    public static func generate(_ json: Bric, rootName: String) throws -> [(String, Schema)] {
+    public static func generate(_ json: Bric, rootName: String?) throws -> [(String, Schema)] {
         let refmap = try json.resolve()
 
         var refschema : [String : Schema] = [:]
@@ -1281,7 +1287,9 @@ public extension Schema {
         }
 
         let schema = try Schema.bracDecoded(bric: json)
-        schemas.append((rootName, schema))
+        if let rootName = rootName {
+            schemas.append((rootName, schema))
+        }
         return schemas
     }
 

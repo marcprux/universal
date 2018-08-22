@@ -26,7 +26,6 @@
 		49DB61562063426E00022D2C /* CurioDemoModels.h in Headers */ = {isa = PBXBuildFile; fileRef = 49DB61542063426E00022D2C /* CurioDemoModels.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		49DB616A206344FE00022D2C /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
 		49DB616B2063451A00022D2C /* CurioDemoModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49DB61522063426D00022D2C /* CurioDemoModels.framework */; };
-		49DB616D206345EB00022D2C /* DerivedSources in Resources */ = {isa = PBXBuildFile; fileRef = 49DB616C206345EA00022D2C /* DerivedSources */; };
 		49DB616E2063467600022D2C /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
 		7E1020201B858F6000171AFE /* JSONParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E10201F1B858F6000171AFE /* JSONParser.swift */; };
 		7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */; };
@@ -136,7 +135,6 @@
 		49DB61522063426D00022D2C /* CurioDemoModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CurioDemoModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		49DB61542063426E00022D2C /* CurioDemoModels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurioDemoModels.h; sourceTree = "<group>"; };
 		49DB61552063426E00022D2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		49DB616C206345EA00022D2C /* DerivedSources */ = {isa = PBXFileReference; lastKnownFileType = text; name = DerivedSources; path = ../../Intermediates.noindex/BricBrac.build/Debug/CurioDemoModels.build/DerivedSources; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E10201F1B858F6000171AFE /* JSONParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONParser.swift; sourceTree = "<group>"; };
 		7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricBrac.swift; sourceTree = "<group>"; };
 		7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Curio.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -231,7 +229,6 @@
 			children = (
 				49DB61542063426E00022D2C /* CurioDemoModels.h */,
 				49BD181A20CD578D00692A3D /* CurioDemoModels.swift */,
-				49DB616C206345EA00022D2C /* DerivedSources */,
 				49BD181C20CD594600692A3D /* schemas */,
 				49DB61552063426E00022D2C /* Info.plist */,
 			);
@@ -538,7 +535,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49DB616D206345EB00022D2C /* DerivedSources in Resources */,
 				49BD181D20CD594600692A3D /* schemas in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

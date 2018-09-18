@@ -327,6 +327,7 @@ public struct Curio {
         }
 
         let codingKey = CodeProtocol(name: "CodingKey")
+        let caseIterable = CodeProtocol(name: "CaseIterable")
 
         let bricable = CodeProtocol(name: "Bricable")
         let bricfun = CodeFunction.Declaration(name: "bric", access: accessor(parents), instance: true, returns: CodeTuple(elements: [(name: nil, type: BricType, value: nil, anon: false)]))
@@ -813,6 +814,7 @@ public struct Curio {
                 if !cases.isEmpty {
                     var keysType = CodeSimpleEnum(name: keyName, access: accessor(parents), cases: cases)
                     keysType.conforms.append(codingKey)
+                    keysType.conforms.append(caseIterable)
 
                     if bricState {
                         // also add an "asList" static field for key enumeration
@@ -1128,6 +1130,7 @@ public struct Curio {
                 code.conforms.append(codable)
             }
 
+            code.conforms.append(caseIterable)
             return code
         }
 
@@ -1401,6 +1404,7 @@ extension Curio {
         var useAnyOfEnums: Bool?
         var anyOfAsOneOf: Bool?
         var generateEquals: Bool?
+        var generateHashable: Bool?
         var generateCodable: Bool?
         var generateBricBrac: Bool?
 
@@ -1433,6 +1437,8 @@ extension Curio {
                 anyOfAsOneOf = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-generateEquals":
                 generateEquals = (args.next() ?? "true").hasPrefix("t") == true ? true : false
+            case "-generateHashable":
+                generateHashable = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-generateCodable":
                 generateCodable = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-generateBricBrac":
@@ -1471,6 +1477,7 @@ extension Curio {
             if let useAnyOfEnums = useAnyOfEnums { curio.useAnyOfEnums = useAnyOfEnums }
             if let anyOfAsOneOf = anyOfAsOneOf { curio.anyOfAsOneOf = anyOfAsOneOf }
             if let generateEquals = generateEquals { curio.generateEquals = generateEquals }
+            if let generateHashable = generateHashable { curio.generateHashable = generateHashable }
             if let generateCodable = generateCodable { curio.generateCodable = generateCodable }
             if let generateBricBrac = generateBricBrac { curio.generateBricBrac = generateBricBrac }
 

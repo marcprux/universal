@@ -1,6 +1,6 @@
 import BricBrac
 
-public struct Thing : Equatable, Codable {
+public struct Thing : Equatable, Hashable, Codable {
     public var weight: Int?
 
     public init(weight: Int? = .none) {

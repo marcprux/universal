@@ -41,6 +41,9 @@ public struct Curio {
     /// whether to generate equatable functions for each type
     public var generateEquals = true
 
+    /// whether to generate hashable functions for each type
+    public var generateHashable = true
+
     /// Whether to output union types as a typealias to a BricBrac.OneOf<T1, T2, ...> enum
     public var useOneOfEnums = true
 
@@ -336,6 +339,7 @@ public struct Curio {
         let bracfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "brac", access: self.accessor(parents), instance: false, exception: true, arguments: CodeTuple(elements: [(name: "bric", type: BricType, value: nil, anon: false)]), returns: CodeTuple(elements: [selfType($0, name: nil)])) }
 
         let equatable = CodeProtocol(name: "Equatable")
+        let hashable = CodeProtocol(name: "Hashable")
 
         let codable = CodeProtocol(name: "Codable")
         let encodefun = CodeFunction.Declaration(name: "encode", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "to encoder", type: EncoderType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
@@ -496,6 +500,10 @@ public struct Curio {
                 code.conforms.append(equatable)
             }
 
+            if generateHashable {
+                code.conforms.append(hashable)
+            }
+
             if generateCodable {
                 code.conforms.append(codable)
                 code.funcs.append(CodeFunction.Implementation(declaration: encodefun, body: encodebody, comments: []))
@@ -619,6 +627,10 @@ public struct Curio {
                 assoc.conforms.append(equatable)
             }
 
+            if generateHashable {
+                assoc.conforms.append(hashable)
+            }
+
             if generateCodable {
                 assoc.conforms.append(codable)
             }
@@ -689,12 +701,14 @@ public struct Curio {
                         proptype = assoc
 
                     case .some(.v1(.array)):
-                        switch prop.items {
-                        case .none:
+                        // a set of all the items, eliminating duplicates; this eliminated redundant schema declarations in the items list
+                        let items: Set<Schema> = Set(prop.items?.v2 ?? prop.items?.v1.flatMap({ [$0] }) ?? [])
+
+                        switch items.count {
+                        case 0:
                             proptype = arrayType(BricType)
-                        case .some(.v2):
-                            throw CodegenErrors.typeArrayNotSupported
-                        case .some(.v1(let item)):
+                        case 1:
+                            let item = items.first!
                             if let ref = item.ref {
                                 proptype = arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents)))
                             } else {
@@ -702,6 +716,8 @@ public struct Curio {
                                 code.nestedTypes.append(type)
                                 proptype = arrayType(type)
                             }
+                        default:
+                            throw CodegenErrors.typeArrayNotSupported
                         }
 
                     default:
@@ -1002,6 +1018,10 @@ public struct Curio {
                 code.conforms.append(equatable)
             }
 
+            if generateHashable {
+                code.conforms.append(hashable)
+            }
+
             if generateCodable {
                 code.conforms.append(codable)
             }
@@ -1043,6 +1063,7 @@ public struct Curio {
             case .none:
                 return CodeTypeAlias(name: typeName(parents, id), type: arrayType(BricType), access: accessor(parents))
             case .some(.v2):
+                print("### typeArrayNotSupported 2")
                 throw CodegenErrors.typeArrayNotSupported
             case .some(.v1(let item)):
                 if let ref = item.ref {
@@ -1068,6 +1089,10 @@ public struct Curio {
             for e in values {
                 if case .str(let evalue) = e {
                     code.cases.append(CodeCaseSimple<String>(name: typeName(parents, evalue, capitalize: enumCase == .upper), value: evalue))
+                } else if case .num(let evalue) = e {
+                    // FIXME: this isn't right, but we don't currently support mixed-type simple enums
+                    code.cases.append(CodeCaseSimple<String>(name: typeName(parents, evalue.description, capitalize: enumCase == .upper), value: evalue.description))
+
                 } else {
                     throw CodegenErrors.nonStringEnumsNotSupported
                 }
@@ -1093,6 +1118,10 @@ public struct Curio {
 
             if generateEquals {
                 code.conforms.append(equatable)
+            }
+
+            if generateHashable {
+                code.conforms.append(hashable)
             }
 
             if generateCodable {

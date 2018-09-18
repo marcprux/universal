@@ -204,7 +204,7 @@ extension Indirect : Hashable where Wrapped : Hashable {
 
 
 /// An empty struct that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
-public struct ExplicitNull : Codable, Equatable, ExpressibleByNilLiteral {
+public struct ExplicitNull : Codable, Equatable, Hashable, ExpressibleByNilLiteral {
     public init(nilLiteral: ()) { }
     public init() { }
 
@@ -346,6 +346,15 @@ extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable {
     }
 }
 
+extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        }
+    }
+}
+
 /// The protocol of a type that can contain one out of 3 or more exclusive options
 public protocol OneOf3Type : OneOf2Type {
     associatedtype T3
@@ -428,6 +437,16 @@ extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
         case (.v2(let a), .v2(let b)): return a == b
         case (.v3(let a), .v3(let b)): return a == b
         default: return false
+        }
+    }
+}
+
+extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
         }
     }
 }
@@ -525,6 +544,17 @@ extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
         case (.v3(let a), .v3(let b)): return a == b
         case (.v4(let a), .v4(let b)): return a == b
         default: return false
+        }
+    }
+}
+
+extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
+        case .v4(let x): return x.hashValue
         }
     }
 }
@@ -629,6 +659,18 @@ extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
         case (.v4(let a), .v4(let b)): return a == b
         case (.v5(let a), .v5(let b)): return a == b
         default: return false
+        }
+    }
+}
+
+extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
+        case .v4(let x): return x.hashValue
+        case .v5(let x): return x.hashValue
         }
     }
 }
@@ -744,6 +786,19 @@ extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
         case (.v5(let a), .v5(let b)): return a == b
         case (.v6(let a), .v6(let b)): return a == b
         default: return false
+        }
+    }
+}
+
+extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
+        case .v4(let x): return x.hashValue
+        case .v5(let x): return x.hashValue
+        case .v6(let x): return x.hashValue
         }
     }
 }
@@ -869,6 +924,20 @@ extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
         case (.v6(let a), .v6(let b)): return a == b
         case (.v7(let a), .v7(let b)): return a == b
         default: return false
+        }
+    }
+}
+
+extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
+        case .v4(let x): return x.hashValue
+        case .v5(let x): return x.hashValue
+        case .v6(let x): return x.hashValue
+        case .v7(let x): return x.hashValue
         }
     }
 }
@@ -1000,6 +1069,21 @@ extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
         case (.v7(let a), .v7(let b)): return a == b
         case (.v8(let a), .v8(let b)): return a == b
         default: return false
+        }
+    }
+}
+
+extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
+        case .v4(let x): return x.hashValue
+        case .v5(let x): return x.hashValue
+        case .v6(let x): return x.hashValue
+        case .v7(let x): return x.hashValue
+        case .v8(let x): return x.hashValue
         }
     }
 }
@@ -1141,6 +1225,22 @@ extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
         case (.v8(let a), .v8(let b)): return a == b
         case (.v9(let a), .v9(let b)): return a == b
         default: return false
+        }
+    }
+}
+
+extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
+        case .v4(let x): return x.hashValue
+        case .v5(let x): return x.hashValue
+        case .v6(let x): return x.hashValue
+        case .v7(let x): return x.hashValue
+        case .v8(let x): return x.hashValue
+        case .v9(let x): return x.hashValue
         }
     }
 }
@@ -1294,6 +1394,23 @@ extension OneOf10 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatab
     }
 }
 
+extension OneOf10 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable, T10 : Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .v1(let x): return x.hashValue
+        case .v2(let x): return x.hashValue
+        case .v3(let x): return x.hashValue
+        case .v4(let x): return x.hashValue
+        case .v5(let x): return x.hashValue
+        case .v6(let x): return x.hashValue
+        case .v7(let x): return x.hashValue
+        case .v8(let x): return x.hashValue
+        case .v9(let x): return x.hashValue
+        case .v10(let x): return x.hashValue
+        }
+    }
+}
+
 
 
 /// An error that indicates that multiple errors occured when decoding the type;
@@ -1341,9 +1458,9 @@ extension AllOf2 : Decodable where T1 : Decodable, T2 : Decodable {
 }
 
 extension AllOf2 : Equatable where T1 : Equatable, T2 : Equatable {
-    public static func ==(lhs: AllOf2<T1, T2>, rhs: AllOf2<T1, T2>) -> Bool {
-        return lhs.v1 == rhs.v1 && lhs.v2 == rhs.v2
-    }
+}
+
+extension AllOf2 : Hashable where T1 : Hashable, T2 : Hashable {
 }
 
 /// Stopgap implementation of AllOf3 via typealias to mutliple AllOf2
@@ -1377,7 +1494,7 @@ public typealias AllOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> = AllOf2<T1, A
 public protocol AnyOf : SomeOf {
 }
 
-/// A simple sum type that must conform to both v1 and v2
+/// A simple sum type that must conform to either v1 or v2
 public struct AnyOf2<T1, T2> : AnyOf {
     public var v1: T1?
     public var v2: T2?
@@ -1415,9 +1532,9 @@ extension AnyOf2 : Decodable where T1 : Decodable, T2 : Decodable {
 }
 
 extension AnyOf2 : Equatable where T1 : Equatable, T2 : Equatable {
-    public static func ==(lhs: AnyOf2<T1, T2>, rhs: AnyOf2<T1, T2>) -> Bool {
-        return lhs.v1 == rhs.v1 && lhs.v2 == rhs.v2
-    }
+}
+
+extension AnyOf2 : Hashable where T1 : Hashable, T2 : Hashable {
 }
 
 /// Stopgap implementation of AnyOf3 via typealias to mutliple AnyOf2

@@ -8,7 +8,7 @@
 
 /// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
 
-public struct Schema : Codable {
+public struct Schema : Codable, Equatable, Hashable {
     public var ref: String? = nil
     public var type: _Type? = nil
     public var id: String? = nil // format: uri

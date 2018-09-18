@@ -1,6 +1,6 @@
 import BricBrac
 
-public struct SampleModel : Equatable, Codable {
+public struct SampleModel : Equatable, Hashable, Codable {
     public var allOfField: AllOfField
     public var anyOfField: AnyOfField
     public var oneOfField: OneOfFieldChoice
@@ -37,7 +37,7 @@ public struct SampleModel : Equatable, Codable {
         public typealias Sum = AllOf2<FirstAll, SecondAll>
 
         /// FirstAll
-        public struct FirstAll : Equatable, Codable {
+        public struct FirstAll : Equatable, Hashable, Codable {
             public var a1: Int
             public var a2: String
 
@@ -53,7 +53,7 @@ public struct SampleModel : Equatable, Codable {
         }
 
         /// SecondAll
-        public struct SecondAll : Equatable, Codable {
+        public struct SecondAll : Equatable, Hashable, Codable {
             public var a3: Bool
             public var a4: Double
 
@@ -75,7 +75,7 @@ public struct SampleModel : Equatable, Codable {
         public typealias Some = AnyOf2<FirstAny?, SecondAny?>
 
         /// FirstAny
-        public struct FirstAny : Equatable, Codable {
+        public struct FirstAny : Equatable, Hashable, Codable {
             public var b1: Int
             public var b2: String
 
@@ -91,7 +91,7 @@ public struct SampleModel : Equatable, Codable {
         }
 
         /// SecondAny
-        public struct SecondAny : Equatable, Codable {
+        public struct SecondAny : Equatable, Hashable, Codable {
             public var b3: Bool
             public var b4: Double
 
@@ -113,7 +113,7 @@ public struct SampleModel : Equatable, Codable {
         public typealias Choice = OneOf2<FirstOne, SecondOne>
 
         /// FirstOne
-        public struct FirstOne : Equatable, Codable {
+        public struct FirstOne : Equatable, Hashable, Codable {
             public var c1: Int
             public var c2: String
 
@@ -129,7 +129,7 @@ public struct SampleModel : Equatable, Codable {
         }
 
         /// SecondOne
-        public struct SecondOne : Equatable, Codable {
+        public struct SecondOne : Equatable, Hashable, Codable {
             public var c3: Bool
             public var c4: Double
 
@@ -146,7 +146,7 @@ public struct SampleModel : Equatable, Codable {
     }
 
     /// Should not escape keyword arguments
-    public struct KeywordFields : Equatable, Codable {
+    public struct KeywordFields : Equatable, Hashable, Codable {
         public var `case`: String?
         public var `for`: String?
         public var `in`: String?
@@ -176,7 +176,7 @@ public struct SampleModel : Equatable, Codable {
         }
     }
 
-    public struct ListItem : Equatable, Codable {
+    public struct ListItem : Equatable, Hashable, Codable {
         public var prop: Prop
 
         public init(prop: Prop = .value) {
@@ -187,12 +187,12 @@ public struct SampleModel : Equatable, Codable {
             case prop
         }
 
-        public enum Prop : String, Equatable, Codable {
+        public enum Prop : String, Equatable, Hashable, Codable {
             case value
         }
     }
 
-    public struct Nested1 : Equatable, Codable {
+    public struct Nested1 : Equatable, Hashable, Codable {
         public var nested2: Nested2
 
         public init(nested2: Nested2) {
@@ -203,7 +203,7 @@ public struct SampleModel : Equatable, Codable {
             case nested2
         }
 
-        public struct Nested2 : Equatable, Codable {
+        public struct Nested2 : Equatable, Hashable, Codable {
             public var nested3: Nested3
 
             public init(nested3: Nested3) {
@@ -214,7 +214,7 @@ public struct SampleModel : Equatable, Codable {
                 case nested3
             }
 
-            public struct Nested3 : Equatable, Codable {
+            public struct Nested3 : Equatable, Hashable, Codable {
                 public var nested4: Nested4
 
                 public init(nested4: Nested4) {
@@ -225,7 +225,7 @@ public struct SampleModel : Equatable, Codable {
                     case nested4
                 }
 
-                public struct Nested4 : Equatable, Codable {
+                public struct Nested4 : Equatable, Hashable, Codable {
                     public var nested5: Nested5
 
                     public init(nested5: Nested5) {
@@ -236,7 +236,7 @@ public struct SampleModel : Equatable, Codable {
                         case nested5
                     }
 
-                    public struct Nested5 : Equatable, Codable {
+                    public struct Nested5 : Equatable, Hashable, Codable {
                         public var single: Single
 
                         public init(single: Single = .value) {
@@ -247,7 +247,7 @@ public struct SampleModel : Equatable, Codable {
                             case single
                         }
 
-                        public enum Single : String, Equatable, Codable {
+                        public enum Single : String, Equatable, Hashable, Codable {
                             case value
                         }
                     }

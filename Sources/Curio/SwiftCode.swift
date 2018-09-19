@@ -113,7 +113,7 @@ open class CodeModule : CodeImplementationType {
             f.emit(emitter)
         }
 
-        for inner in nestedTypes {
+        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -509,7 +509,7 @@ public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType {
             f.emit(emitter)
         }
 
-        for inner in nestedTypes {
+        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -585,7 +585,7 @@ public struct CodeEnum : CodeNamedType, CodeImplementationType {
             f.emit(emitter)
         }
 
-        for inner in nestedTypes {
+        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -702,7 +702,7 @@ public struct CodeStruct : CodeStateType {
             f.emit(emitter)
         }
 
-        for inner in nestedTypes {
+        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -766,7 +766,7 @@ public struct CodeClass : CodeStateType {
             f.emit(emitter)
         }
         
-        for inner in nestedTypes {
+        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
             emitter.emit("")
             inner.emit(emitter)
         }

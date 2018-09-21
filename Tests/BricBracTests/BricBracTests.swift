@@ -1380,6 +1380,13 @@ class BricBracTests : XCTestCase {
             let two = OneOf2<String, String>(t2: "xxx")
             XCTAssertNotEqual(one, two)
         }
+
+        do {
+            var manyOrOneString = OneOf2<[String], String>("foo")
+            guard case .v2 = manyOrOneString else { return XCTFail("wrong type before swap array") }
+            manyOrOneString.swapped.array.removeAll()
+            guard case .v1 = manyOrOneString else { return XCTFail("wrong type after swap array") }
+        }
     }
 
     let RefPerformanceCount = 100000

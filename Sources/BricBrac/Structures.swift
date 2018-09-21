@@ -355,6 +355,49 @@ extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable {
     }
 }
 
+/// Common case of OneOf2<String, [String]>, where we can get or set values as an array
+extension OneOf2 where T2 == Array<T1> {
+    /// Access the underlying values as an array regardless of whether it is the single or multiple case
+    public var array: [T1] {
+        get {
+            switch self {
+            case .v1(let x):
+                return [x]
+            case .v2(let x):
+                return x
+            }
+        }
+
+        set {
+            if let singleValue = newValue.first, newValue.count == 1 {
+                self = .v1(singleValue)
+            } else {
+                self = .v2(newValue)
+            }
+        }
+    }
+}
+
+/// Reversed the OneOf2 ordering
+extension OneOf2 {
+    /// Returns a swapped instance of this OneOf2<T1, T2> as a OneOf2<T2, T1>
+    public var swapped: OneOf2<T2, T1> {
+        get {
+            switch self {
+            case .v1(let x): return OneOf2<T2, T1>(x)
+            case .v2(let x): return OneOf2<T2, T1>(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = OneOf2<T1, T2>(x)
+            case .v2(let x): self = OneOf2<T1, T2>(x)
+            }
+        }
+    }
+}
+
 /// The protocol of a type that can contain one out of 3 or more exclusive options
 public protocol OneOf3Type : OneOf2Type {
     associatedtype T3

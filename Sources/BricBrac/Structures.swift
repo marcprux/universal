@@ -21,6 +21,38 @@ public extension WrapperType where Wrapped : Defaultable {
     }
 }
 
+public extension Array where Element : Defaultable {
+    public var defaultedFirst: Element {
+        get { return self.first ?? Element.init(defaulting: ()) }
+        set { self = [newValue] + dropFirst() }
+    }
+
+    public var defaultedLast: Element {
+        get { return self.last ?? Element.init(defaulting: ()) }
+        set { self = dropLast() + [newValue] }
+    }
+
+    public subscript(defaulted index: Int) -> Element {
+        get { return self.dropFirst(index).first ?? Element.init(defaulting: ()) }
+
+        set {
+            var array = self
+            while array.count <= index {
+                array.append(Element.init(defaulting: ()))
+            }
+            array[index] = newValue
+            self = array
+        }
+    }
+}
+
+public extension Set where Element : Defaultable {
+    public var defaultedAny: Element {
+        get { return self.first ?? Element.init(defaulting: ()) }
+        set { self = Set(dropFirst() + [newValue]) }
+    }
+}
+
 extension Array : Defaultable { public init(defaulting: Void) { self.init() } }
 extension Set : Defaultable { public init(defaulting: Void) { self.init() } }
 extension Dictionary : Defaultable { public init(defaulting: Void) { self.init() } }

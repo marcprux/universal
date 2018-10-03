@@ -21,6 +21,22 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual(bric, bric2)
     }
 
+    /// Tests that the `defaulted` var of Optional, Array, Dictionary, and Set all work as expected
+    func testDefaulting() {
+        var stuff: Array<Set<[String]>> = []
+        XCTAssertEqual(stuff, [])
+        stuff.defaultedLast.defaultedAny = ["Foo"]
+        XCTAssertEqual(stuff, [[["Foo"]]])
+        stuff.defaultedFirst.defaultedAny = ["Bar"]
+        XCTAssertEqual(stuff, [[["Bar"]]])
+        stuff[defaulted: 4].defaultedAny.append("Baz")
+        XCTAssertEqual(stuff, [[["Bar"]], [], [], [], [["Baz"]]])
+        stuff[defaulted: 0].defaultedAny.insert("ABC", at: 0)
+        stuff[defaulted: 2] = [["123"]]
+        stuff[defaulted: 4].defaultedAny.append("XYZ")
+        XCTAssertEqual(stuff, [[["ABC", "Bar"]], [], [["123"]], [], [["Baz", "XYZ"]]])
+    }
+
     func testAllocatonProfiling() throws {
         // json with unicode escapes
         // let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/caliper.json", ofType: "")!

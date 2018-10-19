@@ -400,10 +400,6 @@ extension Optional : BracLayer {
     public typealias BracSub = Wrapped // inherits bracMap via Wrappable conformance
 }
 
-extension Optionally : BracLayer {
-    public typealias BracSub = Wrapped // inherits bracMap via Wrappable conformance
-}
-
 extension RawRepresentable where RawValue : Bracable {
 
     /// Returns this RawRepresentable around the brac, or throws an error if the parameter cannot be used to create the RawRepresentable

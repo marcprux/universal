@@ -82,6 +82,24 @@ public protocol CodeEmittable {
     func emit(_ emitter: CodeEmitterType)
 }
 
+extension CodeEmittable {
+    /// Generic equatability for an emittable is implemented by emitting the code and comparing both sides
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
+        let lhsEmitter = KeyCodeEmitter()
+        lhs.emit(lhsEmitter)
+        let rhsEmitter = KeyCodeEmitter()
+        rhs.emit(rhsEmitter)
+        return lhsEmitter.string == rhsEmitter.string
+    }
+
+    /// Generic hashability for an emittable is implemented by emitting the code and returning the hash
+    public var hashValue: Int {
+        let emitter = KeyCodeEmitter()
+        self.emit(emitter)
+        return emitter.string.hashValue
+    }
+}
+
 open class CodeModule : CodeImplementationType {
     open var types: [CodeNamedType] {
         get { return nestedTypes }
@@ -193,7 +211,7 @@ public struct CodeExternalType : CodeType {
 public protocol CodeCompoundType : CodeType {
 }
 
-public enum CodeAccess : String {
+public enum CodeAccess : String, Hashable, CaseIterable {
     case `public` = "public", `private` = "private", `internal` = "internal", `default` = ""
 }
 
@@ -202,20 +220,20 @@ public protocol CodeImplementation : CodeEmittable {
 }
 
 public struct CodeProperty {
-    open class Declaration: CodeUnit {
-        open var name: CodePropName
+    public struct Declaration: CodeUnit {
+        public var name: CodePropName
         /// The type of the property, which can be nil if we want it to be inferred
-        open var type: CodeType?
-        open var instance: Bool
-        open var access: CodeAccess
-        open var mutable: Bool = true
-        open var comments: [String] = []
+        public var type: CodeType?
+        public var instance: Bool
+        public var access: CodeAccess
+        public var mutable: Bool = true
+        public var comments: [String] = []
 
-        open var isDictionary: Bool {
+        public var isDictionary: Bool {
             return type?.identifier.hasPrefix("Dictionary") ?? false
         }
 
-        open var isArray: Bool {
+        public var isArray: Bool {
             return type?.identifier.hasPrefix("Array") ?? false
         }
 
@@ -227,12 +245,12 @@ public struct CodeProperty {
             self.mutable = mutable
         }
 
-        open func emit(_ emitter: CodeEmitterType) {
+        public func emit(_ emitter: CodeEmitterType) {
             emitter.emitComments(comments)
             emitter.emit(instance ? "" : "static", "var", name + (type == nil ? "" : ":"), type?.identifier, "{", "get", mutable ? "set" : "", "}")
         }
 
-        open var implementation: Implementation {
+        public var implementation: Implementation {
             return Implementation(declaration: self, value: nil, body: [], comments: comments)
         }
     }
@@ -314,14 +332,14 @@ public protocol CodeAccessible : CodeType {
 }
 
 public struct CodeFunction {
-    open class Declaration: CodeCompoundType {
-        open var name: CodePropName
-        open var instance: Bool
-        open var exception: Bool
-        open var access: CodeAccess
-        open var arguments: CodeTuple
-        open var returns: CodeTuple
-        open var comments: [String] = []
+    public struct Declaration: CodeCompoundType {
+        public var name: CodePropName
+        public var instance: Bool
+        public var exception: Bool
+        public var access: CodeAccess
+        public var arguments: CodeTuple
+        public var returns: CodeTuple
+        public var comments: [String] = []
 
         public init(name: CodePropName, access: CodeAccess, instance: Bool = true, exception: Bool = false, arguments: CodeTuple = CodeTuple(), returns: CodeTuple = CodeTuple()) {
             self.access = access
@@ -332,22 +350,22 @@ public struct CodeFunction {
             self.returns = returns
         }
 
-        open var identifier : String {
+        public var identifier : String {
             // (foo: Bar, baz: String)->(Void)
             return arguments.identifier + (exception ? " throws" : "") + " -> " + returns.identifier
         }
 
-        open func emit(_ emitter: CodeEmitterType) {
+        public func emit(_ emitter: CodeEmitterType) {
             emitter.emitComments(comments)
             emitter.emit(access.rawValue, instance ? "" : "static", "func", name, identifier)
         }
 
-        open var directReferences : [CodeNamedType] {
+        public var directReferences : [CodeNamedType] {
             // a function is a reference type
             return []
         }
 
-        open var implementation: Implementation {
+        public var implementation: Implementation {
             return Implementation(declaration: self, body: [], comments: comments)
         }
 
@@ -387,7 +405,7 @@ public extension CodeNamedType {
 }
 
 /// A type alias can take an unnamed type (like a tuple) and assign it a name
-public struct CodeTypeAlias : CodeNamedType {
+public struct CodeTypeAlias : CodeNamedType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var type: CodeType
@@ -451,7 +469,7 @@ extension String {
     }
 }
 
-public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType {
+public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var cases: [CodeCaseSimple<T>] = []
@@ -533,7 +551,7 @@ public struct CodeCaseSimple<T> {
     }
 }
 
-public struct CodeEnum : CodeNamedType, CodeImplementationType {
+public struct CodeEnum : CodeNamedType, CodeImplementationType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var cases: [Case] = []
@@ -608,7 +626,7 @@ public struct CodeEnum : CodeNamedType, CodeImplementationType {
 //    }
 //}
 
-public struct CodeProtocol : CodeNamedType, CodeConformantType {
+public struct CodeProtocol : CodeNamedType, CodeConformantType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var conforms: [CodeProtocol] = []
@@ -657,7 +675,7 @@ public protocol CodeStateType : CodePropertyImplementationType {
     var funcs: [CodeFunction.Implementation] { get set }
 }
 
-public struct CodeStruct : CodeStateType {
+public struct CodeStruct : CodeStateType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var conforms: [CodeProtocol] = []
@@ -711,7 +729,7 @@ public struct CodeStruct : CodeStateType {
     }
 }
 
-public struct CodeClass : CodeStateType {
+public struct CodeClass : CodeStateType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var conforms: [CodeProtocol] = []

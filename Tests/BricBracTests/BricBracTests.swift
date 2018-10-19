@@ -35,6 +35,13 @@ class BricBracTests : XCTestCase {
         stuff[defaulted: 2] = [["123"]]
         stuff[defaulted: 4].defaultedAny.append("XYZ")
         XCTAssertEqual(stuff, [[["ABC", "Bar"]], [], [["123"]], [], [["Baz", "XYZ"]]])
+
+        var optdbl: Optional<Double> = nil
+        XCTAssertEqual(optdbl, nil)
+        optdbl[defaulting: 1.1] += 1.1
+        XCTAssertEqual(optdbl, 2.2)
+        optdbl[defaulting: 0] += 5.5
+        XCTAssertEqual(optdbl, 7.7)
     }
 
     func testAllocatonProfiling() throws {
@@ -1406,17 +1413,6 @@ class BricBracTests : XCTestCase {
     }
 
     let RefPerformanceCount = 100000
-
-    /// Tests to see the performance impact of using a simple Indirect ref vs. a direct Optional
-    func testIndirectPerformance() {
-        var array = Array<Optionally<Bool>>()
-        array.reserveCapacity(RefPerformanceCount)
-        measure { // average: 0.026
-            for _ in 1...self.RefPerformanceCount { array.append(.some(true)) }
-            let allTrue = array.reduce(true, { (x, y) in x && (y.value ?? false) })
-            XCTAssertEqual(allTrue, true)
-        }
-    }
 
     func testOptionalPerformance() {
         var array = Array<Optional<Bool>>()

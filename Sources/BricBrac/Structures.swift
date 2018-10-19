@@ -10,52 +10,80 @@
 
 /// A defaultable type is a type that can be initialized with no arguments and a default value
 public protocol Defaultable {
-    init(defaulting: Void)
+    init(defaulting: ())
+}
+
+public extension WrapperType {
+    /// Returns the wrapped value or the defaulting value if the wrapped value if nil
+    public subscript(defaulting constructor: @autoclosure () -> Wrapped) -> Wrapped {
+        get { return self.flatMap({ $0 }) ?? constructor() }
+        set { self = Self(newValue) }
+    }
 }
 
 public extension WrapperType where Wrapped : Defaultable {
     /// Returns the current value of the wrapped instance or, if nul, instantiates a default value
     public var defaulted: Wrapped {
-        get { return self.flatMap({ $0 }) ?? Wrapped.init(defaulting: ()) }
+        get { return self[defaulting: .init(defaulting: ())] }
         set { self = Self(newValue) }
     }
 }
 
-public extension Array where Element : Defaultable {
+public extension RangeReplaceableCollection where Element : Defaultable {
     public var defaultedFirst: Element {
-        get { return self.first ?? Element.init(defaulting: ()) }
-        set { self = [newValue] + dropFirst() }
+        get { return self.first[defaulting: .init(defaulting: ())] }
+        set { self = Self([newValue] + dropFirst()) }
     }
 
-    public var defaultedLast: Element {
-        get { return self.last ?? Element.init(defaulting: ()) }
-        set { self = dropLast() + [newValue] }
-    }
-
-    public subscript(defaulted index: Int) -> Element {
-        get { return self.dropFirst(index).first ?? Element.init(defaulting: ()) }
+    public subscript(defaulted index: Index) -> Element {
+        get { return indices.contains(index) ? self[index] : .init(defaulting: ()) }
 
         set {
-            var array = self
-            while array.count <= index {
-                array.append(Element.init(defaulting: ()))
+            // fill in the intervening indeices with the default value
+            while !indices.contains(index) {
+                append(.init(defaulting: ()))
             }
-            array[index] = newValue
-            self = array
+            // set the target index item
+            replaceSubrange(index...index, with: [newValue])
         }
+    }
+}
+
+public extension RangeReplaceableCollection where Self : BidirectionalCollection, Element : Defaultable {
+    public var defaultedLast: Element {
+        get { return self.last[defaulting: .init(defaulting: ())] }
+        set { self = Self(dropLast() + [newValue]) }
     }
 }
 
 public extension Set where Element : Defaultable {
     public var defaultedAny: Element {
-        get { return self.first ?? Element.init(defaulting: ()) }
+        get { return self.first ?? .init(defaulting: ()) }
         set { self = Set(dropFirst() + [newValue]) }
     }
 }
 
-extension Array : Defaultable { public init(defaulting: Void) { self.init() } }
-extension Set : Defaultable { public init(defaulting: Void) { self.init() } }
-extension Dictionary : Defaultable { public init(defaulting: Void) { self.init() } }
+extension ExpressibleByNilLiteral {
+    /// An `ExpressibleByNilLiteral` conforms to `Defaultable` by nil initialization
+    public init(defaulting: ()) { self.init(nilLiteral: ()) }
+}
+
+extension ExpressibleByArrayLiteral {
+    /// An `ExpressibleByArrayLiteral` conforms to `Defaultable` by empty array initialization
+    public init(defaulting: ()) { self.init() }
+}
+
+extension ExpressibleByDictionaryLiteral {
+    /// An `ExpressibleByDictionaryLiteral` conforms to `Defaultable` by empty dictionary initialization
+    public init(defaulting: ()) { self.init() }
+}
+
+extension Optional : Defaultable { } // inherits initializer from ExpressibleByNilLiteral
+extension Set : Defaultable { } // inherits initializer from ExpressibleByArrayLiteral
+extension Array : Defaultable { } // inherits initializer from ExpressibleByArrayLiteral
+extension Dictionary : Defaultable { } // inherit initializer from ExpressibleByDictionaryLiteral
+
+extension EmptyCollection : Defaultable { public init(defaulting: ()) { self.init() } }
 
 public extension Defaultable where Self : Equatable {
     /// Returns true if this instance is the same as the defaulted value
@@ -78,102 +106,6 @@ public protocol Wrappable {
 
 extension Optional : WrapperType { }
 extension Optional : Wrappable { }
-
-/// Behaves exactly the same a an Optional except the .Some case is indirect, allowing for recursive value types
-public enum Optionally<Wrapped> : WrapperType, Wrappable, ExpressibleByNilLiteral {
-    case none
-    indirect case some(Wrapped)
-
-    /// Construct a `nil` instance.
-    public init() {
-        self = .none
-    }
-
-    /// Create an instance initialized with `nil`.
-    public init(nilLiteral: ()) {
-        self = .none
-    }
-
-    /// Construct a non-`nil` instance that stores `some`.
-    public init(_ some: Wrapped) {
-        self = .some(some)
-    }
-
-    public init(fromOptional opt: Wrapped?) {
-        switch opt {
-        case .some(let x): self = .some(x)
-        case .none: self = .none
-        }
-    }
-
-    public var value: Wrapped? {
-        get {
-            switch self {
-            case .none: return nil
-            case .some(let v): return v
-            }
-        }
-
-        set {
-            if let v = newValue {
-                self = .some(v)
-            } else {
-                self = .none
-            }
-        }
-    }
-
-    /// If `self == nil`, returns `nil`.  Otherwise, returns `f(self!)`.
-    
-    public func map<U>(f: (Wrapped) throws -> U) rethrows -> U? {
-        return try value.map(f)
-    }
-
-
-    /// Returns `nil` if `self` is nil, `f(self!)` otherwise.
-    
-    public func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U? {
-        return try value.flatMap(f)
-    }
-}
-
-// exactly the same as: https://github.com/apple/swift/blob/325a63a1bd59eb2b12ba310ffa93e83d1336885f/stdlib/public/core/Codable.swift.gyb#L1825
-extension Optionally : Encodable where Wrapped : Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case .none: try container.encodeNil()
-        case .some(let wrapped): try container.encode(wrapped)
-        }
-    }
-}
-
-// exactly the same as: https://github.com/apple/swift/blob/325a63a1bd59eb2b12ba310ffa93e83d1336885f/stdlib/public/core/Codable.swift.gyb#L1842
-// FIXME: doesn't work when nested
-extension Optionally : Decodable where Wrapped : Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if container.decodeNil() {
-            self = .none
-        }  else {
-            let element = try container.decode(Wrapped.self)
-            self = .some(element)
-        }
-    }
-}
-
-extension Optionally : Equatable where Wrapped : Equatable {
-    public static func ==(lhs: Optionally, rhs: Optionally) -> Bool {
-        return lhs.value == rhs.value
-    }
-}
-
-extension Optionally : Hashable where Wrapped : Hashable {
-    public var hashValue: Int {
-        return value?.hashValue ?? 0
-    }
-}
-
 
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
 public indirect enum Indirect<Wrapped> : WrapperType, Wrappable {
@@ -369,7 +301,7 @@ extension OneOf2 : Decodable where T1 : Decodable, T2 : Decodable {
 }
 
 extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable {
-    public static func ==(lhs: OneOf2<T1, T2>, rhs: OneOf2<T1, T2>) -> Bool {
+    public static func ==(lhs: OneOf2, rhs: OneOf2) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -506,7 +438,7 @@ extension OneOf3 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 }
 
 extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable {
-    public static func ==(lhs: OneOf3<T1, T2, T3>, rhs: OneOf3<T1, T2, T3>) -> Bool {
+    public static func ==(lhs: OneOf3, rhs: OneOf3) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -612,7 +544,7 @@ extension OneOf4 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 }
 
 extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable {
-    public static func ==(lhs: OneOf4<T1, T2, T3, T4>, rhs: OneOf4<T1, T2, T3, T4>) -> Bool {
+    public static func ==(lhs: OneOf4, rhs: OneOf4) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -726,7 +658,7 @@ extension OneOf5 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 }
 
 extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable {
-    public static func ==(lhs: OneOf5<T1, T2, T3, T4, T5>, rhs: OneOf5<T1, T2, T3, T4, T5>) -> Bool {
+    public static func ==(lhs: OneOf5, rhs: OneOf5) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -852,7 +784,7 @@ extension OneOf6 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 }
 
 extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable {
-    public static func ==(lhs: OneOf6<T1, T2, T3, T4, T5, T6>, rhs: OneOf6<T1, T2, T3, T4, T5, T6>) -> Bool {
+    public static func ==(lhs: OneOf6, rhs: OneOf6) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -989,7 +921,7 @@ extension OneOf7 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 }
 
 extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable {
-    public static func ==(lhs: OneOf7<T1, T2, T3, T4, T5, T6, T7>, rhs: OneOf7<T1, T2, T3, T4, T5, T6, T7>) -> Bool {
+    public static func ==(lhs: OneOf7, rhs: OneOf7) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -1133,7 +1065,7 @@ extension OneOf8 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 }
 
 extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable {
-    public static func ==(lhs: OneOf8<T1, T2, T3, T4, T5, T6, T7, T8>, rhs: OneOf8<T1, T2, T3, T4, T5, T6, T7, T8>) -> Bool {
+    public static func ==(lhs: OneOf8, rhs: OneOf8) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -1288,7 +1220,7 @@ extension OneOf9 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 }
 
 extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable {
-    public static func ==(lhs: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, rhs: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9>) -> Bool {
+    public static func ==(lhs: OneOf9, rhs: OneOf9) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b
@@ -1452,7 +1384,7 @@ extension OneOf10 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodab
 }
 
 extension OneOf10 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable, T10 : Equatable {
-    public static func ==(lhs: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, rhs: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>) -> Bool {
+    public static func ==(lhs: OneOf10, rhs: OneOf10) -> Bool {
         switch (lhs, rhs) {
         case (.v1(let a), .v1(let b)): return a == b
         case (.v2(let a), .v2(let b)): return a == b

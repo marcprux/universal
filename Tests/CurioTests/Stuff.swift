@@ -7,7 +7,7 @@ public struct Thing : Equatable, Hashable, Codable {
         self.weight = weight 
     }
 
-    public enum CodingKeys : String, CodingKey {
+    public enum CodingKeys : String, CodingKey, CaseIterable {
         case weight
     }
 }

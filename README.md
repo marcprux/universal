@@ -49,9 +49,9 @@ cat ${INPUT_FILE_PATH} | ${BUILT_PRODUCTS_DIR}/curio -name ${INPUT_FILE_BASE} > 
 
 Now any file with the suffix ".jsonschema" will automatiucally have a Swift file generated in the ${SRCDIR}. After the first time this is run you will need to manually add the subsequently generated files to your project's source files, but any changes to the JSON Schema files will then be reflected in the generated sources as part of the build process.
 
-##Installation
+## Installation
 
-###[Carthage](https://github.com/Carthage/Carthage#installing-carthage)
+### [Carthage](https://github.com/Carthage/Carthage#installing-carthage)
 
 Add the following line to your [Cartfile](https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile).
 
@@ -61,7 +61,7 @@ github "glimpseio/BricBrac"
 
 Then do `carthage update`. After that, add the framework to your project.
 
-###Manually
+### Manually
 
 `BricBrac` is a single cross-platform iOS & Mac Framework. To set it up in your project, simply add it as a github submodule, drag the `BricBrac.xcodeproj` into your own project file, add `BricBrac.framework` to your target's dependencies, and `import BricBrac` from any Swift file that should use it.
 

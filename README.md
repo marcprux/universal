@@ -37,6 +37,47 @@ Any instance that supports **Encodable** automatically has a **bricEncoded()** f
 
 Curio is a tool that generates swift value types (structs and enums) from a valid JSON Schema (Draft 5) file. Note that the Curio tool may generate code that has a dependency on the **BricBrac** library, but **Curio** itself never needs to be included as a runtime dependency.
 
+### Example
+
+For the following Stuff.jsonschema file:
+    
+````json
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Stuff", 
+    "type": "array",
+    "items": {
+      "$ref": "#/definitions/thing"
+    },  
+    "definitions": {
+      "thing": {
+        "type": "object",
+        "properties": { 
+          "weight": {
+            "type": "integer"
+          }     
+        }   
+      }     
+    }           
+}               
+````
+
+Curio will generate the following Stuff.swift code:
+    
+````swift
+public struct Thing : Equatable, Hashable, Codable {
+    public var weight: Int?
+
+    public init(weight: Int? = .none) {
+        self.weight = weight
+    }
+
+    public enum CodingKeys : String, CodingKey, CaseIterable {
+        case weight
+    }
+}
+````
+    
 ### Build Integration
 
  * Add a Build Rule

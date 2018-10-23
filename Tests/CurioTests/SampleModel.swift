@@ -21,20 +21,8 @@ public struct SampleModel : Equatable, Hashable, Codable {
         self.simpleOneOf = simpleOneOf 
     }
 
-    public enum CodingKeys : String, CodingKey {
-        case allOfField
-        case anyOfField
-        case oneOfField
-        case keywordFields
-        case list
-        case nested1
-        case simpleOneOf
-    }
-
     public typealias AllOfField = AllOfFieldTypes.Sum
     public enum AllOfFieldTypes {
-
-        public typealias Sum = AllOf2<FirstAll, SecondAll>
 
         /// FirstAll
         public struct FirstAll : Equatable, Hashable, Codable {
@@ -46,7 +34,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 self.a2 = a2 
             }
 
-            public enum CodingKeys : String, CodingKey {
+            public enum CodingKeys : String, CodingKey, CaseIterable {
                 case a1
                 case a2
             }
@@ -62,17 +50,17 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 self.a4 = a4 
             }
 
-            public enum CodingKeys : String, CodingKey {
+            public enum CodingKeys : String, CodingKey, CaseIterable {
                 case a3
                 case a4
             }
         }
+
+        public typealias Sum = AllOf2<FirstAll, SecondAll>
     }
 
     public typealias AnyOfField = AnyOfFieldTypes.Some
     public enum AnyOfFieldTypes {
-
-        public typealias Some = AnyOf2<FirstAny?, SecondAny?>
 
         /// FirstAny
         public struct FirstAny : Equatable, Hashable, Codable {
@@ -84,7 +72,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 self.b2 = b2 
             }
 
-            public enum CodingKeys : String, CodingKey {
+            public enum CodingKeys : String, CodingKey, CaseIterable {
                 case b1
                 case b2
             }
@@ -100,11 +88,13 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 self.b4 = b4 
             }
 
-            public enum CodingKeys : String, CodingKey {
+            public enum CodingKeys : String, CodingKey, CaseIterable {
                 case b3
                 case b4
             }
         }
+
+        public typealias Some = AnyOf2<FirstAny?, SecondAny?>
     }
 
     public typealias OneOfFieldChoice = OneOfFieldTypes.Choice
@@ -122,7 +112,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 self.c2 = c2 
             }
 
-            public enum CodingKeys : String, CodingKey {
+            public enum CodingKeys : String, CodingKey, CaseIterable {
                 case c1
                 case c2
             }
@@ -138,11 +128,24 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 self.c4 = c4 
             }
 
-            public enum CodingKeys : String, CodingKey {
+            public enum CodingKeys : String, CodingKey, CaseIterable {
                 case c3
                 case c4
             }
         }
+    }
+
+    /// Should generate a simple OneOf enum
+    public typealias SimpleOneOfChoice = OneOf2<String, Double>
+
+    public enum CodingKeys : String, CodingKey, CaseIterable {
+        case allOfField
+        case anyOfField
+        case oneOfField
+        case keywordFields
+        case list
+        case nested1
+        case simpleOneOf
     }
 
     /// Should not escape keyword arguments
@@ -165,7 +168,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
             self.`while` = `while` 
         }
 
-        public enum CodingKeys : String, CodingKey {
+        public enum CodingKeys : String, CodingKey, CaseIterable {
             case `case` = "case"
             case `for` = "for"
             case `in` = "in"
@@ -183,11 +186,11 @@ public struct SampleModel : Equatable, Hashable, Codable {
             self.prop = prop 
         }
 
-        public enum CodingKeys : String, CodingKey {
+        public enum CodingKeys : String, CodingKey, CaseIterable {
             case prop
         }
 
-        public enum Prop : String, Equatable, Hashable, Codable {
+        public enum Prop : String, Equatable, Hashable, Codable, CaseIterable {
             case value
         }
     }
@@ -199,7 +202,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
             self.nested2 = nested2 
         }
 
-        public enum CodingKeys : String, CodingKey {
+        public enum CodingKeys : String, CodingKey, CaseIterable {
             case nested2
         }
 
@@ -210,7 +213,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 self.nested3 = nested3 
             }
 
-            public enum CodingKeys : String, CodingKey {
+            public enum CodingKeys : String, CodingKey, CaseIterable {
                 case nested3
             }
 
@@ -221,7 +224,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
                     self.nested4 = nested4 
                 }
 
-                public enum CodingKeys : String, CodingKey {
+                public enum CodingKeys : String, CodingKey, CaseIterable {
                     case nested4
                 }
 
@@ -232,7 +235,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
                         self.nested5 = nested5 
                     }
 
-                    public enum CodingKeys : String, CodingKey {
+                    public enum CodingKeys : String, CodingKey, CaseIterable {
                         case nested5
                     }
 
@@ -243,11 +246,11 @@ public struct SampleModel : Equatable, Hashable, Codable {
                             self.single = single 
                         }
 
-                        public enum CodingKeys : String, CodingKey {
+                        public enum CodingKeys : String, CodingKey, CaseIterable {
                             case single
                         }
 
-                        public enum Single : String, Equatable, Hashable, Codable {
+                        public enum Single : String, Equatable, Hashable, Codable, CaseIterable {
                             case value
                         }
                     }
@@ -255,7 +258,4 @@ public struct SampleModel : Equatable, Hashable, Codable {
             }
         }
     }
-
-    /// Should generate a simple OneOf enum
-    public typealias SimpleOneOfChoice = OneOf2<String, Double>
 }

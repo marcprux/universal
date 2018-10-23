@@ -75,6 +75,12 @@ public struct Curio {
     /// The list of type names to exclude from the generates file
     public var excludes: Set<CodeTypeName> = []
 
+    /// The list of type aliases that will wrap around their aliased types
+    public var encapsulate: Set<CodeTypeName> = []
+
+    /// Override individual property types
+    public var propertyTypeOverrides: [CodeTypeName: CodeTypeName] = [:]
+
     /// The case of the generated enums
     public var enumCase: EnumCase = .lower
 
@@ -167,13 +173,23 @@ public struct Curio {
         }
     }
 
-    func sanitizeString(_ nm: String, capitalize: Bool = true) -> String {
+    func sanitizeString(_ fromName: String, capitalize: Bool = true) -> String {
+        let nm: String
+        // if the name is just a number, then try to use the spelling of the number
+        if Double(fromName)?.description == fromName {
+            nm = "n" + fromName
+        } else {
+            nm = fromName
+        }
+
         var name = ""
 
         var capnext = capitalize
         for c in nm {
             let validCharacters = name.isEmpty ? Curio.nameStart : Curio.nameBody
-            if !validCharacters.contains(c) {
+            if c == "." {
+                name.append("_")
+            } else if !validCharacters.contains(c) {
                 capnext = name.isEmpty ? capitalize : true
             } else if capnext {
                 name.append(String(c).uppercased())
@@ -212,7 +228,7 @@ public struct Curio {
     }
 
     func aliasType(_ type: CodeNamedType) -> CodeType? {
-        if let alias = type as? CodeTypeAlias , alias.peers.isEmpty {
+        if let alias = type as? CodeTypeAlias , alias.peerTypes.isEmpty {
             return alias.type
         } else {
             return nil
@@ -335,6 +351,7 @@ public struct Curio {
 
         let equatable = CodeProtocol(name: "Equatable")
         let hashable = CodeProtocol(name: "Hashable")
+        let rawRepresentable = CodeProtocol(name: "RawRepresentable")
 
         let codable = CodeProtocol(name: "Codable")
         let encodefun = CodeFunction.Declaration(name: "encode", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "to encoder", type: EncoderType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
@@ -491,7 +508,7 @@ public struct Curio {
                 let constantEnums = code.nestedTypes.compactMap({ $0 as? CodeSimpleEnum<String> })
                 if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
                     var alias = aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty)
-                    alias.peers = constantEnums
+                    alias.peerTypes = constantEnums
                     return alias
                 } else { // otherwise we need to continue to use the nested inner types in a hollow enum and return the typealias
                     let choiceName = oneOfSuffix
@@ -507,7 +524,7 @@ public struct Curio {
 
                     var alias = CodeTypeAlias(name: aliasName, type: aliasRef, access: accessor(parents))
                     alias.comments = comments
-                    alias.peers = [nestedEnum]
+                    alias.peerTypes = [nestedEnum]
 
                     return alias
                 }
@@ -590,6 +607,28 @@ public struct Curio {
             return alias
         }
 
+        func aliasSimpleType(name typename: CodeTypeName, type: CodeExternalType) -> CodeNamedType {
+            // When we encapsulate a typealias (e.g., Color = String), we make it into a separate type that can be extended
+            if encapsulate.contains(typename) {
+                let propn = CodePropName("rawValue")
+                let propd = CodeProperty.Declaration(name: propn, type: type, access: accessor(parents), mutable: false)
+                var enc = CodeStruct(name: typename, access: accessor(parents), props: [propd.implementation])
+
+                if generateEquals { enc.conforms.append(equatable) }
+                if generateHashable { enc.conforms.append(hashable) }
+                if generateCodable { enc.conforms.append(codable) }
+
+                enc.conforms.append(rawRepresentable)
+                let rawInit = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: type, value: nil, anon: false)]), returns: CodeTuple(elements: []))
+                let rawInitImp = CodeFunction.Implementation(declaration: rawInit, body: ["self.rawValue = rawValue"], comments: [])
+
+                enc.funcs.append(rawInitImp)
+
+                return enc
+            }
+            return CodeTypeAlias(name: typename, type: type, access: accessor(parents))
+        }
+
         enum StateMode { case standard, allOf, anyOf }
 
         /// Creates a schema instance for an "object" type with all the listed properties
@@ -623,6 +662,8 @@ public struct Curio {
                 if let ref = prop.ref {
                     let tname = typeName(parents, ref)
                     proptype = CodeExternalType(tname, access: accessor(parents + [typename]))
+                } else if let overrideType = propertyTypeOverrides[typename + "." + name] {
+                    proptype = CodeExternalType(overrideType, access: accessor(parents + [typename]))
                 } else {
                     switch prop.type {
                     case .some(.v1(.string)) where prop._enum == nil: proptype = StringType
@@ -844,7 +885,7 @@ public struct Curio {
 
                     var alias = CodeTypeAlias(name: code.name, type: aliasRef, access: accessor(parents))
                     alias.comments = comments
-                    alias.peers = [nestedEnum]
+                    alias.peerTypes = [nestedEnum]
 
                     return alias
                 }
@@ -871,7 +912,7 @@ public struct Curio {
                     if let sub = aliasType(type) {
                         return CodeTypeAlias(name: typeName(parents, id), type: arrayType(sub), access: accessor(parents))
                     } else {
-                        let alias = CodeTypeAlias(name: typeName(parents, id), type: arrayType(type), access: accessor(parents), peers: [type])
+                        let alias = CodeTypeAlias(name: typeName(parents, id), type: arrayType(type), access: accessor(parents), peerTypes: [type])
                         return alias
                     }
                 }
@@ -935,15 +976,15 @@ public struct Curio {
             }
             return aliasOneOf(subTypes, name: typename, optional: false, defined: parents.isEmpty)
         } else if case .some(.v1(.string)) = type {
-            return CodeTypeAlias(name: typename, type: StringType, access: accessor(parents))
+            return aliasSimpleType(name: typename, type: StringType)
         } else if case .some(.v1(.integer)) = type {
-            return CodeTypeAlias(name: typename, type: IntType, access: accessor(parents))
+            return aliasSimpleType(name: typename, type: IntType)
         } else if case .some(.v1(.number)) = type {
-            return CodeTypeAlias(name: typename, type: DoubleType, access: accessor(parents))
+            return aliasSimpleType(name: typename, type: DoubleType)
         } else if case .some(.v1(.boolean)) = type {
-            return CodeTypeAlias(name: typename, type: BoolType, access: accessor(parents))
+            return aliasSimpleType(name: typename, type: BoolType)
         } else if case .some(.v1(.null)) = type {
-            return CodeTypeAlias(name: typename, type: NullType, access: accessor(parents))
+            return aliasSimpleType(name: typename, type: NullType)
         } else if case .some(.v1(.array)) = type {
             return try createArray(typename)
         } else if let properties = schema.properties , !properties.isEmpty {
@@ -985,18 +1026,18 @@ public struct Curio {
         } else if let not = schema.not?.value { // a "not" generates a validator against an inverse schema
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)
-            return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peers: [inverseSchema])
+            return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peerTypes: [inverseSchema])
             // TODO
 //        } else if let req = schema.required where !req.isEmpty { // a sub-bric with only required properties just validates
 //            let reqId = "Req" + typename
 //            let reqSchema = try reify(not, id: reqId, parents: parents)
-//            return CodeTypeAlias(name: typename, type: notBracType(reqSchema), access: accessor(parents), peers: [reqSchema])
+//            return CodeTypeAlias(name: typename, type: notBracType(reqSchema), access: accessor(parents), peerTypes: [reqSchema])
         } else if isBricType(schema) { // an empty schema just generates pure Bric
             return CodeTypeAlias(name: typename, type: BricType, access: accessor(parents))
         } else if case .some(.v1(.object)) = type, case let .some(.v2(adp)) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Type]
             let adpType = try reify(adp, id: typename + "Value", parents: parents)
-            return CodeTypeAlias(name: typename, type: dictionaryType(StringType, adpType), access: accessor(parents), peers: [adpType])
+            return CodeTypeAlias(name: typename, type: dictionaryType(StringType, adpType), access: accessor(parents), peerTypes: [adpType])
         } else if case .some(.v1(.object)) = type, case .some(.v1(true)) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Bric]
             //print("warning: making Brictionary for code: \(schema.bric().stringify())")
@@ -1024,33 +1065,43 @@ public struct Curio {
 
         // next, promote all of the types for promoteIdenticalTypes
         // ### not currently working
-//        if promoteIdenticalTypes {
-//            func flattenedTypes(_ types: [CodeNamedType]) -> [CodeNamedType] {
-//                let subTypes = types.compactMap({ $0 as? CodeImplementationType }).flatMap({ $0.nestedTypes  })
-//                if subTypes.isEmpty { return types }
-//                return types + flattenedTypes(subTypes)
-//            }
-//
-//            let deepTypes = flattenedTypes(types)
-//            print("### deep types: " + deepTypes.map({ $0.identifier }).joined(separator: ", "))
-//
-//            // we currently just promote string enums, since those are the most common shared code we've observed
-//            var enumCounts: [CodeSimpleEnum<String>: Int] = [:]
-//            for enumType in deepTypes.compactMap({ $0 as? CodeSimpleEnum<String> }) {
-//                enumCounts[enumType] = (enumCounts[enumType] ?? 0) + 1
-//            }
-//
-//            print("### enum counts: " + enumCounts.map({ $0.identifier + ": \($1)" }).joined(separator: ", "))
-//
-//            for (type, count) in enumCounts {
-//                if count > 1 {
-//                    print("### flattening \(count) instances of \(type.identifier)")
-//                }
-//            }
-//
-//
-////            print("#### allTypes: \(allTypes)")
-//        }
+        if promoteIdenticalTypes {
+            func flattenedTypes(_ types: [CodeNamedType]) -> [CodeNamedType] {
+                let nestedTypes = types.compactMap({ $0 as? CodeStateType }).flatMap({ $0.nestedTypes  })
+                let peerTypes = types.compactMap({ $0 as? CodeTypeAlias }).flatMap({ $0.peerTypes  })
+                if nestedTypes.isEmpty && peerTypes.isEmpty { return types }
+                return types + flattenedTypes(nestedTypes) + flattenedTypes(peerTypes)
+            }
+
+            let deepTypes = flattenedTypes(types)
+
+            func duplicatedTypes<T : CodeNamedType & Hashable>(_ typeList: [T], from: [CodeNamedType]) -> Set<T> {
+                var enumCounts: [T: Int] = [:]
+                for enumType in typeList {
+                    enumCounts[enumType] = (enumCounts[enumType] ?? 0) + 1
+                }
+
+                var dupes: Set<T> = []
+                for (type, count) in enumCounts {
+                    // any types that have more than one count and are not a "CodingKeys" type can be promoted to the top-level
+                    if count > 1 && type.identifier != "CodingKeys" {
+                        dupes.insert(type)
+                    }
+                }
+
+                return dupes
+            }
+
+            // we currently just promote string enums, since those are the most common shared code we've observed
+            let promotedTypes = duplicatedTypes(deepTypes.compactMap({ $0 as? CodeSimpleEnum<String> }), from: types)
+
+            types = types.map({ $0.purgeTypes(promotedTypes) }) + Array(promotedTypes)
+
+            // this doesn't quite work because we have some conflicting types for common cases (e.g., "Value")
+        // types = promoteTypes(deepTypes.compactMap({ $0 as? CodeTypeAlias }), from: types)
+
+
+        }
 
         // lastly we filter out all the excluded types we want to skip
         types = types.filter({ !excludes.contains($0.name) })
@@ -1071,6 +1122,21 @@ public struct Curio {
         return module
     }
 
+}
+
+extension CodeNamedType {
+    func purgeTypes<T : CodeNamedType & Hashable>(_ purge: Set<T>) -> CodeNamedType {
+        let purgeCodeSet = purge.map({ $0.codeValue }) // ### ugly, but generics prevent us from checking for equatable
+        if var impl = self as? CodeStateType {
+            impl.nestedTypes = impl.nestedTypes.filter({ !purgeCodeSet.contains($0.codeValue) }).map({ $0.purgeTypes(purge) })
+            return impl
+        } else if var alias = self as? CodeTypeAlias {
+            alias.peerTypes = alias.peerTypes.filter({ !purgeCodeSet.contains($0.codeValue) }).map({ $0.purgeTypes(purge) })
+            return alias
+        } else {
+            return self
+        }
+    }
 }
 
 public extension Schema {

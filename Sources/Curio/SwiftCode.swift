@@ -24,6 +24,12 @@ public extension CodeEmitterType {
     }
 }
 
+/// The default ordering of types: typealiases first, then enums, then by name
+func typeOrdering(t1: CodeNamedType, t2: CodeNamedType) -> Bool {
+    if (t1 is CodeTypeAlias) && !(t2 is CodeTypeAlias) { return true }
+    else if (t1 is CodeEnumType) && !(t2 is CodeEnumType) { return true }
+    else { return t1.name < t2.name }
+}
 
 open class CodeEmitter<T: TextOutputStream> : CodeEmitterType {
     open var stream: T
@@ -83,20 +89,21 @@ public protocol CodeEmittable {
 }
 
 extension CodeEmittable {
+    /// Returns the code value for this emittable
+    public var codeValue: String {
+        let emitter = KeyCodeEmitter()
+        self.emit(emitter)
+        return emitter.string
+    }
+
     /// Generic equatability for an emittable is implemented by emitting the code and comparing both sides
     public static func ==(lhs: Self, rhs: Self) -> Bool {
-        let lhsEmitter = KeyCodeEmitter()
-        lhs.emit(lhsEmitter)
-        let rhsEmitter = KeyCodeEmitter()
-        rhs.emit(rhsEmitter)
-        return lhsEmitter.string == rhsEmitter.string
+        return lhs.codeValue == rhs.codeValue
     }
 
     /// Generic hashability for an emittable is implemented by emitting the code and returning the hash
     public var hashValue: Int {
-        let emitter = KeyCodeEmitter()
-        self.emit(emitter)
-        return emitter.string.hashValue
+        return self.codeValue.hashValue
     }
 }
 
@@ -131,7 +138,7 @@ open class CodeModule : CodeImplementationType {
             f.emit(emitter)
         }
 
-        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
+        for inner in nestedTypes.sorted(by: typeOrdering) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -185,7 +192,10 @@ public struct CodeExternalType : CodeType {
         if generics.isEmpty {
             return name
         } else if let shorthand = shorthand {
-            return (shorthand.prefix ?? "") + (generics.map({ $0.identifier })).joined(separator: ", ") + (shorthand.suffix ?? "")
+            var str = (shorthand.prefix ?? "")
+            str += (generics.map({ $0.identifier })).joined(separator: ", ")
+            str += (shorthand.suffix ?? "")
+            return str
         } else {
             return name + "<" + (generics.map({ $0.identifier })).joined(separator: ", ") + ">"
         }
@@ -411,14 +421,14 @@ public struct CodeTypeAlias : CodeNamedType, Hashable {
     public var type: CodeType
     /// A typeaias cannot have a nested types, so the nest best thing it to keey a list of peers that will
     /// be emitted when the typealias is emitted
-    public var peers: [CodeNamedType]
+    public var peerTypes: [CodeNamedType]
     public var comments: [String] = []
 
-    public init(name: CodeTypeName, type: CodeType, access: CodeAccess, peers: [CodeNamedType] = []) {
+    public init(name: CodeTypeName, type: CodeType, access: CodeAccess, peerTypes: [CodeNamedType] = []) {
         self.access = access
         self.name = name
         self.type = type
-        self.peers = peers
+        self.peerTypes = peerTypes
     }
 
     public func emit(_ emitter: CodeEmitterType) {
@@ -426,7 +436,7 @@ public struct CodeTypeAlias : CodeNamedType, Hashable {
         emitter.emit(access.rawValue, "typealias", name, "=", type.identifier)
 
         // type aliases can refer to an external type (like "String", but they can also carry their own peer types)
-        for peer in peers {
+        for peer in peerTypes {
             peer.emit(emitter)
         }
     }
@@ -469,7 +479,11 @@ extension String {
     }
 }
 
-public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType, Hashable {
+public protocol CodeEnumType : CodeNamedType, CodeImplementationType {
+
+}
+
+public struct CodeSimpleEnum<T> : CodeEnumType, CodeStateType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var cases: [CodeCaseSimple<T>] = []
@@ -527,7 +541,8 @@ public struct CodeSimpleEnum<T> : CodeStateType, CodeImplementationType, Hashabl
             f.emit(emitter)
         }
 
-        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
+        // sort typealiases & enums before structs & classes
+        for inner in nestedTypes.sorted(by: typeOrdering) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -551,7 +566,7 @@ public struct CodeCaseSimple<T> {
     }
 }
 
-public struct CodeEnum : CodeNamedType, CodeImplementationType, Hashable {
+public struct CodeEnum : CodeEnumType, Hashable {
     public var name: CodeTypeName
     public var access: CodeAccess
     public var cases: [Case] = []
@@ -603,7 +618,7 @@ public struct CodeEnum : CodeNamedType, CodeImplementationType, Hashable {
             f.emit(emitter)
         }
 
-        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
+        for inner in nestedTypes.sorted(by: typeOrdering) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -720,7 +735,7 @@ public struct CodeStruct : CodeStateType, Hashable {
             f.emit(emitter)
         }
 
-        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
+        for inner in nestedTypes.sorted(by: typeOrdering) {
             emitter.emit("")
             inner.emit(emitter)
         }
@@ -784,7 +799,7 @@ public struct CodeClass : CodeStateType, Hashable {
             f.emit(emitter)
         }
         
-        for inner in nestedTypes.sorted(by: { $0.name < $1.name }) {
+        for inner in nestedTypes.sorted(by: typeOrdering) {
             emitter.emit("")
             inner.emit(emitter)
         }

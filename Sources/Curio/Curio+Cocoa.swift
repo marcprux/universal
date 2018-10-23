@@ -38,7 +38,7 @@ public extension Curio {
         let args = [
             "/usr/bin/xcrun",
             "swiftc",
-            "-target", "x86_64-apple-macosx10.13",
+            "-target", "macosx",
 //            "-sdk", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk",
             "-F", frameworkDir,
             "-o", (tmppath as NSString).deletingPathExtension,

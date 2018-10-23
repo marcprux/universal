@@ -39,41 +39,52 @@ Curio is a tool that generates swift value types (structs and enums) from a vali
 
 ### Example
 
-For the following Stuff.jsonschema file:
+For the following **Food.jsonschema** file:
     
 ````json
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "Stuff", 
-    "type": "array",
-    "items": {
-      "$ref": "#/definitions/thing"
-    },  
-    "definitions": {
-      "thing": {
-        "type": "object",
-        "properties": { 
-          "weight": {
-            "type": "integer"
-          }     
-        }   
-      }     
-    }           
-}               
+    "$schema": "http://json-schema.org/draft-05/schema#",
+    "title": "Food",
+    "type": "object",
+    "required": ["title", "type"],
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "calories": {
+        "type": "integer"
+      },
+      "type": {
+        "enum": ["protein", "carbohydrate", "fat"]
+      }
+    }
+}
 ````
 
-Curio will generate the following Stuff.swift code:
+Curio will generate the following **Food.swift** code:
     
 ````swift
-public struct Thing : Equatable, Hashable, Codable {
-    public var weight: Int?
-
-    public init(weight: Int? = .none) {
-        self.weight = weight
+public struct Food : Equatable, Hashable, Codable {
+    public var title: String
+    public var type: `Type`
+    public var calories: Int?
+      
+    public init(title: String, type: `Type`, calories: Int? = .none) {
+        self.title = title
+        self.type = type
+        self.calories = calories
+    } 
+      
+    public enum CodingKeys : String, CodingKey, CaseIterable {
+        case title
+        case type
+        case calories
     }
 
-    public enum CodingKeys : String, CodingKey, CaseIterable {
-        case weight
+    public enum `Type` : String, Equatable, Hashable, Codable, CaseIterable {
+        case protein
+        case carbohydrate
+        case fat
     }
 }
 ````

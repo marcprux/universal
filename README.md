@@ -14,14 +14,16 @@ Bric-à-brac
 ## Features
 
 - [x] Integrates with Swift 4's built-in Codable features
-- [x] Generate Swift value types from JSON Schemas
-- [x] A simple immutable model of the JSON language elements
-- [x] An efficient streaming JSON parser
+- [x] Generate Swift value types from JSON Schema (Draft 5)
+- [x] A simple immutable model for JSON language elements
+- [x] An efficient streaming JSON parser (optional)
 - [x] Type-based (de)serialization of custom objects (no reflection, no intrusion)
 - [x] No dependencies on `Foundation` or any other external framework
 - [x] 100% Pure Swift
 
-### BricBrac
+**Bric-à-brac** consists of two separate components: the **BricBrac** runtime library and the **Curio** Schema-to-Swift generation tool.
+
+## BricBrac
 
 BricBrac is a support library that contains convenience feautres for serializing instances to an intermediate JSON **Bric** type. Swift's **Codable** feature supports serializing and de-serializing instances to JSON Data, **BricBrac** allows these types to be represented in an intermeidate form so they can be examined and manipulated.
 
@@ -31,9 +33,11 @@ Any instance that supports **Encodable** automatically has a **bricEncoded()** f
   XCTAssertEqual(["encoding":["color":["value":"blue"]]], try encoding.bricEncoded())
 ````
 
-### Curio
+## Curio
 
-Curio is a tool that generates swift value types (structs and enums) from a valid JSON Schema (Draft 5) file.
+Curio is a tool that generates swift value types (structs and enums) from a valid JSON Schema (Draft 5) file. Note that the Curio tool may generate code that has a dependency on the **BricBrac** library, but **Curio** itself never needs to be included as a runtime dependency.
+
+### Build Integration
 
  * Add a Build Rule
  * Set the name to "JSON Schema Compiler"

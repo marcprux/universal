@@ -278,7 +278,7 @@ class BricBracTests : XCTestCase {
 //        company.bric() // this would blow the stack because of object cycles
     }
 
-    /// Tests wrapping behavior of BricLayer and BracLayer
+    /// Tests wrapping behavior for bric and brac
     func testLayers() {
         do {
             do {
@@ -380,7 +380,7 @@ class BricBracTests : XCTestCase {
             }
 
         } catch {
-            XCTFail("unexpected error when wrapping in a BracLayer: \(error)")
+            XCTFail("unexpected error when wrapping in a layer: \(error)")
         }
 
         // now do some that should fail

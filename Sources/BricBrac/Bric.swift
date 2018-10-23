@@ -314,125 +314,61 @@ extension Bool: Bricable {
     public func bric() -> Bric { return .bol(self) }
 }
 
-
-// MARK: BricLayer wrapper Bric
-
-/// A `BricLayer` acts as a wrapper around some eventually bricable instance by using the `bricMap` function.
-/// `BricLayer`s are composable, meaning that a `BricLayer` can be nested up to five layers deep the the underlying
-/// data will be wrapped accordingly.
-public protocol BricLayer {
-    /// The type that is being wrapped by this layer
-    associatedtype BricSub
-
-    /// Construct an instance of self by invoking the function on the given bric
-    func bric(map f: (BricSub) -> Bric) -> Bric
-}
-
-public extension BricLayer where Self.BricSub : Bricable {
-    /// Brics through one level of `BricLayer`
-    public func bric() -> Bric {
-        return bric(map: { $0.bric() })
-    }
-}
-
-public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : Bricable {
-    /// Brics through two levels of `BricLayer`
-    public func bric() -> Bric {
-        return bric(map: { $0.bric(map: { $0.bric() }) })
-    }
-}
-
-public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub : Bricable {
-    /// Brics through three levels of `BricLayer`
-    public func bric() -> Bric {
-        return bric(map: { $0.bric(map: { $0.bric(map: { $0.bric() }) }) })
-    }
-}
-
-public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub.BricSub : Bricable {
-    /// Brics through four levels of `BricLayer`
-    public func bric() -> Bric {
-        return bric(map: { $0.bric(map: { $0.bric(map: { $0.bric(map: { $0.bric() }) }) }) })
-    }
-}
-
-public extension BricLayer where Self.BricSub : BricLayer, Self.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub.BricSub : BricLayer, Self.BricSub.BricSub.BricSub.BricSub.BricSub : Bricable {
-    /// Brics through five levels of `BricLayer`
-    public func bric() -> Bric {
-        return bric(map: { $0.bric(map: { $0.bric(map: { $0.bric(map: { $0.bric(map: { $0.bric() }) }) }) }) })
-    }
-}
-
-
-extension WrapperType {
+extension WrapperType where Wrapped : Bricable {
     /// Maps the underlying layer, or `Bric.nul` if it is nil
-    public func bric(map f: (Wrapped) -> Bric) -> Bric {
+    public func bric() -> Bric {
         if let x = flatMap({$0}) {
-            return f(x)
+            return x.bric()
         } else {
             return Bric.nul
         }
     }
 }
 
-extension Optional : BricLayer {
-    public typealias BricSub = Wrapped // inherits bracMap via WrapperType conformance
+extension Optional : Bricable where Wrapped : Bricable {
 }
 
-extension Indirect : BricLayer {
-    public typealias BricSub = Wrapped // inherits bracMap via WrapperType conformance
+extension Indirect : Bricable where Wrapped : Bricable {
 }
 
 extension RawRepresentable where RawValue : Bricable {
-    public func bric(map f: (RawValue) -> Bric) -> Bric {
-        return f(rawValue)
+    public func bric() -> Bric {
+        return rawValue.bric()
     }
 }
 
-extension Sequence {
+extension Sequence where Element : Bricable {
     /// All sequences bric to a `Bric.arr` array
-    public func bric(map f: (Iterator.Element) -> Bric) -> Bric {
-        return Bric.arr(map(f))
+    public func bric() -> Bric {
+        return Bric.arr(map({ $0.bric() }))
     }
 }
 
-extension Array : BricLayer {
-    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
+extension Array : Bricable where Element : Bricable {
 }
 
-extension ArraySlice : BricLayer {
-    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
+extension ArraySlice : Bricable where Element : Bricable {
 }
 
-extension ContiguousArray : BricLayer {
-    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
+extension ContiguousArray : Bricable where Element : Bricable {
 }
 
-extension Set : BricLayer {
-    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
+extension Set : Bricable where Element : Bricable {
 }
 
-extension CollectionOfOne : BricLayer {
-    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
+extension CollectionOfOne : Bricable where Element : Bricable {
 }
 
-extension EmptyCollection : BricLayer {
-    public typealias BricSub = Iterator.Element // inherits bricMap via SequenceType conformance
+extension EmptyCollection : Bricable where Element : Bricable {
 }
 
-//extension NonEmptyCollection : BricLayer {
-//    public typealias BricSub = Element // inherits bricMap via SequenceType conformance
-//}
-
-extension Dictionary : BricLayer { // TODO: Swift 4: where Key == String
-    public typealias BricSub = Value
-
+extension Dictionary : Bricable where Key == String, Value : Bricable { // TODO: Swift 4: where Key == String
     /// A Dictionary brics to a `Bric.obj` with stringifed keys
-    public func bric(map f: (Value) -> Bric) -> Bric {
+    public func bric() -> Bric {
         var dict: [String : Bric] = [:]
         for keyValue in self {
             // we manually stringify the keys since we aren't able to enforce string-key conformance via generics
-            dict[String(describing: keyValue.0)] = f(keyValue.1)
+            dict[String(describing: keyValue.0)] = keyValue.1.bric()
         }
         return Bric.obj(dict)
     }

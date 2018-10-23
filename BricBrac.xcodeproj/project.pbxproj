@@ -17,7 +17,6 @@
 		49DB613B20633B2300022D2C /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
 		49DB613C20633B2300022D2C /* BricPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */; };
 		49DB613D20633B2300022D2C /* Brac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B371B36159A0058706A /* Brac.swift */; };
-		49DB613E20633B2300022D2C /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
 		49DB613F20633B2300022D2C /* BricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */; };
 		49DB614020633B2300022D2C /* BricIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B381B36159A0058706A /* BricIO.swift */; };
 		49DB614120633B2300022D2C /* BricIO+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */; };
@@ -35,7 +34,6 @@
 		7E28A5D71B5AD66A00A5F27F /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		7E28A5D81B5AD66A00A5F27F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
 		7E28A5DD1B5ADD3500A5F27F /* SampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */; };
-		7E34B16A1C67B68300E50A71 /* Breq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1691C67B68300E50A71 /* Breq.swift */; };
 		7E7F9B271B3615860058706A /* BricBrac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7F9B1C1B3615850058706A /* BricBrac.framework */; };
 		7E7F9B391B36159A0058706A /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
 		7E7F9B3A1B36159A0058706A /* Brac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B371B36159A0058706A /* Brac.swift */; };
@@ -147,7 +145,6 @@
 		7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftCode.swift; sourceTree = "<group>"; };
 		7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleModel.swift; sourceTree = "<group>"; };
 		7E348EE21B9F3DD700945F86 /* Curio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Curio.h; sourceTree = "<group>"; };
-		7E34B1691C67B68300E50A71 /* Breq.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Breq.swift; sourceTree = "<group>"; };
 		7E5DA2D11B9F5F1E0013FCB9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7E7F9B1C1B3615850058706A /* BricBrac.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BricBrac.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E7F9B211B3615850058706A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -295,7 +292,6 @@
 				7E7F9B361B36159A0058706A /* Bric.swift */,
 				7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */,
 				7E7F9B371B36159A0058706A /* Brac.swift */,
-				7E34B1691C67B68300E50A71 /* Breq.swift */,
 				7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */,
 				7E7F9B381B36159A0058706A /* BricIO.swift */,
 				4932B3FE206A79B100424366 /* BricEncoder.swift */,
@@ -609,7 +605,6 @@
 				7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */,
 				7E1020201B858F6000171AFE /* JSONParser.swift in Sources */,
 				7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */,
-				7E34B16A1C67B68300E50A71 /* Breq.swift in Sources */,
 				7E7F9B3A1B36159A0058706A /* Brac.swift in Sources */,
 				7E7F9B3B1B36159A0058706A /* BricIO.swift in Sources */,
 				7E8930151BEA570A00F245C5 /* Structures.swift in Sources */,
@@ -631,7 +626,6 @@
 				49DB613B20633B2300022D2C /* Bric.swift in Sources */,
 				49DB613C20633B2300022D2C /* BricPointer.swift in Sources */,
 				49DB613D20633B2300022D2C /* Brac.swift in Sources */,
-				49DB613E20633B2300022D2C /* Breq.swift in Sources */,
 				49DB613F20633B2300022D2C /* BricBrac.swift in Sources */,
 				49DB614020633B2300022D2C /* BricIO.swift in Sources */,
 				49DB614120633B2300022D2C /* BricIO+Foundation.swift in Sources */,

@@ -123,31 +123,6 @@ public extension Bric {
         }
     }
 
-    /// Reads one level of wrapped instance(s) from the given key in an object bric
-    public func brac<T: BracLayer, R: RawRepresentable>(key: R) throws -> T where R.RawValue == String, T.BracSub : Bracable {
-        return try bracPath(key, T.brac(bric: objectKey(key) ?? nil))
-    }
-
-    /// Reads two levels of wrapped instance(s) from the given key in an object bric
-    public func brac<T: BracLayer, R: RawRepresentable>(key: R) throws -> T where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : Bracable {
-        return try bracPath(key, T.brac(bric: objectKey(key) ?? nil))
-    }
-
-    /// Reads three levels of wrapped instance(s) from the given key in an object bric
-    public func brac<T: BracLayer, R: RawRepresentable>(key: R) throws -> T where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : Bracable {
-        return try bracPath(key, T.brac(bric: objectKey(key) ?? nil))
-    }
-
-    /// Reads four levels of wrapped instance(s) from the given key in an object bric
-    public func brac<T: BracLayer, R: RawRepresentable>(key: R) throws -> T where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : Bracable {
-        return try bracPath(key, T.brac(bric: objectKey(key) ?? nil))
-    }
-
-    /// Reads five levels of wrapped instance(s) from the given key in an object bric
-    public func brac<T: BracLayer, R: RawRepresentable>(key: R) throws -> T where R.RawValue == String, T.BracSub : BracLayer, T.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub : BracLayer, T.BracSub.BracSub.BracSub.BracSub.BracSub : Bracable {
-        return try bracPath(key, T.brac(bric: objectKey(key) ?? nil))
-    }
-
     /// Reads any one of the given Brics, throwing an error if the successful number of instances is outside of the given range of acceptable passes
     public func brac<T: Bracable>(range: ClosedRange<Int>, bracers: [() throws -> T]) throws -> [T] {
         var values: [T] = []
@@ -250,11 +225,6 @@ public extension Bric {
         }
     }
 
-//    public func brac<T: Bracable>(anyOf: [() throws -> T]) throws -> NonEmptyCollection<T, [T]> {
-//        let elements = try bracRange(1...anyOf.count, bracers: anyOf)
-//        return NonEmptyCollection(elements[0], tail: Array(elements.dropFirst()))
-//    }
-
     /// Reads all of the given Brics, throwing an error if any of the closures threw an error
     public func brac<T: Bracable>(allOf: [() throws -> T]) throws -> [T] {
         return try brac(range: allOf.count...allOf.count, bracers: allOf)
@@ -316,88 +286,15 @@ public extension Bric {
     }
 }
 
-// MARK: BracLayer wrapper Brac
-
-
-/// A BracLayer can wrap around some instances; it is used to allow brac'ing from an arbitrarily nested container types
-/// This allows us to have a single handlers for multiple permutations of wrappers, such as
-/// Array<String>, Optional<Array<Bool>>, Array<Optional<Bool>>, and Array<Optional<Set<CollectionOfOne<Int>>>>
-public protocol BracLayer {
-    /// The type that is being wrapped by this layer
-    associatedtype BracSub
-
-    /// Construct an instance of self by invoking the function on the given bric
-    static func brac(map bric: Bric, f: (Bric) throws -> BracSub) throws -> Self
-}
-
-public extension BracLayer where Self.BracSub : Bracable {
-    /// Try to construct an instance of the wrapped type from the `Bric` parameter
-    public static func brac(bric: Bric) throws -> Self {
-        return try Self.brac(map: bric, f: Self.BracSub.brac)
-    }
-}
-
-public extension BracLayer where Self.BracSub : BracLayer, Self.BracSub.BracSub : Bracable {
-    /// Try to construct an instance of the twofold-wrapped type from the `Bric` parameter
-    public static func brac(bric: Bric) throws -> Self {
-        return try Self.brac(map: bric) {
-            try Self.BracSub.brac(map: $0, f: Self.BracSub.BracSub.brac)
-        }
-    }
-}
-
-public extension BracLayer where Self.BracSub : BracLayer, Self.BracSub.BracSub : BracLayer, Self.BracSub.BracSub.BracSub : Bracable {
-    /// Try to construct an instance of the threefold-wrapped type from the `Bric` parameter
-    public static func brac(bric: Bric) throws -> Self {
-        return try Self.brac(map: bric) {
-            try Self.BracSub.brac(map: $0) {
-                try Self.BracSub.BracSub.brac(map: $0,
-                    f: Self.BracSub.BracSub.BracSub.brac)
-            }
-        }
-    }
-}
-
-public extension BracLayer where Self.BracSub : BracLayer, Self.BracSub.BracSub : BracLayer, Self.BracSub.BracSub.BracSub : BracLayer, Self.BracSub.BracSub.BracSub.BracSub : Bracable {
-    /// Try to construct an instance of the fourfold-wrapped type from the `Bric` parameter
-    public static func brac(bric: Bric) throws -> Self {
-        return try Self.brac(map: bric) {
-            try Self.BracSub.brac(map: $0) {
-                try Self.BracSub.BracSub.brac(map: $0) {
-                    try Self.BracSub.BracSub.BracSub.brac(map: $0,
-                        f: Self.BracSub.BracSub.BracSub.BracSub.brac)
-                }
-            }
-        }
-    }
-}
-
-public extension BracLayer where Self.BracSub : BracLayer, Self.BracSub.BracSub : BracLayer, Self.BracSub.BracSub.BracSub : BracLayer, Self.BracSub.BracSub.BracSub.BracSub : BracLayer, Self.BracSub.BracSub.BracSub.BracSub.BracSub : Bracable {
-    /// Try to construct an instance of the fivefold-wrapped type from the `Bric` parameter
-    public static func brac(bric: Bric) throws -> Self {
-        return try Self.brac(map: bric) {
-            try Self.BracSub.brac(map: $0) {
-                try Self.BracSub.BracSub.brac(map: $0) {
-                    try Self.BracSub.BracSub.BracSub.brac(map: $0) {
-                        try Self.BracSub.BracSub.BracSub.BracSub.brac(map: $0,
-                            f: Self.BracSub.BracSub.BracSub.BracSub.BracSub.brac)
-                    }
-                }
-            }
-        }
-    }
-}
-
-extension Wrappable where Self : ExpressibleByNilLiteral {
+extension Wrappable where Self : ExpressibleByNilLiteral, Wrapped : Bracable {
     /// Returns this wrapper around the bracMap, or returns `.None` if the parameter is `Bric.nul`
-    public static func brac(map bric: Bric, f: (Bric) throws -> Wrapped) throws -> Self {
+    public static func brac(bric: Bric) throws -> Self {
         if case .nul = bric { return nil } // an optional is allowed to be nil
-        return Self(try f(bric))
+        return Self(try Wrapped.brac(bric: bric))
     }
 }
 
-extension Optional : BracLayer {
-    public typealias BracSub = Wrapped // inherits bracMap via Wrappable conformance
+extension Optional : Bracable where Wrapped : Bracable {
 }
 
 extension RawRepresentable where RawValue : Bracable {
@@ -414,101 +311,68 @@ extension RawRepresentable where RawValue : Bracable {
 
 }
 
-extension RangeReplaceableCollection {
-    /// Returns this collection around the bracMaps, or throws an error if the parameter is not `Bric.arr`
-    public static func brac(map bric: Bric, f: (Bric) throws -> Iterator.Element) throws -> Self {
+extension RangeReplaceableCollection where Element : Bracable {
+    /// All sequences brac to a `Bric.arr` array
+    public static func brac(bric: Bric) throws -> Self {
         if case .arr(let arr) = bric {
-            var ret = Self()
-            for (i, x) in arr.enumerated() {
-                ret.append(try bracIndex(i, f(x)))
-            }
-            return ret
+            return Self.init(try arr.map(Element.brac(bric:)))
+        } else {
+            return try bric.invalidType()
         }
-        return try bric.invalidType()
     }
 }
 
-extension Array : BracLayer {
-    public typealias BracSub = Element // inherits bracMap via default RangeReplaceableCollectionType conformance
+extension Array : Bracable where Element : Bracable {
 }
 
-extension ArraySlice : BracLayer {
-    public typealias BracSub = Element // inherits bracMap via default RangeReplaceableCollectionType conformance
+extension ArraySlice : Bracable where Element : Bracable {
 }
 
-extension ContiguousArray : BracLayer {
-    public typealias BracSub = Element // inherits bracMap via default RangeReplaceableCollectionType conformance
+extension ContiguousArray : Bracable where Element : Bracable {
 }
 
-extension CollectionOfOne : BracLayer {
-    public typealias BracSub = Element
-
-    public static func brac(map bric: Bric, f: (Bric) throws -> BracSub) throws -> CollectionOfOne {
-        if case .arr(let x) = bric {
-            if x.count != 1 { throw BracError.invalidArrayLength(required: 1...1, actual: x.count, path: []) }
-            return CollectionOfOne(try f(x[0]))
+extension CollectionOfOne : Bracable where Element : Bracable {
+    /// All sequences brac to a `Bric.arr` array
+    public static func brac(bric: Bric) throws -> CollectionOfOne {
+        if case .arr(let arr) = bric, arr.count == 1 {
+            return CollectionOfOne(try arr.map(Element.brac(bric:))[0])
+        } else {
+            return try bric.invalidType()
         }
-        return try bric.invalidType()
     }
 }
 
-extension EmptyCollection : BracLayer {
-    public typealias BracSub = Element
-
-    public static func brac(map bric: Bric, f: (Bric) throws -> BracSub) throws -> EmptyCollection {
-        if case .arr(let x) = bric {
-            // really kind of pointless: why would anyone mandate an array size zero?
-            if x.count != 0 { throw BracError.invalidArrayLength(required: 0...0, actual: x.count, path: []) }
+extension EmptyCollection : Bracable where Element : Bracable {
+    /// All sequences brac to a `Bric.arr` array
+    public static func brac(bric: Bric) throws -> EmptyCollection {
+        if case .arr(let arr) = bric, arr.count == 0 {
             return EmptyCollection()
+        } else {
+            return try bric.invalidType()
         }
-        return try bric.invalidType()
     }
 }
 
-//extension NonEmptyCollection : BracLayer {
-//    public typealias BracSub = Element
-//
-//    /// Returns this collection around the bracMaps, or throws an error if the parameter is not `Bric.arr` or the array does not have at least a single element
-//    public static func bracMap(_ bric: Bric, f: (Bric) throws -> Element) throws -> NonEmptyCollection {
-//        if case .arr(let arr) = bric {
-//            guard let first = arr.first else {
-//                throw BracError.invalidArrayLength(required: 1..<Int.max, actual: 0, path: [])
-//            }
-//            return try NonEmptyCollection(f(first), tail: Tail.bracMap(Bric.arr(Array(arr.dropFirst())), f: f))
-//        }
-//        return try bric.invalidType()
-//    }
-//}
-
-
-extension Dictionary : BracLayer {
-    public typealias BracSub = Value
-
-    public static func brac(map bric: Bric, f: (Bric) throws -> BracSub) throws -> Dictionary {
-        if case .obj(let x) = bric {
-            var d = Dictionary()
-            for (k, v) in x {
-                if let k = k as? Dictionary.Key {
-                    d[k] = try f(v) // keys need to be Strings
-                } else {
-                    return try bric.invalidType()
-                }
-            }
-            return d
+extension Set : Bracable where Element : Bracable {
+    /// All sequences brac to a `Bric.arr` array
+    public static func brac(bric: Bric) throws -> Set {
+        if case .arr(let arr) = bric {
+            return Set(try arr.map(Element.brac(bric:)))
+        } else {
+            return try bric.invalidType()
         }
-        return try bric.invalidType()
     }
 }
 
-extension Set : BracLayer {
-    public typealias BracSub = Iterator.Element
-
-    public static func brac(map bric: Bric, f: (Bric) throws -> BracSub) throws -> Set {
-        if case .arr(let x) = bric { return Set(try x.map(f)) }
-        return try bric.invalidType()
+extension Dictionary : Bracable where Key == String, Value : Bracable {
+    public static func brac(bric: Bric) throws -> Dictionary {
+        if case .obj(let obj) = bric {
+            return try obj.mapValues(Value.brac)
+        } else {
+            return try bric.invalidType()
+        }
     }
 }
-
 
 // MARK: Numeric Brac
 
@@ -806,12 +670,3 @@ public func bracSwap<B1, B2>(_ b1: inout B1, _ b2: inout B2) throws where B1 : B
     (b1, b2) = (brac1, brac2) // only perform the assignment if both the bracs succeed
 }
 
-/// Swaps the values of two optional Bricable & Bracable instances, throwing an error if any of the Brac fails
-///
-/// - Requires: The two types be bric-serialization compatible.
-///
-/// - SeeAlso: `AnyObject`
-public func bracSwap<B1, B2>(_ b1: inout Optional<B1>, _ b2: inout Optional<B2>) throws where B1 : Bricable, B2: Bricable, B1: Bracable, B2: Bracable {
-    let (brac1, brac2) = try (B1.brac(bric: b2.bric()), B2.brac(bric: b1.bric()))
-    (b1, b2) = (brac1, brac2) // only perform the assignment if both the bracs succeed
-}

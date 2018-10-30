@@ -11,8 +11,8 @@ import CoreFoundation
 
 extension Decodable {
     /// Any decodable can be brac'd from a Bric via the built-in decoding
-    public static func bracDecoded(bric: Bric) throws -> Self {
-        return try JSONDecoder().decode(Self.self, from: bric.stringify().data(using: .utf8) ?? Data())
+    public static func bracDecoded(bric: Bric, decoder: JSONDecoder = JSONDecoder()) throws -> Self {
+        return try decoder.decode(Self.self, from: bric.stringify().data(using: .utf8) ?? Data())
     }
 }
 

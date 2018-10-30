@@ -274,8 +274,8 @@ extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
 extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
     public static func brac(bric: Bric) throws -> OneOf2 {
         return try bric.brac(oneOf: [
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
             ])
     }
 }
@@ -294,8 +294,8 @@ extension OneOf2 : Decodable where T1 : Decodable, T2 : Decodable {
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -408,9 +408,9 @@ extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
 extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
     public static func brac(bric: Bric) throws -> OneOf3 {
         return try bric.brac(oneOf: [
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
             ])
     }
 }
@@ -430,9 +430,9 @@ extension OneOf3 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -511,10 +511,10 @@ extension OneOf4 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable {
     public static func brac(bric: Bric) throws -> OneOf4 {
         return try bric.brac(oneOf: [
-            { try .v4(T4.brac(bric: bric)) },
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
             ])
     }
 }
@@ -535,10 +535,10 @@ extension OneOf4 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -622,11 +622,11 @@ extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable {
     public static func brac(bric: Bric) throws -> OneOf5 {
         return try bric.brac(oneOf: [
-            { try .v5(T5.brac(bric: bric)) },
-            { try .v4(T4.brac(bric: bric)) },
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
             ])
     }
 }
@@ -648,11 +648,11 @@ extension OneOf5 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -745,12 +745,12 @@ extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable {
     public static func brac(bric: Bric) throws -> OneOf6 {
         return try bric.brac(oneOf: [
-            { try .v6(T6.brac(bric: bric)) },
-            { try .v5(T5.brac(bric: bric)) },
-            { try .v4(T4.brac(bric: bric)) },
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
             ])
     }
 }
@@ -773,12 +773,12 @@ extension OneOf6 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -879,13 +879,13 @@ extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable {
     public static func brac(bric: Bric) throws -> OneOf7 {
         return try bric.brac(oneOf: [
-            { try .v7(T7.brac(bric: bric)) },
-            { try .v6(T6.brac(bric: bric)) },
-            { try .v5(T5.brac(bric: bric)) },
-            { try .v4(T4.brac(bric: bric)) },
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
             ])
     }
 }
@@ -909,13 +909,13 @@ extension OneOf7 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -1020,14 +1020,14 @@ extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable {
     public static func brac(bric: Bric) throws -> OneOf8 {
         return try bric.brac(oneOf: [
-            { try .v8(T8.brac(bric: bric)) },
-            { try .v7(T7.brac(bric: bric)) },
-            { try .v6(T6.brac(bric: bric)) },
-            { try .v5(T5.brac(bric: bric)) },
-            { try .v4(T4.brac(bric: bric)) },
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
+            { try .v8(T8.brac(bric: bric)) },
             ])
     }
 }
@@ -1052,14 +1052,14 @@ extension OneOf8 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -1172,15 +1172,15 @@ extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable {
     public static func brac(bric: Bric) throws -> OneOf9 {
         return try bric.brac(oneOf: [
-            { try .v9(T9.brac(bric: bric)) },
-            { try .v8(T8.brac(bric: bric)) },
-            { try .v7(T7.brac(bric: bric)) },
-            { try .v6(T6.brac(bric: bric)) },
-            { try .v5(T5.brac(bric: bric)) },
-            { try .v4(T4.brac(bric: bric)) },
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
+            { try .v8(T8.brac(bric: bric)) },
+            { try .v9(T9.brac(bric: bric)) },
             ])
     }
 }
@@ -1206,15 +1206,15 @@ extension OneOf9 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v9(T9(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v9(T9(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }
@@ -1333,16 +1333,16 @@ extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4:
 extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable, T10: Bracable {
     public static func brac(bric: Bric) throws -> OneOf10 {
         return try bric.brac(oneOf: [
-            { try .v10(T10.brac(bric: bric)) },
-            { try .v9(T9.brac(bric: bric)) },
-            { try .v8(T8.brac(bric: bric)) },
-            { try .v7(T7.brac(bric: bric)) },
-            { try .v6(T6.brac(bric: bric)) },
-            { try .v5(T5.brac(bric: bric)) },
-            { try .v4(T4.brac(bric: bric)) },
-            { try .v3(T3.brac(bric: bric)) },
-            { try .v2(T2.brac(bric: bric)) },
             { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
+            { try .v8(T8.brac(bric: bric)) },
+            { try .v9(T9.brac(bric: bric)) },
+            { try .v10(T10.brac(bric: bric)) },
             ])
     }
 }
@@ -1369,16 +1369,16 @@ extension OneOf10 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodab
 
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
-        do { self = try .v10(T10(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v9(T9(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
-        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v3(T3(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v4(T4(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v9(T9(from: decoder)); return } catch { errors.append(error) }
+        do { self = try .v10(T10(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
     }
 }

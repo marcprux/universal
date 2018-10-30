@@ -325,6 +325,18 @@ extension WrapperType where Wrapped : Bricable {
     }
 }
 
+// this works, but it introduces a lot of ambiguous conflicts with WrapperType where Wrapped : Bricable
+//extension WrapperType where Wrapped : RawRepresentable, Wrapped.RawValue : Bricable {
+//    /// Maps the underlying layer, or `Bric.nul` if it is nil
+//    public func bric() -> Bric {
+//        if let x = flatMap({$0}) {
+//            return x.bric()
+//        } else {
+//            return Bric.nul
+//        }
+//    }
+//}
+
 extension Optional : Bricable where Wrapped : Bricable {
 }
 

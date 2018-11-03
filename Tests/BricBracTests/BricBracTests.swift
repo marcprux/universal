@@ -13,6 +13,48 @@ import JavaScriptCore
 
 class BricBracTests : XCTestCase {
 
+    public static var allTests = [
+        //("testBricConversion", testBricConversion),
+        ("testDefaulting", testDefaulting),
+        ("testAllocatonProfiling", testAllocatonProfiling),
+        ("testEscaping", testEscaping),
+        ("testISO8601JSONDates", testISO8601JSONDates),
+        ("testBricBracPerson", testBricBracPerson),
+        ("testBricBracCompany", testBricBracCompany),
+        ("testReferenceCycles", testReferenceCycles),
+        ("testLayers", testLayers),
+        ("testOutputNulls", testOutputNulls),
+        ("testBricBracSerialization", testBricBracSerialization),
+        ("testBricBracParsing", testBricBracParsing),
+        ("testBricBracCocoaCompatNumbers", testBricBracCocoaCompatNumbers),
+        ("testNulNilEquivalence", testNulNilEquivalence),
+        ("testKeyedSubscripting", testKeyedSubscripting),
+        ("testBricAlter", testBricAlter),
+        ("testJSONFormatting", testJSONFormatting),
+        ("testBricBracCompatability", testBricBracCompatability),
+        ("testStringReplace", testStringReplace),
+        ("testJSONPointers", testJSONPointers),
+        ("testStreamingParser", testStreamingParser),
+        ("testStreamingBricolage", testStreamingBricolage),
+        ("testStreamingEncoding", testStreamingEncoding),
+        ("testStreamingDecoding", testStreamingDecoding),
+        ("testMaxlineStringify", testMaxlineStringify),
+        ("testResourcePath", testResourcePath),
+        ("testSerializationPerformance", testSerializationPerformance),
+        ("testBricDate", testBricDate),
+        ("testNestedBricDate", testNestedBricDate),
+        ("testMirrorBric", testMirrorBric),
+        ("testBracSwap", testBracSwap),
+        ("testFidelityBricolage", testFidelityBricolage),
+        ("testOneOfStruct", testOneOfStruct),
+        ("testOptionalPerformance", testOptionalPerformance),
+        ("testDeepMerge", testDeepMerge),
+        ("testShallowMerge", testShallowMerge),
+        ("testCodableConversion", testCodableConversion),
+        ("testExplicitNull", testExplicitNull),
+        ]
+
+#if os(macOS) || os(iOS)
     func testBricConversion() {
         let bric: Bric = ["a": [1, 2, true, false, nil]]
         let cocoa = FoundationBricolage.brac(bric: bric)
@@ -20,6 +62,7 @@ class BricBracTests : XCTestCase {
         let bric2 = cocoa.bric()
         XCTAssertEqual(bric, bric2)
     }
+#endif
 
     /// Tests that the `defaulted` var of Optional, Array, Dictionary, and Set all work as expected
     func testDefaulting() {
@@ -1809,4 +1852,5 @@ extension BricBracTests {
         XCTAssertEqual(values2, values)
 
     }
+
 }

@@ -6,6 +6,8 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
+#if os(macOS) || os(iOS)
+
 import Foundation
 import CoreFoundation
 
@@ -310,3 +312,5 @@ public final class CoreFoundationBricolage: Bricolage {
         return arr
     }
 }
+#endif
+

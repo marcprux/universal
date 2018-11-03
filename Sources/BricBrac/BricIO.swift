@@ -17,7 +17,6 @@ extension Bric : TextOutputStreamable {
     /// - Parameter space: the number of indentation spaces to use for pretty-printing
     /// - Parameter maxline: fit pretty-printed output on a single line if it is less than maxline
     /// - Parameter mapper: When set, .Obj instances will be passed through the given mapper to filter, re-order, or modify the values
-    
     public func stringify(space: Int = 0, maxline: Int = 0, bufferSize: Int? = nil, mapper: @escaping ([String: Bric])->AnyIterator<(key: String, value: Bric)> = { AnyIterator($0.makeIterator()) })->String {
         var str = String()
         if let bufferSize = bufferSize {

@@ -11,15 +11,15 @@ matrix:
         - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme Curio | xcpretty -c
         - xcodebuild test -project BricBrac.xcodepro -scheme BricBrac -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone X,OS=12.0" | xcpretty -c
         - swift test
-    - os: linux
-      language: generic
-      sudo: required
-      dist: trusty
-      install:
-        - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
-        - wget https://swift.org/builds/swift-${SWIFT_VERSION}-release/ubuntu1404/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu14.04.tar.gz
-        - tar xzf swift-${SWIFT_VERSION}-RELEASE-ubuntu14.04.tar.gz
-        - export PATH=${PWD}/swift-${SWIFT_VERSION}-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
-      script:
-        - swift test
+          #- os: linux
+          #language: generic
+          #sudo: required
+          #dist: trusty
+          #install:
+          #- wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+          #- wget https://swift.org/builds/swift-${SWIFT_VERSION}-release/ubuntu1404/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu14.04.tar.gz
+          #- tar xzf swift-${SWIFT_VERSION}-RELEASE-ubuntu14.04.tar.gz
+          #- export PATH=${PWD}/swift-${SWIFT_VERSION}-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+          #script:
+          #- swift test
 

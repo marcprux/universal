@@ -13,9 +13,8 @@ import JavaScriptCore
 
 class BricBracTests : XCTestCase {
 
-    public static var allTests = [
+    public static var allTests: [(String, (BricBracTests) -> () throws -> Void)] = [
         //("testBricConversion", testBricConversion),
-        ("testDefaulting", testDefaulting),
         ("testAllocatonProfiling", testAllocatonProfiling),
         ("testEscaping", testEscaping),
         ("testISO8601JSONDates", testISO8601JSONDates),
@@ -39,7 +38,6 @@ class BricBracTests : XCTestCase {
         ("testStreamingEncoding", testStreamingEncoding),
         ("testStreamingDecoding", testStreamingDecoding),
         ("testMaxlineStringify", testMaxlineStringify),
-        ("testResourcePath", testResourcePath),
         ("testSerializationPerformance", testSerializationPerformance),
         ("testBricDate", testBricDate),
         ("testNestedBricDate", testNestedBricDate),
@@ -63,29 +61,6 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual(bric, bric2)
     }
 #endif
-
-    /// Tests that the `defaulted` var of Optional, Array, Dictionary, and Set all work as expected
-    func testDefaulting() {
-        var stuff: Array<Set<[String]>> = []
-        XCTAssertEqual(stuff, [])
-        stuff.defaultedLast.defaultedAny = ["Foo"]
-        XCTAssertEqual(stuff, [[["Foo"]]])
-        stuff.defaultedFirst.defaultedAny = ["Bar"]
-        XCTAssertEqual(stuff, [[["Bar"]]])
-        stuff[defaulted: 4].defaultedAny.append("Baz")
-        XCTAssertEqual(stuff, [[["Bar"]], [], [], [], [["Baz"]]])
-        stuff[defaulted: 0].defaultedAny.insert("ABC", at: 0)
-        stuff[defaulted: 2] = [["123"]]
-        stuff[defaulted: 4].defaultedAny.append("XYZ")
-        XCTAssertEqual(stuff, [[["ABC", "Bar"]], [], [["123"]], [], [["Baz", "XYZ"]]])
-
-        var optdbl: Optional<Double> = nil
-        XCTAssertEqual(optdbl, nil)
-        optdbl[defaulting: 1.1] += 1.1
-        XCTAssertEqual(optdbl, 2.2)
-        optdbl[defaulting: 0] += 5.5
-        XCTAssertEqual(optdbl, 7.7)
-    }
 
     func testAllocatonProfiling() throws {
         // json with unicode escapes
@@ -1326,7 +1301,7 @@ class BricBracTests : XCTestCase {
     }
 
     /// Returns the path of the folder containing test resources
-    func testResourcePath() -> String {
+    private func testResourcePath() -> String {
         return String(#file.reversed().drop(while: { $0 != "/" }).reversed()) + "test/"
     }
     

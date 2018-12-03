@@ -311,6 +311,7 @@ extension RawRepresentable where RawValue : Bracable {
 
 }
 
+
 extension RangeReplaceableCollection where Element : Bracable {
     /// All sequences brac to a `Bric.arr` array
     public static func brac(bric: Bric) throws -> Self {

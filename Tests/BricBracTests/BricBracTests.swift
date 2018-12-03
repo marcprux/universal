@@ -50,6 +50,7 @@ class BricBracTests : XCTestCase {
         ("testShallowMerge", testShallowMerge),
         ("testCodableConversion", testCodableConversion),
         ("testExplicitNull", testExplicitNull),
+        ("testIndirect", testIndirect),
         ]
 
 #if os(macOS) || os(iOS)
@@ -1704,6 +1705,19 @@ struct ExplicitNullHolder : Codable, Equatable {
 }
 
 extension BricBracTests {
+    func testIndirect() {
+        let encoder = JSONEncoder()
+
+        do {
+            let value = Indirect(["Foo"])
+            XCTAssertEqual(String(bytes: try encoder.encode(value), encoding: .utf8), """
+["Foo"]
+""")
+            XCTAssertEqual(value, try value.roundtripped())
+        }
+
+    }
+
     func testExplicitNull() {
         let encoder = JSONEncoder()
 

@@ -340,9 +340,6 @@ extension WrapperType where Wrapped : Bricable {
 extension Optional : Bricable where Wrapped : Bricable {
 }
 
-extension Indirect : Bricable where Wrapped : Bricable {
-}
-
 extension RawRepresentable where RawValue : Bricable {
     public func bric() -> Bric {
         return rawValue.bric()

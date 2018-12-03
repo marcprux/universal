@@ -51,6 +51,17 @@ public indirect enum Indirect<Wrapped> : WrapperType, Wrappable {
     }
 }
 
+extension Indirect : RawRepresentable {
+    public typealias RawValue = Wrapped
+
+    /// Constructor for RawRepresentable
+    public init(rawValue some: Wrapped) {
+        self = .some(some)
+    }
+
+    public var rawValue: Wrapped { return value }
+}
+
 // similar to Optional codability at:
 // https://github.com/apple/swift/blob/325a63a1bd59eb2b12ba310ffa93e83d1336885f/stdlib/public/core/Codable.swift.gyb#L1825
 extension Indirect : Encodable where Wrapped : Encodable {

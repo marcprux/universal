@@ -1730,7 +1730,7 @@ extension BricBracTests {
         }
 
         do {
-            let nh = ExplicitNullHolder(optionalString: nil, nullableString: .v2("Foo"), nullable: nil, nullableOptional: nil)
+            let nh = ExplicitNullHolder(optionalString: nil, nullableString: .init("Foo"), nullable: nil, nullableOptional: nil)
             XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
 {"nullableString":"Foo","nullable":null}
 """)
@@ -1738,7 +1738,7 @@ extension BricBracTests {
         }
 
         do {
-            let nh = ExplicitNullHolder(optionalString: nil, nullableString: .v2("Foo"), nullable: nil, nullableOptional: .some(nil))
+            let nh = ExplicitNullHolder(optionalString: nil, nullableString: .init("Foo"), nullable: nil, nullableOptional: .some(nil))
             XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
 {"nullableOptional":null,"nullableString":"Foo","nullable":null}
 """)

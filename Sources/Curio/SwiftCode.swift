@@ -26,9 +26,14 @@ public extension CodeEmitterType {
 
 /// The default ordering of types: typealiases first, then enums, then by name
 func typeOrdering(t1: CodeNamedType, t2: CodeNamedType) -> Bool {
-    if (t1 is CodeTypeAlias) && !(t2 is CodeTypeAlias) { return true }
-    else if (t1 is CodeEnumType) && !(t2 is CodeEnumType) { return true }
-    else { return t1.name < t2.name }
+    let (t1alias, t2alias) = ((t1 is CodeTypeAlias), (t2 is CodeTypeAlias))
+    let (t1enum, t2enum) = ((t1 is CodeEnumType), (t2 is CodeEnumType))
+
+    if t1alias && !t2alias { return true }
+    if !t1alias && t2alias { return false }
+    if t1enum && !t2enum { return true }
+    if !t1enum && t2enum { return false }
+    return t1.name < t2.name
 }
 
 open class CodeEmitter<T: TextOutputStream> : CodeEmitterType {

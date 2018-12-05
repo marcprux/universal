@@ -76,7 +76,7 @@ public struct Curio {
     public var excludes: Set<CodeTypeName> = []
 
     /// The list of type aliases that will wrap around their aliased types
-    public var encapsulate: Set<CodeTypeName> = []
+    public var encapsulate: [CodeTypeName: CodeExternalType] = [:]
 
     /// Override individual property types
     public var propertyTypeOverrides: [CodeTypeName: CodeTypeName] = [:]
@@ -96,6 +96,15 @@ public struct Curio {
     public var promoteIdenticalTypes = true
 
     public var propOrdering: ([CodeTypeName], String)->(Array<String>?) = { (parents, id) in nil }
+
+    /// The protocols all our types will adopt
+    var standardAdoptions: [CodeProtocol] {
+        var protos: [CodeProtocol] = []
+        if generateEquals { protos.append(.equatable) }
+        if generateHashable { protos.append(.hashable) }
+        if generateCodable { protos.append(.codable) }
+        return protos
+    }
 
     public init() {
     }
@@ -201,6 +210,51 @@ public struct Curio {
         return name
     }
 
+    func dictionaryType(_ keyType: CodeType, _ valueType: CodeType) -> CodeExternalType {
+        return CodeExternalType("Dictionary", generics: [keyType, valueType], defaultValue: "[:]")
+    }
+
+    func arrayType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("Array", generics: [type], defaultValue: "[]", shorthand: (prefix: "[", suffix: "]"))
+    }
+
+    func collectionOfOneType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("CollectionOfOne", generics: [type], defaultValue: "[]")
+    }
+
+    func optionalType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("Optional", generics: [type], defaultValue: ".none", shorthand: (prefix: nil, suffix: "?"))
+    }
+
+    func indirectType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("Indirect", generics: [type], defaultValue: "nil")
+    }
+
+    func nullableType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("ExplicitNull", generics: [type])
+    }
+
+    func notBracType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("NotBrac", generics: [type], defaultValue: "nil")
+    }
+
+    func nonEmptyType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("NonEmptyCollection", generics: [type, arrayType(type)])
+    }
+
+    func oneOfType(_ types: [CodeType]) -> CodeExternalType {
+        return CodeExternalType("OneOf\(types.count)", generics: types)
+    }
+
+    func anyOfType(_ types: [CodeType]) -> CodeExternalType {
+        return CodeExternalType("AnyOf\(types.count)", generics: types)
+    }
+
+    func allOfType(_ types: [CodeType]) -> CodeExternalType {
+        return CodeExternalType("AllOf\(types.count)", generics: types)
+    }
+
+
     func typeName(_ parents: [CodeTypeName], _ id: String, capitalize: Bool = true) -> CodeTypeName {
         if let tname = renamer(parents, id) {
             return tname
@@ -271,95 +325,45 @@ public struct Curio {
         return props
     }
 
+    /// Encapsulates the given typename with the specified external type
+    func encapsulateType(name typename: CodeTypeName, type: CodeExternalType, access: CodeAccess)  -> CodeNamedType {
+        let aliasType = type
+        let propn = CodePropName("rawValue")
+        let propd = CodeProperty.Declaration(name: propn, type: aliasType, access: access, mutable: false)
+        var enc = CodeStruct(name: typename, access: access, props: [propd.implementation])
+
+        enc.conforms += standardAdoptions
+        enc.conforms.append(.rawRepresentable)
+
+        let rawInit = CodeFunction.Declaration(name: "init", access: access, instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: aliasType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
+        let rawInitImp = CodeFunction.Implementation(declaration: rawInit, body: ["self.rawValue = rawValue"], comments: [])
+
+        enc.funcs.append(rawInitImp)
+
+        return enc
+    }
+
     /// Reifies the given schema as a Swift data structure
     public func reify(_ schema: Schema, id: String, parents parentsx: [CodeTypeName]) throws -> CodeNamedType {
         var parents = parentsx
-        func dictionaryType(_ keyType: CodeType, _ valueType: CodeType) -> CodeExternalType {
-            return CodeExternalType("Dictionary", generics: [keyType, valueType], defaultValue: "[:]")
-        }
-
-        func arrayType(_ type: CodeType) -> CodeExternalType {
-            return CodeExternalType("Array", generics: [type], defaultValue: "[]", shorthand: (prefix: "[", suffix: "]"))
-        }
-
-        func collectionOfOneType(_ type: CodeType) -> CodeExternalType {
-            return CodeExternalType("CollectionOfOne", generics: [type], defaultValue: "[]")
-        }
-
-        func optionalType(_ type: CodeType) -> CodeExternalType {
-            return CodeExternalType("Optional", generics: [type], defaultValue: ".none", shorthand: (prefix: nil, suffix: "?"))
-        }
-
-        func indirectType(_ type: CodeType) -> CodeExternalType {
-            return CodeExternalType("Indirect", generics: [type], defaultValue: "nil")
-        }
-
-        func notBracType(_ type: CodeType) -> CodeExternalType {
-            return CodeExternalType("NotBrac", generics: [type], defaultValue: "nil")
-        }
-
-        func nonEmptyType(_ type: CodeType) -> CodeExternalType {
-            return CodeExternalType("NonEmptyCollection", generics: [type, arrayType(type)])
-        }
-
-        func oneOfType(_ types: [CodeType]) -> CodeExternalType {
-            return CodeExternalType("OneOf\(types.count)", generics: types)
-        }
-
-        func anyOfType(_ types: [CodeType]) -> CodeExternalType {
-            return CodeExternalType("AnyOf\(types.count)", generics: types)
-        }
-
-        func allOfType(_ types: [CodeType]) -> CodeExternalType {
-            return CodeExternalType("AllOf\(types.count)", generics: types)
-        }
-
-        let BricType = CodeExternalType("Bric", defaultValue: "nil")
-
-        let StringType = CodeExternalType("String")
-        let IntType = CodeExternalType("Int")
-        let DoubleType = CodeExternalType("Double")
-        let BoolType = CodeExternalType("Bool")
-        let VoidType = CodeExternalType("Void")
-        let NullType = CodeExternalType("ExplicitNull")
-
-//        let SimpleType = oneOfType([ StringType, DoubleType, BoolType ])
-
-        let ArrayType = CodeExternalType("Array", generics: [BricType], defaultValue: "[]")
-        let ObjectType = dictionaryType(StringType, BricType)
-        let HollowBricType = CodeExternalType("HollowBric")
-        let EncoderType = CodeExternalType("Encoder")
-        let DecoderType = CodeExternalType("Decoder")
-
-        /// Calculate the fully-qualified name of the given type
-        func fullName(_ type: CodeType) -> String {
-            return (parents + [type.identifier]).joined(separator: ".")
-        }
-
-        let codingKey = CodeProtocol(name: "CodingKey")
-        let caseIterable = CodeProtocol(name: "CaseIterable")
-
-        let bricable = CodeProtocol(name: "Bricable")
-        let bricfun = CodeFunction.Declaration(name: "bric", access: accessor(parents), instance: true, returns: CodeTuple(elements: [(name: nil, type: BricType, value: nil, anon: false)]))
+        let bricfun = CodeFunction.Declaration(name: "bric", access: accessor(parents), instance: true, returns: CodeTuple(elements: [(name: nil, type: CodeExternalType.bric, value: nil, anon: false)]))
 
         func selfType(_ type: CodeType, name: String?) -> CodeTupleElement {
             return CodeTupleElement(name: name, type: CodeExternalType(fullName(type), access: self.accessor(parents)), value: nil, anon: false)
         }
 
-        let bracable = CodeProtocol(name: "Bracable")
-        let bracfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "brac", access: self.accessor(parents), instance: false, exception: true, arguments: CodeTuple(elements: [(name: "bric", type: BricType, value: nil, anon: false)]), returns: CodeTuple(elements: [selfType($0, name: nil)])) }
+        let bracfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "brac", access: self.accessor(parents), instance: false, exception: true, arguments: CodeTuple(elements: [(name: "bric", type: CodeExternalType.bric, value: nil, anon: false)]), returns: CodeTuple(elements: [selfType($0, name: nil)])) }
 
-        let equatable = CodeProtocol(name: "Equatable")
-        let hashable = CodeProtocol(name: "Hashable")
-        let rawRepresentable = CodeProtocol(name: "RawRepresentable")
-
-        let codable = CodeProtocol(name: "Codable")
-        let encodefun = CodeFunction.Declaration(name: "encode", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "to encoder", type: EncoderType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
-        let decodefun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "from decoder", type: DecoderType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
+        let encodefun = CodeFunction.Declaration(name: "encode", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "to encoder", type: CodeExternalType.encoder, value: nil, anon: false)]), returns: CodeTuple(elements: []))
+        let decodefun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "from decoder", type: CodeExternalType.decoder, value: nil, anon: false)]), returns: CodeTuple(elements: []))
 
 
         let comments = [schema.title, schema.description].compactMap { $0 }
 
+        /// Calculate the fully-qualified name of the given type
+        func fullName(_ type: CodeType) -> String {
+            return (parents + [type.identifier]).joined(separator: ".")
+        }
 
         func schemaTypeName(_ schema: Schema, types: [CodeType], suffix: String = "") -> String {
             if let titleName = schema.title.flatMap({ typeName(parents, $0) }) { return titleName }
@@ -409,16 +413,11 @@ public struct Curio {
                 let casetype: CodeType
 
                 switch sub.type {
-                case .some(.v1(.string)) where sub._enum == nil:
-                    casetype = StringType
-                case .some(.v1(.number)):
-                    casetype = DoubleType
-                case .some(.v1(.boolean)):
-                    casetype = BoolType
-                case .some(.v1(.integer)):
-                    casetype = IntType
-                case .some(.v1(.null)):
-                    casetype = NullType
+                case .some(.v1(.string)) where sub._enum == nil: casetype = CodeExternalType.string
+                case .some(.v1(.number)): casetype = CodeExternalType.double
+                case .some(.v1(.boolean)): casetype = CodeExternalType.bool
+                case .some(.v1(.integer)): casetype = CodeExternalType.int
+                case .some(.v1(.null)): casetype = CodeExternalType.null
                 default:
                     if let values = sub._enum {
                         // some languages (like Typescript) commonly have union types that are like: var intOrConstant: number | "someConst"
@@ -490,16 +489,8 @@ public struct Curio {
             encodebody.append("}")
             decodebody.append("throw OneOfDecodingError(errors: errors)")
 
-            if generateEquals {
-                code.conforms.append(equatable)
-            }
-
-            if generateHashable {
-                code.conforms.append(hashable)
-            }
-
+            code.conforms += standardAdoptions
             if generateCodable {
-                code.conforms.append(codable)
                 code.funcs.append(CodeFunction.Implementation(declaration: encodefun, body: encodebody, comments: []))
                 code.funcs.append(CodeFunction.Implementation(declaration: decodefun, body: decodebody, comments: []))
             }
@@ -543,51 +534,39 @@ public struct Curio {
                 switch sub {
                 case .string:
                     let caseName = enumCase == .upper ? "Text" : "text"
-                    subTypes.append(StringType)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: StringType))
+                    subTypes.append(CodeExternalType.string)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.string))
                 case .number:
                     let caseName = enumCase == .upper ? "Number" : "number"
-                    subTypes.append(DoubleType)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: DoubleType))
+                    subTypes.append(CodeExternalType.double)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.double))
                 case .boolean:
                     let caseName = enumCase == .upper ? "Boolean" : "boolean"
-                    subTypes.append(BoolType)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: BoolType))
+                    subTypes.append(CodeExternalType.bool)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.bool))
                 case .integer:
                     let caseName = enumCase == .upper ? "Integer" : "integer"
-                    subTypes.append(IntType)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: IntType))
+                    subTypes.append(CodeExternalType.int)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.int))
                 case .array:
                     let caseName = enumCase == .upper ? "List" : "list"
-                    subTypes.append(ArrayType)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: ArrayType))
+                    subTypes.append(CodeExternalType.array)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.array))
                 case .object:
                     let caseName = enumCase == .upper ? "Object" : "object"
                     //print("warning: making Bric for key: \(name)")
-                    subTypes.append(BricType)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: BricType))
+                    subTypes.append(CodeExternalType.bric)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.bric))
                 case .null:
                     let caseName = enumCase == .upper ? "None" : "none"
-                    subTypes.append(NullType)
+                    subTypes.append(CodeExternalType.null)
 //                    optional = true
                     assoc.cases.append(CodeEnum.Case(name: caseName, type: nil))
                 }
             }
 
+            assoc.conforms += standardAdoptions
             parents += [typename]
-
-            if generateEquals {
-                assoc.conforms.append(equatable)
-            }
-
-            if generateHashable {
-                assoc.conforms.append(hashable)
-            }
-
-            if generateCodable {
-                assoc.conforms.append(codable)
-            }
-
             parents = Array(parents.dropLast())
 
             if subTypes.count > 0 {
@@ -601,30 +580,19 @@ public struct Curio {
             // There's no OneOf1; this can happen e.g. when a schema has types: ["double", "null"]
             // In these cases, simply return an alias to the types
             let aname = defined ? name : (unescape(name) + oneOfSuffix)
+
+
             let typ = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
             var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(typ) : typ, access: accessor(parents))
+
             alias.comments = comments
             return alias
         }
 
         func aliasSimpleType(name typename: CodeTypeName, type: CodeExternalType) -> CodeNamedType {
             // When we encapsulate a typealias (e.g., Color = String), we make it into a separate type that can be extended
-            if encapsulate.contains(typename) {
-                let propn = CodePropName("rawValue")
-                let propd = CodeProperty.Declaration(name: propn, type: type, access: accessor(parents), mutable: false)
-                var enc = CodeStruct(name: typename, access: accessor(parents), props: [propd.implementation])
-
-                if generateEquals { enc.conforms.append(equatable) }
-                if generateHashable { enc.conforms.append(hashable) }
-                if generateCodable { enc.conforms.append(codable) }
-
-                enc.conforms.append(rawRepresentable)
-                let rawInit = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: type, value: nil, anon: false)]), returns: CodeTuple(elements: []))
-                let rawInitImp = CodeFunction.Implementation(declaration: rawInit, body: ["self.rawValue = rawValue"], comments: [])
-
-                enc.funcs.append(rawInitImp)
-
-                return enc
+            if let encapsulatedType = self.encapsulate[typename] {
+                return encapsulateType(name: typename, type: encapsulatedType, access: accessor(parents))
             }
             return CodeTypeAlias(name: typename, type: type, access: accessor(parents))
         }
@@ -666,11 +634,11 @@ public struct Curio {
                     proptype = CodeExternalType(overrideType, access: accessor(parents + [typename]))
                 } else {
                     switch prop.type {
-                    case .some(.v1(.string)) where prop._enum == nil: proptype = StringType
-                    case .some(.v1(.number)): proptype = DoubleType
-                    case .some(.v1(.boolean)): proptype = BoolType
-                    case .some(.v1(.integer)): proptype = IntType
-                    case .some(.v1(.null)): proptype = NullType
+                    case .some(.v1(.string)) where prop._enum == nil: proptype = CodeExternalType.string
+                    case .some(.v1(.number)): proptype = CodeExternalType.double
+                    case .some(.v1(.boolean)): proptype = CodeExternalType.bool
+                    case .some(.v1(.integer)): proptype = CodeExternalType.int
+                    case .some(.v1(.null)): proptype = CodeExternalType.null
 
                     case .some(.v2(let types)):
                         let assoc = createSimpleEnumeration(typename, name: name, types: types)
@@ -683,7 +651,7 @@ public struct Curio {
 
                         switch items.count {
                         case 0:
-                            proptype = arrayType(BricType)
+                            proptype = arrayType(CodeExternalType.bric)
                         case 1:
                             let item = items.first!
                             if let ref = item.ref {
@@ -761,7 +729,7 @@ public struct Curio {
                 hasAdditionalProps = nil // FIXME: when this is false, allOf union types won't validate
             case .some(.v1(true)), .some(.v2): // TODO: generate object types for B
                 hasAdditionalProps = true
-                addPropType = ObjectType // additionalProperties default to [String:Bric]
+                addPropType = CodeExternalType.object // additionalProperties default to [String:Bric]
             }
 
             let addPropName = renamer(parents, "additionalProperties") ?? "additionalProperties"
@@ -789,8 +757,8 @@ public struct Curio {
 
                 if !cases.isEmpty {
                     var keysType = CodeSimpleEnum(name: keyName, access: accessor(parents), cases: cases)
-                    keysType.conforms.append(codingKey)
-                    keysType.conforms.append(caseIterable)
+                    keysType.conforms.append(.codingKey)
+                    keysType.conforms.append(.caseIterable)
                     code.nestedTypes.insert(keysType, at: 0)
                 }
             }
@@ -851,17 +819,7 @@ public struct Curio {
 
             makeInit(false)
 
-            if generateEquals {
-                code.conforms.append(equatable)
-            }
-
-            if generateHashable {
-                code.conforms.append(hashable)
-            }
-
-            if generateCodable {
-                code.conforms.append(codable)
-            }
+            code.conforms += standardAdoptions
 
             let reftypes = proptypes.map({ $0.type })
             if (mode == .allOf || mode == .anyOf) && useAllOfEnums && reftypes.count >= 2 && reftypes.count <= 10 {
@@ -898,7 +856,7 @@ public struct Curio {
             // when a top-level type is an array, we make it a typealias with a type for the individual elements
             switch schema.items {
             case .none:
-                return CodeTypeAlias(name: typeName(parents, id), type: arrayType(BricType), access: accessor(parents))
+                return CodeTypeAlias(name: typeName(parents, id), type: arrayType(CodeExternalType.bric), access: accessor(parents))
             case .some(.v2):
                 throw CodegenErrors.typeArrayNotSupported
             case .some(.v1(let item)):
@@ -939,19 +897,8 @@ public struct Curio {
                 code.defaultValue = "." + firstCase.name
             }
 
-            if generateEquals {
-                code.conforms.append(equatable)
-            }
-
-            if generateHashable {
-                code.conforms.append(hashable)
-            }
-
-            if generateCodable {
-                code.conforms.append(codable)
-            }
-
-            code.conforms.append(caseIterable)
+            code.conforms += standardAdoptions
+            code.conforms.append(.caseIterable)
             return code
         }
 
@@ -965,26 +912,26 @@ public struct Curio {
             var subTypes: [CodeType] = []
             for type in multiType {
                 switch type {
-                case .array: subTypes.append(arrayType(BricType))
-                case .boolean: subTypes.append(BoolType)
-                case .integer: subTypes.append(IntType)
-                case .null: subTypes.append(NullType)
-                case .number: subTypes.append(DoubleType)
-                case .object: subTypes.append(BricType)
-                case .string: subTypes.append(StringType)
+                case .array: subTypes.append(arrayType(CodeExternalType.bric))
+                case .boolean: subTypes.append(CodeExternalType.bool)
+                case .integer: subTypes.append(CodeExternalType.int)
+                case .null: subTypes.append(CodeExternalType.null)
+                case .number: subTypes.append(CodeExternalType.double)
+                case .object: subTypes.append(CodeExternalType.bric)
+                case .string: subTypes.append(CodeExternalType.string)
                 }
             }
             return aliasOneOf(subTypes, name: typename, optional: false, defined: parents.isEmpty)
         } else if case .some(.v1(.string)) = type {
-            return aliasSimpleType(name: typename, type: StringType)
+            return aliasSimpleType(name: typename, type: CodeExternalType.string)
         } else if case .some(.v1(.integer)) = type {
-            return aliasSimpleType(name: typename, type: IntType)
+            return aliasSimpleType(name: typename, type: CodeExternalType.int)
         } else if case .some(.v1(.number)) = type {
-            return aliasSimpleType(name: typename, type: DoubleType)
+            return aliasSimpleType(name: typename, type: CodeExternalType.double)
         } else if case .some(.v1(.boolean)) = type {
-            return aliasSimpleType(name: typename, type: BoolType)
+            return aliasSimpleType(name: typename, type: CodeExternalType.bool)
         } else if case .some(.v1(.null)) = type {
-            return aliasSimpleType(name: typename, type: NullType)
+            return aliasSimpleType(name: typename, type: CodeExternalType.null)
         } else if case .some(.v1(.array)) = type {
             return try createArray(typename)
         } else if let properties = schema.properties , !properties.isEmpty {
@@ -1033,19 +980,19 @@ public struct Curio {
 //            let reqSchema = try reify(not, id: reqId, parents: parents)
 //            return CodeTypeAlias(name: typename, type: notBracType(reqSchema), access: accessor(parents), peerTypes: [reqSchema])
         } else if isBricType(schema) { // an empty schema just generates pure Bric
-            return CodeTypeAlias(name: typename, type: BricType, access: accessor(parents))
+            return CodeTypeAlias(name: typename, type: CodeExternalType.bric, access: accessor(parents))
         } else if case .some(.v1(.object)) = type, case let .some(.v2(adp)) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Type]
             let adpType = try reify(adp, id: typename + "Value", parents: parents)
-            return CodeTypeAlias(name: typename, type: dictionaryType(StringType, adpType), access: accessor(parents), peerTypes: [adpType])
+            return CodeTypeAlias(name: typename, type: dictionaryType(CodeExternalType.string, adpType), access: accessor(parents), peerTypes: [adpType])
         } else if case .some(.v1(.object)) = type, case .some(.v1(true)) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Bric]
             //print("warning: making Brictionary for code: \(schema.bric().stringify())")
-            return CodeTypeAlias(name: typename, type: ObjectType, access: self.accessor(parents))
+            return CodeTypeAlias(name: typename, type: CodeExternalType.object, access: self.accessor(parents))
         } else {
             // throw CodegenErrors.illegalState("No code to generate for: \(schema.bric().stringify())")
 //            print("warning: making HollowBric for code: \(schema.bric().stringify())")
-            return CodeTypeAlias(name: typename, type: BricType, access: self.accessor(parents))
+            return CodeTypeAlias(name: typename, type: CodeExternalType.bric, access: self.accessor(parents))
         }
     }
 
@@ -1064,7 +1011,6 @@ public struct Curio {
         let module = CodeModule()
 
         // next, promote all of the types for promoteIdenticalTypes
-        // ### not currently working
         if promoteIdenticalTypes {
             func flattenedTypes(_ types: [CodeNamedType]) -> [CodeNamedType] {
                 let nestedTypes = types.compactMap({ $0 as? CodeStateType }).flatMap({ $0.nestedTypes  })
@@ -1096,6 +1042,16 @@ public struct Curio {
             let promotedTypes = duplicatedTypes(deepTypes.compactMap({ $0 as? CodeSimpleEnum<String> }), from: types)
 
             types = types.map({ $0.purgeTypes(promotedTypes) }) + Array(promotedTypes)
+
+            // next add in any encapsulated types we have specified that might not actually
+            // have been defined in the schema; this allows us to encapsulate things
+            // into wrappers without them being treated specially by the schema
+            for (name, type) in self.encapsulate {
+                if !deepTypes.contains(where: { $0.name == name }) {
+                    let encap = encapsulateType(name: name, type: type, access: accessor([]))
+                    types.append(encap)
+                }
+            }
 
             // this doesn't quite work because we have some conflicting types for common cases (e.g., "Value")
         // types = promoteTypes(deepTypes.compactMap({ $0 as? CodeTypeAlias }), from: types)
@@ -1270,7 +1226,6 @@ extension Curio {
         }
 
         var modelName: String? = nil
-        var defsPath: String? = "#/definitions/"
         var accessType: String? = "public"
         var renames: [String : String] = [:]
         var imports: [String] = ["BricBrac"]
@@ -1292,8 +1247,6 @@ extension Curio {
                 return
             case "-name":
                 modelName = args.next()
-            case "-defs":
-                defsPath = args.next()
             case "-maxdirect":
                 maxdirect = Int(args.next() ?? "")
             case "-rename":
@@ -1328,10 +1281,6 @@ extension Curio {
         do {
             guard let modelName = modelName else {
                 throw UsageError("Missing model name")
-            }
-
-            if defsPath == nil {
-                throw UsageError("Missing definitions path")
             }
 
             guard let accessType = accessType else {
@@ -1392,3 +1341,40 @@ extension Curio {
         }
     }
 }
+
+/// Standard types
+extension CodeExternalType {
+    static let string = CodeExternalType("String")
+    static let int = CodeExternalType("Int")
+    static let double = CodeExternalType("Double")
+    static let bool = CodeExternalType("Bool")
+    static let void = CodeExternalType("Void")
+    static let encoder = CodeExternalType("Encoder")
+    static let decoder = CodeExternalType("Decoder")
+}
+
+/// BricBrac types
+extension CodeExternalType {
+    static let null = CodeExternalType("ExplicitNull")
+    static let hollow = CodeExternalType("HollowBric")
+    static let bric = CodeExternalType("Bric", defaultValue: "nil")
+    static let array = CodeExternalType("Array", generics: [CodeExternalType.bric], defaultValue: "[]")
+    static let object = CodeExternalType("Dictionary", generics: [CodeExternalType.string, CodeExternalType.bric], defaultValue: "[:]")
+}
+
+/// Standard protocols
+extension CodeProtocol {
+    static let codable = CodeProtocol(name: "Codable")
+    static let codingKey = CodeProtocol(name: "CodingKey")
+    static let caseIterable = CodeProtocol(name: "CaseIterable")
+    static let equatable = CodeProtocol(name: "Equatable")
+    static let hashable = CodeProtocol(name: "Hashable")
+    static let rawRepresentable = CodeProtocol(name: "RawRepresentable")
+}
+
+/// BricBrac protocols
+extension CodeProtocol {
+    static let bracable = CodeProtocol(name: "Bracable")
+    static let bricable = CodeProtocol(name: "Bricable")
+}
+

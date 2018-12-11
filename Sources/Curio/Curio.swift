@@ -758,6 +758,8 @@ public struct Curio {
                 if !cases.isEmpty {
                     var keysType = CodeSimpleEnum(name: keyName, access: accessor(parents), cases: cases)
                     keysType.conforms.append(.codingKey)
+                    keysType.conforms.append(.hashable)
+                    keysType.conforms.append(.codable)
                     keysType.conforms.append(.caseIterable)
                     code.nestedTypes.insert(keysType, at: 0)
                 }

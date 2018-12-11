@@ -118,8 +118,8 @@ public struct ExplicitNull : Codable, Equatable, Hashable, ExpressibleByNilLiter
 /// A Nullable is a type that can be either explicitly null or a given type
 public typealias Nullable<T> = OneOf2<T, ExplicitNull>
 
-extension OneOf2 : ExpressibleByNilLiteral where T1 == ExplicitNull {
-    public init(nilLiteral: ()) { self = .v1(nil) }
+extension OneOf2 : ExpressibleByNilLiteral where T2 == ExplicitNull {
+    public init(nilLiteral: ()) { self = .v2(nil) }
 }
 
 /// An Object Bric type that cannot contain anything

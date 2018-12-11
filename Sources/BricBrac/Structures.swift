@@ -190,6 +190,15 @@ public indirect enum OneOf2<T1, T2> : OneOf2Type {
 
     public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+
+    /// Extract the underlying value to a common implementor type (typically a common protocol)
+    /// Sadly, this doesn't work: “Type 'T1' constrained to non-protocol, non-class type 'T'”
+//    public func implementing<T>() -> T where T1 : T, T2 : T {
+//        switch self {
+//        case .v1(let x): return x
+//        case .v2(let x): return x
+//        }
+//    }
 }
 
 extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {

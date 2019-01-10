@@ -420,10 +420,7 @@ public struct Curio {
                 case .some(.v1(.null)): casetype = CodeExternalType.null
                 default:
                     if let values = sub._enum {
-                        // some languages (like Typescript) commonly have union types that are like: var intOrConstant: number | "someConst"
-                        // when a string enum has fewer values than constantPromotionThreshold, we promote the type to the top level to global use
-                        let valueTypeNames = typeName(parents, "Literal" + values.map({ $0.stringify() }).joined(separator: "Or"), capitalize: true)
-                        let literalEnum = try createStringEnum(valueTypeNames, values: values)
+                        let literalEnum = try createStringEnum(values: values)
                         code.nestedTypes.append(literalEnum) // we will later try to promote any CodeSimpleEnum<String> to be a peer of an alias type
                         casetype = literalEnum
                     } else {
@@ -880,7 +877,11 @@ public struct Curio {
         }
 
         func createStringEnum(_ name: CodeTypeName? = nil, values: [Bric]) throws -> CodeSimpleEnum<String> {
-            var code = CodeSimpleEnum<String>(name: name ?? typeName(parents, id), access: accessor(parents))
+            // some languages (like Typescript) commonly have union types that are like: var intOrConstant: number | "someConst"
+            // when a string enum has fewer values than constantPromotionThreshold, we promote the type to the top level to global use
+            let valueTypeNames = typeName(parents, "Literal" + values.map({ $0.stringify() }).joined(separator: "Or"), capitalize: true)
+
+            var code = CodeSimpleEnum<String>(name: name ?? valueTypeNames, access: accessor(parents))
             code.comments = comments
             for e in values {
                 if case .str(let evalue) = e {
@@ -906,9 +907,10 @@ public struct Curio {
 
         let type = schema.type
         let typename = typeName(parents, id)
-
+        let explicitName = id.hasPrefix("#") // explicit named like "#/definitions/LocalMultiTimeUnit" must be used literally
         if let values = schema._enum {
-            return try createStringEnum(typename, values: values)
+            // when creating a string enum, explcit names must be used, otherwise we generate a name like "LiteralXOrYOrZ"
+            return try createStringEnum(explicitName ? typename : nil, values: values)
         } else if case .some(.v2(let multiType)) = type {
             // "type": ["string", "number"]
             var subTypes: [CodeType] = []

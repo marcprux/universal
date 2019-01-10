@@ -158,6 +158,18 @@ public protocol CodeUnit {
 public typealias CodeTypeName = String
 public typealias CodePropName = String
 
+//public struct CodeTypeName : RawRepresentable, Hashable, ExpressibleByStringLiteral {
+//    public let rawValue: String
+//    public init(rawValue: String) { self.rawValue = rawValue }
+//    public init(stringLiteral: String) { self.rawValue = stringLiteral }
+//}
+//
+//public struct CodePropName : RawRepresentable, Hashable, ExpressibleByStringLiteral {
+//    public let rawValue: String
+//    public init(rawValue: String) { self.rawValue = rawValue }
+//    public init(stringLiteral: String) { self.rawValue = stringLiteral }
+//}
+
 public protocol CodeType : CodeUnit {
     /// Returns a reference identifier for this code unit
     var identifier : String { get }

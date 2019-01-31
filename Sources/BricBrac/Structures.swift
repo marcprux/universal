@@ -99,6 +99,8 @@ extension Indirect : Hashable where Wrapped : Hashable {
 
 /// An empty struct that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
 public struct ExplicitNull : Codable, Equatable, Hashable, ExpressibleByNilLiteral {
+    public static let null = ExplicitNull()
+
     public init(nilLiteral: ()) { }
     public init() { }
 
@@ -120,6 +122,10 @@ public typealias Nullable<T> = OneOf2<T, ExplicitNull>
 
 extension OneOf2 : ExpressibleByNilLiteral where T2 == ExplicitNull {
     public init(nilLiteral: ()) { self = .v2(nil) }
+}
+
+public extension OneOf2Type where T2 == ExplicitNull /* i.e., Nullable */ {
+    public var isExplicitNull: Bool { return self.v2 == ExplicitNull.null }
 }
 
 /// An Object Bric type that cannot contain anything
@@ -254,6 +260,25 @@ extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable {
         switch self {
         case .v1(let x): return x.hashValue
         case .v2(let x): return x.hashValue
+        }
+    }
+}
+
+public extension OneOf2 {
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            }
         }
     }
 }
@@ -397,6 +422,27 @@ extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable {
     }
 }
 
+public extension OneOf3 {
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            }
+        }
+    }
+}
+
 /// The protocol of a type that can contain one out of 4 or more exclusive options
 public protocol OneOf4Type : OneOf3Type {
     associatedtype T4
@@ -501,6 +547,29 @@ extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
         case .v2(let x): return x.hashValue
         case .v3(let x): return x.hashValue
         case .v4(let x): return x.hashValue
+        }
+    }
+}
+
+public extension OneOf4 {
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            }
         }
     }
 }
@@ -617,6 +686,31 @@ extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
         case .v3(let x): return x.hashValue
         case .v4(let x): return x.hashValue
         case .v5(let x): return x.hashValue
+        }
+    }
+}
+
+public extension OneOf5 {
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
+            }
         }
     }
 }

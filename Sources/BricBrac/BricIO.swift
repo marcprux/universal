@@ -816,3 +816,197 @@ open class BufferedJSONWriter<Target: TextOutputStream> : JSONWriter {
     }
 }
 
+public extension Encodable {
+    /// Find every child of this encodable instance of the given type.
+    public func encodableChildrenOfType<T: Encodable>(_ type: T.Type) throws -> [T] {
+        var values: [T] = []
+        try FilterEncoder.encode(self, handler: { (key, value) in
+            if let item = value as? T {
+                values.append(item)
+            }
+        })
+        return values
+    }
+}
+
+/// A no-op encoder that simply passes every encodable element through the specific callback filter.
+public class FilterEncoder {
+    public typealias Element = (key: [CodingKey], value: Encodable?)
+
+    public static func encode<T: Encodable>(_ value: T, handler: @escaping (Element) -> ()) throws {
+        let encoding = FilterEncoding(codingPath: [], to: handler)
+        try value.encode(to: encoding)
+    }
+
+    private struct FilterEncoding: Encoder {
+        let codingPath: [CodingKey]
+        private let filter: (Element) -> ()
+
+        init(codingPath: [CodingKey], to filter: @escaping (Element) -> ()) {
+            self.codingPath = codingPath
+            self.filter = filter
+        }
+
+        let userInfo: [CodingUserInfoKey : Any] = [:]
+
+        func container<Key: CodingKey>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> {
+            return KeyedEncodingContainer(FilterKeyedEncoding<Key>(codingPath: codingPath, to: filter))
+        }
+
+        func unkeyedContainer() -> UnkeyedEncodingContainer {
+            return FilterUnkeyedEncoding(codingPath: codingPath, to: filter)
+        }
+
+        func singleValueContainer() -> SingleValueEncodingContainer {
+            let container = FilterSingleValueEncoding(codingPath: codingPath, to: filter)
+            return container
+        }
+    }
+
+    private struct FilterKeyedEncoding<Key: CodingKey>: KeyedEncodingContainerProtocol {
+        let codingPath: [CodingKey]
+        private let filter: (Element) -> ()
+
+        init(codingPath: [CodingKey], to filter: @escaping (Element) -> ()) {
+            self.codingPath = codingPath
+            self.filter = filter
+        }
+
+        func encode<T: Encodable>(_ value: T, forKey key: Key) throws {
+            filter((key: codingPath, value: value))
+            try value.encode(to: FilterEncoding(codingPath: codingPath, to: filter))
+        }
+
+        func nestedContainer<NestedKey: CodingKey>(keyedBy keyType: NestedKey.Type, forKey key: Key) -> KeyedEncodingContainer<NestedKey> {
+            return KeyedEncodingContainer(FilterKeyedEncoding<NestedKey>(codingPath: codingPath + [key], to: filter))
+        }
+
+        func nestedUnkeyedContainer(forKey key: Key) -> UnkeyedEncodingContainer {
+            return FilterUnkeyedEncoding(codingPath: codingPath + [key], to: filter)
+        }
+
+        func superEncoder() -> Encoder {
+            let superKey = Key(stringValue: "super")!
+            return superEncoder(forKey: superKey)
+        }
+
+        func superEncoder(forKey key: Key) -> Encoder {
+            return FilterEncoding(codingPath: codingPath + [key], to: filter)
+        }
+
+        func encodeNil(forKey key: Key) throws { filter((key: codingPath + [key], value: nil)) }
+        func encode(_ value: Bool, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: String, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: Double, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: Float, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: Int, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: Int8, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: Int16, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: Int32, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: Int64, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: UInt, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: UInt8, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: UInt16, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: UInt32, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+        func encode(_ value: UInt64, forKey key: Key) throws { filter((key: codingPath + [key], value: value)) }
+    }
+
+    private struct FilterUnkeyedEncoding: UnkeyedEncodingContainer {
+        let codingPath: [CodingKey]
+        private let filter: (Element) -> ()
+        private(set) var count: Int = 0
+
+        init(codingPath: [CodingKey], to filter: @escaping (Element) -> ()) {
+            self.codingPath = codingPath
+            self.filter = filter
+        }
+
+        private mutating func nextIndexedKey() -> CodingKey {
+            let nextCodingKey = IndexedCodingKey(intValue: count)!
+            count += 1
+            return nextCodingKey
+        }
+
+        private struct IndexedCodingKey: CodingKey {
+            let intValue: Int?
+            let stringValue: String
+
+            init?(intValue: Int) {
+                self.intValue = intValue
+                self.stringValue = intValue.description
+            }
+
+            init?(stringValue: String) {
+                return nil
+            }
+        }
+
+        mutating func encode<T: Encodable>(_ value: T) throws {
+            let encoding = FilterEncoding(codingPath: codingPath + [nextIndexedKey()], to: filter)
+            filter((key: encoding.codingPath, value: value))
+            try value.encode(to: encoding)
+        }
+
+        mutating func nestedContainer<NestedKey: CodingKey>(keyedBy keyType: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> {
+            return KeyedEncodingContainer(FilterKeyedEncoding<NestedKey>(codingPath: codingPath + [nextIndexedKey()], to: filter))
+        }
+
+        mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
+            return FilterUnkeyedEncoding(codingPath: codingPath + [nextIndexedKey()], to: filter)
+        }
+
+        mutating func superEncoder() -> Encoder {
+            return FilterEncoding(codingPath: [nextIndexedKey()], to: filter)
+        }
+
+        mutating func encodeNil() throws { filter((key: codingPath + [nextIndexedKey()], value: nil)) }
+        mutating func encode(_ value: Bool) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: String) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: Double) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: Float) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: Int) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: Int8) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: Int16) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: Int32) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: Int64) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: UInt) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: UInt8) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: UInt16) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: UInt32) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+        mutating func encode(_ value: UInt64) throws { filter((key: codingPath + [nextIndexedKey()], value: value)) }
+    }
+
+    private struct FilterSingleValueEncoding: SingleValueEncodingContainer {
+        private let filter: (Element) -> ()
+        let codingPath: [CodingKey]
+
+        init(codingPath: [CodingKey], to filter: @escaping (Element) -> ()) {
+            self.codingPath = codingPath
+            self.filter = filter
+        }
+
+        func encode<T: Encodable>(_ value: T) throws {
+            let encoding = FilterEncoding(codingPath: codingPath, to: filter)
+            try value.encode(to: encoding)
+            filter((key: encoding.codingPath, value: value))
+        }
+
+        func encodeNil() throws { filter((key: codingPath, value: nil)) }
+        func encode(_ value: Bool) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: String) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: Double) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: Float) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: Int) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: Int8) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: Int16) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: Int32) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: Int64) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: UInt) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: UInt8) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: UInt16) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: UInt32) throws { filter((key: codingPath, value: value)) }
+        func encode(_ value: UInt64) throws { filter((key: codingPath, value: value)) }
+    }
+}
+
+

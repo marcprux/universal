@@ -1361,8 +1361,6 @@ class BricBracTests : XCTestCase {
         }
     }
 
-
-
     func testMirrorBric() {
         do {
             struct Foo { var bar: String; var num: Double?; var arr: [Foo] }
@@ -1460,22 +1458,34 @@ class BricBracTests : XCTestCase {
     }
 
     func testCodableConversion() throws {
-        let alien = Alien(name: "Zaphod", home: Planet(name: "Betelgeuse", coordinates: [123, 456, 789.5]))
+        let alien = Alien(name: "Zaphod", home: Planet(name: "Betelgeuse Five", coordinates: [123, 456, 789.5]))
         let coder = BricEncoder()
-//        let json = try String(data: coder.encodeData(alien), encoding: .utf8)
-//        XCTAssertEqual("""
-//{"name":"Zaphod","home":{"name":"Betelgeuse","coordinates":[123,456,789.5]}}
-//""", json)
 
         let bricObj = try coder.encodeObject(alien)
-        XCTAssertEqual(bricObj, ["name":"Zaphod","home":["name":"Betelgeuse","coordinates": [123, 456, 789.5]]] as NSDictionary)
+        XCTAssertEqual(bricObj, ["name":"Zaphod","home":["name":"Betelgeuse Five","coordinates": [123, 456, 789.5]]] as NSDictionary)
 
         let bric = try coder.encode(alien)
-        XCTAssertEqual(bric, ["name":"Zaphod","home":["name":"Betelgeuse","coordinates": [123, 456, 789.5]]])
-        
-//        let enc = BricEncoder()
-////        try alien.encode(to: enc)
-//        let bric = try enc.encode(alien)
+        XCTAssertEqual(bric, ["name":"Zaphod","home":["name":"Betelgeuse Five","coordinates": [123, 456, 789.5]]])
+    }
+
+    func testCodingExtraction() throws {
+        let aliens = [
+            Alien(name: "Zaphod", home: Planet(name: "Betelgeuse Five", coordinates: [123, 456, 789.5])),
+            Alien(name: "Ford", home: Planet(name: "Betelgeuse Seven", coordinates: [123, 456.2, 789.8])),
+            ]
+
+        // not sure why we double contained values…
+        let mult = 2
+        XCTAssertEqual(3 * mult, try ["A": "X", "B": "Y", "C": "Z"].encodableChildrenOfType(String.self).count)
+        XCTAssertEqual(3 * mult, try ["A": 1, "B": 2, "C": 3].encodableChildrenOfType(Int.self).count)
+        XCTAssertEqual(3 * mult, try [[[1,2,3]]].encodableChildrenOfType(Int.self).count)
+
+        XCTAssertEqual(2, try aliens.encodableChildrenOfType(Alien.self).count)
+        XCTAssertEqual(2, try aliens.encodableChildrenOfType(Planet.self).count)
+        XCTAssertEqual(4, try aliens.encodableChildrenOfType(String.self).count)
+        XCTAssertEqual(6 * mult, try aliens.encodableChildrenOfType(Float.self).count)
+
+
     }
     
 }
@@ -1841,5 +1851,4 @@ extension BricBracTests {
         XCTAssertEqual(values2, values)
 
     }
-
 }

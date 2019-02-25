@@ -9,6 +9,7 @@
 /// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
 
 import Foundation
+import BricBrac
 
 public extension Curio {
     public func emit(_ module: CodeModule, name: String, dir: String) throws {
@@ -32,7 +33,7 @@ public extension Curio {
             return // contents are unchanged from local version; skip compiling
         }
 
-        let bundle = Bundle(for: FoundationBricolage.self).executablePath! // we are just using FoundationBricolage because it is the only class in the BricBrac framework
+        let bundle = Bundle(for: JSONParser.self).executablePath!
         let frameworkDir = ((bundle as NSString).deletingLastPathComponent as NSString).deletingLastPathComponent
 
         let args = [

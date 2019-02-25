@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
-/// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
+import BricBrac
 
 /// A JSON Schema processor that emits Swift code using the Bric-a-Brac framework for marshalling and unmarshalling.
 ///

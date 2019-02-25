@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
-/// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
+import BricBrac
 
 public struct Schema : Codable, Equatable, Hashable {
     public var ref: String? = nil

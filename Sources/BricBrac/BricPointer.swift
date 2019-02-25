@@ -36,10 +36,6 @@ public extension Bric {
         case key(String)
         case index(Int)
 
-        public init<R: RawRepresentable>(key: R) where R.RawValue == String {
-            self = .key(key.rawValue)
-        }
-
         public init(key: String) {
             self = .key(key)
         }

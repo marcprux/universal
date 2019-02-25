@@ -107,19 +107,19 @@ public extension Bric {
 /// Extensions for Bracing instances by key and inferred return type
 public extension Bric {
 
-    internal func objectKey<R: RawRepresentable>(_ key: R) throws -> Optional<Bric> where R.RawValue == String {
+    internal func objectKey(_ key: String) throws -> Optional<Bric> {
         guard case .obj(let dict) = self else {
-            throw BracError.keyWithoutObject(key: key.rawValue, path: [])
+            throw BracError.keyWithoutObject(key: key, path: [])
         }
         return dict[key.rawValue]
     }
 
     /// Reads a required Bric instance from the given key in an object bric
-    public func brac<T: Bracable, R: RawRepresentable>(key: R) throws -> T where R.RawValue == String {
+    public func brac<T: Bracable>(key: String) throws -> T {
         if let value = try objectKey(key) {
             return try bracPath(key, T.brac(bric: value))
         } else {
-            throw BracError.missingRequiredKey(type: T.self, key: key.rawValue, path: [])
+            throw BracError.missingRequiredKey(type: T.self, key: key, path: [])
         }
     }
 
@@ -640,7 +640,7 @@ public extension Bric {
 }
 
 /// Invokes the given autoclosure and returns the value, pre-pending the given path to any BracError
-private func bracPath<T, R: RawRepresentable>(_ key: R, _ f: @autoclosure () throws -> T) throws -> T where R.RawValue == String {
+private func bracPath<T>(_ key: String, _ f: @autoclosure () throws -> T) throws -> T {
     do {
         return try f()
     } catch let err as BracError {

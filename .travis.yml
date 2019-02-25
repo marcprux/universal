@@ -9,7 +9,7 @@ matrix:
         - set -o pipefail
         - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme BricBrac | xcpretty -c
         - xcodebuild test -project BricBrac.xcodeproj -sdk macosx -scheme Curio | xcpretty -c
-        - xcodebuild test -project BricBrac.xcodepro -scheme BricBrac -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone X,OS=12.0" | xcpretty -c
+        - xcodebuild test -project BricBrac.xcodeproj -scheme BricBrac -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone X,OS=12.0" | xcpretty -c
         - swift test
           #- os: linux
           #language: generic

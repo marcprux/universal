@@ -1548,10 +1548,10 @@ extension Person : BricBrac {
 
     func bric() -> Bric {
         return Bric(object: [
-            (Keys.name, name.bric()),
-            (.male, male.bric()),
-            (.age, age.bric()),
-            (.children, children.bric()),
+            (Keys.name.rawValue, name.bric()),
+            (Keys.male.rawValue, male.bric()),
+            (Keys.age.rawValue, age.bric()),
+            (Keys.children.rawValue, children.bric()),
             ])
     }
 

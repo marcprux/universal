@@ -180,9 +180,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
     }
 
     public struct ListItem : Equatable, Hashable, Codable {
-        public var prop: Prop
+        public var prop: LiteralValue
 
-        public init(prop: Prop = .value) {
+        public init(prop: LiteralValue = .value) {
             self.prop = prop 
         }
 
@@ -190,7 +190,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
             case prop
         }
 
-        public enum Prop : String, Equatable, Hashable, Codable, CaseIterable {
+        public enum LiteralValue : String, Equatable, Hashable, Codable, CaseIterable {
             case value
         }
     }
@@ -240,9 +240,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
                     }
 
                     public struct Nested5 : Equatable, Hashable, Codable {
-                        public var single: Single
+                        public var single: LiteralValue
 
-                        public init(single: Single = .value) {
+                        public init(single: LiteralValue = .value) {
                             self.single = single 
                         }
 
@@ -250,7 +250,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
                             case single
                         }
 
-                        public enum Single : String, Equatable, Hashable, Codable, CaseIterable {
+                        public enum LiteralValue : String, Equatable, Hashable, Codable, CaseIterable {
                             case value
                         }
                     }

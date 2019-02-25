@@ -1557,10 +1557,10 @@ extension Person : BricBrac {
 
     static func brac(bric: Bric) throws -> Person {
         return try Person(
-            name: bric.brac(key: Keys.name),
-            male: bric.brac(key: Keys.male),
-            age: bric.brac(key: Keys.age),
-            children: bric.brac(key: Keys.children)
+            name: bric.brac(key: Keys.name.rawValue),
+            male: bric.brac(key: Keys.male.rawValue),
+            age: bric.brac(key: Keys.age.rawValue),
+            children: bric.brac(key: Keys.children.rawValue)
         )
     }
 }

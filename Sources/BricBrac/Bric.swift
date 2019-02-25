@@ -219,11 +219,11 @@ extension Bric : ExpressibleByDictionaryLiteral {
 
 
     /// Creates a Bric.obj with the given key/value pairs
-    public init<R: RawRepresentable>(object: [(R, Bric)]) where R.RawValue == String {
+    public init(object: [(String, Bric)]) {
         var d: Dictionary<String, Bric> = [:]
         for (k, v) in object {
             if !k.rawValue.isEmpty {
-                switch (k.rawValue, v) {
+                switch (k, v) {
                 case (_, .nul):
                     break // nil doens't get saved
                 case (let key, _):
@@ -239,11 +239,6 @@ extension Bric : ExpressibleByDictionaryLiteral {
             }
         }
         self = .obj(d)
-    }
-
-    /// Creates a Bric.obj with the given dictionary where the key is a String RawRepresentable
-    public init<R: RawRepresentable>(obj: [R: Bric]) where R.RawValue == String {
-        self.init(object: Array(obj))
     }
 
     /// Creates a Bric.obj by merging any sub-objects into a single Bric Object

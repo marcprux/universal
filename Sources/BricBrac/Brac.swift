@@ -59,7 +59,7 @@ extension Bool: Bracable {
 }
 
 /// Covenience extension for String so either strings or enum strings can be used to bric and brac
-extension String : RawRepresentable {
+extension String {
     public typealias RawValue = String
     public init?(rawValue: String) { self = rawValue }
     public var rawValue: String { return self }

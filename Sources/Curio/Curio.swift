@@ -137,7 +137,6 @@ public struct Curio {
         }
     }
 
-
     /// Alphabetical characters
     static let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -147,7 +146,6 @@ public struct Curio {
     /// “After the first character, digits and combining Unicode characters are also allowed.”
     static let nameBody = Set(Array(nameStart) + "0123456789")
 
-
     func propName(_ parents: [CodeTypeName], _ id: String, arg: Bool = false) -> CodePropName {
         if let pname = renamer(parents, id) {
             return pname
@@ -156,21 +154,20 @@ public struct Curio {
         // enums can't have a prop named "init", since it will conflict with the constructor name
         var idx = id == "init" ? "initx" : id
 
-        while let first = idx.first , !Curio.nameStart.contains(first) {
+        while let first = idx.first, !Curio.nameStart.contains(first) {
             idx = String(idx.dropFirst())
         }
 
         // swift version 2.2+ allow unescaped keywords as argument names: https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
-        if arg {
-            if idx.isSwiftReservedArg() {
-                idx = "`" + idx + "`"
-            }
-        } else {
-            if idx.isSwiftKeyword() {
-                idx = "`" + idx + "`"
-            }
+        let escape = arg ? idx.isSwiftReservedArg() : idx.isSwiftKeyword()
+        if escape {
+            idx = "`" + idx + "`"
         }
 
+        // replace all illegal characters with nothing
+        for ichar in ["-"] {
+            idx = idx.replace(string: ichar, with: "")
+        }
         return idx
     }
 
@@ -282,7 +279,7 @@ public struct Curio {
     }
 
     func aliasType(_ type: CodeNamedType) -> CodeType? {
-        if let alias = type as? CodeTypeAlias , alias.peerTypes.isEmpty {
+        if let alias = type as? CodeTypeAlias, alias.peerTypes.isEmpty {
             return alias.type
         } else {
             return nil
@@ -896,7 +893,7 @@ public struct Curio {
             }
 
             // when there is only a single possible value, make it the default
-            if let firstCase = code.cases.first , code.cases.count == 1 {
+            if let firstCase = code.cases.first, code.cases.count == 1 {
                 code.defaultValue = "." + firstCase.name
             }
 
@@ -908,9 +905,16 @@ public struct Curio {
         let type = schema.type
         let typename = typeName(parents, id)
         let explicitName = id.hasPrefix("#") // explicit named like "#/definitions/LocalMultiTimeUnit" must be used literally
-        if let values = schema._enum {
+        if var values = schema._enum {
             // when creating a string enum, explcit names must be used, otherwise we generate a name like "LiteralXOrYOrZ"
-            return try createStringEnum(explicitName ? typename : nil, values: values)
+            var containsNul = false
+            if let nulIndex = values.firstIndex(of: .nul) {
+                values.remove(at: nulIndex)
+                containsNul = true
+            }
+            let senum = try createStringEnum(explicitName ? typename : nil, values: values)
+            // TODO: make OneOf(ExplicitNull, ...)
+            return containsNul ? senum : senum
         } else if case .some(.v2(let multiType)) = type {
             // "type": ["string", "number"]
             var subTypes: [CodeType] = []
@@ -938,7 +942,7 @@ public struct Curio {
             return aliasSimpleType(name: typename, type: CodeExternalType.null)
         } else if case .some(.v1(.array)) = type {
             return try createArray(typename)
-        } else if let properties = schema.properties , !properties.isEmpty {
+        } else if let properties = schema.properties, !properties.isEmpty {
             return try createObject(typename, properties: getPropInfo(schema, id: id, parents: parents), mode: .standard)
         } else if let allOf = schema.allOf {
             // represent allOf as a struct with non-optional properties
@@ -1182,7 +1186,7 @@ public extension Schema {
             for (key, value) in obj {
                 sub.append((key, imputePropertyOrdering(value)))
                 // if the key is "properties" then also add a "propertyOrder" property with the order that the props appear in the raw JSON
-                if case .obj(let dict) = value , !dict.isEmpty && String(String.UnicodeScalarView() + key) == "properties" {
+                if case .obj(let dict) = value, !dict.isEmpty && String(String.UnicodeScalarView() + key) == "properties" {
                     // ### FIXME: we hack in a check for "type" to determine if we are in a schema element and not,
                     //  e.g., another properties list, but this will fail if there is an actual property named "type"
                     if bc.bric()["type"] == "object" {

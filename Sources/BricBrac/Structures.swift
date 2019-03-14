@@ -25,8 +25,30 @@ public protocol Wrappable {
 extension Optional : WrapperType { }
 extension Optional : Wrappable { }
 
+public typealias Indirect = IndirectEnum
+
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
-public indirect enum Indirect<Wrapped> : WrapperType, Wrappable {
+public struct IndirectStruct<Wrapped> : WrapperType, Wrappable {
+    /// The underlying holder of the value; must be a type that can handle recursive types, which is why it is an `Array` and not a `CollectionOfOne`
+    private var wrapper: [Wrapped]
+
+    public var value: Wrapped {
+        get { return self.wrapper[0] }
+        set { self.wrapper[0] = newValue }
+    }
+
+    /// Construct a non-`nil` instance that stores `value`.
+    public init(_ value: Wrapped) {
+        self.wrapper = [value]
+    }
+
+    public func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U? {
+        return try f(value)
+    }
+}
+
+/// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
+public indirect enum IndirectEnum<Wrapped> : WrapperType, Wrappable {
     case some(Wrapped)
 
     /// Construct a non-`nil` instance that stores `some`.
@@ -56,7 +78,7 @@ extension Indirect : RawRepresentable {
 
     /// Constructor for RawRepresentable
     public init(rawValue some: Wrapped) {
-        self = .some(some)
+        self.init(some)
     }
 
     public var rawValue: Wrapped { return value }
@@ -65,11 +87,10 @@ extension Indirect : RawRepresentable {
 // similar to Optional codability at:
 // https://github.com/apple/swift/blob/325a63a1bd59eb2b12ba310ffa93e83d1336885f/stdlib/public/core/Codable.swift.gyb#L1825
 extension Indirect : Encodable where Wrapped : Encodable {
+//    @inlinable // FIXME(sil-serialize-all)
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        switch self {
-        case .some(let wrapped): try container.encode(wrapped)
-        }
+        try container.encode(self.rawValue)
     }
 }
 
@@ -80,12 +101,12 @@ extension Indirect : Decodable where Wrapped : Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let element = try container.decode(Wrapped.self)
-        self = .some(element)
+        self.init(element)
     }
 }
 
 extension Indirect : Equatable where Wrapped : Equatable {
-    public static func ==(lhs: Indirect, rhs: Indirect) -> Bool {
+    public static func ==(lhs: IndirectEnum, rhs: IndirectEnum) -> Bool {
         return lhs.value == rhs.value
     }
 }

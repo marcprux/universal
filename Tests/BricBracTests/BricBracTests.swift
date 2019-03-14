@@ -1754,9 +1754,38 @@ extension BricBracTests {
 """)
 //            XCTAssertEqual(nh, try nh.roundtripped()) // this fails because optional intercepts the null
         }
-
-
     }
+
+
+    func testIndirectDeepCoding() {
+        struct I1 : Codable {
+            var i2: Indirect<I2>? = nil
+        }
+
+        struct I2 : Codable {
+            var i3: Indirect<I3>? = nil
+        }
+
+
+        struct I3 : Codable {
+            var name: String? = nil
+        }
+
+        var i1 = I1()
+
+        i1.i2 = .init(I2())
+        i1.i2?.value.i3 = .init(I3())
+        i1.i2?.value.i3?.value.name = "Foo"
+
+        DispatchQueue.concurrentPerform(iterations: 99) { _ in
+            do {
+                let _ = try i1.encodedString()
+            } catch {
+                XCTFail("error encoding: \(error)")
+            }
+        }
+    }
+
 }
 
 extension Decodable where Self: Encodable, Self: Decodable {

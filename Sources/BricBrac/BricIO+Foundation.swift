@@ -16,6 +16,12 @@ extension Decodable {
     public static func bracDecoded(bric: Bric, decoder: JSONDecoder = JSONDecoder()) throws -> Self {
         return try decoder.decode(Self.self, from: bric.stringify().data(using: .utf8) ?? Data())
     }
+
+    /// Loads this `Decodable` from the JSON stored in the given URL.
+    public static func loadJSON(url: URL) throws -> Self {
+        let decoder = JSONDecoder()
+        return try decoder.decode(Self.self, from: Data(contentsOf: url))
+    }
 }
 
 public extension Encodable {

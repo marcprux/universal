@@ -497,7 +497,7 @@ extension String {
 }
 
 public protocol CodeEnumType : CodeNamedType, CodeImplementationType {
-
+    var associatedTypeName: String { get }
 }
 
 public struct CodeSimpleEnum<T> : CodeEnumType, CodeStateType, Hashable {
@@ -516,6 +516,10 @@ public struct CodeSimpleEnum<T> : CodeEnumType, CodeStateType, Hashable {
         self.name = name
         self.cases = cases
         self.props = props
+    }
+
+    public var associatedTypeName: String {
+        return String(describing: T.self)
     }
 
     func quotedString(_ value: T) -> String {
@@ -595,6 +599,10 @@ public struct CodeEnum : CodeEnumType, Hashable {
     public init(name: CodeTypeName, access: CodeAccess) {
         self.access = access
         self.name = name
+    }
+
+    public var associatedTypeName: String {
+        return String(describing: CodeEnum.self)
     }
 
     public var directReferences : [CodeNamedType] {

@@ -120,6 +120,7 @@ public struct Curio {
         case unsupported(String)
         indirect case illegalProperty(Schema)
         case compileError(String)
+        case emptyEnum
 
         var debugDescription : String {
             switch self {
@@ -133,6 +134,7 @@ public struct Curio {
             case .unsupported(let x): return "Unsupported(\(x))"
             case .illegalProperty(let x): return "IllegalProperty(\(x))"
             case .compileError(let x): return "CompileError(\(x))"
+            case .emptyEnum: return "EmptyEnum"
             }
         }
     }
@@ -417,7 +419,7 @@ public struct Curio {
                 case .some(.v1(.null)): casetype = CodeExternalType.null
                 default:
                     if let values = sub._enum {
-                        let literalEnum = try createStringEnum(values: values)
+                        let literalEnum = try createLiteralEnum(values: values)
                         code.nestedTypes.append(literalEnum) // we will later try to promote any CodeSimpleEnum<String> to be a peer of an alias type
                         casetype = literalEnum
                     } else {
@@ -721,9 +723,10 @@ public struct Curio {
                 hasAdditionalProps = nil // TODO: make a global default for whether unspecified additionalProperties means yes or no
             case .some(.v1(false)):
                 hasAdditionalProps = nil // FIXME: when this is false, allOf union types won't validate
-            case .some(.v1(true)), .some(.v2): // TODO: generate object types for B
-                hasAdditionalProps = true
-                addPropType = CodeExternalType.object // additionalProperties default to [String:Bric]
+            case .some(.v1(true)), .some(.v2):
+                hasAdditionalProps = nil // TODO: generate object types for B
+                //hasAdditionalProps = true
+                //addPropType = CodeExternalType.object // additionalProperties default to [String:Bric]
             }
 
             let addPropName = renamer(parents, "additionalProperties") ?? "additionalProperties"
@@ -873,33 +876,60 @@ public struct Curio {
             }
         }
 
-        func createStringEnum(_ name: CodeTypeName? = nil, values: [Bric]) throws -> CodeSimpleEnum<String> {
+        func createLiteralEnum(_ name: CodeTypeName? = nil, values: [Bric]) throws -> CodeNamedType {
             // some languages (like Typescript) commonly have union types that are like: var intOrConstant: number | "someConst"
             // when a string enum has fewer values than constantPromotionThreshold, we promote the type to the top level to global use
             let valueTypeNames = typeName(parents, "Literal" + values.map({ $0.stringify() }).joined(separator: "Or"), capitalize: true)
 
-            var code = CodeSimpleEnum<String>(name: name ?? valueTypeNames, access: accessor(parents))
-            code.comments = comments
+            var stringEnum = CodeSimpleEnum<String>(name: name ?? valueTypeNames, access: accessor(parents))
+            var numberEnum = CodeSimpleEnum<Double>(name: name ?? valueTypeNames, access: accessor(parents))
+            var boolEnum = CodeSimpleEnum<Bool>(name: name ?? valueTypeNames, access: accessor(parents))
             for e in values {
                 if case .str(let evalue) = e {
-                    code.cases.append(CodeCaseSimple<String>(name: typeName(parents, evalue, capitalize: enumCase == .upper), value: evalue))
+                    stringEnum.cases.append(.init(name: typeName(parents, evalue, capitalize: enumCase == .upper), value: evalue))
                 } else if case .num(let evalue) = e {
-                    // FIXME: this isn't right, but we don't currently support mixed-type simple enums
-                    code.cases.append(CodeCaseSimple<String>(name: typeName(parents, evalue.description, capitalize: enumCase == .upper), value: evalue.description))
-
+                    numberEnum.cases.append(.init(name: typeName(parents, evalue.description, capitalize: enumCase == .upper), value: evalue))
+                } else if case .bol(let evalue) = e {
+                    boolEnum.cases.append(.init(name: typeName(parents, evalue.description, capitalize: enumCase == .upper), value: evalue))
                 } else {
                     throw CodegenErrors.nonStringEnumsNotSupported
                 }
             }
 
-            // when there is only a single possible value, make it the default
-            if let firstCase = code.cases.first, code.cases.count == 1 {
-                code.defaultValue = "." + firstCase.name
+            func finishEnum<T>(_ code: CodeSimpleEnum<T>) -> CodeEnumType {
+                var code = code
+                // when there is only a single possible value, make it the default
+                if let firstCase = code.cases.first, code.cases.count == 1 {
+                    code.defaultValue = "." + firstCase.name
+                }
+
+                code.conforms += standardAdoptions
+                code.conforms.append(.caseIterable)
+                code.comments = comments
+                return code
             }
 
-            code.conforms += standardAdoptions
-            code.conforms.append(.caseIterable)
-            return code
+            let stringEnumCode = stringEnum.cases.isEmpty ? nil : finishEnum(stringEnum)
+            let numberEnumCode = numberEnum.cases.isEmpty ? nil : finishEnum(numberEnum)
+            let boolEnumCode = boolEnum.cases.isEmpty ? nil : finishEnum(boolEnum)
+
+            let enumTypes: [CodeEnumType] = [stringEnumCode, numberEnumCode, boolEnumCode].compactMap({ $0 })
+            switch enumTypes.count {
+            case 0:
+                throw CodegenErrors.emptyEnum
+            case 1: // just return the type directly
+                return enumTypes[0]
+            case _: // multiple enums form a OneOfX for each type
+                var enumTypes = enumTypes
+                enumTypes = enumTypes.map { enumType in
+                    var enumType = enumType
+                    enumType.name = enumType.name + enumType.associatedTypeName // suffix the type with the type
+                    return enumType
+                }
+                var type = aliasOneOf(enumTypes, name: name ?? valueTypeNames, optional: false, defined: true)
+                type.peerTypes = enumTypes
+                return type
+            }
         }
 
         let type = schema.type
@@ -912,7 +942,7 @@ public struct Curio {
                 values.remove(at: nulIndex)
                 containsNul = true
             }
-            let senum = try createStringEnum(explicitName ? typename : nil, values: values)
+            let senum = try createLiteralEnum(explicitName ? typename : nil, values: values)
             // TODO: make OneOf(ExplicitNull, ...)
             return containsNul ? senum : senum
         } else if case .some(.v2(let multiType)) = type {

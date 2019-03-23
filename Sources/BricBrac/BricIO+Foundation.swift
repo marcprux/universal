@@ -31,7 +31,9 @@ public extension Encodable {
         return String(data: data, encoding: .utf8) ?? ""
     }
 
-    /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric
+    /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric.
+    /// This only works for top-level encodable properties (i.e., Array and Dictionary, but not String, Double, or Boolean).
+    /// Full support would require a custom JSONEncoder to encode directly as a Bric.
     public func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
         let encoder = JSONEncoder()
 

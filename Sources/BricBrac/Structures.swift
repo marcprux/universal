@@ -27,6 +27,13 @@ extension Optional : Wrappable { }
 
 public typealias Indirect = IndirectEnum
 
+public extension Optional {
+    /// Wrap this optional in an indirection
+    public func indirect() -> Optional<Indirect<Wrapped>> {
+        return self.flatMap(Indirect.init(rawValue:))
+    }
+}
+
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
 public struct IndirectStruct<Wrapped> : WrapperType, Wrappable {
     /// The underlying holder of the value; must be a type that can handle recursive types, which is why it is an `Array` and not a `CollectionOfOne`

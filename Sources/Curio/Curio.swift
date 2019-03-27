@@ -57,6 +57,9 @@ public struct Curio {
     /// The prefix for private internal indirect implementations
     public var indirectPrefix = "_"
 
+    /// Whether enums that are generated should be marked as `indirect`
+    public var indirectEnums = true
+
     /// The suffic for a OneOf choice enum
     public var oneOfSuffix = "Choice"
 
@@ -1269,6 +1272,7 @@ extension Curio {
         var imports: [String] = ["BricBrac"]
         var maxdirect: Int?
         var typeType: String?
+        var indirectEnums: Bool?
         var useOneOfEnums: Bool?
         var useAllOfEnums: Bool?
         var useAnyOfEnums: Bool?
@@ -1295,6 +1299,8 @@ extension Curio {
                 accessType = args.next()
             case "-typetype":
                 typeType = String(args.next() ?? "")
+            case "-indirectEnums":
+                indirectEnums = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-useOneOfEnums":
                 useOneOfEnums = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-useAllOfEnums":
@@ -1336,6 +1342,7 @@ extension Curio {
 
             var curio = Curio()
             if let maxdirect = maxdirect { curio.indirectCountThreshold = maxdirect }
+            if let indirectEnums = indirectEnums { curio.indirectEnums = indirectEnums }
             if let useOneOfEnums = useOneOfEnums { curio.useOneOfEnums = useOneOfEnums }
             if let useAllOfEnums = useAllOfEnums { curio.useAllOfEnums = useAllOfEnums }
             if let useAnyOfEnums = useAnyOfEnums { curio.useAnyOfEnums = useAnyOfEnums }

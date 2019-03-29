@@ -321,7 +321,7 @@ public struct Curio {
         ordering.append(contentsOf: schema.required ?? [])
         ordering.append(contentsOf: properties.keys.sorted())
         
-        let ordered = properties.sorted { a, b in return ordering.index(of: a.0)! <= ordering.index(of: b.0)! }
+        let ordered = properties.sorted { a, b in return ordering.firstIndex(of: a.0)! <= ordering.firstIndex(of: b.0)! }
         let req = Set(schema.required ?? [])
         let props: [PropInfo] = ordered.map({ PropInfo(name: $0, required: req.contains($0), schema: $1) })
         return props
@@ -1176,11 +1176,11 @@ public extension Schema {
     }
 
     /// Parse the given JSON info an array of resolved schema references, maintaining property order from the source JSON
-    public static func parse(_ source: String, rootName: String?) throws -> [(String, Schema)] {
+    static func parse(_ source: String, rootName: String?) throws -> [(String, Schema)] {
         return try generate(impute(source), rootName: rootName)
     }
 
-    public static func generate(_ json: Bric, rootName: String?) throws -> [(String, Schema)] {
+    static func generate(_ json: Bric, rootName: String?) throws -> [(String, Schema)] {
         let refmap = try json.resolve()
 
         var refschema : [String : Schema] = [:]
@@ -1200,7 +1200,7 @@ public extension Schema {
     }
 
     /// Parses the given JSON and injects the property ordering attribute based on the underlying source
-    public static func impute(_ source: String) throws -> Bric {
+    static func impute(_ source: String) throws -> Bric {
         var fidelity = try FidelityBricolage.parse(source)
         fidelity = imputePropertyOrdering(fidelity)
         return fidelity.bric()

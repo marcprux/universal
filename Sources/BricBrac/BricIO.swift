@@ -727,7 +727,7 @@ open class BufferedJSONWriter<Target: TextOutputStream> : JSONWriter {
         if tokens.isEmpty { return }
 
         func rangeBlock(_ index: Int, level: Int) -> CountableClosedRange<Int>? {
-            let match = tokens.dropFirst(index).index(where: {
+            let match = tokens.dropFirst(index).firstIndex(where: {
                 if case .indent(let lvl) = $0 , lvl == (level - 1) {
                     return true
                 } else {
@@ -818,7 +818,7 @@ open class BufferedJSONWriter<Target: TextOutputStream> : JSONWriter {
 
 public extension Encodable {
     /// Find every child of this encodable instance of the given type.
-    public func encodableChildrenOfType<T: Encodable>(_ type: T.Type) throws -> [T] {
+    func encodableChildrenOfType<T: Encodable>(_ type: T.Type) throws -> [T] {
         var values: [T] = []
         try FilterEncoder.encode(self, handler: { (key, value) in
             if let item = value as? T {

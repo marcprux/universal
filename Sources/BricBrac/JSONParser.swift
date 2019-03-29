@@ -689,7 +689,7 @@ public extension JSONParser {
     /// - parameter indent: the number of spaces to indent the output, zero for compact, nil for exact whitespace preservation
     ///
     /// - Returns: The processed JSON String
-    public static func formatJSON(_ json: String, indent: Int? = nil) throws -> String {
+    static func formatJSON(_ json: String, indent: Int? = nil) throws -> String {
         var out = String()
         out.reserveCapacity(json.unicodeScalars.count)
         let src = Array(json.unicodeScalars)
@@ -702,7 +702,7 @@ public extension JSONParser {
     /// - parameter json: the source JSON scalars to process
     /// - parameter out: the `OutputStreamType` to write the result
     /// - parameter indent: the number of spaces to indent the output, zero for compact, nil for exact whitespace preservation
-    public static func processJSON<S: TextOutputStream>(_ src: [UnicodeScalar], out: inout S, indent: Int? = nil) throws {
+    static func processJSON<S: TextOutputStream>(_ src: [UnicodeScalar], out: inout S, indent: Int? = nil) throws {
         let parser = JSONParser(options: Options.Strict)
 
         var depth = 0

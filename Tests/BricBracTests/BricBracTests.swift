@@ -1257,25 +1257,25 @@ class BricBracTests : XCTestCase {
             var codec = UTF8()
 
             do {
-                var g1 = IteratorOverOne(_elements: units[0])
+                var g1 = CollectionOfOne.Iterator(_elements: units[0])
                 let r1 = codec.decode(&g1)
                 print("r1: \(r1)") // .Error
             }
 
             do {
-                var g2 = IteratorOverOne(_elements: units[1])
+                var g2 = CollectionOfOne.Iterator(_elements: units[1])
                 let r2 = codec.decode(&g2)
                 print("r2: \(r2)") // .EmptyInput
             }
 
             do {
-                var g3 = IteratorOverOne(_elements: units[2])
+                var g3 = CollectionOfOne.Iterator(_elements: units[2])
                 let r3 = codec.decode(&g3)
                 print("r3: \(r3)") // .EmptyInput
             }
 
             do {
-                var g4 = IteratorOverOne(_elements: units[3])
+                var g4 = CollectionOfOne.Iterator(_elements: units[3])
                 let r4 = codec.decode(&g4)
                 print("r4: \(r4)") // .EmptyInput
             }
@@ -1398,8 +1398,8 @@ class BricBracTests : XCTestCase {
             XCTFail("FidelityBricolage not object")
         }
 
-        let bric: Bric = fb.bric()
-        XCTAssertNotEqual(Array(bric.obj!.keys), ["a", "b", "c", "d"]) // note that we lose ordering when converting to standard Bric
+        let _: Bric = fb.bric()
+        // XCTAssertNotEqual(Array(bric.obj!.keys), ["a", "b", "c", "d"]) // note that we lose ordering when converting to standard Bric, but we can't rely on failure because it will be dependant on varying hashcodes
     }
 
     func testOneOfStruct() {
@@ -1814,7 +1814,9 @@ public struct ColumnMap<T : Codable & Hashable> : Codable, Equatable {
         /// and doesn't have a guarantee of maintaining serialization future-compatibility
         public var ranges: IndexSet
 
-        public var hashValue: Int { return value.hashValue }
+        public func hash(into hasher: inout Hasher) {
+            self.value.hash(into: &hasher)
+        }
     }
 
     /// Dehydrates a list of JSON objects into an optimized column map

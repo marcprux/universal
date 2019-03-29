@@ -24,7 +24,7 @@ extension Bric : Bracable {
 public extension Bric {
 
     /// Bric has a string subscript when it is an object type
-    public subscript(key: String)->Bric? {
+    subscript(key: String)->Bric? {
         get { return try? brac(key: key) }
 
         set {
@@ -68,36 +68,36 @@ extension String {
 
 public extension Bric {
     /// Bracs this type as Void, throwing an error if the underlying type is not null
-    public func bracNul() throws -> Void {
+    func bracNul() throws -> Void {
         guard case .nul = self else { return try invalidType() }
     }
 
     /// Bracs this type as Number, throwing an error if the underlying type is not a number
-    public func bracNum() throws -> Double {
+    func bracNum() throws -> Double {
         guard case .num(let x) = self else { return try invalidType() }
         return x
     }
 
     /// Bracs this type as String, throwing an error if the underlying type is not a string
-    public func bracStr() throws -> String {
+    func bracStr() throws -> String {
         guard case .str(let x) = self else { return try invalidType() }
         return x
     }
 
     /// Bracs this type as Bool, throwing an error if the underlying type is not a boolean
-    public func bracBol() throws -> Bool {
+    func bracBol() throws -> Bool {
         guard case .bol(let x) = self else { return try invalidType() }
         return x
     }
 
     /// Bracs this type as an Object, throwing an error if the underlying type is not an object
-    public func bracObj() throws -> [String: Bric] {
+    func bracObj() throws -> [String: Bric] {
         guard case .obj(let x) = self else { return try invalidType() }
         return x
     }
 
     /// Bracs this type as an Array, throwing an error if the underlying type is not an array
-    public func bracArr() throws -> [Bric] {
+    func bracArr() throws -> [Bric] {
         guard case .arr(let x) = self else { return try invalidType() }
         return x
     }
@@ -115,7 +115,7 @@ public extension Bric {
     }
 
     /// Reads a required Bric instance from the given key in an object bric
-    public func brac<T: Bracable>(key: String) throws -> T {
+    func brac<T: Bracable>(key: String) throws -> T {
         if let value = try objectKey(key) {
             return try bracPath(key, T.brac(bric: value))
         } else {
@@ -124,7 +124,7 @@ public extension Bric {
     }
 
     /// Reads any one of the given Brics, throwing an error if the successful number of instances is outside of the given range of acceptable passes
-    public func brac<T: Bracable>(range: ClosedRange<Int>, bracers: [() throws -> T]) throws -> [T] {
+    func brac<T: Bracable>(range: ClosedRange<Int>, bracers: [() throws -> T]) throws -> [T] {
         var values: [T] = []
         var errors: [Error] = []
         for f in bracers {
@@ -145,12 +145,12 @@ public extension Bric {
     }
 
     /// Reads any one of the given Brics, throwing an error if all of the closures also threw an error or more than one succeeded
-    public func brac<T: Bracable>(oneOf: [() throws -> T]) throws -> T {
+    func brac<T: Bracable>(oneOf: [() throws -> T]) throws -> T {
         return try brac(range: 1...1, bracers: oneOf).first!
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    public func brac<T1, T2>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2) throws -> (T1?, T2?) {
+    func brac<T1, T2>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2) throws -> (T1?, T2?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -166,7 +166,7 @@ public extension Bric {
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    public func brac<T1, T2, T3>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3) throws -> (T1?, T2?, T3?) {
+    func brac<T1, T2, T3>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3) throws -> (T1?, T2?, T3?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -184,7 +184,7 @@ public extension Bric {
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    public func brac<T1, T2, T3, T4>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3, _ b4: (Bric) throws -> T4) throws -> (T1?, T2?, T3?, T4?) {
+    func brac<T1, T2, T3, T4>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3, _ b4: (Bric) throws -> T4) throws -> (T1?, T2?, T3?, T4?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -204,7 +204,7 @@ public extension Bric {
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    public func brac<T1, T2, T3, T4, T5>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3, _ b4: (Bric) throws -> T4, _ b5: (Bric) throws -> T5) throws -> (T1?, T2?, T3?, T4?, T5?) {
+    func brac<T1, T2, T3, T4, T5>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3, _ b4: (Bric) throws -> T4, _ b5: (Bric) throws -> T5) throws -> (T1?, T2?, T3?, T4?, T5?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -226,18 +226,18 @@ public extension Bric {
     }
 
     /// Reads all of the given Brics, throwing an error if any of the closures threw an error
-    public func brac<T: Bracable>(allOf: [() throws -> T]) throws -> [T] {
+    func brac<T: Bracable>(allOf: [() throws -> T]) throws -> [T] {
         return try brac(range: allOf.count...allOf.count, bracers: allOf)
     }
 
     /// Bracs the T with the given factory
-    public func brac<T1, T2>(both t1: (Bric) throws -> T1, _ t2: (Bric) throws -> T2) throws -> (T1, T2) {
+    func brac<T1, T2>(both t1: (Bric) throws -> T1, _ t2: (Bric) throws -> T2) throws -> (T1, T2) {
         return try (t1(self), t2(self))
     }
 
     /// Returns a dictionary of keys to raw Brics for all keys that are not present in the given RawType (e.g., an enum of keys)
     /// This is useful for maintaining the underlying Brics of any object keys that are not strictly enumerated
-    public func brac<R: RawRepresentable>(disjoint keys: R.Type) throws -> Dictionary<String, Bric> where R.RawValue == String {
+    func brac<R: RawRepresentable>(disjoint keys: R.Type) throws -> Dictionary<String, Bric> where R.RawValue == String {
         guard case .obj(let d) = self else { return try invalidType() }
         var dict = d
         for key in dict.keys {
@@ -249,7 +249,7 @@ public extension Bric {
     }
 
     /// Validates that only the given keys exists in the current dictionary bric; useful for forbidding additionalProperties
-    public func exclusive<T>(keys: [String], _ f: @autoclosure () throws -> T) throws -> T {
+    func exclusive<T>(keys: [String], _ f: @autoclosure () throws -> T) throws -> T {
         guard case .obj(let dict) = self else { return try invalidType() }
         let unrecognized = Set(dict.keys).subtracting(keys)
         if !unrecognized.isEmpty {
@@ -264,7 +264,7 @@ public extension Bric {
     }
 
     /// Validates that only the given keys exists in the current dictionary bric; useful for forbidding additionalProperties
-    public func prohibit<R: RawRepresentable>(additionalKeys keys: R.Type) throws where R.RawValue == String {
+    func prohibit<R: RawRepresentable>(additionalKeys keys: R.Type) throws where R.RawValue == String {
         guard case .obj(let dict) = self else { return try invalidType() }
         var errs: [Error] = []
         for key in dict.keys {
@@ -281,7 +281,7 @@ public extension Bric {
 
     // TODO: remove
 
-    public func assertNoAdditionalProperties<R: RawRepresentable>(_ keys: R.Type) throws where R.RawValue == String {
+    func assertNoAdditionalProperties<R: RawRepresentable>(_ keys: R.Type) throws where R.RawValue == String {
         return try prohibit(additionalKeys: keys)
     }
 }
@@ -622,7 +622,7 @@ public enum BracError: Error, CustomDebugStringConvertible {
 
 public extension Bric {
     /// Utility function that simply throws an BracError.InvalidType
-    public func invalidType<T>() throws -> T {
+    func invalidType<T>() throws -> T {
         switch self {
         case .nul: throw BracError.invalidType(type: T.self, actual: "nil", path: [])
         case .arr: throw BracError.invalidType(type: T.self, actual: "Array", path: [])
@@ -634,7 +634,7 @@ public extension Bric {
     }
 
     /// Utility function that simply throws an BracError.InvalidType
-    public func invalidRawValue<T>(_ value: Any) throws -> T {
+    func invalidRawValue<T>(_ value: Any) throws -> T {
         throw BracError.invalidRawValue(type: T.self, value: value, path: [])
     }
 }

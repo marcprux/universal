@@ -115,7 +115,7 @@ public struct Schema : Codable, Equatable, Hashable {
 }
 
 public extension Schema {
-    public init(type: SimpleTypes?) {
+    init(type: SimpleTypes?) {
         var schema = Schema()
         if let type = type {
             schema.type = .v1(type)

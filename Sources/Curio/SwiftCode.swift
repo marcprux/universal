@@ -15,7 +15,7 @@ public protocol CodeEmitterType {
 }
 
 public extension CodeEmitterType {
-    public func emitComments(_ comments: [String]) {
+    func emitComments(_ comments: [String]) {
         let comms = comments.flatMap({ $0.split { $0 == "\n" || $0 == "\r" } })
 
         for comment in comms {
@@ -107,9 +107,10 @@ extension CodeEmittable {
     }
 
     /// Generic hashability for an emittable is implemented by emitting the code and returning the hash
-    public var hashValue: Int {
-        return self.codeValue.hashValue
+    public func hash(into hasher: inout Hasher) {
+        self.codeValue.hashValue.hash(into: &hasher)
     }
+
 }
 
 open class CodeModule : CodeImplementationType {
@@ -183,7 +184,7 @@ public protocol CodeType : CodeUnit {
 
 public extension CodeType {
     /// By default, types have no default value
-    public var defaultValue : String? {
+    var defaultValue : String? {
         return nil
     }
 }
@@ -428,7 +429,7 @@ public protocol CodeNamedType : CodeAccessible, CodeEmittable {
 
 public extension CodeNamedType {
     /// The identifier for a named type is the name itself
-    public var identifier : String { return name }
+    var identifier : String { return name }
 }
 
 /// A type alias can take an unnamed type (like a tuple) and assign it a name

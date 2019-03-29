@@ -38,32 +38,7 @@ extension Bric {
 }
 
 extension Bric : Equatable { }
-
-/// Two Brics are the same when they represent the same type and have the same contents
-public func ==(lhs: Bric, rhs: Bric) -> Bool {
-    switch (lhs, rhs) {
-    case let (.arr(arr1), .arr(arr2)): return arr1 == arr2
-    case let (.obj(obj1), .obj(obj2)): return obj1 == obj2
-    case let (.str(str1), .str(str2)): return str1 == str2
-    case let (.num(num1), .num(num2)): return num1 == num2
-    case let (.bol(bol1), .bol(bol2)): return bol1 == bol2
-    case (.nul, .nul): return true
-    default: return false
-    }
-}
-
-extension Bric : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .arr(let a): return a.reduce(0, { sum, bric in (37.multipliedReportingOverflow(by: (sum.addingReportingOverflow(bric.hashValue).partialValue)).partialValue) })
-        case .obj(let o): return o.reduce(0, { sum, keyValue in (37.multipliedReportingOverflow(by: sum.addingReportingOverflow(keyValue.0.hashValue).partialValue.addingReportingOverflow(keyValue.1.hashValue).partialValue).partialValue) })
-        case .str(let s): return s.hashValue
-        case .num(let d): return d.hashValue
-        case .bol(let b): return b.hashValue
-        case .nul: return 0
-        }
-    }
-}
+extension Bric : Hashable { }
 
 extension Bric {
     /// The count of Bric is either the number of properties (for an object), number of elements (for an array), 0 for null, or 1 for string & number
@@ -109,13 +84,13 @@ public extension Bric {
     ///
     /// - See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
     
-    public func assign(bric: Bric) -> Bric {
+    func assign(bric: Bric) -> Bric {
         return merge(bric: bric, depth: 1)
     }
 
     /// Performs a deep merge of all the object & array elements of the given Bric
     
-    public func merge(bric: Bric, depth: Int = Int.max) -> Bric {
+    func merge(bric: Bric, depth: Int = Int.max) -> Bric {
         if depth <= 0 { return self }
 
         if case .arr(var a1) = self, case .arr(let a2) = bric {
@@ -142,7 +117,7 @@ public extension Bric {
 public extension Bric {
 
     /// Bric has an int subscript when it is an array type; safe indexing is used
-    public subscript(index: Int)->Bric? {
+    subscript(index: Int)->Bric? {
         get {
             switch self {
             case .arr(let arr):
@@ -382,7 +357,7 @@ extension Dictionary : Bricable where Key == String, Value : Bricable { // TODO:
 /// RawRepresentable Bric methods that enable a String enum to automatically bric & brac
 public extension RawRepresentable where Self.RawValue == String {
     /// A String `RawRepresentable` brics to a `Bric.str` with the underlying `rawValue`
-    public func bric() -> Bric {
+    func bric() -> Bric {
         return .str(rawValue)
     }
 }
@@ -405,7 +380,7 @@ extension BricableDoubleConvertible {
 /// RawRepresentable Bric methods that enable a numeric enum to automatically bric
 public extension RawRepresentable where Self.RawValue : BricableDoubleConvertible {
     /// A numeric `RawRepresentabke` brics to a `Bric.num`
-    public func bric() -> Bric {
+    func bric() -> Bric {
         return .num(rawValue.bricNum)
     }
 }
@@ -509,6 +484,8 @@ extension Mirror : Bricable {
                 }
             }
             return .obj(dict)
+        @unknown default:
+            return Bric.nul
         }
     }
 }

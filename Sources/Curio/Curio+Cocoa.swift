@@ -12,7 +12,7 @@ import Foundation
 import BricBrac
 
 public extension Curio {
-    public func emit(_ module: CodeModule, name: String, dir: String) throws {
+    func emit(_ module: CodeModule, name: String, dir: String) throws {
         let locpath = (dir as NSString).appendingPathComponent(name)
 
         let emitter = CodeEmitter(stream: "")

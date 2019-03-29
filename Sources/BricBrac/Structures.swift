@@ -29,7 +29,7 @@ public typealias Indirect = IndirectEnum
 
 public extension Optional {
     /// Wrap this optional in an indirection
-    public func indirect() -> Optional<Indirect<Wrapped>> {
+    func indirect() -> Optional<Indirect<Wrapped>> {
         return self.flatMap(Indirect.init(rawValue:))
     }
 }
@@ -112,17 +112,8 @@ extension Indirect : Decodable where Wrapped : Decodable {
     }
 }
 
-extension Indirect : Equatable where Wrapped : Equatable {
-    public static func ==(lhs: IndirectEnum, rhs: IndirectEnum) -> Bool {
-        return lhs.value == rhs.value
-    }
-}
-
-extension Indirect : Hashable where Wrapped : Hashable {
-    public var hashValue: Int {
-        return value.hashValue
-    }
-}
+extension Indirect : Equatable where Wrapped : Equatable { }
+extension Indirect : Hashable where Wrapped : Hashable { }
 
 
 /// An empty struct that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
@@ -153,7 +144,7 @@ extension OneOf2 : ExpressibleByNilLiteral where T2 == ExplicitNull {
 }
 
 public extension OneOf2Type where T2 == ExplicitNull /* i.e., Nullable */ {
-    public var isExplicitNull: Bool { return self.v2 == ExplicitNull.null }
+    var isExplicitNull: Bool { return self.v2 == ExplicitNull.null }
 }
 
 /// An Object Bric type that cannot contain anything
@@ -194,7 +185,7 @@ public protocol OneOfN : SomeOf {
 }
 
 public extension OneOfN {
-    public var v1: T1? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v1: T1? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// The protocol of a type that can contain one out of 2 or more exclusive options
@@ -206,7 +197,7 @@ public protocol OneOf2Type : OneOfN {
 }
 
 public extension OneOf2Type {
-    public var v2: T2? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v2: T2? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2
@@ -264,7 +255,6 @@ extension OneOf2 : Encodable where T1 : Encodable, T2 : Encodable {
 }
 
 extension OneOf2 : Decodable where T1 : Decodable, T2 : Decodable {
-
     public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
@@ -273,28 +263,12 @@ extension OneOf2 : Decodable where T1 : Decodable, T2 : Decodable {
     }
 }
 
-extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable {
-    public static func ==(lhs: OneOf2, rhs: OneOf2) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
+extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 
 public extension OneOf2 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
+    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -363,7 +337,7 @@ public protocol OneOf3Type : OneOf2Type {
 }
 
 public extension OneOf3Type {
-    public var v3: T3? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v3: T3? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3
@@ -429,30 +403,12 @@ extension OneOf3 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
-extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable {
-    public static func ==(lhs: OneOf3, rhs: OneOf3) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable { }
+extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { }
 
 public extension OneOf3 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
+    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -480,7 +436,7 @@ public protocol OneOf4Type : OneOf3Type {
 }
 
 public extension OneOf4Type {
-    public var v4: T4? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v4: T4? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -556,32 +512,12 @@ extension OneOf4 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
-extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable {
-    public static func ==(lhs: OneOf4, rhs: OneOf4) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        case (.v4(let a), .v4(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        case .v4(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable { }
+extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable { }
 
 public extension OneOf4 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
+    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -611,7 +547,7 @@ public protocol OneOf5Type : OneOf4Type {
 }
 
 public extension OneOf5Type {
-    public var v5: T5? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v5: T5? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5
@@ -693,34 +629,12 @@ extension OneOf5 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
-extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable {
-    public static func ==(lhs: OneOf5, rhs: OneOf5) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        case (.v4(let a), .v4(let b)): return a == b
-        case (.v5(let a), .v5(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        case .v4(let x): return x.hashValue
-        case .v5(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable { }
+extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
 
 public extension OneOf5 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    public subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
+    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -753,7 +667,7 @@ public protocol OneOf6Type : OneOf5Type {
 }
 
 public extension OneOf6Type {
-    public var v6: T6? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v6: T6? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -844,33 +758,8 @@ extension OneOf6 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
-extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable {
-    public static func ==(lhs: OneOf6, rhs: OneOf6) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        case (.v4(let a), .v4(let b)): return a == b
-        case (.v5(let a), .v5(let b)): return a == b
-        case (.v6(let a), .v6(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        case .v4(let x): return x.hashValue
-        case .v5(let x): return x.hashValue
-        case .v6(let x): return x.hashValue
-        }
-    }
-}
-
+extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable { }
+extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable { }
 
 /// The protocol of a type that can contain one out of 7 or more exclusive options
 public protocol OneOf7Type : OneOf6Type {
@@ -881,7 +770,7 @@ public protocol OneOf7Type : OneOf6Type {
 }
 
 public extension OneOf7Type {
-    public var v7: T7? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v7: T7? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -981,34 +870,8 @@ extension OneOf7 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
-extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable {
-    public static func ==(lhs: OneOf7, rhs: OneOf7) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        case (.v4(let a), .v4(let b)): return a == b
-        case (.v5(let a), .v5(let b)): return a == b
-        case (.v6(let a), .v6(let b)): return a == b
-        case (.v7(let a), .v7(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        case .v4(let x): return x.hashValue
-        case .v5(let x): return x.hashValue
-        case .v6(let x): return x.hashValue
-        case .v7(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable { }
+extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable { }
 
 /// The protocol of a type that can contain one out of 8 or more exclusive options
 public protocol OneOf8Type : OneOf7Type {
@@ -1019,7 +882,7 @@ public protocol OneOf8Type : OneOf7Type {
 }
 
 public extension OneOf8Type {
-    public var v8: T8? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v8: T8? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
@@ -1125,36 +988,8 @@ extension OneOf8 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
-extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable {
-    public static func ==(lhs: OneOf8, rhs: OneOf8) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        case (.v4(let a), .v4(let b)): return a == b
-        case (.v5(let a), .v5(let b)): return a == b
-        case (.v6(let a), .v6(let b)): return a == b
-        case (.v7(let a), .v7(let b)): return a == b
-        case (.v8(let a), .v8(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        case .v4(let x): return x.hashValue
-        case .v5(let x): return x.hashValue
-        case .v6(let x): return x.hashValue
-        case .v7(let x): return x.hashValue
-        case .v8(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable { }
+extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable { }
 
 
 /// The protocol of a type that can contain one out of 9 or more exclusive options
@@ -1166,7 +1001,7 @@ public protocol OneOf9Type : OneOf8Type {
 }
 
 public extension OneOf9Type {
-    public var v9: T9? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v9: T9? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
@@ -1280,38 +1115,8 @@ extension OneOf9 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
-extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable {
-    public static func ==(lhs: OneOf9, rhs: OneOf9) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        case (.v4(let a), .v4(let b)): return a == b
-        case (.v5(let a), .v5(let b)): return a == b
-        case (.v6(let a), .v6(let b)): return a == b
-        case (.v7(let a), .v7(let b)): return a == b
-        case (.v8(let a), .v8(let b)): return a == b
-        case (.v9(let a), .v9(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        case .v4(let x): return x.hashValue
-        case .v5(let x): return x.hashValue
-        case .v6(let x): return x.hashValue
-        case .v7(let x): return x.hashValue
-        case .v8(let x): return x.hashValue
-        case .v9(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable { }
+extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable { }
 
 /// The protocol of a type that can contain one out of 10 or more exclusive options
 public protocol OneOf10Type : OneOf9Type {
@@ -1322,7 +1127,7 @@ public protocol OneOf10Type : OneOf9Type {
 }
 
 public extension OneOf10Type {
-    public var v10: T10? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    var v10: T10? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10
@@ -1444,40 +1249,8 @@ extension OneOf10 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodab
     }
 }
 
-extension OneOf10 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable, T10 : Equatable {
-    public static func ==(lhs: OneOf10, rhs: OneOf10) -> Bool {
-        switch (lhs, rhs) {
-        case (.v1(let a), .v1(let b)): return a == b
-        case (.v2(let a), .v2(let b)): return a == b
-        case (.v3(let a), .v3(let b)): return a == b
-        case (.v4(let a), .v4(let b)): return a == b
-        case (.v5(let a), .v5(let b)): return a == b
-        case (.v6(let a), .v6(let b)): return a == b
-        case (.v7(let a), .v7(let b)): return a == b
-        case (.v8(let a), .v8(let b)): return a == b
-        case (.v9(let a), .v9(let b)): return a == b
-        case (.v10(let a), .v10(let b)): return a == b
-        default: return false
-        }
-    }
-}
-
-extension OneOf10 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable, T10 : Hashable {
-    public var hashValue: Int {
-        switch self {
-        case .v1(let x): return x.hashValue
-        case .v2(let x): return x.hashValue
-        case .v3(let x): return x.hashValue
-        case .v4(let x): return x.hashValue
-        case .v5(let x): return x.hashValue
-        case .v6(let x): return x.hashValue
-        case .v7(let x): return x.hashValue
-        case .v8(let x): return x.hashValue
-        case .v9(let x): return x.hashValue
-        case .v10(let x): return x.hashValue
-        }
-    }
-}
+extension OneOf10 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable, T10 : Equatable { }
+extension OneOf10 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable, T10 : Hashable { }
 
 
 
@@ -1652,7 +1425,7 @@ public protocol ISO8601DateTime {
 
 public extension Bric {
     /// Returns the underlying `BricDateTime` for `Bric.str` cases that can be pased with `ISO8601FromString`, else nil
-    public var dtm: BricDateTime? {
+    var dtm: BricDateTime? {
         if let str = self.str {
             return BricDateTime(str)
         } else {
@@ -1695,8 +1468,6 @@ public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, Custo
 
     public var description: String { return toISO8601String() }
 
-    public var hashValue: Int { return year }
-
     /// BricDateTime instances are serialized to ISO-8601 strings
     public func bric() -> Bric {
         return Bric.str(toISO8601String())
@@ -1714,7 +1485,7 @@ public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, Custo
 public extension ISO8601DateTime {
 
     /// Converts this datetime to a formatted string with the given time separator and designator for UTC (Zulu) time
-    public func toFormattedString(timesep: String = "T", utctz: String? = "Z", padsec: Int = 3) -> String {
+    func toFormattedString(timesep: String = "T", utctz: String? = "Z", padsec: Int = 3) -> String {
         func pad(_ num: Int, _ len: Int) -> String {
             var str = String(num)
             while str.count < len {
@@ -1738,12 +1509,12 @@ public extension ISO8601DateTime {
     }
 
     /// Returns a string representation in accordance with ISO-8601
-    public func toISO8601String() -> String {
+    func toISO8601String() -> String {
         return toFormattedString()
     }
 
     /// Attempt to parse the given String as an ISO-8601 date-time structure
-    public func parseISO8601String(_ str: String) -> Self? {
+    func parseISO8601String(_ str: String) -> Self? {
         var gen = str.makeIterator()
 
         func scan(_ skip: Int = 0, _ until: Character...) -> (String, Character?)? {

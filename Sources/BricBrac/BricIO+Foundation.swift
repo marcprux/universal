@@ -26,7 +26,7 @@ extension Decodable {
 
 public extension Encodable {
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)
-    public func encodedString(encoder: (Self) throws -> (Data) = JSONEncoder().encode) rethrows -> String {
+    func encodedString(encoder: (Self) throws -> (Data) = JSONEncoder().encode) rethrows -> String {
         let data = try encoder(self)
         return String(data: data, encoding: .utf8) ?? ""
     }
@@ -34,7 +34,7 @@ public extension Encodable {
     /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric.
     /// This only works for top-level encodable properties (i.e., Array and Dictionary, but not String, Double, or Boolean).
     /// Full support would require a custom JSONEncoder to encode directly as a Bric.
-    public func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
+    func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
         let encoder = JSONEncoder()
 
         if let outputFormatting = outputFormatting { encoder.outputFormatting = outputFormatting }
@@ -83,7 +83,7 @@ extension Bric : Decodable {
 
 public extension Bricable {
     /// Decode this bric into a decodable instance
-    public func decode<T: Decodable>(_ type: T.Type, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> T {
+    func decode<T: Decodable>(_ type: T.Type, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> T {
         let decoder = JSONDecoder()
         
         if let dateDecodingStrategy = dateDecodingStrategy {
@@ -109,12 +109,12 @@ public extension Bricable {
 public extension Bric {
 
     /// Validates the given JSON string and throws an error if there was a problem
-    public static func parseCocoa(_ string: String, options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
+    static func parseCocoa(_ string: String, options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
         return try FoundationBricolage.parseJSON(Array(string.unicodeScalars), options: options).object
     }
 
     /// Validates the given array of unicode scalars and throws an error if there was a problem
-    public static func parseCocoa(_ scalars: [UnicodeScalar], options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
+    static func parseCocoa(_ scalars: [UnicodeScalar], options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
         return try FoundationBricolage.parseJSON(scalars, options: options).object
     }
 }

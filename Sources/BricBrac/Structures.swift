@@ -59,11 +59,11 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType, Wrappable {
     case some(Wrapped)
 
     /// Construct a non-`nil` instance that stores `some`.
-    public init(_ some: Wrapped) {
+    @inlinable public init(_ some: Wrapped) {
         self = .some(some)
     }
 
-    public var value: Wrapped {
+    @inlinable public var value: Wrapped {
         get {
             switch self {
             case .some(let v): return v
@@ -75,7 +75,7 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType, Wrappable {
         }
     }
 
-    public func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U? {
+    @inlinable public func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U? {
         return try f(value)
     }
 }
@@ -84,11 +84,11 @@ extension Indirect : RawRepresentable {
     public typealias RawValue = Wrapped
 
     /// Constructor for RawRepresentable
-    public init(rawValue some: Wrapped) {
+    @inlinable public init(rawValue some: Wrapped) {
         self.init(some)
     }
 
-    public var rawValue: Wrapped { return value }
+    @inlinable public var rawValue: Wrapped { return value }
 }
 
 // similar to Optional codability at:
@@ -601,7 +601,7 @@ public protocol OneOf5Type : OneOf4Type {
 }
 
 public extension OneOf5Type {
-    var v5: T5? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v5: T5? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5

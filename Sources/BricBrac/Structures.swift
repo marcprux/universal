@@ -185,7 +185,7 @@ public protocol OneOfN : SomeOf {
 }
 
 public extension OneOfN {
-    var v1: T1? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v1: T1? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// The protocol of a type that can contain one out of 2 or more exclusive options
@@ -197,37 +197,37 @@ public protocol OneOf2Type : OneOfN {
 }
 
 public extension OneOf2Type {
-    var v2: T2? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v2: T2? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2
 public indirect enum OneOf2<T1, T2> : OneOf2Type {
     case v1(T1), v2(T2)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
+
+    @inlinable subscript<U1, U2>(oneOf keyPaths: (KeyPath<T1, U1>, KeyPath<T2, U2>)) -> OneOf2<U1, U2> {
+        get {
+            switch self {
+            case .v1(let x): return .init(x[keyPath: keyPaths.0])
+            case .v2(let x): return .init(x[keyPath: keyPaths.1])
+            }
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?) { return (extract(), extract()) }
+    @inlinable public var values: (T1?, T2?) { return (extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-
-    /// Extract the underlying value to a common implementor type (typically a common protocol)
-    /// Sadly, this doesn't work: “Type 'T1' constrained to non-protocol, non-class type 'T'”
-//    public func implementing<T>() -> T where T1 : T, T2 : T {
-//        switch self {
-//        case .v1(let x): return x
-//        case .v2(let x): return x
-//        }
-//    }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
 }
 
 extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -236,7 +236,7 @@ extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
 }
 
 extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf2 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf2 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -245,8 +245,7 @@ extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
 }
 
 extension OneOf2 : Encodable where T1 : Encodable, T2 : Encodable {
-
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -255,11 +254,22 @@ extension OneOf2 : Encodable where T1 : Encodable, T2 : Encodable {
 }
 
 extension OneOf2 : Decodable where T1 : Decodable, T2 : Decodable {
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
+    }
+}
+
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf2 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf2]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            ].joined())
     }
 }
 
@@ -268,7 +278,7 @@ extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 
 public extension OneOf2 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
+    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -288,7 +298,7 @@ public extension OneOf2 {
 /// Common case of OneOf2<String, [String]>, where we can get or set values as an array
 extension OneOf2 where T2 == Array<T1> {
     /// Access the underlying values as an array regardless of whether it is the single or multiple case
-    public var array: [T1] {
+    @inlinable public var array: [T1] {
         get {
             switch self {
             case .v1(let x):
@@ -311,7 +321,7 @@ extension OneOf2 where T2 == Array<T1> {
 /// Reversed the OneOf2 ordering
 extension OneOf2 {
     /// Returns a swapped instance of this OneOf2<T1, T2> as a OneOf2<T2, T1>
-    public var swapped: OneOf2<T2, T1> {
+    @inlinable public var swapped: OneOf2<T2, T1> {
         get {
             switch self {
             case .v1(let x): return OneOf2<T2, T1>(x)
@@ -337,32 +347,41 @@ public protocol OneOf3Type : OneOf2Type {
 }
 
 public extension OneOf3Type {
-    var v3: T3? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v3: T3? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3
 public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
     case v1(T1), v2(T2), v3(T3)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<T1, T2>, T3> {
+        switch self {
+        case .v1(let v): return .v1(.v1(v))
+        case .v2(let v): return .v1(.v2(v))
+        case .v3(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?) { return (extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?) { return (extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
 }
 
 extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -372,7 +391,7 @@ extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
 }
 
 extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf3 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf3 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -383,7 +402,7 @@ extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
 
 extension OneOf3 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -394,7 +413,7 @@ extension OneOf3 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodabl
 
 extension OneOf3 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -403,12 +422,24 @@ extension OneOf3 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf3 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf3]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            ].joined())
+    }
+}
+
 extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable { }
 extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { }
 
 public extension OneOf3 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
+    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -436,7 +467,7 @@ public protocol OneOf4Type : OneOf3Type {
 }
 
 public extension OneOf4Type {
-    var v4: T4? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v4: T4? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -444,30 +475,40 @@ public extension OneOf4Type {
 public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
     case v1(T1), v2(T2), v3(T3), v4(T4)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .v4(t4) }
-    public init(_ t4: T4) { self = .v4(t4) }
+    @inlinable public init(t4: T4) { self = .v4(t4) }
+    @inlinable public init(_ t4: T4) { self = .v4(t4) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4> {
+        switch self {
+        case .v1(let v): return .v1(.v1(.v1(v)))
+        case .v2(let v): return .v1(.v1(.v2(v)))
+        case .v3(let v): return .v1(.v2(v))
+        case .v4(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?, T4?) { return (extract(), extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?, T4?) { return (extract(), extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
 
 }
 
 extension OneOf4 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -478,7 +519,7 @@ extension OneOf4 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf4 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf4 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -490,7 +531,7 @@ extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf4 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -502,7 +543,7 @@ extension OneOf4 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodabl
 
 extension OneOf4 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -512,12 +553,25 @@ extension OneOf4 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf4 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable, T4 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf4]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            T4.allCases.map(AllCases.Element.init(t4:)),
+            ].joined())
+    }
+}
+
 extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable { }
 extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable { }
 
 public extension OneOf4 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
+    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -554,33 +608,44 @@ public extension OneOf5Type {
 public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .v4(t4) }
-    public init(_ t4: T4) { self = .v4(t4) }
+    @inlinable public init(t4: T4) { self = .v4(t4) }
+    @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
-    public init(t5: T5) { self = .v5(t5) }
-    public init(_ t5: T5) { self = .v5(t5) }
+    @inlinable public init(t5: T5) { self = .v5(t5) }
+    @inlinable public init(_ t5: T5) { self = .v5(t5) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5> {
+        switch self {
+        case .v1(let v): return .v1(.v1(.v1(.v1(v))))
+        case .v2(let v): return .v1(.v1(.v1(.v2(v))))
+        case .v3(let v): return .v1(.v1(.v2(v)))
+        case .v4(let v): return .v1(.v2(v))
+        case .v5(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?, T4?, T5?) { return (extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?) { return (extract(), extract(), extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
 }
 
 extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -592,7 +657,7 @@ extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf5 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf5 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -605,7 +670,7 @@ extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf5 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -618,7 +683,7 @@ extension OneOf5 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodabl
 
 extension OneOf5 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable, T5 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -629,12 +694,26 @@ extension OneOf5 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
     }
 }
 
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf5 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable, T4 : CaseIterable, T5 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf5]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            T4.allCases.map(AllCases.Element.init(t4:)),
+            T5.allCases.map(AllCases.Element.init(t5:)),
+            ].joined())
+    }
+}
+
 extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable { }
 extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
 
 public extension OneOf5 {
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
+    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -667,7 +746,7 @@ public protocol OneOf6Type : OneOf5Type {
 }
 
 public extension OneOf6Type {
-    var v6: T6? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v6: T6? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -675,37 +754,49 @@ public extension OneOf6Type {
 public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .v4(t4) }
-    public init(_ t4: T4) { self = .v4(t4) }
+    @inlinable public init(t4: T4) { self = .v4(t4) }
+    @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
-    public init(t5: T5) { self = .v5(t5) }
-    public init(_ t5: T5) { self = .v5(t5) }
+    @inlinable public init(t5: T5) { self = .v5(t5) }
+    @inlinable public init(_ t5: T5) { self = .v5(t5) }
 
-    public init(t6: T6) { self = .v6(t6) }
-    public init(_ t6: T6) { self = .v6(t6) }
+    @inlinable public init(t6: T6) { self = .v6(t6) }
+    @inlinable public init(_ t6: T6) { self = .v6(t6) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6> {
+        switch self {
+        case .v1(let v): return .v1(.v1(.v1(.v1(.v1(v)))))
+        case .v2(let v): return .v1(.v1(.v1(.v1(.v2(v)))))
+        case .v3(let v): return .v1(.v1(.v1(.v2(v))))
+        case .v4(let v): return .v1(.v1(.v2(v)))
+        case .v5(let v): return .v1(.v2(v))
+        case .v6(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?, T4?, T5?, T6?) { return (extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?) { return (extract(), extract(), extract(), extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
 }
 
 extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -718,7 +809,7 @@ extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf6 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf6 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -732,7 +823,7 @@ extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf6 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -746,7 +837,7 @@ extension OneOf6 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodabl
 
 extension OneOf6 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable, T5 : Decodable, T6 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -755,6 +846,21 @@ extension OneOf6 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
         do { self = try .v5(T5(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
+    }
+}
+
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf6 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable, T4 : CaseIterable, T5 : CaseIterable, T6 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf6]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            T4.allCases.map(AllCases.Element.init(t4:)),
+            T5.allCases.map(AllCases.Element.init(t5:)),
+            T6.allCases.map(AllCases.Element.init(t6:)),
+            ].joined())
     }
 }
 
@@ -770,7 +876,7 @@ public protocol OneOf7Type : OneOf6Type {
 }
 
 public extension OneOf7Type {
-    var v7: T7? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v7: T7? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -779,41 +885,54 @@ public extension OneOf7Type {
 public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .v4(t4) }
-    public init(_ t4: T4) { self = .v4(t4) }
+    @inlinable public init(t4: T4) { self = .v4(t4) }
+    @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
-    public init(t5: T5) { self = .v5(t5) }
-    public init(_ t5: T5) { self = .v5(t5) }
+    @inlinable public init(t5: T5) { self = .v5(t5) }
+    @inlinable public init(_ t5: T5) { self = .v5(t5) }
 
-    public init(t6: T6) { self = .v6(t6) }
-    public init(_ t6: T6) { self = .v6(t6) }
+    @inlinable public init(t6: T6) { self = .v6(t6) }
+    @inlinable public init(_ t6: T6) { self = .v6(t6) }
 
-    public init(t7: T7) { self = .v7(t7) }
-    public init(_ t7: T7) { self = .v7(t7) }
+    @inlinable public init(t7: T7) { self = .v7(t7) }
+    @inlinable public init(_ t7: T7) { self = .v7(t7) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7> {
+        switch self {
+        case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(v))))))
+        case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v2(v))))))
+        case .v3(let v): return .v1(.v1(.v1(.v1(.v2(v)))))
+        case .v4(let v): return .v1(.v1(.v1(.v2(v))))
+        case .v5(let v): return .v1(.v1(.v2(v)))
+        case .v6(let v): return .v1(.v2(v))
+        case .v7(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
 }
 
 extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -827,7 +946,7 @@ extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf7 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf7 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -842,7 +961,7 @@ extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf7 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -857,7 +976,7 @@ extension OneOf7 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodabl
 
 extension OneOf7 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable, T5 : Decodable, T6 : Decodable, T7 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -867,6 +986,22 @@ extension OneOf7 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
         do { self = try .v6(T6(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
+    }
+}
+
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf7 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable, T4 : CaseIterable, T5 : CaseIterable, T6 : CaseIterable, T7 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf7]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            T4.allCases.map(AllCases.Element.init(t4:)),
+            T5.allCases.map(AllCases.Element.init(t5:)),
+            T6.allCases.map(AllCases.Element.init(t6:)),
+            T7.allCases.map(AllCases.Element.init(t7:)),
+            ].joined())
     }
 }
 
@@ -882,52 +1017,66 @@ public protocol OneOf8Type : OneOf7Type {
 }
 
 public extension OneOf8Type {
-    var v8: T8? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v8: T8? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .v4(t4) }
-    public init(_ t4: T4) { self = .v4(t4) }
+    @inlinable public init(t4: T4) { self = .v4(t4) }
+    @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
-    public init(t5: T5) { self = .v5(t5) }
-    public init(_ t5: T5) { self = .v5(t5) }
+    @inlinable public init(t5: T5) { self = .v5(t5) }
+    @inlinable public init(_ t5: T5) { self = .v5(t5) }
 
-    public init(t6: T6) { self = .v6(t6) }
-    public init(_ t6: T6) { self = .v6(t6) }
+    @inlinable public init(t6: T6) { self = .v6(t6) }
+    @inlinable public init(_ t6: T6) { self = .v6(t6) }
 
-    public init(t7: T7) { self = .v7(t7) }
-    public init(_ t7: T7) { self = .v7(t7) }
+    @inlinable public init(t7: T7) { self = .v7(t7) }
+    @inlinable public init(_ t7: T7) { self = .v7(t7) }
 
-    public init(t8: T8) { self = .v8(t8) }
-    public init(_ t8: T8) { self = .v8(t8) }
+    @inlinable public init(t8: T8) { self = .v8(t8) }
+    @inlinable public init(_ t8: T8) { self = .v8(t8) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8> {
+        switch self {
+        case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(v)))))))
+        case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v2(v)))))))
+        case .v3(let v): return .v1(.v1(.v1(.v1(.v1(.v2(v))))))
+        case .v4(let v): return .v1(.v1(.v1(.v1(.v2(v)))))
+        case .v5(let v): return .v1(.v1(.v1(.v2(v))))
+        case .v6(let v): return .v1(.v1(.v2(v)))
+        case .v7(let v): return .v1(.v2(v))
+        case .v8(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
-    public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
 }
 
 extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -942,7 +1091,7 @@ extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf8 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf8 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -958,7 +1107,7 @@ extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf8 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -974,7 +1123,7 @@ extension OneOf8 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodabl
 
 extension OneOf8 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable, T5 : Decodable, T6 : Decodable, T7 : Decodable, T8 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -985,6 +1134,23 @@ extension OneOf8 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
         do { self = try .v7(T7(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
+    }
+}
+
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf8 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable, T4 : CaseIterable, T5 : CaseIterable, T6 : CaseIterable, T7 : CaseIterable, T8 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf8]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            T4.allCases.map(AllCases.Element.init(t4:)),
+            T5.allCases.map(AllCases.Element.init(t5:)),
+            T6.allCases.map(AllCases.Element.init(t6:)),
+            T7.allCases.map(AllCases.Element.init(t7:)),
+            T8.allCases.map(AllCases.Element.init(t8:)),
+            ].joined())
     }
 }
 
@@ -1001,56 +1167,71 @@ public protocol OneOf9Type : OneOf8Type {
 }
 
 public extension OneOf9Type {
-    var v9: T9? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v9: T9? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .v4(t4) }
-    public init(_ t4: T4) { self = .v4(t4) }
+    @inlinable public init(t4: T4) { self = .v4(t4) }
+    @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
-    public init(t5: T5) { self = .v5(t5) }
-    public init(_ t5: T5) { self = .v5(t5) }
+    @inlinable public init(t5: T5) { self = .v5(t5) }
+    @inlinable public init(_ t5: T5) { self = .v5(t5) }
 
-    public init(t6: T6) { self = .v6(t6) }
-    public init(_ t6: T6) { self = .v6(t6) }
+    @inlinable public init(t6: T6) { self = .v6(t6) }
+    @inlinable public init(_ t6: T6) { self = .v6(t6) }
 
-    public init(t7: T7) { self = .v7(t7) }
-    public init(_ t7: T7) { self = .v7(t7) }
+    @inlinable public init(t7: T7) { self = .v7(t7) }
+    @inlinable public init(_ t7: T7) { self = .v7(t7) }
 
-    public init(t8: T8) { self = .v8(t8) }
-    public init(_ t8: T8) { self = .v8(t8) }
+    @inlinable public init(t8: T8) { self = .v8(t8) }
+    @inlinable public init(_ t8: T8) { self = .v8(t8) }
 
-    public init(t9: T9) { self = .v9(t9) }
-    public init(_ t9: T9) { self = .v9(t9) }
+    @inlinable public init(t9: T9) { self = .v9(t9) }
+    @inlinable public init(_ t9: T9) { self = .v9(t9) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9> {
+        switch self {
+        case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(v))))))))
+        case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v2(v))))))))
+        case .v3(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v2(v)))))))
+        case .v4(let v): return .v1(.v1(.v1(.v1(.v1(.v2(v))))))
+        case .v5(let v): return .v1(.v1(.v1(.v1(.v2(v)))))
+        case .v6(let v): return .v1(.v1(.v1(.v2(v))))
+        case .v7(let v): return .v1(.v1(.v2(v)))
+        case .v8(let v): return .v1(.v2(v))
+        case .v9(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
-    public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
-    public func extract() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
+    @inlinable public func extract() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
 }
 
 extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -1066,7 +1247,7 @@ extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf9 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf9 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -1083,7 +1264,7 @@ extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf9 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable, T9 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -1100,7 +1281,7 @@ extension OneOf9 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodabl
 
 extension OneOf9 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable, T5 : Decodable, T6 : Decodable, T7 : Decodable, T8 : Decodable, T9 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -1112,6 +1293,24 @@ extension OneOf9 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodabl
         do { self = try .v8(T8(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v9(T9(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
+    }
+}
+
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf9 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable, T4 : CaseIterable, T5 : CaseIterable, T6 : CaseIterable, T7 : CaseIterable, T8 : CaseIterable, T9 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf9]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            T4.allCases.map(AllCases.Element.init(t4:)),
+            T5.allCases.map(AllCases.Element.init(t5:)),
+            T6.allCases.map(AllCases.Element.init(t6:)),
+            T7.allCases.map(AllCases.Element.init(t7:)),
+            T8.allCases.map(AllCases.Element.init(t8:)),
+            T9.allCases.map(AllCases.Element.init(t9:)),
+            ].joined())
     }
 }
 
@@ -1127,60 +1326,76 @@ public protocol OneOf10Type : OneOf9Type {
 }
 
 public extension OneOf10Type {
-    var v10: T10? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v10: T10? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10
 public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9), v10(T10)
 
-    public init(t1: T1) { self = .v1(t1) }
-    public init(_ t1: T1) { self = .v1(t1) }
+    @inlinable public init(t1: T1) { self = .v1(t1) }
+    @inlinable public init(_ t1: T1) { self = .v1(t1) }
 
-    public init(t2: T2) { self = .v2(t2) }
-    public init(_ t2: T2) { self = .v2(t2) }
+    @inlinable public init(t2: T2) { self = .v2(t2) }
+    @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    public init(t3: T3) { self = .v3(t3) }
-    public init(_ t3: T3) { self = .v3(t3) }
+    @inlinable public init(t3: T3) { self = .v3(t3) }
+    @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public init(t4: T4) { self = .v4(t4) }
-    public init(_ t4: T4) { self = .v4(t4) }
+    @inlinable public init(t4: T4) { self = .v4(t4) }
+    @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
-    public init(t5: T5) { self = .v5(t5) }
-    public init(_ t5: T5) { self = .v5(t5) }
+    @inlinable public init(t5: T5) { self = .v5(t5) }
+    @inlinable public init(_ t5: T5) { self = .v5(t5) }
 
-    public init(t6: T6) { self = .v6(t6) }
-    public init(_ t6: T6) { self = .v6(t6) }
+    @inlinable public init(t6: T6) { self = .v6(t6) }
+    @inlinable public init(_ t6: T6) { self = .v6(t6) }
 
-    public init(t7: T7) { self = .v7(t7) }
-    public init(_ t7: T7) { self = .v7(t7) }
+    @inlinable public init(t7: T7) { self = .v7(t7) }
+    @inlinable public init(_ t7: T7) { self = .v7(t7) }
 
-    public init(t8: T8) { self = .v8(t8) }
-    public init(_ t8: T8) { self = .v8(t8) }
+    @inlinable public init(t8: T8) { self = .v8(t8) }
+    @inlinable public init(_ t8: T8) { self = .v8(t8) }
 
-    public init(t9: T9) { self = .v9(t9) }
-    public init(_ t9: T9) { self = .v9(t9) }
+    @inlinable public init(t9: T9) { self = .v9(t9) }
+    @inlinable public init(_ t9: T9) { self = .v9(t9) }
 
-    public init(t10: T10) { self = .v10(t10) }
-    public init(_ t10: T10) { self = .v10(t10) }
+    @inlinable public init(t10: T10) { self = .v10(t10) }
+    @inlinable public init(_ t10: T10) { self = .v10(t10) }
+
+    /// Split the tuple into nested OneOf2 instances
+    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>, T10> {
+        switch self {
+        case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(v)))))))))
+        case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(.v2(v)))))))))
+        case .v3(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v2(v))))))))
+        case .v4(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v2(v)))))))
+        case .v5(let v): return .v1(.v1(.v1(.v1(.v1(.v2(v))))))
+        case .v6(let v): return .v1(.v1(.v1(.v1(.v2(v)))))
+        case .v7(let v): return .v1(.v1(.v1(.v2(v))))
+        case .v8(let v): return .v1(.v1(.v2(v)))
+        case .v9(let v): return .v1(.v2(v))
+        case .v10(let v): return .v2(v)
+        }
+    }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
-    public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
-    public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
-    public func extract() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
-    public func extract() -> T10? { if case .v10(let v10) = self { return v10 } else { return nil } }
+    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
+    @inlinable public func extract() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
+    @inlinable public func extract() -> T10? { if case .v10(let v10) = self { return v10 } else { return nil } }
 }
 
 extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable, T10: Bricable {
-    public func bric() -> Bric {
+    @inlinable public func bric() -> Bric {
         switch self {
         case .v1(let t1): return t1.bric()
         case .v2(let t2): return t2.bric()
@@ -1197,7 +1412,7 @@ extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4:
 }
 
 extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable, T10: Bracable {
-    public static func brac(bric: Bric) throws -> OneOf10 {
+    @inlinable public static func brac(bric: Bric) throws -> OneOf10 {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -1215,7 +1430,7 @@ extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4:
 
 extension OneOf10 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable, T9 : Encodable, T10 : Encodable {
 
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         switch self {
         case .v1(let x): try x.encode(to: encoder)
         case .v2(let x): try x.encode(to: encoder)
@@ -1233,7 +1448,7 @@ extension OneOf10 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodab
 
 extension OneOf10 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodable, T4 : Decodable, T5 : Decodable, T6 : Decodable, T7 : Decodable, T8 : Decodable, T9 : Decodable, T10 : Decodable {
 
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         var errors: [Error] = []
         do { self = try .v1(T1(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v2(T2(from: decoder)); return } catch { errors.append(error) }
@@ -1246,6 +1461,25 @@ extension OneOf10 : Decodable where T1 : Decodable, T2 : Decodable, T3 : Decodab
         do { self = try .v9(T9(from: decoder)); return } catch { errors.append(error) }
         do { self = try .v10(T10(from: decoder)); return } catch { errors.append(error) }
         throw OneOfDecodingError(errors: errors)
+    }
+}
+
+/// One of a series of `CaseIterable`s is itself `CaseIterable`; `allCases` returns a lazy union of all sub-cases.
+extension OneOf10 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 : CaseIterable, T4 : CaseIterable, T5 : CaseIterable, T6 : CaseIterable, T7 : CaseIterable, T8 : CaseIterable, T9 : CaseIterable, T10 : CaseIterable {
+    public typealias AllCases = FlattenSequence<[[OneOf10]]>
+    @inlinable public static var allCases: AllCases {
+        return ([
+            T1.allCases.map(AllCases.Element.init(t1:)),
+            T2.allCases.map(AllCases.Element.init(t2:)),
+            T3.allCases.map(AllCases.Element.init(t3:)),
+            T4.allCases.map(AllCases.Element.init(t4:)),
+            T5.allCases.map(AllCases.Element.init(t5:)),
+            T6.allCases.map(AllCases.Element.init(t6:)),
+            T7.allCases.map(AllCases.Element.init(t7:)),
+            T8.allCases.map(AllCases.Element.init(t8:)),
+            T9.allCases.map(AllCases.Element.init(t9:)),
+            T10.allCases.map(AllCases.Element.init(t10:)),
+            ].joined())
     }
 }
 

@@ -97,13 +97,6 @@
 			remoteGlobalIDString = 7E28A5BB1B5AD5EE00A5F27F;
 			remoteInfo = BricBracSchema;
 		};
-		7E5DA2D51B9F633C0013FCB9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7E8E74591B9F31E8004EA61F;
-			remoteInfo = CurioTool;
-		};
 		7E7F9B281B3615860058706A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
@@ -384,7 +377,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				7E5DA2D61B9F633C0013FCB9 /* PBXTargetDependency */,
 				7E23650D1B5B3DAF007D53AB /* PBXTargetDependency */,
 			);
 			name = Curio;
@@ -667,11 +659,6 @@
 			isa = PBXTargetDependency;
 			target = 7E28A5BB1B5AD5EE00A5F27F /* Curio */;
 			targetProxy = 7E28A5C71B5AD5EE00A5F27F /* PBXContainerItemProxy */;
-		};
-		7E5DA2D61B9F633C0013FCB9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7E8E74591B9F31E8004EA61F /* CurioTool */;
-			targetProxy = 7E5DA2D51B9F633C0013FCB9 /* PBXContainerItemProxy */;
 		};
 		7E7F9B291B3615860058706A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

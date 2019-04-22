@@ -277,8 +277,18 @@ extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
 extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 
 public extension OneOf2 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(switching keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            }
+        }
+    }
+
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
+    @inlinable subscript<T>(switching keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -295,9 +305,18 @@ public extension OneOf2 {
     }
 }
 
+/// A `OneOrAny` is either a specific value or a generic `Bric` instance.
+/// This can be useful for deserialization where you want to handle a certain
+/// case while falling back to a general structure.
+public typealias OneOrAny<T> = OneOf2<T, Bric>
+
+/// A `OneOrMany` is either a single value or any array or zero or multiple values
+public typealias OneOrMany<T> = OneOf2<T, [T]>
+
 /// Common case of OneOf2<String, [String]>, where we can get or set values as an array
 extension OneOf2 where T2 == Array<T1> {
-    /// Access the underlying values as an array regardless of whether it is the single or multiple case
+    /// View of the underlying value(s) as an array regardless of whether it is the single or multiple case.
+    /// Any time the array is set to a single value it will set the first case, everything else sets the second case.
     @inlinable public var array: [T1] {
         get {
             switch self {
@@ -438,8 +457,19 @@ extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { }
 
 public extension OneOf3 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(switching keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            }
+        }
+    }
+
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
+    @inlinable subscript<T>(switching keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -570,8 +600,20 @@ extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable { }
 
 public extension OneOf4 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(switching keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            }
+        }
+    }
+
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
+    @inlinable subscript<T>(switching keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -712,8 +754,21 @@ extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
 
 public extension OneOf5 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(switching keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            }
+        }
+    }
+
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(traversing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
+    @inlinable subscript<T>(switching keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]

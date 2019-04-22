@@ -1757,8 +1757,10 @@ extension BricBracTests {
     }
 
 
-    func testIndirectDeepCoding() {
+    func testIndirectDeepCoding() throws {
+        
         struct I1 : Codable {
+            var map: [String: String] = [:]
             var i2: Indirect<I2>? = nil
         }
 
@@ -1777,18 +1779,36 @@ extension BricBracTests {
         i1.i2?.value.i3 = .init(I3())
         i1.i2?.value.i3?.value.name = "Foo"
 
+        for i in 1..<10 {
+            i1.map["\(i)"] = "\(i)"
+        }
+
+        // ensure that `encodedString` returns sorted keys
+        XCTAssertEqual("""
+{"i2":{"i3":{"name":"Foo"}},"map":{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9"}}
+""", try i1.encodedString())
+
+        for i in 1..<10000 {
+            i1.map["\(i)"] = "\(i)"
+        }
+
+        let str = try i1.encodedString()
+        let strlen = str.count
+
+        // stress test parallel encoding; tack on a few more 9's to really try it out
+        // 999: direct memory string: 16.263 seconds, 16.472 seconds, 16.468 seconds
+        // 999: string copy: 16.812 seconds, 16.194 seconds, 15.793 seconds
         DispatchQueue.concurrentPerform(iterations: 99) { _ in
-            do {
-                let _ = try i1.encodedString()
-            } catch {
-                XCTFail("error encoding: \(error)")
-            }
+            let str = try? i1.encodedStringUnordered()
+            // make sure the string is really the same
+            // we use assert in case `XCTAssert*` functions have some internal locks or something
+            assert(strlen == str?.count) // ordered vs. unordered should be the same character count
         }
     }
 
 }
 
-extension Decodable where Self: Encodable, Self: Decodable {
+extension Decodable where Self: Encodable {
     /// Returns a deserialized copy of this instance's encoded data
     public func roundtripped(encoder: (Self) throws -> (Data) = JSONEncoder().encode, decoder: (Self.Type, Data) throws -> (Self) = JSONDecoder().decode) rethrows -> Self {
         return try decoder(Self.self, encoder(self))

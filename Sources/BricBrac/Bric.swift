@@ -24,17 +24,17 @@ public enum Bric {
 
 extension Bric {
     /// Returns the underlying `String` for `Bric.str` cases, else nil
-    public var str: String? { if case .str(let x) = self { return x } else { return nil } }
+    @inlinable public var str: String? { if case .str(let x) = self { return x } else { return nil } }
     /// Returns the underlying `Double` for `Bric.num` cases, else nil
-    public var num: Double? { if case .num(let x) = self { return x } else { return nil } }
+    @inlinable public var num: Double? { if case .num(let x) = self { return x } else { return nil } }
     /// Returns the underlying `Bool` for `Bric.bol` cases, else nil
-    public var bol: Bool? { if case .bol(let x) = self { return x } else { return nil } }
+    @inlinable public var bol: Bool? { if case .bol(let x) = self { return x } else { return nil } }
     /// Returns the underlying `Void` for `Bric.nul` cases, else nil
-    public var nul: Void? { if case .nul = self { return Void() } else { return nil } }
+    @inlinable public var nul: Void? { if case .nul = self { return Void() } else { return nil } }
     /// Returns the underlying `Array<Bric>` for `Bric.arr` cases, else nil
-    public var arr: [Bric]? { if case .arr(let x) = self { return x.map({ $0 as Bric }) } else { return nil } }
+    @inlinable public var arr: [Bric]? { if case .arr(let x) = self { return x.map({ $0 as Bric }) } else { return nil } }
     /// Returns the underlying `Dictionary<String,Bric>` for `Bric.obj` cases, else nil
-    public var obj: [String : Bric]? { if case .obj(let x) = self { return x } else { return nil } }
+    @inlinable public var obj: [String : Bric]? { if case .obj(let x) = self { return x } else { return nil } }
 }
 
 extension Bric : Equatable { }
@@ -42,7 +42,7 @@ extension Bric : Hashable { }
 
 extension Bric {
     /// The count of Bric is either the number of properties (for an object), number of elements (for an array), 0 for null, or 1 for string & number
-    public var count: Int {
+    @inlinable public var count: Int {
         switch self {
         case .obj(let ob): return ob.count
         case .arr(let arr): return arr.count

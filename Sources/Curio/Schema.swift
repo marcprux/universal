@@ -6,8 +6,6 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
-import BricBrac
-
 public struct Schema : Codable, Equatable, Hashable {
     public var ref: String? = nil
     public var type: _Type? = nil

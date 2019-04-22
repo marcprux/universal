@@ -13,28 +13,75 @@ import CoreFoundation
 
 extension Decodable {
     /// Any decodable can be brac'd from a Bric via the built-in decoding
-    public static func bracDecoded(bric: Bric, decoder: JSONDecoder = JSONDecoder()) throws -> Self {
+    @inlinable public static func bracDecoded(bric: Bric, decoder: JSONDecoder = JSONDecoder()) throws -> Self {
         return try decoder.decode(Self.self, from: bric.stringify().data(using: .utf8) ?? Data())
     }
 
     /// Loads this `Decodable` from the JSON stored in the given URL.
-    public static func loadJSON(url: URL) throws -> Self {
+    @inlinable public static func loadJSON(url: URL) throws -> Self {
         let decoder = JSONDecoder()
         return try decoder.decode(Self.self, from: Data(contentsOf: url))
     }
 }
 
+
+/// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
+/// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
+public let BricBracSharedSortedJSONEncoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .sortedKeys // we want consistent key ordering
+    return encoder
+}()
+
+/// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
+/// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
+public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [] // we want it to be unsorted
+    return encoder
+}()
+
+
+/// Fast but unsafe conversion of data to a String;
+/// not used because in practice it seems to be no faster than the simpler and safer:
+/// String(data: data, encoding: .utf8)
+//@usableFromInline func unsafeStringFromUTF8Data(_ data: inout Data) -> String {
+//    // return String(data: data, encoding: .utf8) ?? ""
+//
+//    let count = data.count
+//    if count <= 0 { return "" }
+//
+//    return data.withUnsafeMutableBytes { (rawBufferPointer: UnsafeMutableRawBufferPointer) in
+//        let unsafeBufferPointer = rawBufferPointer.bindMemory(to: UInt8.self)
+//        guard let unsafePointer = unsafeBufferPointer.baseAddress else {
+//            return ""
+//        }
+//        return String(bytesNoCopy: unsafePointer, length: count, encoding: .utf8, freeWhenDone: false)
+//        } ?? ""
+//}
+
 public extension Encodable {
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)
-    func encodedString(encoder: (Self) throws -> (Data) = JSONEncoder().encode) rethrows -> String {
-        let data = try encoder(self)
-        return String(data: data, encoding: .utf8) ?? ""
+    @inlinable func encodedString(encoder: (Self) throws -> (Data) = BricBracSharedSortedJSONEncoder.encode) rethrows -> String {
+        return String(data: try encoder(self), encoding: .utf8) ?? "{}"
+//        var data = try encoder(self)
+//        return unsafeStringFromUTF8Data(&data)
     }
+
+    /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
+    /// this is somewhat faster than `encodedString` because it returns unordered keys.
+    @inlinable func encodedStringUnordered() throws -> String {
+        return String(data: try BricBracSharedUnsortedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
+//        var data = try BricBracSharedUnsortedJSONEncoder.encode(self)
+//        return unsafeStringFromUTF8Data(&data)
+    }
+
+
 
     /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric.
     /// This only works for top-level encodable properties (i.e., Array and Dictionary, but not String, Double, or Boolean).
     /// Full support would require a custom JSONEncoder to encode directly as a Bric.
-    func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
+    @inlinable func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
         let encoder = JSONEncoder()
 
         if let outputFormatting = outputFormatting { encoder.outputFormatting = outputFormatting }
@@ -50,7 +97,7 @@ public extension Encodable {
 }
 
 extension Bric : Encodable {
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
         case .arr(let x): try container.encode(x)
@@ -64,7 +111,7 @@ extension Bric : Encodable {
 }
 
 extension Bric : Decodable {
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {
             self = .nul
@@ -77,13 +124,12 @@ extension Bric : Decodable {
             case .v5(let x): self = .obj(x)
             }
         }
-
     }
 }
 
 public extension Bricable {
     /// Decode this bric into a decodable instance
-    func decode<T: Decodable>(_ type: T.Type, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> T {
+    @inlinable func decode<T: Decodable>(_ type: T.Type, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> T {
         let decoder = JSONDecoder()
         
         if let dateDecodingStrategy = dateDecodingStrategy {

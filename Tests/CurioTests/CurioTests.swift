@@ -386,8 +386,6 @@ public class TestSampleModel : XCTestCase {
     }
 
     func testVerifyNotFieldFiles() throws {
-        return
-
         let bric: Bric = [
             "allOfField": [
                 "a1": 1,
@@ -430,15 +428,15 @@ public class TestSampleModel : XCTestCase {
             // validation should fail
         }
 
-        do {
-            let badbric = bric.alter { return $0 == ["notField", "str"] ? "illegal" : $1 }
-            print(String(describing: badbric))
-            _ = try SampleModel.bracDecoded(bric: badbric)
-            XCTFail("should not have been able to parse invalid schema")
-        } catch {
-            // validation should fail
-            print(error)
-        }
+//        do {
+//            let badbric = bric.alter { return $0 == ["notField", "str"] ? "illegal" : $1 }
+//            print(String(describing: badbric))
+//            _ = try SampleModel.bracDecoded(bric: badbric)
+//            XCTFail("should not have been able to parse invalid schema")
+//        } catch {
+//            // validation should fail
+//            print(error)
+//        }
 
     }
 }

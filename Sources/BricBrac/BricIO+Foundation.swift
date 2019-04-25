@@ -27,6 +27,7 @@ extension Decodable {
 
 /// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
 /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
+@available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
 public let BricBracSharedSortedJSONEncoder: JSONEncoder = {
     let encoder = JSONEncoder()
     encoder.outputFormatting = .sortedKeys // we want consistent key ordering
@@ -62,18 +63,15 @@ public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
 
 public extension Encodable {
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)
+    @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
     @inlinable func encodedString(encoder: (Self) throws -> (Data) = BricBracSharedSortedJSONEncoder.encode) rethrows -> String {
         return String(data: try encoder(self), encoding: .utf8) ?? "{}"
-//        var data = try encoder(self)
-//        return unsafeStringFromUTF8Data(&data)
     }
 
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
     /// this is somewhat faster than `encodedString` because it returns unordered keys.
     @inlinable func encodedStringUnordered() throws -> String {
         return String(data: try BricBracSharedUnsortedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
-//        var data = try BricBracSharedUnsortedJSONEncoder.encode(self)
-//        return unsafeStringFromUTF8Data(&data)
     }
 
 

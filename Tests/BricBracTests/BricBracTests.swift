@@ -1429,6 +1429,36 @@ class BricBracTests : XCTestCase {
         }
     }
 
+    func testFunneling() {
+        struct Thing1 {
+            var thing1: Int
+            var name: String?
+        }
+        struct Thing2 {
+            var thing2: Double
+            var name: String?
+        }
+
+        struct Things {
+            var thing: OneOf2<Thing1, Thing2>
+            var name: String? {
+                get { return thing[funneling: (\.name, \.name)] }
+                set { thing[funneling: (\.name, \.name)] = newValue }
+            }
+        }
+
+        var thing1 = Things(thing: .init(Thing1(thing1: 11, name: "X")))
+        XCTAssertEqual("X", thing1.name)
+        thing1.name = .some("Y")
+        XCTAssertEqual("Y", thing1.name)
+
+        let thing2 = Things(thing: .init(Thing2(thing2: 12.3, name: "Y")))
+
+        var things = [thing1, thing2]
+        things[walking: \.name] = ["ABC", "ABC"]
+        XCTAssertEqual(things[walking: \.name], ["ABC", "ABC"])
+    }
+
     let RefPerformanceCount = 100000
 
     func testOptionalPerformance() {
@@ -1488,6 +1518,20 @@ class BricBracTests : XCTestCase {
 
     }
     
+}
+
+fileprivate extension MutableCollection {
+    subscript<T>(walking keyPath: WritableKeyPath<Element, T>) -> [T] {
+        get {
+            return self.map({ $0[keyPath: keyPath] })
+        }
+
+        set {
+            for (i, value) in zip(indices, newValue) {
+                self[i][keyPath: keyPath] = value
+            }
+        }
+    }
 }
 
 struct Alien : Codable {

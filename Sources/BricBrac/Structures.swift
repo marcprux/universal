@@ -922,6 +922,48 @@ extension OneOf6 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable { }
 extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable { }
 
+public extension OneOf6 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            }
+        }
+    }
+
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
+            }
+        }
+    }
+}
+
+
 /// The protocol of a type that can contain one out of 7 or more exclusive options
 public protocol OneOf7Type : OneOf6Type {
     associatedtype T7
@@ -1062,6 +1104,51 @@ extension OneOf7 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable { }
 extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable { }
+
+public extension OneOf7 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            }
+        }
+    }
+
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
+            }
+        }
+    }
+}
+
 
 /// The protocol of a type that can contain one out of 8 or more exclusive options
 public protocol OneOf8Type : OneOf7Type {
@@ -1211,6 +1298,54 @@ extension OneOf8 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable { }
 extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable { }
+
+
+public extension OneOf8 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v8(let x8): return x8[keyPath: keys.kp8]
+            }
+        }
+    }
+
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v8(let x8): return x8[keyPath: keys.kp8]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
+            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = .init(x8)
+            }
+        }
+    }
+}
 
 
 /// The protocol of a type that can contain one out of 9 or more exclusive options
@@ -1371,6 +1506,58 @@ extension OneOf9 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable { }
 extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable { }
+
+
+public extension OneOf9 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v8(let x8): return x8[keyPath: keys.kp8]
+            case .v9(let x9): return x9[keyPath: keys.kp9]
+            }
+        }
+    }
+
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v8(let x8): return x8[keyPath: keys.kp8]
+            case .v9(let x9): return x9[keyPath: keys.kp9]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
+            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = .init(x8)
+            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = .init(x9)
+            }
+        }
+    }
+}
+
 
 /// The protocol of a type that can contain one out of 10 or more exclusive options
 public protocol OneOf10Type : OneOf9Type {
@@ -1541,6 +1728,60 @@ extension OneOf10 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 
 extension OneOf10 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable, T10 : Equatable { }
 extension OneOf10 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable, T10 : Hashable { }
 
+
+
+public extension OneOf10 {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>, kp10: KeyPath<T10, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v8(let x8): return x8[keyPath: keys.kp8]
+            case .v9(let x9): return x9[keyPath: keys.kp9]
+            case .v10(let x10): return x10[keyPath: keys.kp10]
+            }
+        }
+    }
+
+    /// Enables reading & writing multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>, kp10: WritableKeyPath<T10, T>)) -> T {
+        get {
+            switch self {
+            case .v1(let x1): return x1[keyPath: keys.kp1]
+            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v8(let x8): return x8[keyPath: keys.kp8]
+            case .v9(let x9): return x9[keyPath: keys.kp9]
+            case .v10(let x10): return x10[keyPath: keys.kp10]
+            }
+        }
+
+        set {
+            switch self {
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
+            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = .init(x8)
+            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = .init(x9)
+            case .v10(var x10): x10[keyPath: keys.kp10] = newValue; self = .init(x10)
+            }
+        }
+    }
+}
 
 
 /// An error that indicates that multiple errors occured when decoding the type;

@@ -315,6 +315,15 @@ public typealias OneOrMany<T> = OneOf2<T, [T]>
 
 /// Common case of OneOf2<String, [String]>, where we can get or set values as an array
 extension OneOf2 where T2 == Array<T1> {
+
+    /// The number of elements in .v2; .v1 always returns 1
+    @inlinable public var count: Int {
+        switch self {
+        case .v1: return 1
+        case .v2(let x): return x.count
+        }
+    }
+
     /// View of the underlying value(s) as an array regardless of whether it is the single or multiple case.
     /// Any time the array is set to a single value it will set the first case, everything else sets the second case.
     @inlinable public var array: [T1] {

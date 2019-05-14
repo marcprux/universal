@@ -278,7 +278,7 @@ extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 
 public extension OneOf2 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -288,7 +288,7 @@ public extension OneOf2 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -467,7 +467,7 @@ extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { 
 
 public extension OneOf3 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -478,7 +478,7 @@ public extension OneOf3 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -610,7 +610,7 @@ extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf4 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -622,7 +622,7 @@ public extension OneOf4 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -764,7 +764,7 @@ extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf5 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -777,7 +777,7 @@ public extension OneOf5 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -933,7 +933,7 @@ extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf6 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -947,7 +947,7 @@ public extension OneOf6 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1116,7 +1116,7 @@ extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf7 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1131,7 +1131,7 @@ public extension OneOf7 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1311,7 +1311,7 @@ extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf8 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1327,7 +1327,7 @@ public extension OneOf8 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1519,7 +1519,7 @@ extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf9 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1536,7 +1536,7 @@ public extension OneOf9 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1741,7 +1741,7 @@ extension OneOf10 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, 
 
 public extension OneOf10 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>, kp10: KeyPath<T10, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>, kp10: KeyPath<T10, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]
@@ -1759,7 +1759,7 @@ public extension OneOf10 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(funneling keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>, kp10: WritableKeyPath<T10, T>)) -> T {
+    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>, kp10: WritableKeyPath<T10, T>)) -> T {
         get {
             switch self {
             case .v1(let x1): return x1[keyPath: keys.kp1]

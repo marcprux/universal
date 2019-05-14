@@ -1429,7 +1429,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func testFunneling() {
+    func testKeyRouting() {
         struct Thing1 {
             var thing1: Int
             var name: String?
@@ -1442,8 +1442,8 @@ class BricBracTests : XCTestCase {
         struct Things {
             var thing: OneOf2<Thing1, Thing2>
             var name: String? {
-                get { return thing[funneling: (\.name, \.name)] }
-                set { thing[funneling: (\.name, \.name)] = newValue }
+                get { return thing[routing: (\.name, \.name)] }
+                set { thing[routing: (\.name, \.name)] = newValue }
             }
         }
 

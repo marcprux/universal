@@ -621,14 +621,17 @@ public struct Curio {
             }
             var props: [PropDec] = properties.map({ PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, prop: $0.schema, anon: $0.name == nil) })
 
-            for (name, required, prop, anon) in props {
+            for (name, var required, prop, anon) in props {
                 var proptype: CodeType
 
-                if let ref = prop.ref {
+                if let overrideType = propertyTypeOverrides[typename + "." + name] {
+                    proptype = CodeExternalType(overrideType, access: accessor(parents + [typename]))
+                    if !required && overrideType.hasSuffix("!") {
+                        required = true // the type can also override the required-ness with a "!"
+                    }
+                } else if let ref = prop.ref {
                     let tname = typeName(parents, ref)
                     proptype = CodeExternalType(tname, access: accessor(parents + [typename]))
-                } else if let overrideType = propertyTypeOverrides[typename + "." + name] {
-                    proptype = CodeExternalType(overrideType, access: accessor(parents + [typename]))
                 } else {
                     switch prop.type {
                     case .some(.v1(.string)) where prop._enum == nil: proptype = CodeExternalType.string

@@ -314,7 +314,7 @@ public typealias OneOrAny<T> = OneOf2<T, Bric>
 public typealias OneOrMany<T> = OneOf2<T, [T]>
 
 /// Common case of OneOf2<String, [String]>, where we can get or set values as an array
-extension OneOf2 where T2 == Array<T1> {
+extension OneOrMany where T2 == Array<T1> {
 
     /// The number of elements in .v2; .v1 always returns 1
     @inlinable public var count: Int {

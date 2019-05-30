@@ -187,27 +187,35 @@ extension Bric.Ref : Hashable {
 
 public extension Bric {
     /// Updated the bric at the given existant path and sets the specified value
-    func update(_ value: Bric, pointer: Bric.Ref...) -> Bric {
+    func update(_ value: Bric, pointer: Bric.Ref...) -> Bric? {
         return alter { return $0 == pointer ? value : $1 }
     }
 
     /// Recursively visits each node in this Bric and performs the alteration specified by the mutator
-    func alter(mutator: (Pointer, Bric) throws -> Bric) rethrows -> Bric {
+    func alter(mutator: (Pointer, Bric) throws -> Bric?) rethrows -> Bric? {
         return try alterPath(path: [], mutator)
     }
 
-    fileprivate func alterPath(path: Pointer = [], _ mutator: (Pointer, Bric) throws -> Bric) rethrows -> Bric {
+    fileprivate func alterPath(path: Pointer = [], _ mutator: (Pointer, Bric) throws -> Bric?) rethrows -> Bric? {
         switch self {
         case .arr(var values):
-            for (i, v) in values.enumerated() {
+            for (i, v) in values.enumerated().reversed() {
                 let p = path + [.index(i)]
-                values[i] = try mutator(p, v.alterPath(path: p, mutator))
+                if let newValue = try v.alterPath(path: p, mutator), let newElement = try mutator(p, newValue) {
+                    values[i] = newElement
+                } else {
+                    values.remove(at: i)
+                }
             }
             return try mutator(path, .arr(values))
         case .obj(var dict):
             for (k, v) in dict {
                 let p = path + [.key(k)]
-                dict[k] = try mutator(p, v.alterPath(path: p, mutator))
+                if let newValue = try v.alterPath(path: p, mutator) {
+                    dict[k] = try mutator(p, newValue)
+                } else {
+                    dict.removeValue(forKey: k)
+                }
             }
             return try mutator(path, .obj(dict))
         default:

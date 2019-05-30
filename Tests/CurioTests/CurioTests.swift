@@ -419,11 +419,11 @@ public class TestSampleModel : XCTestCase {
 
         do {
 //            let badbric = bric.alter { return $0 == ["allOfField", "a1"] ? "illegal" : $1 }
-            let badbric = bric.update("illegal", pointer: "allOfField", "a1")
-
-            print(String(describing: badbric))
-            _ = try SampleModel.bracDecoded(bric: badbric)
-            XCTFail("should not have been able to parse invalid schema")
+            if let badbric = bric.update("illegal", pointer: "allOfField", "a1") {
+                print(String(describing: badbric))
+                _ = try SampleModel.bracDecoded(bric: badbric)
+                XCTFail("should not have been able to parse invalid schema")
+            }
         } catch {
             // validation should fail
         }

@@ -42,24 +42,20 @@ public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
     return encoder
 }()
 
+public extension JSONEncoder {
+    /// Merely calls `encode` with the given value, but permits fragmentary elements to be encoded.
+    /// This is similar to `JSONSerialization.ReadingOptions.allowFragments`, but for writing.
+    func encodeFragment<T: Encodable>(_ value: T) throws -> Data {
+        do {
+            return try self.encode(value) // attempt to just encode the value
+        } catch {
+            let data = try self.encode([value]) // wrap it in an array…
+            let whitespace = Set(" \n\r\t".utf8)
+            return Data(data.dropFirst().drop(while: whitespace.contains).reversed().dropFirst().drop(while: whitespace.contains).reversed()) // …and trim the enclosing array boundry and and whitespace
+        }
+    }
+}
 
-/// Fast but unsafe conversion of data to a String;
-/// not used because in practice it seems to be no faster than the simpler and safer:
-/// String(data: data, encoding: .utf8)
-//@usableFromInline func unsafeStringFromUTF8Data(_ data: inout Data) -> String {
-//    // return String(data: data, encoding: .utf8) ?? ""
-//
-//    let count = data.count
-//    if count <= 0 { return "" }
-//
-//    return data.withUnsafeMutableBytes { (rawBufferPointer: UnsafeMutableRawBufferPointer) in
-//        let unsafeBufferPointer = rawBufferPointer.bindMemory(to: UInt8.self)
-//        guard let unsafePointer = unsafeBufferPointer.baseAddress else {
-//            return ""
-//        }
-//        return String(bytesNoCopy: unsafePointer, length: count, encoding: .utf8, freeWhenDone: false)
-//        } ?? ""
-//}
 
 public extension Encodable {
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)

@@ -74,10 +74,10 @@ public extension Bric {
             }
             return rmap
 
-        case .obj(var dict):
+        case .obj(let dict):
             // { "$ref": "http://example.com/example.json#/foo/bar" }
             if case .some(.str(let ref)) = dict["$ref"] {
-                var parts = ref.split(omittingEmptySubsequences: false, whereSeparator: { $0 == "#" }).map({ String($0) })
+                let parts = ref.split(omittingEmptySubsequences: false, whereSeparator: { $0 == "#" }).map({ String($0) })
                 if parts.count != 2 { throw BricReferenceError.unresolvableReferenceRoot(ref) }
 
                 // resolve the absolute root: "http://example.com/example.json"

@@ -53,6 +53,8 @@
 			compilerSpec = com.apple.compilers.proxy.script;
 			filePatterns = "*.jsonschema";
 			fileType = pattern.proxy;
+			inputFiles = (
+			);
 			isEditable = 1;
 			outputFiles = (
 				"$(DERIVED_SOURCES_DIR)/$(INPUT_FILE_BASE).swift",
@@ -464,7 +466,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 1020;
+				LastUpgradeCheck = 1100;
 				ORGANIZATIONNAME = io.glimpse;
 				TargetAttributes = {
 					49DB61512063426D00022D2C = {
@@ -975,6 +977,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_MODULES_AUTOLINK = NO;
+				CODE_SIGN_IDENTITY = "-";
 				EXECUTABLE_NAME = curio;
 				LD_RUNPATH_SEARCH_PATHS = "";
 				PRODUCT_NAME = "${TARGET_NAME}";
@@ -989,6 +992,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_MODULES_AUTOLINK = NO;
+				CODE_SIGN_IDENTITY = "-";
 				EXECUTABLE_NAME = curio;
 				LD_RUNPATH_SEARCH_PATHS = "";
 				PRODUCT_NAME = "${TARGET_NAME}";

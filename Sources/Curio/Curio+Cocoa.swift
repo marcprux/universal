@@ -8,7 +8,8 @@
 
 /// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
 
-import Foundation
+#if os(macOS)
+import Cocoa
 
 public extension Curio {
     func emit(_ module: CodeModule, name: String, dir: String) throws {
@@ -64,3 +65,5 @@ public extension Curio {
         }
     }
 }
+#endif
+

@@ -223,7 +223,7 @@ public struct Curio {
     }
 
     func optionalType(_ type: CodeType) -> CodeExternalType {
-        return CodeExternalType("Optional", generics: [type], defaultValue: ".none", shorthand: (prefix: nil, suffix: "?"))
+        return CodeExternalType("Optional", generics: [type], defaultValue: "nil", shorthand: (prefix: nil, suffix: "?"))
     }
 
     func indirectType(_ type: CodeType) -> CodeExternalType {

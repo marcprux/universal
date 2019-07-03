@@ -315,6 +315,11 @@ public typealias OneOrMany<T> = OneOf2<T, [T]>
 
 /// Common case of OneOf2<String, [String]>, where we can get or set values as an array
 extension OneOrMany where T2 == Array<T1> {
+    /// Initializes this OneOf with the given array
+    public init(array: Array<T1>) {
+        self = .v2([])
+        self.array = array
+    }
 
     /// The number of elements in .v2; .v1 always returns 1
     @inlinable public var count: Int {

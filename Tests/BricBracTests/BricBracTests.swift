@@ -53,7 +53,7 @@ class BricBracTests : XCTestCase {
         ("testIndirect", testIndirect),
         ]
 
-#if os(macOS) || os(iOS)
+#if canImport(Foundation)
     func testBricConversion() {
         let bric: Bric = ["a": [1, 2, true, false, nil]]
         let cocoa = FoundationBricolage.brac(bric: bric)

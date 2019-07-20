@@ -6,7 +6,7 @@
 //  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
-#if os(macOS) || os(iOS)
+#if canImport(Foundation)
 
 import Foundation
 import CoreFoundation

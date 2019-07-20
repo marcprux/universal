@@ -8,7 +8,7 @@
 
 /// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
 
-#if os(macOS)
+#if canImport(Cocoa)
 import Cocoa
 
 public extension Curio {

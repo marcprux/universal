@@ -857,26 +857,32 @@ public struct Curio {
 
         func createArray(_ typename: CodeTypeName) throws -> CodeNamedType {
             // when a top-level type is an array, we make it a typealias with a type for the individual elements
+            let items: Set<Schema>
             switch schema.items {
-            case .none:
-                return CodeTypeAlias(name: typeName(parents, id), type: arrayType(CodeExternalType.bric), access: accessor(parents))
-            case .some(.v2):
-                throw CodegenErrors.typeArrayNotSupported
-            case .some(.v1(let item)):
-                if let ref = item.ref {
-                    return CodeTypeAlias(name: typeName(parents, id), type: arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents))), access: accessor(parents))
-                } else {
-                    // note that we do not tack on the alias' name, because it will not be used as the external name of the type
-                    let type = try reify(item, id: typename + "Item", parents: parents)
+            case .none: items = []
+            case .some(.v1(let value)): items = [value]
+            case .some(.v2(let values)): items = .init(values)
+            }
 
-                    // rather than creating two aliases when something is an array of an alias, merge them as a single unit
-                    if let sub = aliasType(type) {
-                        return CodeTypeAlias(name: typeName(parents, id), type: arrayType(sub), access: accessor(parents))
+            if items.isEmpty {
+                return CodeTypeAlias(name: typeName(parents, id), type: arrayType(CodeExternalType.bric), access: accessor(parents))
+            } else if let item = items.first, items.count == 1 {
+                    if let ref = item.ref {
+                        return CodeTypeAlias(name: typeName(parents, id), type: arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents))), access: accessor(parents))
                     } else {
-                        let alias = CodeTypeAlias(name: typeName(parents, id), type: arrayType(type), access: accessor(parents), peerTypes: [type])
-                        return alias
+                        // note that we do not tack on the alias' name, because it will not be used as the external name of the type
+                        let type = try reify(item, id: typename + "Item", parents: parents)
+
+                        // rather than creating two aliases when something is an array of an alias, merge them as a single unit
+                        if let sub = aliasType(type) {
+                            return CodeTypeAlias(name: typeName(parents, id), type: arrayType(sub), access: accessor(parents))
+                        } else {
+                            let alias = CodeTypeAlias(name: typeName(parents, id), type: arrayType(type), access: accessor(parents), peerTypes: [type])
+                            return alias
+                        }
                     }
-                }
+            } else {
+                throw CodegenErrors.typeArrayNotSupported
             }
         }
 
@@ -1081,9 +1087,21 @@ public struct Curio {
             }
 
             // we currently just promote string enums, since those are the most common shared code we've observed
-            let promotedTypes = duplicatedTypes(deepTypes.compactMap({ $0 as? CodeSimpleEnum<String> }), from: types)
+            var promotedTypes = duplicatedTypes(deepTypes.compactMap({ $0 as? CodeSimpleEnum<String> }), from: types)
 
-            types = types.map({ $0.purgeTypes(promotedTypes) }) + Array(promotedTypes)
+            types = types.map({ $0.purgeTypes(promotedTypes) })
+
+            // de-dupe promoted types: this can happen when there are two type names that have different description comments (e.g., LiteralWidth)
+            for (typeName, typeValues) in Dictionary(grouping: promotedTypes, by: { $0.name }) {
+                if typeValues.count > 1 {
+                    print("// warning: excluding \(typeValues.count) duplicate type names for \(typeName)")
+                    for drop in typeValues.sorted(by: { $0.codeValue < $1.codeValue }).dropFirst() {
+                        promotedTypes.remove(drop) // clear out duplicates
+                    }
+                }
+            }
+
+            types += Array(promotedTypes) // tack on the de-duplicated promoted types
 
             // next add in any encapsulated types we have specified that might not actually
             // have been defined in the schema; this allows us to encapsulate things
@@ -1097,8 +1115,6 @@ public struct Curio {
 
             // this doesn't quite work because we have some conflicting types for common cases (e.g., "Value")
         // types = promoteTypes(deepTypes.compactMap({ $0 as? CodeTypeAlias }), from: types)
-
-
         }
 
         // lastly we filter out all the excluded types we want to skip

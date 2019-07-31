@@ -545,7 +545,7 @@ public extension Vague {
     public var wrappedValue: T
     public var vague: Stuff = nil
 
-    public init(initialValue value: T) {
+    public init(wrappedValue value: T) {
         self.wrappedValue = value
     }
 

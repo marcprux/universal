@@ -286,7 +286,7 @@ public extension Bric {
     }
 }
 
-extension Wrappable where Self : ExpressibleByNilLiteral, Wrapped : Bracable {
+extension WrapperType where Self : ExpressibleByNilLiteral, Wrapped : Bracable {
     /// Returns this wrapper around the bracMap, or returns `.None` if the parameter is `Bric.nul`
     public static func brac(bric: Bric) throws -> Self {
         if case .nul = bric { return nil } // an optional is allowed to be nil

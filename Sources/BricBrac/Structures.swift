@@ -15,15 +15,15 @@ public protocol WrapperType {
     func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U?
 }
 
-/// Wrappable can contain zero or one instances (covers both `Optional` and `Indirect`)
-public protocol Wrappable {
-    associatedtype Wrapped
-    init(_ some: Wrapped)
+public extension WrapperType {
+    /// The underlying type that is contained in this wrapper.
+    @inlinable var flatValue: Wrapped? {
+        get { self.flatMap({ $0 }) }
+        set { if let newValue = newValue { self = .init(newValue) } }
+    }
 }
 
-
 extension Optional : WrapperType { }
-extension Optional : Wrappable { }
 
 public typealias Indirect = IndirectEnum
 
@@ -35,7 +35,7 @@ public extension Optional {
 }
 
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
-public struct IndirectStruct<Wrapped> : WrapperType, Wrappable {
+public struct IndirectStruct<Wrapped> : WrapperType {
     /// The underlying holder of the value; must be a type that can handle recursive types, which is why it is an `Array` and not a `CollectionOfOne`
     private var wrapper: [Wrapped]
 
@@ -55,7 +55,7 @@ public struct IndirectStruct<Wrapped> : WrapperType, Wrappable {
 }
 
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
-public indirect enum IndirectEnum<Wrapped> : WrapperType, Wrappable {
+public indirect enum IndirectEnum<Wrapped> : WrapperType {
     case some(Wrapped)
 
     /// Construct a non-`nil` instance that stores `some`.

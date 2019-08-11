@@ -42,6 +42,13 @@ public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
     return encoder
 }()
 
+public extension Encodable {
+    /// Returns a simple debug description of the JSON encoding of the given `Encodable`.
+    var jsonDebugDescription: String {
+        String(data: (try? BricBracSharedSortedJSONEncoder.encodeFragment(self)) ?? .init(), encoding: .utf8) ?? ""
+    }
+}
+
 public extension JSONEncoder {
     /// Merely calls `encode` with the given value, but permits fragmentary elements to be encoded.
     /// This is similar to `JSONSerialization.ReadingOptions.allowFragments`, but for writing.

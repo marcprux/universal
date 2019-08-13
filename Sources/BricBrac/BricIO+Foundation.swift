@@ -63,6 +63,21 @@ public extension JSONEncoder {
     }
 }
 
+public extension JSONDecoder {
+    private static let openBrace: Data = "[".data(using: .utf8)!
+    private static let closeBrace: Data = "]".data(using: .utf8)!
+
+    /// Merely calls `decode` with the given value, but permits fragmentary elements to be encoded.
+    /// This is similar to `JSONSerialization.ReadingOptions.allowFragments`.
+    func decodeFragment<T: Decodable>(_ valueType: T.Type, from data: Data) throws -> T? {
+        let values = try self.decode(Array<T>.self, from: Self.openBrace + data + Self.closeBrace)
+
+        if values.count != 1 {
+            return nil // we don't throw an error because we want to be able to indicate that the value was empty (e.g, just whitespace)
+        }
+        return values[0]
+    }
+}
 
 public extension Encodable {
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)

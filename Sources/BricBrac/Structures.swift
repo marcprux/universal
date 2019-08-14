@@ -63,7 +63,14 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
         self = .some(some)
     }
 
+    /// Cover for `indirectValue`
     @inlinable public var value: Wrapped {
+        get { indirectValue }
+        set { indirectValue = newValue }
+    }
+
+    /// The underlying value of this `IndirectEnum`.
+    @inlinable public var indirectValue: Wrapped {
         get {
             switch self {
             case .some(let v): return v

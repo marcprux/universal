@@ -64,6 +64,7 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
     }
 
     /// Cover for `indirectValue`
+    @available(*, deprecated, renamed: "indirectValue")
     @inlinable public var value: Wrapped {
         get { indirectValue }
         set { indirectValue = newValue }
@@ -83,7 +84,7 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
     }
 
     @inlinable public func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U? {
-        return try f(value)
+        return try f(indirectValue)
     }
 }
 
@@ -95,7 +96,7 @@ extension Indirect : RawRepresentable {
         self.init(some)
     }
 
-    @inlinable public var rawValue: Wrapped { return value }
+    @inlinable public var rawValue: Wrapped { return indirectValue }
 }
 
 // similar to Optional codability at:
@@ -310,7 +311,36 @@ public extension OneOf2 {
             }
         }
     }
+
+    /// When `T1` can be derived from `T2`, always treat this `OneOf2` as a `T1` instance.
+    subscript(subsumeByV1 constructor: (T2) -> T1) -> T1 {
+        get {
+            switch self {
+            case .v1(let x): return x
+            case .v2(let x): return constructor(x)
+            }
+        }
+
+        set {
+            self = .v1(newValue)
+        }
+    }
+
+    /// When `T2` can be derived from `T1`, always treat this `OneOf2` as a `T2` instance.
+    subscript(subsumeByV2 constructor: (T1) -> T2) -> T2 {
+        get {
+            switch self {
+            case .v1(let x): return constructor(x)
+            case .v2(let x): return x
+            }
+        }
+
+        set {
+            self = .v2(newValue)
+        }
+    }
 }
+
 
 /// A `OneOrAny` is either a specific value or a generic `Bric` instance.
 /// This can be useful for deserialization where you want to handle a certain

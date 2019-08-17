@@ -19,7 +19,7 @@ public extension WrapperType {
     /// The underlying type that is contained in this wrapper.
     @inlinable var flatValue: Wrapped? {
         get { self.flatMap({ $0 }) }
-        set { if let newValue = newValue { self = .init(newValue) } }
+        set { if let newValue = newValue { self = Self(newValue) } }
     }
 }
 
@@ -306,8 +306,8 @@ public extension OneOf2 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
             }
         }
     }
@@ -531,9 +531,9 @@ public extension OneOf3 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
             }
         }
     }
@@ -676,10 +676,10 @@ public extension OneOf4 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
             }
         }
     }
@@ -832,11 +832,11 @@ public extension OneOf5 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
             }
         }
     }
@@ -1003,12 +1003,12 @@ public extension OneOf6 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
             }
         }
     }
@@ -1188,13 +1188,13 @@ public extension OneOf7 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
             }
         }
     }
@@ -1385,14 +1385,14 @@ public extension OneOf8 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
-            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = .init(x8)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
+            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = Self(x8)
             }
         }
     }
@@ -1595,15 +1595,15 @@ public extension OneOf9 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
-            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = .init(x8)
-            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = .init(x9)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
+            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = Self(x8)
+            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = Self(x9)
             }
         }
     }
@@ -1819,16 +1819,16 @@ public extension OneOf10 {
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = .init(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = .init(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = .init(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = .init(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = .init(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = .init(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = .init(x7)
-            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = .init(x8)
-            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = .init(x9)
-            case .v10(var x10): x10[keyPath: keys.kp10] = newValue; self = .init(x10)
+            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
+            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = Self(x8)
+            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = Self(x9)
+            case .v10(var x10): x10[keyPath: keys.kp10] = newValue; self = Self(x10)
             }
         }
     }

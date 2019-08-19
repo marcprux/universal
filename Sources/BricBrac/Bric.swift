@@ -640,6 +640,11 @@ extension Stuff : Codable {
     }
 }
 
+/// A type that is codable using its contained `CodingKeys` type.
+public protocol KeyedCodable : Codable {
+    /// The keys that will be associated with this type
+    associatedtype CodingKeys : CodingKey & Hashable
+}
 
 public protocol FixedCodingKeys : CaseIterable, CodingKey {
 

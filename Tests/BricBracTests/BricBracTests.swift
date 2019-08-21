@@ -25,6 +25,7 @@ class BricBracTests : XCTestCase {
         ("testOutputNulls", testOutputNulls),
         ("testBricBracSerialization", testBricBracSerialization),
         ("testBricBracParsing", testBricBracParsing),
+        ("testBricSwapping", testBricSwapping),
         ("testBricBracCocoaCompatNumbers", testBricBracCocoaCompatNumbers),
         ("testNulNilEquivalence", testNulNilEquivalence),
         ("testKeyedSubscripting", testKeyedSubscripting),
@@ -640,6 +641,42 @@ class BricBracTests : XCTestCase {
             }
         } catch {
             XCTFail("\(error)", file: file, line: line)
+        }
+    }
+
+    func testBricSwapping() {
+        struct Swapper : KeyedCodable, Equatable {
+            let x: Int
+            let y: Float
+
+            enum CodingKeys : String, CodingKey { case x, y }
+        }
+        do {
+            var swapper = Swapper(x: 5, y: 6)
+            XCTAssertEqual(5, swapper.x)
+            XCTAssertEqual(6, swapper.y)
+            try swapper.swapBricValues(keys: (.x, .y))
+            XCTAssertEqual(6, swapper.x)
+            XCTAssertEqual(5, swapper.y)
+
+            do {
+                let swapper1 = Swapper(x: 1, y: 2)
+                var swapper2 = swapper1
+                try swapper2.swapBricValues(keys: (.x, .y))
+                try swapper2.swapBricValues(keys: (.x, .y))
+                XCTAssertEqual(swapper1, swapper2) // make sure round-trip is equal
+            }
+
+//            do {
+//                // doesn't work: “Parsed JSON number <2.200000047683716> does not fit in Int”
+//                let swapper1 = Swapper(x: 1, y: 2.2)
+//                var swapper2 = swapper1
+//                try swapper2.swapBricValues(keys: (.x, .y))
+//                try swapper2.swapBricValues(keys: (.x, .y))
+//                XCTAssertNotEqual(swapper1, swapper2) // make sure round-trip is *not* equal
+//            }
+        } catch {
+            XCTFail("\(error)")
         }
     }
 

@@ -12,7 +12,7 @@ import Foundation
 public typealias BricEncoder = BricolageEncoder<Bric>
 
 /// `BricolageEncoder` facilitates the encoding of `Encodable` values into a specific `Bricolage` implementation.
-open class BricolageEncoder<B: Bricolage> {
+open class BricolageEncoder<B: Bricolage> { // TODO: : TopLevelEncoder
     // MARK: Options
     /// The formatting of the output JSON data.
     public struct OutputFormatting : OptionSet {

@@ -389,9 +389,9 @@ extension OneOrMany where T2 == Array<T1> {
 }
 
 /// Reversed the OneOf2 ordering
-extension OneOf2 {
+public extension OneOf2 {
     /// Returns a swapped instance of this OneOf2<T1, T2> as a OneOf2<T2, T1>
-    @inlinable public var swapped: OneOf2<T2, T1> {
+    @inlinable var swapped: OneOf2<T2, T1> {
         get {
             switch self {
             case .v1(let x): return OneOf2<T2, T1>(x)

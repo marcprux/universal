@@ -1018,7 +1018,7 @@ public struct Curio {
             let tname = typeName(parents, ref)
             let extern = CodeExternalType(tname)
             return CodeTypeAlias(name: typename == tname ? typename + "Type" : typename, type: extern, access: accessor(parents))
-        } else if let not = schema.not?.value { // a "not" generates a validator against an inverse schema
+        } else if let not = schema.not?.indirectValue { // a "not" generates a validator against an inverse schema
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)
             return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peerTypes: [inverseSchema])

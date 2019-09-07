@@ -44,9 +44,7 @@ public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
 
 public extension Encodable {
     /// Returns a simple debug description of the JSON encoding of the given `Encodable`.
-    var jsonDebugDescription: String {
-        String(data: (try? BricBracSharedSortedJSONEncoder.encodeFragment(self)) ?? .init(), encoding: .utf8) ?? ""
-    }
+    var jsonDebugDescription: String { (try? encodedString()) ?? "{}" }
 }
 
 public extension JSONEncoder {
@@ -82,13 +80,13 @@ public extension JSONDecoder {
 public extension Encodable {
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)
     @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-    @inlinable func encodedString(encoder: (Self) throws -> (Data) = BricBracSharedSortedJSONEncoder.encode) rethrows -> String {
+    func encodedString(encoder: (Self) throws -> (Data) = BricBracSharedSortedJSONEncoder.encode) rethrows -> String {
         return String(data: try encoder(self), encoding: .utf8) ?? "{}"
     }
 
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
     /// this is somewhat faster than `encodedString` because it returns unordered keys.
-    @inlinable func encodedStringUnordered() throws -> String {
+    func encodedStringUnordered() throws -> String {
         return String(data: try BricBracSharedUnsortedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
     }
 

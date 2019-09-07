@@ -1,6 +1,6 @@
 import BricBrac
 
-public struct SampleModel : Equatable, Hashable, Codable {
+public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     public var allOfField: AllOfField
     public var anyOfField: AnyOfField
     public var oneOfField: OneOfFieldChoice
@@ -10,8 +10,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
     public var nested1: Nested1?
     /// Should generate a simple OneOf enum
     public var simpleOneOf: SimpleOneOfChoice?
+    public static let codingKeyPaths = (\Self.allOfField, \Self.anyOfField, \Self.oneOfField, \Self.keywordFields, \Self.list, \Self.nested1, \Self.simpleOneOf)
 
-    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfFieldChoice, keywordFields: KeywordFields? = .none, list: [ListItem]? = .none, nested1: Nested1? = .none, simpleOneOf: SimpleOneOfChoice? = .none) {
+    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfFieldChoice, keywordFields: KeywordFields? = nil, list: [ListItem]? = nil, nested1: Nested1? = nil, simpleOneOf: SimpleOneOfChoice? = nil) {
         self.allOfField = allOfField 
         self.anyOfField = anyOfField 
         self.oneOfField = oneOfField 
@@ -27,9 +28,10 @@ public struct SampleModel : Equatable, Hashable, Codable {
         public typealias Sum = AllOf2<FirstAll, SecondAll>
 
         /// FirstAll
-        public struct FirstAll : Equatable, Hashable, Codable {
+        public struct FirstAll : Equatable, Hashable, Codable, KeyedCodable {
             public var a1: Int
             public var a2: String
+            public static let codingKeyPaths = (\Self.a1, \Self.a2)
 
             public init(a1: Int, a2: String) {
                 self.a1 = a1 
@@ -43,9 +45,10 @@ public struct SampleModel : Equatable, Hashable, Codable {
         }
 
         /// SecondAll
-        public struct SecondAll : Equatable, Hashable, Codable {
+        public struct SecondAll : Equatable, Hashable, Codable, KeyedCodable {
             public var a3: Bool
             public var a4: Double
+            public static let codingKeyPaths = (\Self.a3, \Self.a4)
 
             public init(a3: Bool, a4: Double) {
                 self.a3 = a3 
@@ -65,9 +68,10 @@ public struct SampleModel : Equatable, Hashable, Codable {
         public typealias Some = AnyOf2<FirstAny?, SecondAny?>
 
         /// FirstAny
-        public struct FirstAny : Equatable, Hashable, Codable {
+        public struct FirstAny : Equatable, Hashable, Codable, KeyedCodable {
             public var b1: Int
             public var b2: String
+            public static let codingKeyPaths = (\Self.b1, \Self.b2)
 
             public init(b1: Int, b2: String) {
                 self.b1 = b1 
@@ -81,9 +85,10 @@ public struct SampleModel : Equatable, Hashable, Codable {
         }
 
         /// SecondAny
-        public struct SecondAny : Equatable, Hashable, Codable {
+        public struct SecondAny : Equatable, Hashable, Codable, KeyedCodable {
             public var b3: Bool
             public var b4: Double
+            public static let codingKeyPaths = (\Self.b3, \Self.b4)
 
             public init(b3: Bool, b4: Double) {
                 self.b3 = b3 
@@ -103,9 +108,10 @@ public struct SampleModel : Equatable, Hashable, Codable {
         public typealias Choice = OneOf2<FirstOne, SecondOne>
 
         /// FirstOne
-        public struct FirstOne : Equatable, Hashable, Codable {
+        public struct FirstOne : Equatable, Hashable, Codable, KeyedCodable {
             public var c1: Int
             public var c2: String
+            public static let codingKeyPaths = (\Self.c1, \Self.c2)
 
             public init(c1: Int, c2: String) {
                 self.c1 = c1 
@@ -119,9 +125,10 @@ public struct SampleModel : Equatable, Hashable, Codable {
         }
 
         /// SecondOne
-        public struct SecondOne : Equatable, Hashable, Codable {
+        public struct SecondOne : Equatable, Hashable, Codable, KeyedCodable {
             public var c3: Bool
             public var c4: Double
+            public static let codingKeyPaths = (\Self.c3, \Self.c4)
 
             public init(c3: Bool, c4: Double) {
                 self.c3 = c3 
@@ -149,7 +156,7 @@ public struct SampleModel : Equatable, Hashable, Codable {
     }
 
     /// Should not escape keyword arguments
-    public struct KeywordFields : Equatable, Hashable, Codable {
+    public struct KeywordFields : Equatable, Hashable, Codable, KeyedCodable {
         public var `case`: String?
         public var `for`: String?
         public var `in`: String?
@@ -157,8 +164,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
         public var `let`: String?
         public var `var`: String?
         public var `while`: String?
+        public static let codingKeyPaths = (\Self.`case`, \Self.`for`, \Self.`in`, \Self.`inout`, \Self.`let`, \Self.`var`, \Self.`while`)
 
-        public init(`case`: String? = .none, `for`: String? = .none, `in`: String? = .none, `inout`: String? = .none, `let`: String? = .none, `var`: String? = .none, `while`: String? = .none) {
+        public init(`case`: String? = nil, `for`: String? = nil, `in`: String? = nil, `inout`: String? = nil, `let`: String? = nil, `var`: String? = nil, `while`: String? = nil) {
             self.`case` = `case` 
             self.`for` = `for` 
             self.`in` = `in` 
@@ -179,8 +187,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
         }
     }
 
-    public struct ListItem : Equatable, Hashable, Codable {
+    public struct ListItem : Equatable, Hashable, Codable, KeyedCodable {
         public var prop: LiteralValue
+        public static let codingKeyPaths = (\Self.prop)
 
         public init(prop: LiteralValue = .value) {
             self.prop = prop 
@@ -195,8 +204,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
         }
     }
 
-    public struct Nested1 : Equatable, Hashable, Codable {
+    public struct Nested1 : Equatable, Hashable, Codable, KeyedCodable {
         public var nested2: Nested2
+        public static let codingKeyPaths = (\Self.nested2)
 
         public init(nested2: Nested2) {
             self.nested2 = nested2 
@@ -206,8 +216,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
             case nested2
         }
 
-        public struct Nested2 : Equatable, Hashable, Codable {
+        public struct Nested2 : Equatable, Hashable, Codable, KeyedCodable {
             public var nested3: Nested3
+            public static let codingKeyPaths = (\Self.nested3)
 
             public init(nested3: Nested3) {
                 self.nested3 = nested3 
@@ -217,8 +228,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
                 case nested3
             }
 
-            public struct Nested3 : Equatable, Hashable, Codable {
+            public struct Nested3 : Equatable, Hashable, Codable, KeyedCodable {
                 public var nested4: Nested4
+                public static let codingKeyPaths = (\Self.nested4)
 
                 public init(nested4: Nested4) {
                     self.nested4 = nested4 
@@ -228,8 +240,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
                     case nested4
                 }
 
-                public struct Nested4 : Equatable, Hashable, Codable {
+                public struct Nested4 : Equatable, Hashable, Codable, KeyedCodable {
                     public var nested5: Nested5
+                    public static let codingKeyPaths = (\Self.nested5)
 
                     public init(nested5: Nested5) {
                         self.nested5 = nested5 
@@ -239,8 +252,9 @@ public struct SampleModel : Equatable, Hashable, Codable {
                         case nested5
                     }
 
-                    public struct Nested5 : Equatable, Hashable, Codable {
+                    public struct Nested5 : Equatable, Hashable, Codable, KeyedCodable {
                         public var single: LiteralValue
+                        public static let codingKeyPaths = (\Self.single)
 
                         public init(single: LiteralValue = .value) {
                             self.single = single 

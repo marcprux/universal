@@ -144,15 +144,16 @@ public struct ExplicitNull : Codable, Equatable, Hashable, ExpressibleByNilLiter
     }
 }
 
-/// A Nullable is a type that can be either explicitly null or a given type
-public typealias Nullable<T> = OneOf2<T, ExplicitNull>
+/// A Nullable is a type that can be either explicitly null or a given type.
+public typealias Nullable<T> = OneOf2<ExplicitNull, T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
-extension OneOf2 : ExpressibleByNilLiteral where T2 == ExplicitNull {
-    public init(nilLiteral: ()) { self = .v2(nil) }
-}
+//extension OneOf2 : ExpressibleByNilLiteral where T2 == ExplicitNull {
+//    public init(nilLiteral: ()) { self = .v2(nil) }
+//}
 
-public extension OneOf2Type where T2 == ExplicitNull /* i.e., Nullable */ {
-    var isExplicitNull: Bool { return self.v2 == ExplicitNull.null }
+public extension OneOfN where T1 == ExplicitNull /* e.g., Nullable */ {
+    /// Returns `true` if explicitly `null`
+    var isExplicitNull: Bool { extract() == ExplicitNull.null }
 }
 
 /// An Object Bric type that cannot contain anything

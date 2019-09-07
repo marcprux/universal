@@ -650,7 +650,9 @@ class BricBracTests : XCTestCase {
             let y: Float
 
             enum CodingKeys : String, CodingKey { case x, y }
+            static let codingKeyPaths = (\Self.x, \Self.y)
         }
+
         do {
             var swapper = Swapper(x: 5, y: 6)
             XCTAssertEqual(5, swapper.x)
@@ -1407,7 +1409,7 @@ class BricBracTests : XCTestCase {
 
     func testStreamingDecoding() {
         // U+1F602 (Emoji: "face with tears of joy") in UTF-8 is: 240, 159, 152, 130
-        var units: [UTF8.CodeUnit] = [240, 159, 152, 130]
+        let units: [UTF8.CodeUnit] = [240, 159, 152, 130]
 
         _ = transcode(units.makeIterator(), from: UTF8.self, to: UTF32.self, stoppingOnError: true, into: {
             assert(UnicodeScalar($0) == "\u{1F602}")
@@ -1923,16 +1925,10 @@ extension Date : Bricable, Bracable {
     }
 }
 
-struct ExplicitNullHolder : Codable, Equatable {
-    public let optionalString: String?
-    public let nullableString: Nullable<String>
-    public let nullable: ExplicitNull
-    public let nullableOptional: ExplicitNull?
-}
-
 extension BricBracTests {
     func testIndirect() {
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys // we want consistent key ordering
 
         do {
             let value = Indirect(["Foo"])
@@ -1945,12 +1941,21 @@ extension BricBracTests {
     }
 
     func testExplicitNull() {
+        struct ExplicitNullHolder : Codable, Equatable {
+            public let optionalString: String?
+            public let nullableString: Nullable<String>
+            public let nullable: ExplicitNull
+            public let nullableOptional: ExplicitNull?
+        }
+
+
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys // we want consistent key ordering
 
         do {
-            let nh = ExplicitNullHolder(optionalString: nil, nullableString: nil, nullable: nil, nullableOptional: nil)
+            let nh = ExplicitNullHolder(optionalString: nil, nullableString: .init(.null), nullable: nil, nullableOptional: nil)
             XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
-{"nullableString":null,"nullable":null}
+{"nullable":null,"nullableString":null}
 """)
             XCTAssertEqual(nh, try nh.roundtripped())
         }
@@ -1958,7 +1963,7 @@ extension BricBracTests {
         do {
             let nh = ExplicitNullHolder(optionalString: nil, nullableString: .init("Foo"), nullable: nil, nullableOptional: nil)
             XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
-{"nullableString":"Foo","nullable":null}
+{"nullable":null,"nullableString":"Foo"}
 """)
             XCTAssertEqual(nh, try nh.roundtripped())
         }
@@ -1966,15 +1971,106 @@ extension BricBracTests {
         do {
             let nh = ExplicitNullHolder(optionalString: nil, nullableString: .init("Foo"), nullable: nil, nullableOptional: .some(nil))
             XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
-{"nullableOptional":null,"nullableString":"Foo","nullable":null}
+{"nullable":null,"nullableOptional":null,"nullableString":"Foo"}
 """)
-//            XCTAssertEqual(nh, try nh.roundtripped()) // this fails because optional intercepts the null
+            //XCTAssertEqual(nh, try nh.roundtripped()) // this fails because optional intercepts the null
         }
     }
 
+    func testNullableOptionals() {
+
+        struct NullableHolder : Codable, Equatable {
+            public let ons: Optional<Nullable<String>>
+
+            init(ons: Optional<Nullable<String>>) {
+                self.ons = ons
+            }
+
+            init(from decoder: Decoder) throws {
+                func _t<T>() -> T.Type { T.self }
+
+                let values = try decoder.container(keyedBy: CodingKeys.self)
+                // override the default optional handling so we can support explicit `null` values
+                ons = try values.decodeOptional(_t(), forKey: .ons)
+//                ons = !values.contains(.ons) ? .none : try values.decode(Nullable<String>.self, forKey: .ons)
+            }
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys // we want consistent key ordering
+
+        do {
+            let nh = NullableHolder(ons: .none)
+            XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
+{}
+""")
+            XCTAssertEqual(nh, try nh.roundtripped())
+        }
+
+        do {
+            let nh = NullableHolder(ons: .some(.init("X")))
+            XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
+{"ons":"X"}
+""")
+            XCTAssertEqual(nh, try nh.roundtripped())
+        }
+
+        do {
+            let nh = NullableHolder(ons: .some(.init(.null)))
+            XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
+{"ons":null}
+""")
+            // without the special `Decodable` implementation, we would get: XCTAssertEqual failed: ("NullableHolder(ons: Optional(BricBrac.OneOf2<BricBrac.ExplicitNull, Swift.String>.v1(BricBrac.ExplicitNull())))") is not equal to ("NullableHolder(ons: nil)")
+            XCTAssertEqual(nh, try nh.roundtripped())
+        }
+    }
+
+    /// This test demonstrates that having an `Optional<Optional<T>>` is not sufficient for maintaining
+    /// serialization fidelity when we want to declare an explicit `null` value and have it be
+    /// preserved through serialization round-tripping.
+    ///
+    /// I.e., it shows why we need `ExplicitNull` and `Nullable` when we need to maintain a distinction
+    /// between an `undefined` value and an explicitly `null` value (as is common with JavaScript, and, therefore, JSON).
+    ///
+    /// This could be resolved with the `nullDecodingStrategy` property discussed at
+    /// https://forums.swift.org/t/pitch-jsondecoder-nulldecodingstrategy/13980
+    /// but it doesn't look like it will be implemented.
+    func testOptionalOptionalsLosingSerializationFidelity() {
+        struct OptionalOptional : Codable, Equatable {
+            public let oos: Optional<Optional<String>>
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys // we want consistent key ordering
+
+        do {
+            let oo = OptionalOptional(oos: .some(.some("x")))
+            XCTAssertEqual(String(bytes: try encoder.encode(oo), encoding: .utf8), """
+{"oos":"x"}
+""")
+            XCTAssertEqual(oo, try oo.roundtripped())
+        }
+
+        do {
+            let oo = OptionalOptional(oos: .none)
+            XCTAssertEqual(String(bytes: try encoder.encode(oo), encoding: .utf8), """
+{}
+""")
+            XCTAssertEqual(oo, try oo.roundtripped())
+        }
+
+        do {
+            let oo = OptionalOptional(oos: .some(.none))
+            // this is right…
+            XCTAssertEqual(String(bytes: try encoder.encode(oo), encoding: .utf8), """
+{"oos":null}
+""")
+            // … but this is wrong!
+            XCTAssertNotEqual(oo, try oo.roundtripped()) // the NOT-equals shows why double-optional loses fidelity
+        }
+    }
 
     func testIndirectDeepCoding() throws {
-        
         struct I1 : Codable {
             var map: [String: String] = [:]
             var i2: Indirect<I2>? = nil
@@ -1992,8 +2088,8 @@ extension BricBracTests {
         var i1 = I1()
 
         i1.i2 = .init(I2())
-        i1.i2?.value.i3 = .init(I3())
-        i1.i2?.value.i3?.value.name = "Foo"
+        i1.i2?.indirectValue.i3 = .init(I3())
+        i1.i2?.indirectValue.i3?.indirectValue.name = "Foo"
 
         for i in 1..<10 {
             i1.map["\(i)"] = "\(i)"
@@ -2119,3 +2215,4 @@ extension BricBracTests {
 
     }
 }
+

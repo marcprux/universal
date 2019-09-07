@@ -45,6 +45,9 @@ public struct Curio {
     /// Whether AnyOf elements should be treated as OneOf elements
     public var anyOfAsOneOf = false
 
+    /// Whether to generate `KeyedCodable` conformance
+    public var generateKeyedCodable = true
+
     /// the number of properties beyond which Optional types should instead be Indirect; this is needed beause
     /// a struct that contains many other stucts can make very large compilation units and take a very long
     /// time to compile
@@ -188,7 +191,9 @@ public struct Curio {
         if Double(fromName)?.description == fromName {
             nm = "n" + fromName
         } else {
-            nm = fromName
+            // we need to swap out "[]" for "Array" before we start stripping out illegal characters
+            // because there might be some schema type like: ConditionalAxisProperty<(number[]|undefined|null)
+            nm = fromName.replacingOccurrences(of: "[]", with: "Array")
         }
 
         var name = ""
@@ -242,8 +247,32 @@ public struct Curio {
         return CodeExternalType("NonEmptyCollection", generics: [type, arrayType(type)])
     }
 
-    func oneOfType(_ types: [CodeType]) -> CodeExternalType {
-        return CodeExternalType("OneOf\(types.count)", generics: types)
+    func oneOfType(_ codeTypes: [CodeType], promoteNullable: Bool = true) -> CodeExternalType {
+        if codeTypes.count == 1 {
+            return CodeExternalType(codeTypes[0].identifier)
+        }
+
+        var hasNullable = false
+        var types = codeTypes
+        // we normally leave the type order alone, but when a type is an `ExplicitNull`,
+        // we need special handing because there is special decoder handling
+        // when an `Optional` can contain an `ExplicitNull`; so we always promote
+        // any `ExplicitNull` type to the front of the `OneOfX` type list.
+        if let nullIndex = types.firstIndex(where: { $0.identifier == CodeExternalType.null.identifier }) {
+            hasNullable = true
+            let nullItem = types.remove(at: nullIndex)
+            types.insert(nullItem, at: 0)
+        }
+
+
+
+        if hasNullable && promoteNullable {
+            return CodeExternalType("Nullable", generics: [oneOfType(Array(types.dropFirst()))])
+        } else if types.count == 2 && hasNullable {
+            return CodeExternalType("Nullable", generics: Array(types.dropFirst()))
+        } else {
+            return CodeExternalType("OneOf\(types.count)", generics: types)
+        }
     }
 
     func anyOfType(_ types: [CodeType]) -> CodeExternalType {
@@ -346,23 +375,37 @@ public struct Curio {
     /// Reifies the given schema as a Swift data structure
     public func reify(_ schema: Schema, id: String, parents parentsx: [CodeTypeName]) throws -> CodeNamedType {
         var parents = parentsx
-        let bricfun = CodeFunction.Declaration(name: "bric", access: accessor(parents), instance: true, returns: CodeTuple(elements: [(name: nil, type: CodeExternalType.bric, value: nil, anon: false)]))
 
         func selfType(_ type: CodeType, name: String?) -> CodeTupleElement {
             return CodeTupleElement(name: name, type: CodeExternalType(fullName(type), access: self.accessor(parents)), value: nil, anon: false)
         }
 
-        let bracfun: (CodeType)->(CodeFunction.Declaration) = { CodeFunction.Declaration(name: "brac", access: self.accessor(parents), instance: false, exception: true, arguments: CodeTuple(elements: [(name: "bric", type: CodeExternalType.bric, value: nil, anon: false)]), returns: CodeTuple(elements: [selfType($0, name: nil)])) }
-
         let encodefun = CodeFunction.Declaration(name: "encode", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "to encoder", type: CodeExternalType.encoder, value: nil, anon: false)]), returns: CodeTuple(elements: []))
         let decodefun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "from decoder", type: CodeExternalType.decoder, value: nil, anon: false)]), returns: CodeTuple(elements: []))
-
 
         let comments = [schema.title, schema.description].compactMap { $0 }
 
         /// Calculate the fully-qualified name of the given type
         func fullName(_ type: CodeType) -> String {
             return (parents + [type.identifier]).joined(separator: ".")
+        }
+
+        func createUniqueName(_ props: [Curio.PropInfo], _ names: [CodeTypeName]) -> String {
+            var name = ""
+            for prop in props {
+                name += sanitizeString(prop.name ?? "")
+            }
+            name += "Type"
+
+            // ensure the name is unique
+            var uniqueName = name
+            var num = 0
+            while names.contains(uniqueName) {
+                num += 1
+                uniqueName = name + String(num)
+            }
+
+            return uniqueName
         }
 
         func schemaTypeName(_ schema: Schema, types: [CodeType], suffix: String = "") -> String {
@@ -376,21 +419,7 @@ public struct Curio {
 
             let props = getPropInfo(schema, id: id, parents: parents)
             if props.count > 0 && props.count <= 5 {
-                var name = ""
-                for prop in props {
-                    name += sanitizeString(prop.name ?? "")
-                }
-                name += "Type"
-
-                // ensure the name is unique
-                var uniqueName = name
-                var num = 0
-                while names.contains(uniqueName) {
-                    num += 1
-                    uniqueName = name + String(num)
-                }
-
-                return uniqueName
+                return createUniqueName(props, names)
             }
 
             return "Type" + suffix
@@ -577,8 +606,6 @@ public struct Curio {
             // There's no OneOf1; this can happen e.g. when a schema has types: ["double", "null"]
             // In these cases, simply return an alias to the types
             let aname = defined ? name : (unescape(name) + oneOfSuffix)
-
-
             let typ = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
             var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(typ) : typ, access: accessor(parents))
 
@@ -766,6 +793,15 @@ public struct Curio {
                 }
             }
 
+            func makeCodingKeyPaths() {
+                // "static let codingKeyPaths = (\Self.x, \Self.y, …)"
+                let codingKeyPathsValue = "("
+                    + code.props.map({ "\\Self.\($0.declaration.name)" }).joined(separator: ", ")
+                    + ")"
+
+                code.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "codingKeyPaths", type: nil, access: accessor(parents), instance: false, mutable: false), value: codingKeyPathsValue, body: [], comments: []))
+            }
+
             /// Creates a memberwise initializer for the object type
             func makeInit(_ merged: Bool) {
                 var elements: [CodeTupleElement] = []
@@ -814,6 +850,33 @@ public struct Curio {
                 code.funcs.append(initimp)
             }
 
+            /// Creates a custom decoder for special `Optional<Nullable<T>>` handling (which the synthesized decoders don't handle correctly)
+            func makeDecodable(permitSynthesizedImplementation: Bool = false) {
+                var decodebody: [String] = [
+                    //"func keytype<Value>(_ kp: KeyPath<Self, Value>) -> Value.Type { Value.self }",
+                    "let values = try decoder.container(keyedBy: CodingKeys.self)",
+                ]
+
+                for p in code.props {
+                    let d = p.declaration
+                    if let typ = p.declaration.type {
+                        var id = typ.identifier
+                        if id.hasSuffix("!") { id = String(id.dropLast(1)) }
+                        if id.hasSuffix("?") {
+                            id = String(id.dropLast(1)) // decode non-optional version
+                            decodebody.append("self.\(d.name) = try values.decodeOptional(\(id).self, forKey: .\(d.name))")
+                        } else {
+                            decodebody.append("self.\(d.name) = try values.decode(\(id).self, forKey: .\(d.name))")
+                        }
+                    }
+                }
+
+                let decodefun = CodeFunction.Declaration(name: "init", access: accessor(parents), instance: true, exception: true, arguments: CodeTuple(elements: [(name: "from decoder", type: CodeExternalType.decoder, value: nil, anon: false)]), returns: CodeTuple(elements: []))
+                let decodeimp = CodeFunction.Implementation(declaration: decodefun, body: decodebody, comments: [])
+                code.funcs.append(decodeimp)
+            }
+
+
             let keysName = "CodingKeys"
             if !isUnionType {
                 // create an enumeration of "Keys" for all the object's properties
@@ -821,8 +884,13 @@ public struct Curio {
             }
 
             makeInit(false)
-
+            makeDecodable()
             code.conforms += standardAdoptions
+
+            if generateKeyedCodable {
+                makeCodingKeyPaths()
+                code.conforms += [.keyedCodable]
+            }
 
             let reftypes = proptypes.map({ $0.type })
             if (mode == .allOf || mode == .anyOf) && useAllOfEnums && reftypes.count >= 2 && reftypes.count <= 10 {
@@ -1427,6 +1495,7 @@ extension CodeExternalType {
 /// Standard protocols
 extension CodeProtocol {
     static let codable = CodeProtocol(name: "Codable")
+    static let keyedCodable = CodeProtocol(name: "KeyedCodable")
     static let codingKey = CodeProtocol(name: "CodingKey")
     static let caseIterable = CodeProtocol(name: "CaseIterable")
     static let equatable = CodeProtocol(name: "Equatable")

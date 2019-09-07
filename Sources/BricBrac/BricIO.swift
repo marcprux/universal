@@ -829,6 +829,163 @@ public extension Encodable {
     }
 }
 
+/// Extension similar to the built-in `decodeIfPresent` methods in an `KeyedDecodingContainerProtocol`
+/// implementation, but provides support for correct `Nullable` type decoding, working around the issue
+/// where `decodeIfPresent` will consume a `null` value before passing it to the underlying type which,
+/// like `ExplicitNull`, might want to provide significance to `null` values.
+public extension KeyedDecodingContainerProtocol {
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Bool.Type, forKey key: Self.Key) throws -> Bool? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: String.Type, forKey key: Self.Key) throws -> String? {
+       try decodeIfPresent(type, forKey: key)
+   }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Double.Type, forKey key: Self.Key) throws -> Double? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Float.Type, forKey key: Self.Key) throws -> Float? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Int.Type, forKey key: Self.Key) throws -> Int? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Int8.Type, forKey key: Self.Key) throws -> Int8? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Int16.Type, forKey key: Self.Key) throws -> Int16? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Int32.Type, forKey key: Self.Key) throws -> Int32? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: Int64.Type, forKey key: Self.Key) throws -> Int64? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: UInt.Type, forKey key: Self.Key) throws -> UInt? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: UInt8.Type, forKey key: Self.Key) throws -> UInt8? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: UInt16.Type, forKey key: Self.Key) throws -> UInt16? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: UInt32.Type, forKey key: Self.Key) throws -> UInt32? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional(_ type: UInt64.Type, forKey key: Self.Key) throws -> UInt64? {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decodeIfPresent`
+    @inlinable func decodeOptional<T>(_ type: T.Type, forKey key: Self.Key) throws -> T? where T : Decodable {
+        try decodeIfPresent(type, forKey: key)
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Bool>.Type, forKey key: Self.Key) throws -> Nullable<Bool>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<String>.Type, forKey key: Self.Key) throws -> Nullable<String>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Double>.Type, forKey key: Self.Key) throws -> Nullable<Double>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Float>.Type, forKey key: Self.Key) throws -> Nullable<Float>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Int>.Type, forKey key: Self.Key) throws -> Nullable<Int>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Int8>.Type, forKey key: Self.Key) throws -> Nullable<Int8>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Int16>.Type, forKey key: Self.Key) throws -> Nullable<Int16>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Int32>.Type, forKey key: Self.Key) throws -> Nullable<Int32>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<Int64>.Type, forKey key: Self.Key) throws -> Nullable<Int64>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<UInt>.Type, forKey key: Self.Key) throws -> Nullable<UInt>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<UInt8>.Type, forKey key: Self.Key) throws -> Nullable<UInt8>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<UInt16>.Type, forKey key: Self.Key) throws -> Nullable<UInt16>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<UInt32>.Type, forKey key: Self.Key) throws -> Nullable<UInt32>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional(_ type: Nullable<UInt64>.Type, forKey key: Self.Key) throws -> Nullable<UInt64>? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
+    /// Pass-through to `decode` if the `Nullable` is present in the container
+    @inlinable func decodeOptional<T>(_ type: Nullable<T>.Type, forKey key: Self.Key) throws -> Nullable<T>? where T : Decodable {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+}
+
 /// A no-op encoder that simply passes every encodable element through the specific callback filter.
 public class FilterEncoder {
     public typealias Element = (key: [CodingKey], value: Encodable?)

@@ -910,6 +910,11 @@ public extension KeyedDecodingContainerProtocol {
         try decodeIfPresent(type, forKey: key)
     }
 
+    /// Pass-through to `decode` if the `ExplicitNull` is present in the container; permits the distinction between `null` and `undefined`.
+    @inlinable func decodeOptional(_ type: ExplicitNull.Type, forKey key: Self.Key) throws -> ExplicitNull? {
+        contains(key) ? try decode(type, forKey: key) : .none
+    }
+
     /// Pass-through to `decode` if the `Nullable` is present in the container
     @inlinable func decodeOptional(_ type: Nullable<Bool>.Type, forKey key: Self.Key) throws -> Nullable<Bool>? {
         contains(key) ? try decode(type, forKey: key) : .none

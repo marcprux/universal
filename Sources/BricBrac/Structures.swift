@@ -124,12 +124,12 @@ extension Indirect : Equatable where Wrapped : Equatable { }
 extension Indirect : Hashable where Wrapped : Hashable { }
 
 
-/// An empty struct that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
-public struct ExplicitNull : Codable, Equatable, Hashable, ExpressibleByNilLiteral {
-    public static let null = ExplicitNull()
+/// An single-element enumeration that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
+public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseIterable {
+    case null
 
-    public init(nilLiteral: ()) { }
-    public init() { }
+    public init(nilLiteral: ()) { self = .null }
+    public init() { self = .null }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
@@ -141,19 +141,24 @@ public struct ExplicitNull : Codable, Equatable, Hashable, ExpressibleByNilLiter
         if !container.decodeNil() {
             throw DecodingError.typeMismatch(ExplicitNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for ExplicitNull"))
         }
+        self = .null
     }
 }
 
 /// A Nullable is a type that can be either explicitly null or a given type.
 public typealias Nullable<T> = OneOf2<ExplicitNull, T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
-//extension OneOf2 : ExpressibleByNilLiteral where T2 == ExplicitNull {
-//    public init(nilLiteral: ()) { self = .v2(nil) }
-//}
-
 public extension OneOfN where T1 == ExplicitNull /* e.g., Nullable */ {
+    /// A nullable `.null`, similar to `Optional.none`
+    static var null: Self { return .init(.null) }
+
     /// Returns `true` if explicitly `null`
     var isExplicitNull: Bool { extract() == ExplicitNull.null }
+}
+
+public extension Nullable {
+    /// A nullable `.full`, similar to `Optional.some`
+    static func full(_ some: T2) -> Self { return .v2(some) }
 }
 
 /// An Object Bric type that cannot contain anything

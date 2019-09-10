@@ -356,12 +356,21 @@ public typealias OneOrAny<T> = OneOf2<T, Bric>
 /// A `OneOrMany` is either a single value or any array or zero or multiple values
 public typealias OneOrMany<T> = OneOf2<T, [T]>
 
+extension OneOrMany : ExpressibleByArrayLiteral where T2 == [T1] {
+    public init(arrayLiteral elements: T1...) {
+        self.init(array: elements)
+    }
+}
+
 /// Common case of OneOf2<String, [String]>, where we can get or set values as an array
-extension OneOrMany where T2 == Array<T1> {
+extension OneOrMany where T2 == [T1] {
     /// Initializes this OneOf with the given array
     public init(array: Array<T1>) {
-        self = .v2([])
-        self.array = array
+        if array.count == 1 {
+            self = .v1(array[0])
+        } else {
+            self = .v2(array)
+        }
     }
 
     /// The number of elements in .v2; .v1 always returns 1

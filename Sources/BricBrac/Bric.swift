@@ -647,6 +647,9 @@ public protocol KeyedCodable : Codable {
     /// Tuple containing all the `WritableKeyPath`s for the type.
     static var codingKeyPaths: CodingKeyPaths { get }
 
+    /// Map from the `PartialKeyPath` to the `CodingKey`
+    static var codableKeys: [PartialKeyPath<Self>: CodingKeys] { get }
+
     /// The keys that will be associated with this type
     associatedtype CodingKeys : CodingKey & Hashable
 }

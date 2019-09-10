@@ -547,7 +547,7 @@ public struct CodeSimpleEnum<T> : CodeEnumType, CodeStateType, Hashable {
 
         emitter.emit(access.rawValue, "enum", name, adoptions, "{")
         for c in cases {
-            if let v = c.value, c.name == "\(v)" {
+            if let v = c.value, (c.name == "\(v)" || c.name == "`\(v)`") {
                 emitter.emit("case", c.name) // don't emit string cases when they are the same as the enum name
             } else {
                 emitter.emit("case", c.name, c.value.flatMap({ "= " + quotedString($0) }))

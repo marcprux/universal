@@ -21,6 +21,9 @@ public struct Curio {
     /// whether to generate codable implementations for each type
     public var generateCodable = true
 
+    /// whether to generate cause `CodingKeys` to conform to `Idenfiable`
+    public var generateIdentifiable = true
+
     /// Whether to generate a compact representation with type shorthand and string enum types names reduced
     public var compact = true
 
@@ -158,7 +161,7 @@ public struct Curio {
         }
 
         // enums can't have a prop named "init", since it will conflict with the constructor name
-        var idx = id == "init" ? "initx" : id
+        var idx = id // id == "init" ? "initx" : id
 
         while let first = idx.first, !Curio.nameStart.contains(first) {
             idx = String(idx.dropFirst())
@@ -236,7 +239,11 @@ public struct Curio {
     }
 
     func nullableType(_ type: CodeType) -> CodeExternalType {
-        return CodeExternalType("ExplicitNull", generics: [type])
+        return CodeExternalType("Nullable", generics: [type])
+    }
+
+    func oneOrManyType(_ type: CodeType) -> CodeExternalType {
+        return CodeExternalType("OneOrMany", generics: [type])
     }
 
     func notBracType(_ type: CodeType) -> CodeExternalType {
@@ -247,13 +254,28 @@ public struct Curio {
         return CodeExternalType("NonEmptyCollection", generics: [type, arrayType(type)])
     }
 
-    func oneOfType(_ codeTypes: [CodeType], promoteNullable: Bool = true) -> CodeExternalType {
-        if codeTypes.count == 1 {
-            return CodeExternalType(codeTypes[0].identifier)
+    func oneOfType(_ codeTypes: [CodeType], promoteNullable: Bool = true, coalesceOneOrMany: Bool = true) -> CodeExternalType {
+        var types = codeTypes
+        if coalesceOneOrMany {
+            // find any types that contain both `T` and `[T]` and turn them into a single `OneOrMany` type
+            for (i, t) in types.enumerated() {
+                // if let ai = types.firstIndex(where: { $0.identifier == arrayType(t).identifier }) {
+                if i < types.count - 1 && types[i+1].identifier == arrayType(t).identifier  {
+                    let ai = i+1 // for now we only coalesce adjacent types, since that is generally the convention and we don't want to unnecessarily coalesce types that don't have one-or-many semantice (e.g., RangeChoice = OneOf2<[Double], OneOrMany<String>>)
+                    let oom = oneOrManyType(t)
+                    types.remove(at: max(i, ai))
+                    types[min(i, ai)] = oom // replace the type with the OneOrMany
+                    break // we extract at most one
+                }
+            }
+        }
+
+        if types.count == 1 {
+            return CodeExternalType(types[0].identifier)
         }
 
         var hasNullable = false
-        var types = codeTypes
+
         // we normally leave the type order alone, but when a type is an `ExplicitNull`,
         // we need special handing because there is special decoder handling
         // when an `Optional` can contain an `ExplicitNull`; so we always promote
@@ -265,9 +287,8 @@ public struct Curio {
         }
 
 
-
         if hasNullable && promoteNullable {
-            return CodeExternalType("Nullable", generics: [oneOfType(Array(types.dropFirst()))])
+            return nullableType(oneOfType(Array(types.dropFirst())))
         } else if types.count == 2 && hasNullable {
             return CodeExternalType("Nullable", generics: Array(types.dropFirst()))
         } else {
@@ -789,17 +810,39 @@ public struct Curio {
                     keysType.conforms.append(.hashable)
                     keysType.conforms.append(.codable)
                     keysType.conforms.append(.caseIterable)
+
+                    if generateIdentifiable == true { // "var id: Self { self }"
+                        keysType.conforms.append(.identifiable)
+                        keysType.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "id", type: CodeExternalType("Self"), access: accessor(parents), instance: true, mutable: false), value: nil, body: ["self"], comments: []))
+                    }
                     code.nestedTypes.insert(keysType, at: 0)
                 }
             }
 
+            // "static let codingKeyPaths = (\Self.x, \Self.y, …)"
             func makeCodingKeyPaths() {
-                // "static let codingKeyPaths = (\Self.x, \Self.y, …)"
+                let vars = code.props.filter { $0.declaration.instance == true && $0.body.isEmpty } // i.e., not static vars
+                if vars.isEmpty { return }
+
                 let codingKeyPathsValue = "("
-                    + code.props.map({ "\\Self.\($0.declaration.name)" }).joined(separator: ", ")
+                    + vars.map({ "\\Self.\($0.declaration.name)" }).joined(separator: ", ")
                     + ")"
 
                 code.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "codingKeyPaths", type: nil, access: accessor(parents), instance: false, mutable: false), value: codingKeyPathsValue, body: [], comments: []))
+            }
+
+            //     static let codableKeys: [PartialKeyPath<Self> : Self.CodingKeys] = [\Self.x: CodingKeys.x, \Self.y: CodingKeys.y]
+            func makeCodableKeys() {
+                let vars = code.props.filter { $0.declaration.instance == true && $0.body.isEmpty } // i.e., not static vars
+                if vars.isEmpty { return }
+
+                let codableKeysValue = "["
+                    + vars.map({ "\\Self.\($0.declaration.name) : CodingKeys.\($0.declaration.name)" }).joined(separator: ", ")
+                    + "]"
+
+                let codableKeysType = dictionaryType(CodeExternalType("PartialKeyPath", generics: [CodeExternalType("Self")]), CodeExternalType("CodingKeys"))
+
+                code.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "codableKeys", type: codableKeysType, access: accessor(parents), instance: false, mutable: false), value: codableKeysValue, body: [], comments: []))
             }
 
             /// Creates a memberwise initializer for the object type
@@ -889,6 +932,7 @@ public struct Curio {
 
             if generateKeyedCodable {
                 makeCodingKeyPaths()
+                makeCodableKeys()
                 code.conforms += [.keyedCodable]
             }
 
@@ -1498,6 +1542,7 @@ extension CodeProtocol {
     static let keyedCodable = CodeProtocol(name: "KeyedCodable")
     static let codingKey = CodeProtocol(name: "CodingKey")
     static let caseIterable = CodeProtocol(name: "CaseIterable")
+    static let identifiable = CodeProtocol(name: "Identifiable")
     static let equatable = CodeProtocol(name: "Equatable")
     static let hashable = CodeProtocol(name: "Hashable")
     static let rawRepresentable = CodeProtocol(name: "RawRepresentable")

@@ -376,19 +376,22 @@ public struct Curio {
     }
 
     /// Encapsulates the given typename with the specified external type
-    func encapsulateType(name typename: CodeTypeName, type: CodeExternalType, access: CodeAccess)  -> CodeNamedType {
+    func encapsulateType(name typename: CodeTypeName, type: CodeExternalType, access: CodeAccess) -> CodeNamedType {
         let aliasType = type
         let propn = CodePropName("rawValue")
         let propd = CodeProperty.Declaration(name: propn, type: aliasType, access: access, mutable: false)
         var enc = CodeStruct(name: typename, access: access, props: [propd.implementation])
 
         enc.conforms += standardAdoptions
-        enc.conforms.append(.rawRepresentable)
+        enc.conforms.append(.rawCodable)
 
-        let rawInit = CodeFunction.Declaration(name: "init", access: access, instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: aliasType, value: nil, anon: false)]), returns: CodeTuple(elements: []))
-        let rawInitImp = CodeFunction.Implementation(declaration: rawInit, body: ["self.rawValue = rawValue"], comments: [])
+        for anon in [false, true] { // make both a named rawValue init as well as an anonymous one…
+            let rawInit = CodeFunction.Declaration(name: "init", access: access, instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: aliasType, value: nil, anon: anon)]), returns: CodeTuple(elements: []))
+            let rawInitImp = CodeFunction.Implementation(declaration: rawInit, body: ["self.rawValue = rawValue"], comments: [])
+            enc.funcs.append(rawInitImp)
+        }
 
-        enc.funcs.append(rawInitImp)
+        // TODO: when wrapping String, should we also conform to ExpressibleByStringLiteral and create the initializer?
 
         return enc
     }
@@ -474,7 +477,7 @@ public struct Curio {
                         code.nestedTypes.append(literalEnum) // we will later try to promote any CodeSimpleEnum<String> to be a peer of an alias type
                         casetype = literalEnum
                     } else {
-                        // otherwise, create an anonmount sub-type (Type1, Type2, …)
+                        // otherwise, create an anon sub-type (Type1, Type2, …)
                         let subtype = try reify(sub, id: schemaTypeName(sub, types: casetypes, suffix: String(code.nestedTypes.count+1)), parents: parents + [code.name])
                         // when the generated code is merely a typealias, just inline it in the enum case
                         if let aliasType = aliasType(subtype) {
@@ -545,9 +548,7 @@ public struct Curio {
             if useOneOfEnums && casetypes.count >= 2 && casetypes.count <= 10 {
                 let constantEnums = code.nestedTypes.compactMap({ $0 as? CodeSimpleEnum<String> })
                 if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
-                    var alias = aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty)
-                    alias.peerTypes = constantEnums
-                    return alias
+                    return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, peerTypes: constantEnums)
                 } else { // otherwise we need to continue to use the nested inner types in a hollow enum and return the typealias
                     let choiceName = oneOfSuffix
                     let aliasName = ename + (parents.isEmpty ? "" : choiceName) // top-level aliases are fully-qualified types because they are defined in defs and refs
@@ -623,13 +624,19 @@ public struct Curio {
             return assoc
         }
 
-        func aliasOneOf(_ subTypes: [CodeType], name: CodeTypeName, optional: Bool, defined: Bool) -> CodeTypeAlias {
+        func aliasOneOf(_ subTypes: [CodeType], name typename: CodeTypeName, optional: Bool, defined: Bool, peerTypes: [CodeNamedType] = []) -> CodeNamedType {
             // There's no OneOf1; this can happen e.g. when a schema has types: ["double", "null"]
             // In these cases, simply return an alias to the types
-            let aname = defined ? name : (unescape(name) + oneOfSuffix)
-            let typ = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
-            var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(typ) : typ, access: accessor(parents))
+            let aname = defined ? typename : (unescape(typename) + oneOfSuffix)
 
+            // typealiases to OneOfX work but are difficult to extend (e.g., generic types cannot conform to the same protocol with different type constraints), so we add an additional level of serialization-compatible indirection
+            if let encapsulatedType = self.encapsulate[typename], peerTypes.isEmpty, !optional, subTypes.count > 1, defined {
+                let wrapType = encapsulatedType.name == typename ? oneOfType(subTypes) : encapsulatedType
+                return encapsulateType(name: typename, type: wrapType, access: accessor(parents))
+            }
+
+            let type = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
+            var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(type) : type, access: accessor(parents), peerTypes: peerTypes)
             alias.comments = comments
             return alias
         }
@@ -637,7 +644,10 @@ public struct Curio {
         func aliasSimpleType(name typename: CodeTypeName, type: CodeExternalType) -> CodeNamedType {
             // When we encapsulate a typealias (e.g., Color = String), we make it into a separate type that can be extended
             if let encapsulatedType = self.encapsulate[typename] {
-                return encapsulateType(name: typename, type: encapsulatedType, access: accessor(parents))
+                // if the encapsulated type name is exactly the same as the typename, then that means we should encapsulate
+                // with the preserved type name. E.g., if "FontWeight = OneOf2<String, Double>" and we encapsulate "FontWeight" = "FontWeight", then we will just generate a raw represented struct FontWeight { rawValue: OneOf2<String, Double> }
+                let wrapType = encapsulatedType.name == typename ? type : encapsulatedType
+                return encapsulateType(name: typename, type: wrapType, access: accessor(parents))
             }
             return CodeTypeAlias(name: typename, type: type, access: accessor(parents))
         }
@@ -1048,9 +1058,7 @@ public struct Curio {
                     enumType.name = enumType.name + enumType.associatedTypeName // suffix the type with the type
                     return enumType
                 }
-                var type = aliasOneOf(enumTypes, name: name ?? valueTypeNames, optional: false, defined: true)
-                type.peerTypes = enumTypes
-                return type
+                return aliasOneOf(enumTypes, name: name ?? valueTypeNames, optional: false, defined: true, peerTypes: enumTypes)
             }
         }
 
@@ -1546,6 +1554,7 @@ extension CodeProtocol {
     static let equatable = CodeProtocol(name: "Equatable")
     static let hashable = CodeProtocol(name: "Hashable")
     static let rawRepresentable = CodeProtocol(name: "RawRepresentable")
+    static let rawCodable = CodeProtocol(name: "RawCodable")
 }
 
 /// BricBrac protocols

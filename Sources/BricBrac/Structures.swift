@@ -145,6 +145,30 @@ public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseItera
     }
 }
 
+/// A RawCodable is a simple `RawRepresentable` wrapper except its coding
+/// will store the underlying value directly rather than keyed as "rawValue",
+/// thus requiring that the `init(rawValue:)` be non-failable; it is useful
+/// as a codable typesafe wrapper for some general type like UUID where the
+/// Codable implementation does not automatically use the underlying type (like
+/// it does with primitives and Strings)
+public protocol RawCodable : RawRepresentable, Codable where RawValue : Codable {
+    init(rawValue: RawValue)
+}
+
+
+public extension RawCodable {
+    /// A `RawCodable` deserializes from the underlying type's decoding with any intermediate wrapper
+    init(from decoder: Decoder) throws {
+        try self.init(rawValue: RawValue(from: decoder))
+    }
+
+    /// A `RawCodable` serializes to the underlying type's encoding with any intermediate wrapper
+    func encode(to encoder: Encoder) throws {
+        try rawValue.encode(to: encoder)
+    }
+}
+
+
 /// A Nullable is a type that can be either explicitly null or a given type.
 public typealias Nullable<T> = OneOf2<ExplicitNull, T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 

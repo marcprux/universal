@@ -30,7 +30,7 @@ extension Decodable {
 @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
 public let BricBracSharedSortedJSONEncoder: JSONEncoder = {
     let encoder = JSONEncoder()
-    encoder.outputFormatting = .sortedKeys // we want consistent key ordering
+    encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes] // we want consistent key ordering
     return encoder
 }()
 
@@ -38,7 +38,7 @@ public let BricBracSharedSortedJSONEncoder: JSONEncoder = {
 /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
 public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
     let encoder = JSONEncoder()
-    encoder.outputFormatting = [] // we want it to be unsorted
+    encoder.outputFormatting = [.withoutEscapingSlashes] // we want it to be unsorted
     return encoder
 }()
 

@@ -15,11 +15,11 @@ public protocol WrapperType {
     func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U?
 }
 
-public extension WrapperType {
+public extension WrapperType where Self : ExpressibleByNilLiteral {
     /// The underlying type that is contained in this wrapper.
     @inlinable var flatValue: Wrapped? {
         get { self.flatMap({ $0 }) }
-        set { if let newValue = newValue { self = Self(newValue) } }
+        set { self = newValue.flatMap(Self.init) ?? nil }
     }
 }
 

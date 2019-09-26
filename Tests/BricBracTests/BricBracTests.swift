@@ -646,6 +646,8 @@ class BricBracTests : XCTestCase {
 
     func testBricSwapping() {
         struct Swapper : KeyedCodable, Equatable {
+            static let codableKeys = [\Self.x : CodingKeys.x, \Self.y : CodingKeys.y]
+
             let x: Int
             let y: Float
 

@@ -172,7 +172,7 @@ public extension RawCodable {
 /// A Nullable is a type that can be either explicitly null or a given type.
 public typealias Nullable<T> = OneOf2<ExplicitNull, T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
-public extension OneOfN where T1 == ExplicitNull /* e.g., Nullable */ {
+public extension OneOfNType where T1 == ExplicitNull /* e.g., Nullable */ {
     /// A nullable `.null`, similar to `Optional.none`
     static var null: Self { return .init(.null) }
 
@@ -209,25 +209,25 @@ public protocol SomeOf {
     associatedtype T
 
     /// Returns a tuple of the possible value types for this OneOf
-    var values: T { get }
+    var tupleValue: T { get }
 }
 
 /// MARK: OneOf implementations
 
 /// The protocol of a type that can contain one out of 1 or more exclusive options
-public protocol OneOfN : SomeOf {
+public protocol OneOfNType : SomeOf {
     associatedtype T1
     init(t1: T1)
     init(_ t1: T1)
     func extract() -> T1?
 }
 
-public extension OneOfN {
+public extension OneOfNType {
     @inlinable var v1: T1? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// The protocol of a type that can contain one out of 2 or more exclusive options
-public protocol OneOf2Type : OneOfN {
+public protocol OneOf2Type : OneOfNType {
     associatedtype T2
     init(t2: T2)
     init(_ t2: T2)
@@ -258,7 +258,7 @@ public indirect enum OneOf2<T1, T2> : OneOf2Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?) { return (extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?) { return (extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -482,7 +482,7 @@ public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?) { return (extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?) { return (extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -618,7 +618,7 @@ public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?, T4?) { return (extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?) { return (extract(), extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -767,7 +767,7 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?) { return (extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?) { return (extract(), extract(), extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -930,7 +930,7 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?) { return (extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?) { return (extract(), extract(), extract(), extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1107,7 +1107,7 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1295,7 +1295,7 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1497,7 +1497,7 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1712,7 +1712,7 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10T
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var values: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1900,7 +1900,7 @@ public struct AllOf2<T1, T2> : AllOf {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1, T2) { return (v1, v2) }
+    public var tupleValue: (T1, T2) { return (v1, v2) }
 }
 
 extension AllOf2 : Encodable where T1 : Encodable, T2 : Encodable {
@@ -1966,7 +1966,7 @@ public struct AnyOf2<T1, T2> : AnyOf {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    public var values: (T1?, T2?) { return (v1, v2) }
+    public var tupleValue: (T1?, T2?) { return (v1, v2) }
 }
 
 extension AnyOf2 : Encodable where T1 : Encodable, T2 : Encodable {

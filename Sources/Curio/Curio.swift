@@ -54,7 +54,7 @@ public struct Curio {
     /// the number of properties beyond which Optional types should instead be Indirect; this is needed beause
     /// a struct that contains many other stucts can make very large compilation units and take a very long
     /// time to compile
-    /// This isn't as much of an issue now that OneOfN enums are indirect; the vega-lite schema is 7M with indirectCountThreshold=9 and 13M with indirectCountThreshold=99
+    /// This isn't as much of an issue now that OneOfNType enums are indirect; the vega-lite schema is 7M with indirectCountThreshold=9 and 13M with indirectCountThreshold=99
     /// Also, if indirectCountThreshold is to be used, we need to synthesize the CodingKeys macro again
     public var indirectCountThreshold = 99
 

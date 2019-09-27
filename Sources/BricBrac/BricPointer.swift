@@ -249,11 +249,7 @@ public extension String {
 
     
     func replace(string find: String, with replacement: String) -> String {
-        var replaced = self
-        for range in self.ranges(ofString: find).reversed() {
-            replaced.replaceSubrange(range, with: replacement)
-        }
-        return replaced
+        self.replacingOccurrences(of: find, with: replacement)
     }
 
     func replace(character find: Character, with replacement: String) -> String {

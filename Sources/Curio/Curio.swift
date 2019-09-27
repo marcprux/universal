@@ -21,8 +21,11 @@ public struct Curio {
     /// whether to generate codable implementations for each type
     public var generateCodable = true
 
-    /// whether to generate cause `CodingKeys` to conform to `Idenfiable`
+    /// whether to cause `CodingKeys` to conform to `Idenfiable`
     public var generateIdentifiable = true
+
+    /// whether to cause `CodingKeys` to embed a `keyDescription` field
+    public var keyDescriptionMethod = true
 
     /// Whether to generate a compact representation with type shorthand and string enum types names reduced
     public var compact = true
@@ -736,8 +739,8 @@ public struct Curio {
                 if !required {
                     let structProps = props.filter({ (name, required, prop, anon) in
 
-                        var types: [Schema.SimpleTypes] = prop.type?.values.1 ?? []
-                        if let typ = prop.type?.values.0 { types.append(typ) }
+                        var types: [Schema.SimpleTypes] = prop.type?.tupleValue.1 ?? []
+                        if let typ = prop.type?.tupleValue.0 { types.append(typ) }
 
                         switch types.first {
                         case .none: return true // unspecified object type: maybe a $ref
@@ -825,6 +828,23 @@ public struct Curio {
                         keysType.conforms.append(.identifiable)
                         keysType.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "id", type: CodeExternalType("Self"), access: accessor(parents), instance: true, mutable: false), value: nil, body: ["self"], comments: []))
                     }
+
+                    if keyDescriptionMethod == true {
+                        var keysBody: [String] = []
+                        keysBody.append("switch self {")
+
+                        for (key, _, prop, _) in props {
+                            let pname = propName(parents + [typename], key)
+                            cases.append(CodeCaseSimple(name: pname, value: key))
+                            let desc = prop.description?.enquote("\"").replace(character: "\n", with: "\\n") ?? "nil"
+                            keysBody.append("case .\(pname): return \(desc)")
+                        }
+
+                        keysBody.append(" } ")
+
+                        keysType.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "keyDescription", type: optionalType(CodeExternalType.string), access: accessor(parents), instance: true, mutable: false), value: nil, body: keysBody, comments: []))
+                    }
+
                     code.nestedTypes.insert(keysType, at: 0)
                 }
             }

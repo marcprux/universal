@@ -66,7 +66,7 @@ class BricBracTests : XCTestCase {
 
     func testAllocatonProfiling() throws {
         // json with unicode escapes
-        // let path: String! = NSBundle(forClass: BricBracTests.self).pathForResource("test/profile/caliper.json", ofType: "")!
+        // let path: String! = NSBundle(forClass: Self.self).pathForResource("test/profile/caliper.json", ofType: "")!
 
         // json no with escapes
         let path = testResourcePath() + "/profile/rap.json"

@@ -114,12 +114,12 @@ extension Bric : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
-        case .arr(let x): try container.encode(x)
-        case .obj(let x): try container.encode(x)
-        case .str(let x): try container.encode(x)
-        case .num(let x): try container.encode(x)
-        case .bol(let x): try container.encode(x)
         case .nul: try container.encodeNil()
+        case .bol(let x): try container.encode(x)
+        case .num(let x): try container.encode(x)
+        case .str(let x): try container.encode(x)
+        case .obj(let x): try container.encode(x)
+        case .arr(let x): try container.encode(x)
         }
     }
 }
@@ -127,15 +127,30 @@ extension Bric : Encodable {
 extension Bric : Decodable {
     @inlinable public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
+        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
         if container.decodeNil() {
             self = .nul
         }  else {
-            switch try OneOf5<String, Double, Bool, Array<Bric>, Dictionary<String, Bric>>(from: decoder) {
-            case .v1(let x): self = .str(x)
-            case .v2(let x): self = .num(x)
-            case .v3(let x): self = .bol(x)
-            case .v4(let x): self = .arr(x)
-            case .v5(let x): self = .obj(x)
+            do {
+                self = try .bol(decode())
+            } catch DecodingError.typeMismatch {
+                do {
+                    self = try .num(decode())
+                } catch DecodingError.typeMismatch {
+                    do {
+                        self = try .str(decode())
+                    } catch DecodingError.typeMismatch {
+                        do {
+                            self = try .obj(decode())
+                        } catch DecodingError.typeMismatch {
+                            do {
+                                self = try .arr(decode())
+                            } catch DecodingError.typeMismatch {
+                                throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
+                            }
+                        }
+                    }
+                }
             }
         }
     }

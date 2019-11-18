@@ -258,7 +258,12 @@ public indirect enum OneOf2<T1, T2> : OneOf2Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?) { return (extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?) {
+        switch self {
+        case .v1(let v): return (v, nil)
+        case .v2(let v): return (nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -482,7 +487,13 @@ public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?) { return (extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil)
+        case .v2(let v): return (nil, v, nil)
+        case .v3(let v): return (nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -618,7 +629,14 @@ public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?) { return (extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil, nil)
+        case .v2(let v): return (nil, v, nil, nil)
+        case .v3(let v): return (nil, nil, v, nil)
+        case .v4(let v): return (nil, nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -767,7 +785,15 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?) { return (extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil, nil, nil)
+        case .v2(let v): return (nil, v, nil, nil, nil)
+        case .v3(let v): return (nil, nil, v, nil, nil)
+        case .v4(let v): return (nil, nil, nil, v, nil)
+        case .v5(let v): return (nil, nil, nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -930,7 +956,16 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?) { return (extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil, nil, nil, nil)
+        case .v2(let v): return (nil, v, nil, nil, nil, nil)
+        case .v3(let v): return (nil, nil, v, nil, nil, nil)
+        case .v4(let v): return (nil, nil, nil, v, nil, nil)
+        case .v5(let v): return (nil, nil, nil, nil, v, nil)
+        case .v6(let v): return (nil, nil, nil, nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1107,7 +1142,17 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil)
+        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil)
+        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil)
+        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil)
+        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil)
+        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil)
+        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1295,7 +1340,18 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil, nil)
+        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil, nil)
+        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil, nil)
+        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil, nil)
+        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil, nil)
+        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil, nil)
+        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v, nil)
+        case .v8(let v): return (nil, nil, nil, nil, nil, nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1497,7 +1553,19 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type {
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil, nil, nil)
+        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil, nil, nil)
+        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil, nil, nil)
+        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil, nil, nil)
+        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil, nil, nil)
+        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil, nil, nil)
+        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v, nil, nil)
+        case .v8(let v): return (nil, nil, nil, nil, nil, nil, nil, v, nil)
+        case .v9(let v): return (nil, nil, nil, nil, nil, nil, nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
@@ -1712,7 +1780,20 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10T
     }
 
     /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?) { return (extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract(), extract()) }
+    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?) {
+        switch self {
+        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil, nil, nil, nil)
+        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil, nil, nil, nil)
+        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil, nil, nil, nil)
+        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil, nil, nil, nil)
+        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil, nil, nil, nil)
+        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v, nil, nil, nil)
+        case .v8(let v): return (nil, nil, nil, nil, nil, nil, nil, v, nil, nil)
+        case .v9(let v): return (nil, nil, nil, nil, nil, nil, nil, nil, v, nil)
+        case .v10(let v): return (nil, nil, nil, nil, nil, nil, nil, nil, nil, v)
+        }
+    }
 
     @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }

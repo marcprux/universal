@@ -23,6 +23,7 @@ class BricBracTests : XCTestCase {
         ("testReferenceCycles", testReferenceCycles),
         ("testLayers", testLayers),
         ("testOutputNulls", testOutputNulls),
+        ("testBricBracModifiers", testBricBracModifiers),
         ("testBricBracSerialization", testBricBracSerialization),
         ("testBricBracParsing", testBricBracParsing),
         ("testBricSwapping", testBricSwapping),
@@ -598,6 +599,35 @@ class BricBracTests : XCTestCase {
         let bric: Bric = ["num": 1, "nul": nil]
 
         XCTAssertEqual("{\"nul\":null,\"num\":1}", bric.stringify(mapper: bricOrderedMapper))
+    }
+
+    func testBricBracModifiers() {
+        var bric = Bric.str("x")
+        bric.str! += "x"
+        XCTAssertEqual("xx", bric)
+        bric.str = nil
+        XCTAssertEqual(.nul, bric)
+
+        bric.num = 2.0
+        XCTAssertEqual(2.0, bric)
+        bric.num! += 0.2
+        XCTAssertEqual(2.2, bric)
+
+        bric.bol = false
+        XCTAssertEqual(false, bric)
+        bric.bol!.toggle()
+        XCTAssertEqual(true, bric)
+
+        bric.arr = [1, 2]
+        XCTAssertEqual([1, 2], bric)
+        bric.arr!.append(3)
+        XCTAssertEqual([1, 2, 3], bric)
+
+        bric.obj = ["X": 1, "Y": 2]
+        XCTAssertEqual(["X": 1, "Y": 2], bric)
+        bric.obj!["Y"]!.num! += 2
+        XCTAssertEqual(["X": 1, "Y": 4], bric)
+
     }
 
     func testBricBracSerialization() {

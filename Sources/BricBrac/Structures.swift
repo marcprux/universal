@@ -78,8 +78,16 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
             }
         }
 
-        set {
-            self = .some(newValue)
+//        set {
+//            self = .some(newValue)
+//        }
+
+        _modify {
+            switch self {
+            case .some(var x):
+                yield &x
+                self = .some(x)
+            }
         }
     }
 

@@ -23,40 +23,140 @@ public enum Bric {
 }
 
 extension Bric {
-    /// Returns the underlying `String` for `Bric.str` cases, else nil
-    @inlinable public var str: String? {
-        get { if case .str(let x) = self { return x } else { return nil } }
-        set { self = newValue.flatMap(Bric.str) ?? .nul }
-    }
-
-    /// Returns the underlying `Double` for `Bric.num` cases, else nil
-    @inlinable public var num: Double? {
-        get { if case .num(let x) = self { return x } else { return nil } }
-        set { self = newValue.flatMap(Bric.num) ?? .nul }
-    }
-
-    /// Returns the underlying `Bool` for `Bric.bol` cases, else nil
-    @inlinable public var bol: Bool? {
-        get { if case .bol(let x) = self { return x } else { return nil } }
-        set { self = newValue.flatMap(Bric.bol) ?? .nul }
-    }
-
     /// Returns the underlying `Void` for `Bric.nul` cases, else nil
     @inlinable public var nul: Void? {
         get { if case .nul = self { return Void() } else { return nil } }
         set { self = .nul }
     }
 
+    /// Returns the underlying `String` for `Bric.str` cases, else nil
+    @inlinable public var str: String? {
+        get { if case .str(let x) = self { return x } else { return nil } }
+//        set { self = newValue.flatMap(Bric.str) ?? .nul }
+        _modify {
+            var tmp: Optional<String>
+            if case .str(let x) = self {
+                tmp = x
+                yield &tmp
+                if let newValue = tmp {
+                    self = .str(newValue)
+                } else {
+                    self = .nul
+                }
+            } else {
+                tmp = nil
+                yield &tmp
+                if let newValue = tmp {
+                    self = .str(newValue)
+                } else {
+                    self = .nul
+                }
+            }
+        }
+    }
+
+    /// Returns the underlying `Double` for `Bric.num` cases, else nil
+    @inlinable public var num: Double? {
+        get { if case .num(let x) = self { return x } else { return nil } }
+//        set { self = newValue.flatMap(Bric.num) ?? .nul }
+        _modify {
+            var tmp: Optional<Double>
+            if case .num(let x) = self {
+                tmp = x
+                yield &tmp
+                if let newValue = tmp {
+                    self = .num(newValue)
+                } else {
+                    self = .nul
+                }
+            } else {
+                tmp = nil
+                yield &tmp
+                if let newValue = tmp {
+                    self = .num(newValue)
+                } else {
+                    self = .nul
+                }
+            }
+        }
+    }
+
+    /// Returns the underlying `Bool` for `Bric.bol` cases, else nil
+    @inlinable public var bol: Bool? {
+        get { if case .bol(let x) = self { return x } else { return nil } }
+//        set { self = newValue.flatMap(Bric.bol) ?? .nul }
+        _modify {
+            var tmp: Optional<Bool>
+            if case .bol(let x) = self {
+                tmp = x
+                yield &tmp
+                if let newValue = tmp {
+                    self = .bol(newValue)
+                } else {
+                    self = .nul
+                }
+            } else {
+                tmp = nil
+                yield &tmp
+                if let newValue = tmp {
+                    self = .bol(newValue)
+                } else {
+                    self = .nul
+                }
+            }
+        }
+    }
+
     /// Returns the underlying `Array<Bric>` for `Bric.arr` cases, else nil
     @inlinable public var arr: [Bric]? {
-        get { if case .arr(let x) = self { return x.map({ $0 as Bric }) } else { return nil } }
-        set { self = newValue.flatMap(Bric.arr) ?? .nul }
+        get { if case .arr(let x) = self { return x } else { return nil } }
+//        set { self = newValue.flatMap(Bric.arr) ?? .nul }
+        _modify {
+            var tmp: Optional<[Bric]>
+            if case .arr(let x) = self {
+                tmp = x
+                yield &tmp
+                if let newValue = tmp {
+                    self = .arr(newValue)
+                } else {
+                    self = .nul
+                }
+            } else {
+                tmp = nil
+                yield &tmp
+                if let newValue = tmp {
+                    self = .arr(newValue)
+                } else {
+                    self = .nul
+                }
+            }
+        }
     }
 
     /// Returns the underlying `Dictionary<String,Bric>` for `Bric.obj` cases, else nil
     @inlinable public var obj: [String : Bric]? {
         get { if case .obj(let x) = self { return x } else { return nil } }
-        set { self = newValue.flatMap(Bric.obj) ?? .nul }
+//        set { self = newValue.flatMap(Bric.obj) ?? .nul }
+        _modify {
+            var tmp: Optional<[String : Bric]>
+            if case .obj(let x) = self {
+                tmp = x
+                yield &tmp
+                if let newValue = tmp {
+                    self = .obj(newValue)
+                } else {
+                    self = .nul
+                }
+            } else {
+                tmp = nil
+                yield &tmp
+                if let newValue = tmp {
+                    self = .obj(newValue)
+                } else {
+                    self = .nul
+                }
+            }
+        }
     }
 
 }

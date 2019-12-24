@@ -382,7 +382,7 @@ public struct Curio {
     func encapsulateType(name typename: CodeTypeName, type: CodeExternalType, access: CodeAccess) -> CodeNamedType {
         let aliasType = type
         let propn = CodePropName("rawValue")
-        let propd = CodeProperty.Declaration(name: propn, type: aliasType, access: access, mutable: false)
+        let propd = CodeProperty.Declaration(name: propn, type: aliasType, access: access, mutable: true)
         var enc = CodeStruct(name: typename, access: access, props: [propd.implementation])
 
         enc.conforms += standardAdoptions

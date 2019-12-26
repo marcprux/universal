@@ -19,7 +19,15 @@ public extension WrapperType where Self : ExpressibleByNilLiteral {
     /// The underlying type that is contained in this wrapper.
     @inlinable var flatValue: Wrapped? {
         get { self.flatMap({ $0 }) }
-        set { self = newValue.flatMap(Self.init) ?? nil }
+        _modify {
+            var val = self.flatMap({ $0 })
+            yield &val
+            if let val = val {
+                self = Self(val)
+            } else {
+                self = nil
+            }
+        }
     }
 }
 
@@ -63,13 +71,6 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
         self = .some(some)
     }
 
-    /// Cover for `indirectValue`
-    @available(*, deprecated, renamed: "indirectValue")
-    @inlinable public var value: Wrapped {
-        get { indirectValue }
-        set { indirectValue = newValue }
-    }
-
     /// The underlying value of this `IndirectEnum`.
     @inlinable public var indirectValue: Wrapped {
         get {
@@ -77,10 +78,6 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
             case .some(let v): return v
             }
         }
-
-//        set {
-//            self = .some(newValue)
-//        }
 
         _modify {
             switch self {

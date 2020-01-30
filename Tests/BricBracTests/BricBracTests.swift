@@ -32,7 +32,7 @@ class BricBracTests : XCTestCase {
         ("testKeyedSubscripting", testKeyedSubscripting),
         ("testBricAlter", testBricAlter),
         ("testJSONFormatting", testJSONFormatting),
-        ("testBricBracCompatability", testBricBracCompatability),
+        ("testBricBracCompatibility", testBricBracCompatibility),
         ("testStringReplace", testStringReplace),
         ("testJSONPointers", testJSONPointers),
         ("testStreamingParser", testStreamingParser),
@@ -1082,7 +1082,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func testBricBracCompatability() {
+    func testBricBracCompatibility() {
 
         let fm = FileManager.default
         do {

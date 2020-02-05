@@ -182,7 +182,14 @@ public extension OneOfNType where T1 == ExplicitNull /* e.g., Nullable */ {
     static var null: Self { return .init(.null) }
 
     /// Returns `true` if explicitly `null`
-    var isExplicitNull: Bool { extract() == ExplicitNull.null }
+    var isExplicitNull: Bool { infer() == ExplicitNull.null }
+}
+
+public extension OneOf2 where T1 == ExplicitNull /* i.e., Nullable */ {
+    /// The `null` side of the `Nullable`.
+    var nullValue: ExplicitNull? { v1 }
+    /// The non-`null` side of the `Nullable`.
+    var fullValue: T2? { v2 }
 }
 
 public extension Nullable {
@@ -224,11 +231,11 @@ public protocol OneOfNType : SomeOf {
     associatedtype T1
     init(t1: T1)
     init(_ t1: T1)
-    func extract() -> T1?
+    func infer() -> T1?
 }
 
 public extension OneOfNType {
-    @inlinable var v1: T1? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v1: T1? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// The protocol of a type that can contain one out of 2 or more exclusive options
@@ -236,11 +243,11 @@ public protocol OneOf2Type : OneOfNType {
     associatedtype T2
     init(t2: T2)
     init(_ t2: T2)
-    func extract() -> T2?
+    func infer() -> T2?
 }
 
 public extension OneOf2Type {
-    @inlinable var v2: T2? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v2: T2? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2
@@ -270,8 +277,8 @@ public indirect enum OneOf2<T1, T2> : OneOf2Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
 }
 
 extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
@@ -462,11 +469,11 @@ public protocol OneOf3Type : OneOf2Type {
     associatedtype T3
     init(t3: T3)
     init(_ t3: T3)
-    func extract() -> T3?
+    func infer() -> T3?
 }
 
 public extension OneOf3Type {
-    @inlinable var v3: T3? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v3: T3? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3
@@ -500,9 +507,9 @@ public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
 }
 
 extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
@@ -599,11 +606,11 @@ public protocol OneOf4Type : OneOf3Type {
     associatedtype T4
     init(t4: T4)
     init(_ t4: T4)
-    func extract() -> T4?
+    func infer() -> T4?
 }
 
 public extension OneOf4Type {
-    @inlinable var v4: T4? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v4: T4? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -643,10 +650,10 @@ public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
 
 }
 
@@ -752,11 +759,11 @@ public protocol OneOf5Type : OneOf4Type {
     associatedtype T5
     init(t5: T5)
     init(_ t5: T5)
-    func extract() -> T5?
+    func infer() -> T5?
 }
 
 public extension OneOf5Type {
-    @inlinable var v5: T5? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v5: T5? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5
@@ -800,11 +807,11 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func infer() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
 }
 
 extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable {
@@ -918,11 +925,11 @@ public protocol OneOf6Type : OneOf5Type {
     associatedtype T6
     init(t6: T6)
     init(_ t6: T6)
-    func extract() -> T6?
+    func infer() -> T6?
 }
 
 public extension OneOf6Type {
-    @inlinable var v6: T6? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v6: T6? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -972,12 +979,12 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func infer() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func infer() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
 }
 
 extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable {
@@ -1099,11 +1106,11 @@ public protocol OneOf7Type : OneOf6Type {
     associatedtype T7
     init(t7: T7)
     init(_ t7: T7)
-    func extract() -> T7?
+    func infer() -> T7?
 }
 
 public extension OneOf7Type {
-    @inlinable var v7: T7? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v7: T7? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 
@@ -1159,13 +1166,13 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func infer() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func infer() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func infer() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
 }
 
 extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable {
@@ -1295,11 +1302,11 @@ public protocol OneOf8Type : OneOf7Type {
     associatedtype T8
     init(t8: T8)
     init(_ t8: T8)
-    func extract() -> T8?
+    func infer() -> T8?
 }
 
 public extension OneOf8Type {
-    @inlinable var v8: T8? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v8: T8? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
@@ -1358,14 +1365,14 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
-    @inlinable public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func infer() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func infer() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func infer() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func infer() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
 }
 
 extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable {
@@ -1504,11 +1511,11 @@ public protocol OneOf9Type : OneOf8Type {
     associatedtype T9
     init(t9: T9)
     init(_ t9: T9)
-    func extract() -> T9?
+    func infer() -> T9?
 }
 
 public extension OneOf9Type {
-    @inlinable var v9: T9? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v9: T9? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
@@ -1572,15 +1579,15 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type {
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
-    @inlinable public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
-    @inlinable public func extract() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func infer() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func infer() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func infer() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func infer() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
+    @inlinable public func infer() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
 }
 
 extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable {
@@ -1727,11 +1734,11 @@ public protocol OneOf10Type : OneOf9Type {
     associatedtype T10
     init(t10: T10)
     init(_ t10: T10)
-    func extract() -> T10?
+    func infer() -> T10?
 }
 
 public extension OneOf10Type {
-    @inlinable var v10: T10? { get { return extract() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+    @inlinable var v10: T10? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10
@@ -1800,16 +1807,16 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10T
         }
     }
 
-    @inlinable public func extract() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
-    @inlinable public func extract() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
-    @inlinable public func extract() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
-    @inlinable public func extract() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
-    @inlinable public func extract() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
-    @inlinable public func extract() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
-    @inlinable public func extract() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
-    @inlinable public func extract() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
-    @inlinable public func extract() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
-    @inlinable public func extract() -> T10? { if case .v10(let v10) = self { return v10 } else { return nil } }
+    @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
+    @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
+    @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
+    @inlinable public func infer() -> T4? { if case .v4(let v4) = self { return v4 } else { return nil } }
+    @inlinable public func infer() -> T5? { if case .v5(let v5) = self { return v5 } else { return nil } }
+    @inlinable public func infer() -> T6? { if case .v6(let v6) = self { return v6 } else { return nil } }
+    @inlinable public func infer() -> T7? { if case .v7(let v7) = self { return v7 } else { return nil } }
+    @inlinable public func infer() -> T8? { if case .v8(let v8) = self { return v8 } else { return nil } }
+    @inlinable public func infer() -> T9? { if case .v9(let v9) = self { return v9 } else { return nil } }
+    @inlinable public func infer() -> T10? { if case .v10(let v10) = self { return v10 } else { return nil } }
 }
 
 extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable, T10: Bricable {

@@ -331,7 +331,19 @@ extension OneOf2 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable {
 extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
 extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 
+
 public extension OneOf2 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    @inlinable func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> OneOf2<U1, U2> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>)) -> T {
         get {
@@ -570,6 +582,19 @@ extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { }
 
 public extension OneOf3 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    @inlinable func map3<U1, U2, U3>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3)) rethrows -> OneOf3<U1, U2, U3> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>)) -> T {
         get {
@@ -720,6 +745,21 @@ extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable { }
 
 public extension OneOf4 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    ///   - f4: the function to apply to `T4`
+    @inlinable func map4<U1, U2, U3, U4>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4)) rethrows -> OneOf4<U1, U2, U3, U4> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        case .v4(let t4): return try .init(f4(t4))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>)) -> T {
         get {
@@ -882,6 +922,23 @@ extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
 
 public extension OneOf5 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    ///   - f4: the function to apply to `T4`
+    ///   - f5: the function to apply to `T5`
+    @inlinable func map5<U1, U2, U3, U4, U5>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5)) rethrows -> OneOf5<U1, U2, U3, U4, U5> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        case .v4(let t4): return try .init(f4(t4))
+        case .v5(let t5): return try .init(f5(t5))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>)) -> T {
         get {

@@ -192,6 +192,14 @@ public extension OneOf2 where T1 == ExplicitNull /* i.e., Nullable */ {
     var fullValue: T2? { v2 }
 }
 
+public extension Optional where Wrapped == ExplicitNull {
+    /// Converts an `.some(ExplicitNull.null)` to `false` and `.none` to `true`
+    var explicitNullAsFalse: Bool {
+        get { self == ExplicitNull.null ? false : true }
+        set { self = newValue == true ? .none : .some(ExplicitNull.null) }
+    }
+}
+
 public extension Nullable {
     /// A nullable `.full`, similar to `Optional.some`
     static func full(_ some: T2) -> Self { return .v2(some) }

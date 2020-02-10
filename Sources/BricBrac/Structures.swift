@@ -200,6 +200,14 @@ public extension Optional where Wrapped == ExplicitNull {
     }
 }
 
+extension WrapperType where Self : ExpressibleByNilLiteral {
+    /// Returns this wrapped instance as a Nullablle
+    var asNullable: Nullable<Wrapped> {
+        get { flatMap({ .init($0) }) ?? .null }
+        set { self = newValue.fullValue.flatMap({ .init($0) }) ?? nil }
+    }
+}
+
 public extension Nullable {
     /// A nullable `.full`, similar to `Optional.some`
     static func full(_ some: T2) -> Self { return .v2(some) }

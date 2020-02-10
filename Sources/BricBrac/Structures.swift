@@ -200,7 +200,7 @@ public extension Optional where Wrapped == ExplicitNull {
     }
 }
 
-extension WrapperType where Self : ExpressibleByNilLiteral {
+public extension WrapperType where Self : ExpressibleByNilLiteral {
     /// Returns this wrapped instance as a Nullablle
     var asNullable: Nullable<Wrapped> {
         get { flatMap({ .init($0) }) ?? .null }

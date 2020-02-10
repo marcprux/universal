@@ -201,11 +201,18 @@ public extension Optional where Wrapped == ExplicitNull {
 }
 
 public extension WrapperType where Self : ExpressibleByNilLiteral {
-    /// Returns this wrapped instance as a Nullablle
+    /// Returns this wrapped instance as a `Nullablle`
     var asNullable: Nullable<Wrapped> {
         get { flatMap({ .init($0) }) ?? .null }
         set { self = newValue.fullValue.flatMap({ .init($0) }) ?? nil }
     }
+
+    /// Returns this wrapped instance as an `Optional<Nullablle>`, where an underlying `null` is converted to `none`.
+    var asNullableOptional: Nullable<Wrapped>? {
+        get { flatMap({ .init($0) }) }
+        set { self = newValue?.fullValue.flatMap({ .init($0) }) ?? nil }
+    }
+
 }
 
 public extension Nullable {

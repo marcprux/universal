@@ -3,7 +3,7 @@
 //  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 8/20/15.
-//  Copyright © 2015 io.glimpse. All rights reserved.
+//  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
 /// A non-recursive streaming parser for JSON (ECMA-404). The parser operates by being fed a complete or 

@@ -3,7 +3,7 @@
 //  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 6/17/15.
-//  Copyright © 2015 io.glimpse. All rights reserved.
+//  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
 extension Bric : TextOutputStreamable {

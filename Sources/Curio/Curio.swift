@@ -3,7 +3,7 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 6/30/15.
-//  Copyright © 2015 io.glimpse. All rights reserved.
+//  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
 /// A JSON Schema processor that emits Swift code using the Bric-a-Brac framework for marshalling and unmarshalling.

@@ -3,7 +3,7 @@
 //  CurioDemoModels
 //
 //  Created by Marc Prud'hommeaux on 6/10/18.
-//  Copyright © 2018 io.glimpse. All rights reserved.
+//  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
 

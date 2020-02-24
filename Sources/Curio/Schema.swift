@@ -3,7 +3,7 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 6/21/15.
-//  Copyright © 2015 io.glimpse. All rights reserved.
+//  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
 public struct Schema : Codable, Equatable, Hashable {

@@ -461,12 +461,7 @@ extension OneOrMany where T2 == [T1] {
     /// Any time the array is set to a single value it will set the first case, everything else sets the second case.
     @inlinable public var array: [T1] {
         get {
-            switch self {
-            case .v1(let x):
-                return [x]
-            case .v2(let x):
-                return x
-            }
+            array(expanding: { [$0] })
         }
 
         set {
@@ -475,6 +470,17 @@ extension OneOrMany where T2 == [T1] {
             } else {
                 self = .v2(newValue)
             }
+        }
+    }
+
+    /// Returns this value as an array, using the expansion function to convert from a single item to multiple items.
+    /// - Parameter expanding: the function to expand the array
+    @inlinable public func array(expanding: (T1) -> T2) -> T2 {
+        switch self {
+        case .v1(let one):
+            return expanding(one)
+        case .v2(let many):
+            return many
         }
     }
 }

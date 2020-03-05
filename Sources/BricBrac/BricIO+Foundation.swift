@@ -80,13 +80,15 @@ public extension JSONDecoder {
 public extension Encodable {
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)
     @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-    func encodedString(encoder: (Self) throws -> (Data) = BricBracSharedSortedJSONEncoder.encode) rethrows -> String {
+    @inlinable func encodedString(encoder: (Self) throws -> (Data) = BricBracSharedSortedJSONEncoder.encode) rethrows -> String {
         return String(data: try encoder(self), encoding: .utf8) ?? "{}"
     }
 
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
     /// this is somewhat faster than `encodedString` because it returns unordered keys.
-    func encodedStringUnordered() throws -> String {
+    ///
+    /// Example: for a 2.3MB spec, this has been seen to be almost 3x faster (269ms vs. 769ms)
+    @inlinable func encodedStringUnordered() throws -> String {
         return String(data: try BricBracSharedUnsortedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
     }
 

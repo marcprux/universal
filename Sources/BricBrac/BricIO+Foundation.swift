@@ -44,7 +44,7 @@ public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
 
 public extension Encodable {
     /// Returns a simple debug description of the JSON encoding of the given `Encodable`.
-    var jsonDebugDescription: String { (try? encodedString()) ?? "{}" }
+    var jsonDebugDescription: String { (try? encodedStringOrdered()) ?? "{}" }
 }
 
 public extension JSONEncoder {
@@ -188,8 +188,8 @@ public extension Bricable {
         if let userInfo = userInfo {
             decoder.userInfo = userInfo
         }
-        
-        return try decoder.decode(type, from: bric().stringify().data(using: .utf8) ?? Data())
+
+        return try decoder.decode(type, from: BricBracSharedUnsortedJSONEncoder.encode(self.bric()))
     }
 }
 

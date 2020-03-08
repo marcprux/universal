@@ -25,22 +25,24 @@ extension Decodable {
 }
 
 
-/// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
-/// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
-@available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-public let BricBracSharedSortedJSONEncoder: JSONEncoder = {
+private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting) -> JSONEncoder {
     let encoder = JSONEncoder()
-    encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes] // we want consistent key ordering
+    encoder.outputFormatting = outputFormatting
     return encoder
-}()
+}
 
 /// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
 /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
-public let BricBracSharedUnsortedJSONEncoder: JSONEncoder = {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.withoutEscapingSlashes] // we want it to be unsorted
-    return encoder
-}()
+@available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
+public let BricBracSharedSortedJSONEncoder = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes]) // we want consistent key ordering
+
+/// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
+/// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
+public let BricBracSharedUnsortedJSONEncoder = createJSONEncoder([.withoutEscapingSlashes]) // we want it to be unsorted
+
+@available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
+public let BricBracSharedFormattedJSONEncoder = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes, .prettyPrinted])
+
 
 public extension Encodable {
     /// Returns a simple debug description of the JSON encoding of the given `Encodable`.
@@ -102,6 +104,10 @@ public extension Encodable {
         return String(data: try BricBracSharedUnsortedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
     }
 
+    /// Returns an pretty-printed encoded string for the encodable.
+    @inlinable func encodedStringFormatted() throws -> String {
+        return String(data: try BricBracSharedFormattedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
+    }
 
 
     /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric.

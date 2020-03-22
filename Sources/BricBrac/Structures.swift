@@ -353,7 +353,9 @@ extension OneOf2 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable {
 
 extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
 extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
-
+extension OneOf2 : Identifiable where T1 : Identifiable, T2 : Identifiable {
+    public var id: OneOf2<T1.ID, T2.ID> { map2({ $0.id }, { $0.id }) }
+}
 
 public extension OneOf2 {
     /// Apply the separate mapping functions for the individual options.
@@ -609,6 +611,9 @@ extension OneOf3 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable { }
 extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { }
+extension OneOf3 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable {
+    public var id: OneOf3<T1.ID, T2.ID, T3.ID> { map3({ $0.id }, { $0.id }, { $0.id }) }
+}
 
 public extension OneOf3 {
     /// Apply the separate mapping functions for the individual options.
@@ -772,6 +777,9 @@ extension OneOf4 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable { }
 extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable { }
+extension OneOf4 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable {
+    public var id: OneOf4<T1.ID, T2.ID, T3.ID, T4.ID> { map4({ $0.id }, { $0.id }, { $0.id }, { $0.id }) }
+}
 
 public extension OneOf4 {
     /// Apply the separate mapping functions for the individual options.
@@ -949,6 +957,9 @@ extension OneOf5 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable { }
 extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
+extension OneOf5 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable {
+    public var id: OneOf5<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID> { map5({ $0.id }, { $0.id }, { $0.id }, { $0.id }, { $0.id }) }
+}
 
 public extension OneOf5 {
     /// Apply the separate mapping functions for the individual options.

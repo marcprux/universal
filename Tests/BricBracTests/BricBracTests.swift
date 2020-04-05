@@ -2120,8 +2120,8 @@ extension BricBracTests {
         var i1 = I1()
 
         i1.i2 = .init(I2())
-        i1.i2?.indirectValue.i3 = .init(I3())
-        i1.i2?.indirectValue.i3?.indirectValue.name = "Foo"
+        i1.i2?.wrappedValue.i3 = .init(I3())
+        i1.i2?.wrappedValue.i3?.wrappedValue.name = "Foo"
 
         for i in 1..<10 {
             i1.map["\(i)"] = "\(i)"

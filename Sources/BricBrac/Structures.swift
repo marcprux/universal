@@ -33,37 +33,14 @@ public extension WrapperType where Self : ExpressibleByNilLiteral {
 
 extension Optional : WrapperType { }
 
-public typealias Indirect = IndirectEnum
-
 public extension Optional {
     /// Wrap this optional in an indirection
     func indirect() -> Optional<Indirect<Wrapped>> {
         return self.flatMap(Indirect.init(rawValue:))
     }
 }
-
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
-public struct IndirectStruct<Wrapped> : WrapperType {
-    /// The underlying holder of the value; must be a type that can handle recursive types, which is why it is an `Array` and not a `CollectionOfOne`
-    private var wrapper: [Wrapped]
-
-    public var value: Wrapped {
-        get { return self.wrapper[0] }
-        set { self.wrapper[0] = newValue }
-    }
-
-    /// Construct a non-`nil` instance that stores `value`.
-    public init(_ value: Wrapped) {
-        self.wrapper = [value]
-    }
-
-    public func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U? {
-        return try f(value)
-    }
-}
-
-/// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
-public indirect enum IndirectEnum<Wrapped> : WrapperType {
+@propertyWrapper public indirect enum Indirect<Wrapped> : WrapperType {
     case some(Wrapped)
 
     /// Construct a non-`nil` instance that stores `some`.
@@ -72,7 +49,7 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
     }
 
     /// The underlying value of this `IndirectEnum`.
-    @inlinable public var indirectValue: Wrapped {
+    @inlinable public var wrappedValue: Wrapped {
         get {
             switch self {
             case .some(let v): return v
@@ -89,7 +66,7 @@ public indirect enum IndirectEnum<Wrapped> : WrapperType {
     }
 
     @inlinable public func flatMap<U>(_ f: (Wrapped) throws -> U?) rethrows -> U? {
-        return try f(indirectValue)
+        return try f(wrappedValue)
     }
 }
 
@@ -101,7 +78,7 @@ extension Indirect : RawRepresentable {
         self.init(some)
     }
 
-    @inlinable public var rawValue: Wrapped { return indirectValue }
+    @inlinable public var rawValue: Wrapped { return wrappedValue }
 }
 
 // similar to Optional codability at:

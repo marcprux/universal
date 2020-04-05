@@ -24,11 +24,14 @@ public extension CodeEmitterType {
     }
 }
 
-/// The default ordering of types: typealiases first, then enums, then by name
+/// The default ordering of types: protocols, typealiases, enums, then by name
 func typeOrdering(t1: CodeNamedType, t2: CodeNamedType) -> Bool {
+    let (t1proto, t2proto) = ((t1 is CodeProtocol), (t2 is CodeProtocol))
     let (t1alias, t2alias) = ((t1 is CodeTypeAlias), (t2 is CodeTypeAlias))
     let (t1enum, t2enum) = ((t1 is CodeEnumType), (t2 is CodeEnumType))
 
+    if t1proto && !t2proto { return true }
+    if !t1proto && t2proto { return false }
     if t1alias && !t2alias { return true }
     if !t1alias && t2alias { return false }
     if t1enum && !t2enum { return true }
@@ -211,11 +214,11 @@ public struct CodeExternalType : CodeType {
             return name
         } else if let shorthand = shorthand {
             var str = (shorthand.prefix ?? "")
-            str += (generics.map({ $0.identifier })).joined(separator: ", ")
+            str += (generics.map(\.identifier)).joined(separator: ", ")
             str += (shorthand.suffix ?? "")
             return str
         } else {
-            return name + "<" + (generics.map({ $0.identifier })).joined(separator: ", ") + ">"
+            return name + "<" + (generics.map(\.identifier)).joined(separator: ", ") + ">"
         }
     }
 
@@ -535,7 +538,7 @@ public struct CodeSimpleEnum<T> : CodeEnumType, CodeStateType, Hashable {
         let typeName = String(describing: T.self)
         // get the last part of "Swift.String", "Swift.Int", etc.
         let lastPart: String = typeName.afterLast(".")
-        var exts = ([lastPart] + conforms.map({ $0.identifier })).joined(separator: ", ")
+        var exts = ([lastPart] + conforms.map(\.identifier)).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
@@ -607,7 +610,7 @@ public struct CodeEnum : CodeEnumType, Hashable {
     }
 
     public var directReferences : [CodeNamedType] {
-        return [self] + cases.flatMap({ $0.directReferences })
+        return [self] + cases.flatMap(\.directReferences)
     }
 
     public struct Case {
@@ -621,7 +624,7 @@ public struct CodeEnum : CodeEnumType, Hashable {
     }
 
     public var adoptions: String {
-        var exts = conforms.map({ $0.identifier }).joined(separator: ", ")
+        var exts = conforms.map(\.identifier).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
@@ -682,11 +685,11 @@ public struct CodeProtocol : CodeNamedType, CodeConformantType, Hashable {
     }
 
     public var allprops : [CodeProperty.Declaration] {
-        return conforms.flatMap({ $0.allprops }) + props
+        return conforms.flatMap(\.allprops) + props
     }
 
     var adoptions: String {
-        var exts = conforms.map({ $0.identifier }).joined(separator: ", ")
+        var exts = conforms.map(\.identifier).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
@@ -733,7 +736,7 @@ public struct CodeStruct : CodeStateType, Hashable {
 
     /// A struct's adoptions is the list of protocols it adopts
     var adoptions: String {
-        var exts = conforms.map({ $0.identifier }).joined(separator: ", ")
+        var exts = conforms.map(\.identifier).joined(separator: ", ")
         if !exts.isEmpty {
             exts = ": " + exts
         }
@@ -741,7 +744,7 @@ public struct CodeStruct : CodeStateType, Hashable {
     }
 
     public var directReferences : [CodeNamedType] {
-        return [self] + props.compactMap({ $0.declaration.type }).flatMap({ $0.directReferences })
+        return [self] + props.compactMap(\.declaration.type).flatMap(\.directReferences)
     }
 
     public func emit(_ emitter: CodeEmitterType) {
@@ -750,7 +753,7 @@ public struct CodeStruct : CodeStateType, Hashable {
         for p in props {
             p.emit(emitter)
         }
-        for p in conforms.flatMap({ $0.allprops }) {
+        for p in conforms.flatMap(\.allprops) {
             // provide default implementations for all protocol properties
             // TODO: only is we have not explicitly provided implementations
             p.implementation.emit(emitter)
@@ -789,7 +792,7 @@ public struct CodeClass : CodeStateType, Hashable {
 
     /// A class' adoptions is the list of protocols it adopts as well as its superclass
     var adoptions: String {
-        var refs = conforms.map({ $0.identifier })
+        var refs = conforms.map(\.identifier)
         if let ext = extends.first { refs.insert(ext.identifier, at: 0) }
 
         var exts = refs.joined(separator: ", ")
@@ -802,7 +805,7 @@ public struct CodeClass : CodeStateType, Hashable {
     public var directReferences : [CodeNamedType] {
         // a class does not have any "direct" references since it is a reference type
         return []
-        // return [self] + props.flatMap({ $0.declaration.type })
+        // return [self] + props.flatMap(\.declaration.type)
     }
 
     public func emit(_ emitter: CodeEmitterType) {
@@ -812,7 +815,7 @@ public struct CodeClass : CodeStateType, Hashable {
         for p in props {
             p.emit(emitter)
         }
-        for p in conforms.flatMap({ $0.allprops }) {
+        for p in conforms.flatMap(\.allprops) {
             // provide default implementations for all protocol properties
             // TODO: only is we have not explicitly provided implementations
             // TODO: only if the superclass has not already provided an implementation

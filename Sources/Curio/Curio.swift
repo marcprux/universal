@@ -79,8 +79,14 @@ public struct Curio {
     /// The suffix for a case operation
     public var caseSuffix = "Case"
 
-    public var accessor: ([CodeTypeName])->(CodeAccess) = { _ in .`public` }
-    public var renamer: ([CodeTypeName], String)->(CodeTypeName?) = { (parents, id) in nil }
+    public var accessor: ([CodeTypeName]) -> (CodeAccess) = { _ in .`public` }
+    public var renamer: ([CodeTypeName], String) -> (CodeTypeName?) = { (parents, id) in nil }
+
+    /// The name of a centralized enum for all top-level ty
+    public var registryTypeName: String? = nil
+
+    /// The name of a centralized conformance type to synthesize and conform to (in additional to the default equatable, codable, etc.)
+    public var conformances: [CodeProtocol] = []
 
     /// The list of type names to exclude from the generates file
     public var excludes: Set<CodeTypeName> = []
@@ -90,6 +96,9 @@ public struct Curio {
 
     /// Override individual property types
     public var propertyTypeOverrides: [CodeTypeName: CodeTypeName] = [:]
+
+    /// Manual specification of property indirects
+    public var propertyIndirects: Set<CodeTypeName> = []
 
     /// The case of the generated enums
     public var enumCase: EnumCase = .lower
@@ -102,7 +111,7 @@ public struct Curio {
     /// The suffix to append to generated types
     public var typeSuffix = ""
 
-    /// Whether to gather identical types and promote them to a top level upon reificiation (helps with reducing the number of parochical string constants)
+    /// Whether to gather identical types and promote them to a top level upon reificiation (helps with reducing the number of parochical string constants and local oneofs)
     public var promoteIdenticalTypes = true
 
     public var propOrdering: ([CodeTypeName], String)->(Array<String>?) = { (parents, id) in nil }
@@ -113,6 +122,7 @@ public struct Curio {
         if generateEquals { protos.append(.equatable) }
         if generateHashable { protos.append(.hashable) }
         if generateCodable { protos.append(.codable) }
+        protos += conformances
         return protos
     }
 
@@ -488,7 +498,7 @@ public struct Curio {
                         } else {
                             code.nestedTypes.append(subtype)
 
-                            if generateValueTypes && subtype.directReferences.map({ $0.name }).contains(ename) {
+                            if generateValueTypes && subtype.directReferences.map(\.name).contains(ename) {
                                 casetype = indirectType(subtype)
                             } else {
                                 casetype = subtype
@@ -680,12 +690,22 @@ public struct Curio {
                 anonPropCount += 1
                 return anonPropCount - 1
             }
-            var props: [PropDec] = properties.map({ PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, prop: $0.schema, anon: $0.name == nil) })
+            var props: [PropDec] = properties
+                .map({
+                    PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, prop: $0.schema, anon: $0.name == nil)
+                })
+                .filter({ name, required, prop, anon in
+                    !excludes.contains(typename + "." + name)
+                })
 
             for (name, var required, prop, anon) in props {
                 var proptype: CodeType
 
-                if let overrideType = propertyTypeOverrides[typename + "." + name] {
+                let propPath = typename + "." + name
+
+                let forceIndirect = propertyIndirects.contains(propPath)
+
+                if let overrideType = propertyTypeOverrides[propPath] {
                     proptype = CodeExternalType(overrideType, access: accessor(parents + [typename]))
                     if !required && overrideType.hasSuffix("!") {
                         required = true // the type can also override the required-ness with a "!"
@@ -749,7 +769,7 @@ public struct Curio {
                         }
                     })
 
-                    if structProps.count >= self.indirectCountThreshold {
+                    if forceIndirect || structProps.count >= self.indirectCountThreshold {
                         indirect = indirectType(proptype)
                     }
                     proptype = optionalType(proptype)
@@ -764,13 +784,13 @@ public struct Curio {
                 // indirect properties are stored privately as _prop vars with cover wrappers that convert them to optionals
                 if let indirect = indirect {
                     let ipropn = propName(parents + [typename], indirectPrefix + name)
-                    var ipropd = CodeProperty.Declaration(name: ipropn, type: indirect, access: .`private`)
+                    let ipropd = CodeProperty.Declaration(name: ipropn, type: indirect, access: .`private`)
                     let ipropi = ipropd.implementation
                     code.props.append(ipropi)
 
                     propi.body = [
-                        "get { return " + ipropn + ".value }",
-                        "set { " + ipropn + " = Indirect(fromOptional: newValue) }",
+                        "get { return " + ipropn + ".wrappedValue }",
+                        "set { " + ipropn + " = newValue.flatMap({ Indirect($0) }) }",
                     ]
                 }
 
@@ -808,9 +828,11 @@ public struct Curio {
             /// Creates a Keys enumeration of all the valid keys for this state instance
             func makeKeys(_ keyName: String) {
                 var cases: [CodeCaseSimple<String>] = []
-                for (key, _, _, _) in props {
-                    let pname = propName(parents + [typename], key)
-                    cases.append(CodeCaseSimple(name: pname, value: key))
+                for (name, _, _, _) in props {
+                    let propPath = typename + "." + name
+
+                    let pname = propName(parents + [typename], name)
+                    cases.append(CodeCaseSimple(name: pname, value: name))
                 }
 
                 if addPropType != nil {
@@ -894,7 +916,7 @@ public struct Curio {
                             if wasIndirect {
                                 // unescape is a hack because we don't preserve the original property name, so we need to
                                 // do self._case = XXX instead of self._`case` = XXX
-                                initbody.append("self.\(indirectPrefix)\(unescape(d.name)) = Indirect(fromOptional: \(d.name))")
+                                initbody.append("self.\(indirectPrefix)\(unescape(d.name)) = \(d.name).flatMap({ Indirect($0) })")
                                 wasIndirect = false
                             } else {
                                 initbody.append("self.\(d.name) = \(d.name)")
@@ -966,7 +988,7 @@ public struct Curio {
                 code.conforms += [.keyedCodable]
             }
 
-            let reftypes = proptypes.map({ $0.type })
+            let reftypes = proptypes.map(\.type)
             if (mode == .allOf || mode == .anyOf) && useAllOfEnums && reftypes.count >= 2 && reftypes.count <= 10 {
                 let suffix = mode == .allOf ? allOfSuffix : anyOfSuffix
                 let sumType = mode == .allOf ? allOfType(reftypes) : anyOfType(reftypes)
@@ -1158,7 +1180,7 @@ public struct Curio {
             let tname = typeName(parents, ref)
             let extern = CodeExternalType(tname)
             return CodeTypeAlias(name: typename == tname ? typename + "Type" : typename, type: extern, access: accessor(parents))
-        } else if let not = schema.not?.indirectValue { // a "not" generates a validator against an inverse schema
+        } else if let not = schema.not?.wrappedValue, (try not.bricEncoded()).count > 0 { // a "not" generates a validator against an inverse schema, but only if it isn't empty
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)
             return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peerTypes: [inverseSchema])
@@ -1210,13 +1232,13 @@ public struct Curio {
             let deepTypes = flattenedTypes(types)
 
             func duplicatedTypes<T : CodeNamedType & Hashable>(_ typeList: [T], from: [CodeNamedType]) -> Set<T> {
-                var enumCounts: [T: Int] = [:]
-                for enumType in typeList {
-                    enumCounts[enumType] = (enumCounts[enumType] ?? 0) + 1
+                var typeCounts: [T: Int] = [:]
+                for checkType in typeList {
+                    typeCounts[checkType] = (typeCounts[checkType] ?? 0) + 1
                 }
 
                 var dupes: Set<T> = []
-                for (type, count) in enumCounts {
+                for (type, count) in typeCounts {
                     // any types that have more than one count and are not a "CodingKeys" type can be promoted to the top-level
                     if count > 1 && type.identifier != "CodingKeys" {
                         dupes.insert(type)
@@ -1226,22 +1248,29 @@ public struct Curio {
                 return dupes
             }
 
-            // we currently just promote string enums, since those are the most common shared code we've observed
-            var promotedTypes = duplicatedTypes(deepTypes.compactMap({ $0 as? CodeSimpleEnum<String> }), from: types)
+            func promoteTypes<T: CodeNamedType & Hashable>(_ array: [T]) {
+                var promotedTypes = duplicatedTypes(array, from: types)
 
-            types = types.map({ $0.purgeTypes(promotedTypes) })
+                types = types.map({ $0.purgeTypes(promotedTypes) })
 
-            // de-dupe promoted types: this can happen when there are two type names that have different description comments (e.g., LiteralWidth)
-            for (typeName, typeValues) in Dictionary(grouping: promotedTypes, by: { $0.name }) {
-                if typeValues.count > 1 {
-                    print("// warning: excluding \(typeValues.count) duplicate type names for \(typeName)")
-                    for drop in typeValues.sorted(by: { $0.codeValue < $1.codeValue }).dropFirst() {
-                        promotedTypes.remove(drop) // clear out duplicates
+                // de-dupe promoted types: this can happen when there are two type names that have different description comments (e.g., LiteralWidth)
+                for (typeName, typeValues) in Dictionary(grouping: promotedTypes, by: { $0.name }) {
+                    if typeValues.count > 1 {
+                        print("// warning: excluding \(typeValues.count) duplicate type names for \(typeName)")
+                        for drop in typeValues.sorted(by: { $0.codeValue < $1.codeValue }).dropFirst() {
+                            promotedTypes.remove(drop) // clear out duplicates
+                        }
                     }
                 }
+
+                types += Array(promotedTypes) // tack on the de-duplicated promoted types
             }
 
-            types += Array(promotedTypes) // tack on the de-duplicated promoted types
+            // we currently just promote string enums & typealiases, since those are the most common shared code we've observed
+            promoteTypes(deepTypes.compactMap({ $0 as? CodeSimpleEnum<String> }))
+
+            // also promote type aliases – not currently working (there are top-level duplicates)
+            // promoteTypes(deepTypes.compactMap({ $0 as? CodeTypeAlias }))
 
             // next add in any encapsulated types we have specified that might not actually
             // have been defined in the schema; this allows us to encapsulate things
@@ -1254,7 +1283,7 @@ public struct Curio {
             }
 
             // this doesn't quite work because we have some conflicting types for common cases (e.g., "Value")
-        // types = promoteTypes(deepTypes.compactMap({ $0 as? CodeTypeAlias }), from: types)
+            // types = promoteTypes(deepTypes.compactMap({ $0 as? CodeTypeAlias }), from: types)
         }
 
         // lastly we filter out all the excluded types we want to skip
@@ -1273,6 +1302,32 @@ public struct Curio {
             module.types = types
         }
 
+        // add in a root enumeration for all the types
+        if let registryTypeName = registryTypeName {
+            var registryType = CodeEnum(name: registryTypeName, access: accessor([]))
+            let allTypes = module.types.sorted(by: { $0.name < $1.name })
+
+            func addRegistryTypes<T: CodeNamedType>(name: String, types: [T]) {
+                if types.isEmpty { return } // cannot create an empty enum
+                var registryEnum = CodeSimpleEnum<String>(name: name, access: accessor([]))
+                registryEnum.conforms += [.caseIterable, .hashable]
+                for type in types {
+                    registryEnum.cases.append(.init(name: type.name, value: type.name))
+                }
+                registryType.nestedTypes += [registryEnum]
+            }
+
+            addRegistryTypes(name: "Structs", types: allTypes.compactMap({ $0 as? CodeStruct }).filter({ !$0.conforms.contains(.rawCodable) }))
+            addRegistryTypes(name: "Wrappers", types: allTypes.compactMap({ $0 as? CodeStruct }).filter({ $0.conforms.contains(.rawCodable) }))
+            addRegistryTypes(name: "Enums", types: allTypes.compactMap({ $0 as? CodeSimpleEnum<String> })) // TODO: also include CodeEnum, which would require extracting just the name
+            addRegistryTypes(name: "Aliases", types: allTypes.compactMap({ $0 as? CodeTypeAlias }))
+
+            module.types = [registryType] + module.types
+        }
+
+        // finally insert any root protocols we wanted to conform to
+        module.types = conformances + module.types
+
         return module
     }
 
@@ -1280,7 +1335,7 @@ public struct Curio {
 
 extension CodeNamedType {
     func purgeTypes<T : CodeNamedType & Hashable>(_ purge: Set<T>) -> CodeNamedType {
-        let purgeCodeSet = purge.map({ $0.codeValue }) // ### ugly, but generics prevent us from checking for equatable
+        let purgeCodeSet = purge.map(\.codeValue) // ### ugly, but generics prevent us from checking for equatable
         if var impl = self as? CodeStateType {
             impl.nestedTypes = impl.nestedTypes.filter({ !purgeCodeSet.contains($0.codeValue) }).map({ $0.purgeTypes(purge) })
             return impl
@@ -1380,7 +1435,7 @@ public extension Schema {
                     // ### FIXME: we hack in a check for "type" to determine if we are in a schema element and not,
                     //  e.g., another properties list, but this will fail if there is an actual property named "type"
                     if bc.bric()["type"] == "object" {
-                        let ordering = dict.map({ $0.0 })
+                        let ordering = dict.map(\.0)
                         sub.append((FidelityBricolage.StrType("propertyOrder".unicodeScalars), FidelityBricolage.arr(ordering.map(FidelityBricolage.str))))
                     }
                 }

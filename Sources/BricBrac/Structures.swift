@@ -246,6 +246,12 @@ public protocol OneOf2Type : OneOfNType {
     func infer() -> T2?
 }
 
+/// Construct a `OneOf2Type` from T1.
+@inlinable public func oneOf<T: OneOf2Type>(_ value: T.T1) -> T { .init(value) }
+
+/// Construct a `OneOf2Type` from T2.
+@inlinable public func oneOf<T: OneOf2Type>(_ value: T.T2) -> T { .init(value) }
+
 public extension OneOf2Type {
     @inlinable var v2: T2? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
@@ -496,6 +502,9 @@ public extension OneOf3Type {
     @inlinable var v3: T3? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
+/// Construct a `OneOf3Type` from T3.
+@inlinable public func oneOf<T: OneOf3Type>(_ value: T.T3) -> T { .init(value) }
+
 /// A simple union type that can be one of either T1 or T2 or T3
 public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
     case v1(T1), v2(T2), v3(T3)
@@ -649,6 +658,8 @@ public extension OneOf4Type {
     @inlinable var v4: T4? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
+/// Construct a `OneOf4Type` from T4.
+@inlinable public func oneOf<T: OneOf4Type>(_ value: T.T4) -> T { .init(value) }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4
 public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
@@ -815,6 +826,9 @@ public protocol OneOf5Type : OneOf4Type {
     init(_ t5: T5)
     func infer() -> T5?
 }
+
+/// Construct a `OneOf5Type` from T5.
+@inlinable public func oneOf<T: OneOf5Type>(_ value: T.T5) -> T { .init(value) }
 
 public extension OneOf5Type {
     @inlinable var v5: T5? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
@@ -1002,6 +1016,9 @@ public protocol OneOf6Type : OneOf5Type {
     func infer() -> T6?
 }
 
+/// Construct a `OneOf6Type` from T6.
+@inlinable public func oneOf<T: OneOf6Type>(_ value: T.T6) -> T { .init(value) }
+
 public extension OneOf6Type {
     @inlinable var v6: T6? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
@@ -1182,6 +1199,9 @@ public protocol OneOf7Type : OneOf6Type {
     init(_ t7: T7)
     func infer() -> T7?
 }
+
+/// Construct a `OneOf7Type` from T7.
+@inlinable public func oneOf<T: OneOf7Type>(_ value: T.T7) -> T { .init(value) }
 
 public extension OneOf7Type {
     @inlinable var v7: T7? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
@@ -1378,6 +1398,9 @@ public protocol OneOf8Type : OneOf7Type {
     init(_ t8: T8)
     func infer() -> T8?
 }
+
+/// Construct a `OneOf8Type` from T8.
+@inlinable public func oneOf<T: OneOf8Type>(_ value: T.T8) -> T { .init(value) }
 
 public extension OneOf8Type {
     @inlinable var v8: T8? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
@@ -1587,6 +1610,9 @@ public protocol OneOf9Type : OneOf8Type {
     init(_ t9: T9)
     func infer() -> T9?
 }
+
+/// Construct a `OneOf9Type` from T9.
+@inlinable public func oneOf<T: OneOf9Type>(_ value: T.T9) -> T { .init(value) }
 
 public extension OneOf9Type {
     @inlinable var v9: T9? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
@@ -1810,6 +1836,9 @@ public protocol OneOf10Type : OneOf9Type {
     init(_ t10: T10)
     func infer() -> T10?
 }
+
+/// Construct a `OneOf10Type` from T10.
+@inlinable public func oneOf<T: OneOf10Type>(_ value: T.T10) -> T { .init(value) }
 
 public extension OneOf10Type {
     @inlinable var v10: T10? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }

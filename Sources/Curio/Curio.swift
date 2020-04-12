@@ -821,7 +821,7 @@ public struct Curio {
                 let propd = CodeProperty.Declaration(name: propn, type: addPropType, access: accessor(parents))
                 let propi = propd.implementation
                 code.props.append(propi)
-                let pt: PropNameType = (name: propn, type: addPropType)
+//                let pt: PropNameType = (name: propn, type: addPropType)
 //                proptypes.append(pt)
             }
 
@@ -829,7 +829,7 @@ public struct Curio {
             func makeKeys(_ keyName: String) {
                 var cases: [CodeCaseSimple<String>] = []
                 for (name, _, _, _) in props {
-                    let propPath = typename + "." + name
+//                    let propPath = typename + "." + name
 
                     let pname = propName(parents + [typename], name)
                     cases.append(CodeCaseSimple(name: pname, value: name))

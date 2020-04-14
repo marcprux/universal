@@ -829,6 +829,29 @@ public extension Encodable {
     }
 }
 
+public extension Decoder {
+    /// Throw an error if any unrecognized properties are present.
+    @inlinable func forbidAdditionalProperties<S: Sequence, Key: CodingKey>(notContainedIn keys: S) throws where S.Element == Key {
+        let unkeyed = try self.singleValueContainer()
+        let raw = try unkeyed.decode([String: AnyDecodable].self)
+
+        let keyStrings = Set(keys.map(\.stringValue))
+        for key in raw.keys {
+            if !keyStrings.contains(key) {
+                // TODO: custom error when we forbid additional keys
+                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Additional property \"\(key)\" is forbidden"))
+            }
+        }
+    }
+}
+
+/// An empty type that decodes from anything, used for creating a validation map
+@usableFromInline
+internal struct AnyDecodable : Decodable {
+    @usableFromInline
+    init(from decoder: Decoder) { }
+}
+
 /// Extension similar to the built-in `decodeIfPresent` methods in an `KeyedDecodingContainerProtocol`
 /// implementation, but provides support for correct `Nullable` type decoding, working around the issue
 /// where `decodeIfPresent` will consume a `null` value before passing it to the underlying type which,

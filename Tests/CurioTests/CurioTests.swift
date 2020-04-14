@@ -65,6 +65,7 @@ class CurioTests: XCTestCase {
                         [
                             "title": "FirstAll",
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": [
                                 "a1": [ "type": "integer" ],
                                 "a2": [ "type": "string" ]
@@ -74,6 +75,7 @@ class CurioTests: XCTestCase {
                         [
                             "title": "SecondAll",
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": [
                                 "a3": [ "type": "boolean" ],
                                 "a4": [ "type": "number" ]
@@ -84,10 +86,12 @@ class CurioTests: XCTestCase {
                 ],
                 "anyOfField": [
                     "type": "object",
+                    "additionalProperties": true,
                     "anyOf": [
                         [
                             "title": "FirstAny",
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": [
                                 "b1": [ "type": "integer" ],
                                 "b2": [ "type": "string" ]
@@ -97,6 +101,7 @@ class CurioTests: XCTestCase {
                         [
                             "title": "SecondAny",
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": [
                                 "b3": [ "type": "boolean" ],
                                 "b4": [ "type": "number" ]
@@ -307,6 +312,20 @@ public class TestSampleModel : XCTestCase {
         assertNOTBracable(bric: bric)
 
         bric["simpleOneOf"] = "x"
+        assertBracable(bric: bric)
+    }
+
+    func testForbidAdditionalProperties() {
+        var bric: Bric = [
+            "anyOfField": [ "b1": 1, "b2": "b2" ],
+            "allOfField": [ "a1": 1, "a2": "a2", "a3": true, "a4": 1.2 ],
+            "oneOfField": [ "c1": 1, "c2": "b2", ],
+            "XXX": "YYY"
+        ]
+
+        assertNOTBracable(bric: bric)
+
+        bric["XXX"] = nil
         assertBracable(bric: bric)
     }
 

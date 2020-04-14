@@ -668,8 +668,7 @@ public struct Curio {
         enum StateMode { case standard, allOf, anyOf }
 
         /// Creates a schema instance for an "object" type with all the listed properties
-        func createObject(_ typename: CodeTypeName, properties: [PropInfo], mode modex: StateMode) throws -> CodeNamedType {
-            var mode = modex
+        func createObject(_ typename: CodeTypeName, properties: [PropInfo], mode: StateMode) throws -> CodeNamedType {
             let isUnionType = mode == .allOf || mode == .anyOf
 
             var code: CodeStateType
@@ -699,6 +698,7 @@ public struct Curio {
                 })
 
             for (name, var required, prop, anon) in props {
+                let _ = anon
                 var proptype: CodeType
 
                 let propPath = typename + "." + name
@@ -770,7 +770,7 @@ public struct Curio {
                     })
 
                     if forceIndirect || structProps.count >= self.indirectCountThreshold {
-                        indirect = indirectType(proptype)
+                        indirect = optionalType(indirectType(proptype))
                     }
                     proptype = optionalType(proptype)
                 }
@@ -789,7 +789,7 @@ public struct Curio {
                     code.props.append(ipropi)
 
                     propi.body = [
-                        "get { return " + ipropn + ".wrappedValue }",
+                        "get { return " + ipropn + "?.wrappedValue }",
                         "set { " + ipropn + " = newValue.flatMap({ Indirect($0) }) }",
                     ]
                 }
@@ -803,6 +803,11 @@ public struct Curio {
             var addPropType: CodeType? = nil
             let hasAdditionalProps: Bool? // true=yes, false=no, nil=unspecified
 
+            // currently we simply choose to allow or forbid additionalProperties
+            // we should also implement support for an additionalProperties schema values
+            // e.g., `"additionalProperties": { "type": "number" }` should generate:
+            // typealias AdditionalPropertiesValue = Double
+            // var additionalProperties: [String: AdditionalPropertiesValue]?
             switch schema.additionalProperties {
             case .none:
                 hasAdditionalProps = nil // TODO: make a global default for whether unspecified additionalProperties means yes or no
@@ -816,22 +821,34 @@ public struct Curio {
 
             let addPropName = renamer(parents, "additionalProperties") ?? "additionalProperties"
 
+            func keyName(_ prop: CodeProperty.Declaration) -> String {
+                keyName(name: prop.name)
+            }
+
+            func keyName(name: String) -> String {
+                let propPath = typename + "." + name
+                let forceIndirect = propertyIndirects.contains(propPath)
+                return (forceIndirect ? "_" : "") + name
+            }
+
             if let addPropType = addPropType {
                 let propn = propName(parents + [typename], addPropName)
                 let propd = CodeProperty.Declaration(name: propn, type: addPropType, access: accessor(parents))
                 let propi = propd.implementation
                 code.props.append(propi)
-//                let pt: PropNameType = (name: propn, type: addPropType)
+                if hasAdditionalProps != false { } // TODO
+                let _: PropNameType = (name: propn, type: addPropType)
 //                proptypes.append(pt)
             }
 
             /// Creates a Keys enumeration of all the valid keys for this state instance
-            func makeKeys(_ keyName: String) {
+            func makeKeys(_ keysName: String) {
                 var cases: [CodeCaseSimple<String>] = []
                 for (name, _, _, _) in props {
-//                    let propPath = typename + "." + name
+                    let propPath = typename + "." + name
+                    let forceIndirect = propertyIndirects.contains(propPath)
 
-                    let pname = propName(parents + [typename], name)
+                    let pname = propName(parents + [typename], (forceIndirect ? indirectPrefix : "") + name)
                     cases.append(CodeCaseSimple(name: pname, value: name))
                 }
 
@@ -840,7 +857,7 @@ public struct Curio {
                 }
 
                 if !cases.isEmpty {
-                    var keysType = CodeSimpleEnum(name: keyName, access: accessor(parents), cases: cases)
+                    var keysType = CodeSimpleEnum(name: keysName, access: accessor(parents), cases: cases)
                     keysType.conforms.append(.codingKey)
                     keysType.conforms.append(.hashable)
                     keysType.conforms.append(.codable)
@@ -859,7 +876,8 @@ public struct Curio {
                             let pname = propName(parents + [typename], key)
                             cases.append(CodeCaseSimple(name: pname, value: key))
                             let desc = prop.description?.enquote("\"").replace(character: "\n", with: "\\n") ?? "nil"
-                            keysBody.append("case .\(pname): return \(desc)")
+                            let kname = keyName(name: pname)
+                            keysBody.append("case .\(kname): return \(desc)")
                         }
 
                         keysBody.append(" } ")
@@ -947,21 +965,28 @@ public struct Curio {
 
             /// Creates a custom decoder for special `Optional<Nullable<T>>` handling (which the synthesized decoders don't handle correctly)
             func makeDecodable(permitSynthesizedImplementation: Bool = false) {
-                var decodebody: [String] = [
+                var decodebody: [String] = [ ]
+
+                if schema.additionalProperties == nil || schema.additionalProperties?.infer() == false {
+                    // forbid additional properties before we try to decode the other value – this should help decoding performance by failing quietly on invalid schemas before we dig into the decodability of nested properties
+                    decodebody.append("try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases)")
+                }
+
                     //"func keytype<Value>(_ kp: KeyPath<Self, Value>) -> Value.Type { Value.self }",
-                    "let values = try decoder.container(keyedBy: CodingKeys.self)",
-                ]
+                decodebody.append("let values = try decoder.container(keyedBy: CodingKeys.self)")
 
                 for p in code.props {
                     let d = p.declaration
                     if let typ = p.declaration.type {
                         var id = typ.identifier
                         if id.hasSuffix("!") { id = String(id.dropLast(1)) }
+                        let kname = keyName(d)
                         if id.hasSuffix("?") {
                             id = String(id.dropLast(1)) // decode non-optional version
-                            decodebody.append("self.\(d.name) = try values.decodeOptional(\(id).self, forKey: .\(d.name))")
+
+                            decodebody.append("self.\(d.name) = try values.decodeOptional(\(id).self, forKey: .\(kname))")
                         } else {
-                            decodebody.append("self.\(d.name) = try values.decode(\(id).self, forKey: .\(d.name))")
+                            decodebody.append("self.\(d.name) = try values.decode(\(id).self, forKey: .\(kname))")
                         }
                     }
                 }

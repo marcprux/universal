@@ -10,6 +10,7 @@ public struct Thing : Equatable, Hashable, Codable, KeyedCodable {
     }
 
     public init(from decoder: Decoder) throws {
+        try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
         let values = try decoder.container(keyedBy: CodingKeys.self) 
         self.weight = try values.decodeOptional(Int.self, forKey: .weight) 
     }

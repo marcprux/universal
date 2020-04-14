@@ -24,6 +24,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     }
 
     public init(from decoder: Decoder) throws {
+        try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
         let values = try decoder.container(keyedBy: CodingKeys.self) 
         self.allOfField = try values.decode(AllOfField.self, forKey: .allOfField) 
         self.anyOfField = try values.decode(AnyOfField.self, forKey: .anyOfField) 
@@ -196,6 +197,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
             }
 
             public init(from decoder: Decoder) throws {
+                try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
                 let values = try decoder.container(keyedBy: CodingKeys.self) 
                 self.c1 = try values.decode(Int.self, forKey: .c1) 
                 self.c2 = try values.decode(String.self, forKey: .c2) 
@@ -229,6 +231,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
             }
 
             public init(from decoder: Decoder) throws {
+                try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
                 let values = try decoder.container(keyedBy: CodingKeys.self) 
                 self.c3 = try values.decode(Bool.self, forKey: .c3) 
                 self.c4 = try values.decode(Double.self, forKey: .c4) 
@@ -300,6 +303,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         }
 
         public init(from decoder: Decoder) throws {
+            try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
             let values = try decoder.container(keyedBy: CodingKeys.self) 
             self.`case` = try values.decodeOptional(String.self, forKey: .`case`) 
             self.`for` = try values.decodeOptional(String.self, forKey: .`for`) 
@@ -345,6 +349,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         }
 
         public init(from decoder: Decoder) throws {
+            try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
             let values = try decoder.container(keyedBy: CodingKeys.self) 
             self.prop = try values.decode(LiteralValue.self, forKey: .prop) 
         }
@@ -376,6 +381,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         }
 
         public init(from decoder: Decoder) throws {
+            try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
             let values = try decoder.container(keyedBy: CodingKeys.self) 
             self.nested2 = try values.decode(Nested2.self, forKey: .nested2) 
         }
@@ -402,6 +408,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
             }
 
             public init(from decoder: Decoder) throws {
+                try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
                 let values = try decoder.container(keyedBy: CodingKeys.self) 
                 self.nested3 = try values.decode(Nested3.self, forKey: .nested3) 
             }
@@ -428,6 +435,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                 }
 
                 public init(from decoder: Decoder) throws {
+                    try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
                     let values = try decoder.container(keyedBy: CodingKeys.self) 
                     self.nested4 = try values.decode(Nested4.self, forKey: .nested4) 
                 }
@@ -454,6 +462,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     }
 
                     public init(from decoder: Decoder) throws {
+                        try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
                         let values = try decoder.container(keyedBy: CodingKeys.self) 
                         self.nested5 = try values.decode(Nested5.self, forKey: .nested5) 
                     }
@@ -480,6 +489,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                         }
 
                         public init(from decoder: Decoder) throws {
+                            try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
                             let values = try decoder.container(keyedBy: CodingKeys.self) 
                             self.single = try values.decode(LiteralValue.self, forKey: .single) 
                         }

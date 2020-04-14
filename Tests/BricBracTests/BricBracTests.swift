@@ -2130,13 +2130,13 @@ extension BricBracTests {
         // ensure that `encodedString` returns sorted keys
         XCTAssertEqual("""
 {"i2":{"i3":{"name":"Foo"}},"map":{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9"}}
-""", try i1.encodedString())
+""", try i1.encodedStringOrdered())
 
         for i in 1..<10000 {
             i1.map["\(i)"] = "\(i)"
         }
 
-        let str = try i1.encodedString()
+        let str = try i1.encodedStringOrdered()
         let strlen = str.count
 
         // stress test parallel encoding; tack on a few more 9's to really try it out

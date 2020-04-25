@@ -128,6 +128,17 @@ public extension Encodable {
     }
 }
 
+public extension Encodable where Self : Decodable {
+    /// Attempts to merge one object with another by encoding the two objects and deep-merging their JSON representations. Note that conflicting keys will resove to that defined by this instance (or the other instance, if `reverse` is true).
+    @available(*, deprecated, message: "slow and unreliable")
+    func merging(withCodable other: Self, reverse: Bool = false) throws -> Self {
+        let b1 = try self.bricEncoded()
+        let b2 = try other.bricEncoded()
+        let b3 = reverse ? b2.merge(bric: b1) : b1.merge(bric: b2)
+        return try b3.decode(Self.self)
+    }
+}
+
 extension Bric : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()

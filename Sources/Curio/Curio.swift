@@ -24,6 +24,9 @@ public struct Curio {
     /// whether to cause `CodingKeys` to conform to `Idenfiable`
     public var generateIdentifiable = true
 
+    /// The name of a typealias from the `CodingKeys` implementation to the owning `Codable`
+    public var codingOwner: CodeTypeName? = "CodingOwner"
+
     /// whether to cause `CodingKeys` to embed a `keyDescription` field
     public var keyDescriptionMethod = true
 
@@ -866,6 +869,12 @@ public struct Curio {
                     if generateIdentifiable == true { // "var id: Self { self }"
                         keysType.conforms.append(.identifiable)
                         keysType.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "id", type: CodeExternalType("Self"), access: accessor(parents), instance: true, mutable: false), value: nil, body: ["self"], comments: []))
+                    }
+
+                    // Add in a "CodingOwner" typealias to the owner
+                    if let codingOwner = codingOwner {
+                        let ownerAlias = CodeTypeAlias(name: codingOwner, type: code, access: accessor(parents))
+                        keysType.nestedTypes.insert(ownerAlias, at: 0)
                     }
 
                     if keyDescriptionMethod == true {

@@ -2120,26 +2120,42 @@ extension AllOf2 : Equatable where T1 : Equatable, T2 : Equatable {
 extension AllOf2 : Hashable where T1 : Hashable, T2 : Hashable {
 }
 
+public func allOf<T1, T2>(_ tuple: (T1, T2)) -> AllOf2<T1, T2> { .init(v1: tuple.0, v2: tuple.1) }
+
 /// Stopgap implementation of AllOf3 via typealias to mutliple AllOf2
 public typealias AllOf3<T1, T2, T3> = AllOf2<T1, AllOf2<T2, T3>>
+
+public func allOf<T1, T2, T3>(_ tuple: (T1, T2, T3)) -> AllOf3<T1, T2, T3> { allOf((tuple.0, allOf((tuple.1, tuple.2)))) }
 
 /// Stopgap implementation of AllOf4 via typealias to mutliple AllOf2
 public typealias AllOf4<T1, T2, T3, T4> = AllOf2<T1, AllOf3<T2, T3, T4>>
 
+public func allOf<T1, T2, T3, T4>(_ tuple: (T1, T2, T3, T4)) -> AllOf4<T1, T2, T3, T4> { allOf((tuple.0, allOf((tuple.1, tuple.2, tuple.3)))) }
+
 /// Stopgap implementation of AllOf5 via typealias to mutliple AllOf2
 public typealias AllOf5<T1, T2, T3, T4, T5> = AllOf2<T1, AllOf4<T2, T3, T4, T5>>
+
+public func allOf<T1, T2, T3, T4, T5>(_ tuple: (T1, T2, T3, T4, T5)) -> AllOf5<T1, T2, T3, T4, T5> { allOf((tuple.0, allOf((tuple.1, tuple.2, tuple.3, tuple.4)))) }
 
 /// Stopgap implementation of AllOf6 via typealias to mutliple AllOf2
 public typealias AllOf6<T1, T2, T3, T4, T5, T6> = AllOf2<T1, AllOf5<T2, T3, T4, T5, T6>>
 
+public func allOf<T1, T2, T3, T4, T5, T6>(_ tuple: (T1, T2, T3, T4, T5, T6)) -> AllOf6<T1, T2, T3, T4, T5, T6> { allOf((tuple.0, allOf((tuple.1, tuple.2, tuple.3, tuple.4, tuple.5)))) }
+
 /// Stopgap implementation of AllOf7 via typealias to mutliple AllOf2
 public typealias AllOf7<T1, T2, T3, T4, T5, T6, T7> = AllOf2<T1, AllOf6<T2, T3, T4, T5, T6, T7>>
+
+public func allOf<T1, T2, T3, T4, T5, T6, T7>(_ tuple: (T1, T2, T3, T4, T5, T6, T7)) -> AllOf7<T1, T2, T3, T4, T5, T6, T7> { allOf((tuple.0, allOf((tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6)))) }
 
 /// Stopgap implementation of AllOf8 via typealias to mutliple AllOf2
 public typealias AllOf8<T1, T2, T3, T4, T5, T6, T7, T8> = AllOf2<T1, AllOf7<T2, T3, T4, T5, T6, T7, T8>>
 
+public func allOf<T1, T2, T3, T4, T5, T6, T7, T8>(_ tuple: (T1, T2, T3, T4, T5, T6, T7, T8)) -> AllOf8<T1, T2, T3, T4, T5, T6, T7, T8> { allOf((tuple.0, allOf((tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7)))) }
+
 /// Stopgap implementation of AllOf9 via typealias to mutliple AllOf2
 public typealias AllOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> = AllOf2<T1, AllOf8<T2, T3, T4, T5, T6, T7, T8, T9>>
+
+public func allOf<T1, T2, T3, T4, T5, T6, T7, T8, T9>(_ tuple: (T1, T2, T3, T4, T5, T6, T7, T8, T9)) -> AllOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> { allOf((tuple.0, allOf((tuple.1, tuple.2, tuple.3, tuple.4, tuple.5, tuple.6, tuple.7, tuple.8)))) }
 
 /// Stopgap implementation of AllOf10 via typealias to mutliple AllOf2
 public typealias AllOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> = AllOf2<T1, AllOf9<T2, T3, T4, T5, T6, T7, T8, T9, T10>>

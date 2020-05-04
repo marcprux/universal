@@ -25,5 +25,7 @@ public struct Thing : Equatable, Hashable, Codable, KeyedCodable {
             case .weight: return nil
              } 
         }
+
+        public typealias CodingOwner = Thing
     }
 }

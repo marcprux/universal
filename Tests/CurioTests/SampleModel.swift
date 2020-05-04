@@ -70,6 +70,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     case .a2: return nil
                      } 
                 }
+
+                public typealias CodingOwner = FirstAll
             }
         }
 
@@ -103,6 +105,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     case .a4: return nil
                      } 
                 }
+
+                public typealias CodingOwner = SecondAll
             }
         }
     }
@@ -142,6 +146,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     case .b2: return nil
                      } 
                 }
+
+                public typealias CodingOwner = FirstAny
             }
         }
 
@@ -175,6 +181,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     case .b4: return nil
                      } 
                 }
+
+                public typealias CodingOwner = SecondAny
             }
         }
     }
@@ -215,6 +223,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     case .c2: return nil
                      } 
                 }
+
+                public typealias CodingOwner = FirstOne
             }
         }
 
@@ -249,6 +259,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     case .c4: return nil
                      } 
                 }
+
+                public typealias CodingOwner = SecondOne
             }
         }
     }
@@ -278,6 +290,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
             case .simpleOneOf: return "Should generate a simple OneOf enum"
              } 
         }
+
+        public typealias CodingOwner = SampleModel
     }
 
     /// Should not escape keyword arguments
@@ -336,6 +350,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                 case .`while`: return nil
                  } 
             }
+
+            public typealias CodingOwner = KeywordFields
         }
     }
 
@@ -364,6 +380,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                 case .prop: return nil
                  } 
             }
+
+            public typealias CodingOwner = ListItem
         }
 
         public enum LiteralValue : String, Equatable, Hashable, Codable, CaseIterable {
@@ -396,6 +414,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                 case .nested2: return nil
                  } 
             }
+
+            public typealias CodingOwner = Nested1
         }
 
         public struct Nested2 : Equatable, Hashable, Codable, KeyedCodable {
@@ -423,6 +443,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                     case .nested3: return nil
                      } 
                 }
+
+                public typealias CodingOwner = Nested2
             }
 
             public struct Nested3 : Equatable, Hashable, Codable, KeyedCodable {
@@ -450,6 +472,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                         case .nested4: return nil
                          } 
                     }
+
+                    public typealias CodingOwner = Nested3
                 }
 
                 public struct Nested4 : Equatable, Hashable, Codable, KeyedCodable {
@@ -477,6 +501,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                             case .nested5: return nil
                              } 
                         }
+
+                        public typealias CodingOwner = Nested4
                     }
 
                     public struct Nested5 : Equatable, Hashable, Codable, KeyedCodable {
@@ -504,6 +530,8 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                                 case .single: return nil
                                  } 
                             }
+
+                            public typealias CodingOwner = Nested5
                         }
 
                         public enum LiteralValue : String, Equatable, Hashable, Codable, CaseIterable {

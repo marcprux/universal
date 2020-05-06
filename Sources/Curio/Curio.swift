@@ -793,7 +793,7 @@ public struct Curio {
 
                     propi.body = [
                         "get { return " + ipropn + "?.wrappedValue }",
-                        "set { " + ipropn + " = newValue.flatMap({ Indirect($0) }) }",
+                        "set { " + ipropn + " = newValue.indirect() }",
                     ]
                 }
 
@@ -943,7 +943,7 @@ public struct Curio {
                             if wasIndirect {
                                 // unescape is a hack because we don't preserve the original property name, so we need to
                                 // do self._case = XXX instead of self._`case` = XXX
-                                initbody.append("self.\(indirectPrefix)\(unescape(d.name)) = \(d.name).flatMap({ Indirect($0) })")
+                                initbody.append("self.\(indirectPrefix)\(unescape(d.name)) = \(d.name).indirect()")
                                 wasIndirect = false
                             } else {
                                 initbody.append("self.\(d.name) = \(d.name)")

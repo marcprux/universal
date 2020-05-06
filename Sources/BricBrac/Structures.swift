@@ -35,7 +35,7 @@ extension Optional : WrapperType { }
 
 public extension Optional {
     /// Wrap this optional in an indirection
-    func indirect() -> Optional<Indirect<Wrapped>> {
+    @inlinable func indirect() -> Optional<Indirect<Wrapped>> {
         return self.flatMap(Indirect.init(rawValue:))
     }
 }

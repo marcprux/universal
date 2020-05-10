@@ -1,5 +1,5 @@
 env:
-  - SWIFT_VERSION=5
+  - SWIFT_VERSION=5.2
 matrix:
   include:
     - os: osx

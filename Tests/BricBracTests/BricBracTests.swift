@@ -674,6 +674,25 @@ class BricBracTests : XCTestCase {
         }
     }
 
+    func testDoubleOptionalEncoding() throws {
+        struct OStrings : Codable, Hashable {
+            let a: String?
+            let b: String??
+        }
+
+        XCTAssertEqual("{}", OStrings(a: .none, b: .none).jsonDebugDescription)
+        XCTAssertEqual("{\"b\":null}", OStrings(a: .none, b: .some(.none)).jsonDebugDescription)
+        XCTAssertEqual("{\"b\":\"X\"}", OStrings(a: .none, b: "X").jsonDebugDescription)
+
+        func dec(_ string: String) throws -> OStrings {
+            try JSONDecoder().decode(OStrings.self, from: Data(string.utf8))
+        }
+        XCTAssertEqual(try dec("{}"), OStrings(a: .none, b: .none))
+        XCTAssertEqual(try dec("{\"b\":null}"), OStrings(a: .none, b: .none)) // .some(.none))) // this is why we need Nullable: double-optional doesn't decode explicit nulls as a .some(.none)
+        XCTAssertEqual(try dec("{\"b\":\"X\"}"), OStrings(a: .none, b: "X"))
+
+    }
+
     func testBricSwapping() {
         struct Swapper : KeyedCodable, Equatable {
             static let codableKeys = [\Self.x : CodingKeys.x, \Self.y : CodingKeys.y]

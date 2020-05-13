@@ -96,26 +96,26 @@ public final class JSONParser {
         fileprivate static let falseScalars: [UnicodeScalar] = ["f", "a", "l", "s", "e"]
     }
 
-    /// Customization of the JSON parson process
+    /// Customization of the JSON parsing process
     public struct Options : OptionSet {
         public let rawValue: Int
 
         public init(rawValue: Int) { self.rawValue = rawValue }
 
         /// Permit arrays and objects to end with a trailing comma
-        public static let AllowTrailingCommas = Options(rawValue: 1)
+        public static let AllowTrailingCommas = Options(rawValue: 1 << 1)
 
         /// Permit numbers to start with a zero
-        public static let AllowLeadingZeros = Options(rawValue: 2)
+        public static let AllowLeadingZeros = Options(rawValue: 1 << 2)
 
         /// Permit non-whitespace trailing content
-        public static let AllowTrailingContent = Options(rawValue: 3)
+        public static let AllowTrailingContent = Options(rawValue: 1 << 3)
 
         /// Permit strings to contain unescaped tab characters
-        public static let AllowTabsInStrings = Options(rawValue: 4)
+        public static let AllowTabsInStrings = Options(rawValue: 1 << 4)
 
         /// Permit strings to contain unescaped newine characters
-        public static let AllowNewlinesInStrings = Options(rawValue: 5)
+        public static let AllowNewlinesInStrings = Options(rawValue: 1 << 5)
 
         public static let Strict: Options = []
         public static let Lenient: Options = [.AllowTrailingCommas, .AllowLeadingZeros, .AllowTrailingContent, .AllowTabsInStrings, .AllowNewlinesInStrings]

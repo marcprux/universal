@@ -19,8 +19,12 @@ extension Decodable {
 
     /// Loads this `Decodable` from the JSON stored in the given URL.
     @inlinable public static func loadJSON(url: URL) throws -> Self {
-        let decoder = JSONDecoder()
-        return try decoder.decode(Self.self, from: Data(contentsOf: url))
+        try loadFromJSON(data: Data(contentsOf: url))
+    }
+
+    /// Loads this `Decodable` from the JSON stored in the given URL.
+    @inlinable public static func loadFromJSON(data: Data) throws -> Self {
+        try JSONDecoder().decode(Self.self, from: data)
     }
 }
 

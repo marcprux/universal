@@ -334,6 +334,20 @@ extension OneOf2 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable {
     }
 }
 
+extension OneOf2 : RawRepresentable where T1 : RawRepresentable, T2 : RawRepresentable, T1.RawValue == T2.RawValue {
+    public typealias RawValue = T1.RawValue
+
+    public init?(rawValue: RawValue) {
+        if let t1 = T1(rawValue: rawValue) { self = .init(t1: t1) }
+        else if let t2 = T2(rawValue: rawValue) { self = .init(t2: t2) }
+        else { return nil }
+    }
+
+    public var rawValue: RawValue {
+        self[routing: (\.rawValue, \.rawValue)]
+    }
+}
+
 extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
 extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 extension OneOf2 : Identifiable where T1 : Identifiable, T2 : Identifiable {
@@ -595,6 +609,21 @@ extension OneOf3 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
     }
 }
 
+extension OneOf3 : RawRepresentable where T1 : RawRepresentable, T2 : RawRepresentable, T3 : RawRepresentable, T1.RawValue == T2.RawValue, T2.RawValue == T3.RawValue {
+    public typealias RawValue = T1.RawValue
+
+    public init?(rawValue: RawValue) {
+        if let t1 = T1(rawValue: rawValue) { self = .init(t1: t1) }
+        else if let t2 = T2(rawValue: rawValue) { self = .init(t2: t2) }
+        else if let t3 = T3(rawValue: rawValue) { self = .init(t3: t3) }
+        else { return nil }
+    }
+
+    public var rawValue: RawValue {
+        self[routing: (\.rawValue, \.rawValue, \.rawValue)]
+    }
+}
+
 extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable { }
 extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { }
 extension OneOf3 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable {
@@ -760,6 +789,22 @@ extension OneOf4 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
             T3.allCases.map(AllCases.Element.init(t3:)),
             T4.allCases.map(AllCases.Element.init(t4:)),
             ].joined())
+    }
+}
+
+extension OneOf4 : RawRepresentable where T1 : RawRepresentable, T2 : RawRepresentable, T3 : RawRepresentable, T4 : RawRepresentable, T1.RawValue == T2.RawValue, T2.RawValue == T3.RawValue, T3.RawValue == T4.RawValue {
+    public typealias RawValue = T1.RawValue
+
+    public init?(rawValue: RawValue) {
+        if let t1 = T1(rawValue: rawValue) { self = .init(t1: t1) }
+        else if let t2 = T2(rawValue: rawValue) { self = .init(t2: t2) }
+        else if let t3 = T3(rawValue: rawValue) { self = .init(t3: t3) }
+        else if let t4 = T4(rawValue: rawValue) { self = .init(t4: t4) }
+        else { return nil }
+    }
+
+    public var rawValue: RawValue {
+        self[routing: (\.rawValue, \.rawValue, \.rawValue, \.rawValue)]
     }
 }
 
@@ -946,11 +991,29 @@ extension OneOf5 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
     }
 }
 
+extension OneOf5 : RawRepresentable where T1 : RawRepresentable, T2 : RawRepresentable, T3 : RawRepresentable, T4 : RawRepresentable, T5 : RawRepresentable, T1.RawValue == T2.RawValue, T2.RawValue == T3.RawValue, T3.RawValue == T4.RawValue, T4.RawValue == T5.RawValue {
+    public typealias RawValue = T1.RawValue
+
+    public init?(rawValue: RawValue) {
+        if let t1 = T1(rawValue: rawValue) { self = .init(t1: t1) }
+        else if let t2 = T2(rawValue: rawValue) { self = .init(t2: t2) }
+        else if let t3 = T3(rawValue: rawValue) { self = .init(t3: t3) }
+        else if let t4 = T4(rawValue: rawValue) { self = .init(t4: t4) }
+        else if let t5 = T5(rawValue: rawValue) { self = .init(t5: t5) }
+        else { return nil }
+    }
+
+    public var rawValue: RawValue {
+        self[routing: (\.rawValue, \.rawValue, \.rawValue, \.rawValue, \.rawValue)]
+    }
+}
+
 extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable { }
 extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
 extension OneOf5 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable {
     public var id: OneOf5<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID> { map5({ $0.id }, { $0.id }, { $0.id }, { $0.id }, { $0.id }) }
 }
+
 
 public extension OneOf5 {
     /// Apply the separate mapping functions for the individual options.

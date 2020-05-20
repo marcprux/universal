@@ -487,18 +487,20 @@ extension OneOrMany where T2 == [T1] {
 /// Reversed the OneOf2 ordering
 public extension OneOf2 {
     /// Returns a swapped instance of this OneOf2<T1, T2> as a OneOf2<T2, T1>
-    @inlinable var swapped: OneOf2<T2, T1> {
+    @inlinable var swap_2_1: OneOf2<T2, T1> {
         get {
             switch self {
-            case .v1(let x): return OneOf2<T2, T1>(x)
-            case .v2(let x): return OneOf2<T2, T1>(x)
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
             }
         }
 
-        set {
-            switch newValue {
-            case .v1(let x): self = OneOf2<T1, T2>(x)
-            case .v2(let x): self = OneOf2<T1, T2>(x)
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
             }
         }
     }
@@ -674,6 +676,75 @@ public extension OneOf3 {
         }
     }
 }
+
+/// Reversed the OneOf2 ordering
+public extension OneOf3 {
+    /// Returns a swapped instance of this OneOf3
+    @inlinable var swap_2_1: OneOf3<T2, T1, T3> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            }
+        }
+    }
+
+    /// Returns a swapped instance of this OneOf3
+    @inlinable var swap_3_1: OneOf3<T3, T2, T1> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_3_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            }
+        }
+    }
+
+
+    /// Returns a swapped instance of this OneOf3
+    @inlinable var swap_3_2: OneOf3<T1, T3, T2> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_3_2
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            }
+        }
+    }
+
+}
+
 
 /// The protocol of a type that can contain one out of 4 or more exclusive options
 public protocol OneOf4Type : OneOf3Type {

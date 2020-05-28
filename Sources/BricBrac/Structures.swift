@@ -534,8 +534,10 @@ public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
     @inlinable public init(t3: T3) { self = .v3(t3) }
     @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
+    public typealias Split = OneOf2<OneOf2<T1, T2>, T3>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<T1, T2>, T3> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(v))
         case .v2(let v): return .v1(.v2(v))
@@ -777,8 +779,10 @@ public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
     @inlinable public init(t4: T4) { self = .v4(t4) }
     @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
+    public typealias Split = OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(.v1(v)))
         case .v2(let v): return .v1(.v1(.v2(v)))
@@ -969,8 +973,10 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type {
     @inlinable public init(t5: T5) { self = .v5(t5) }
     @inlinable public init(_ t5: T5) { self = .v5(t5) }
 
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(.v1(.v1(v))))
         case .v2(let v): return .v1(.v1(.v1(.v2(v))))
@@ -1180,8 +1186,10 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
     @inlinable public init(t6: T6) { self = .v6(t6) }
     @inlinable public init(_ t6: T6) { self = .v6(t6) }
 
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(.v1(.v1(.v1(v)))))
         case .v2(let v): return .v1(.v1(.v1(.v1(.v2(v)))))
@@ -1368,8 +1376,10 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
     @inlinable public init(t7: T7) { self = .v7(t7) }
     @inlinable public init(_ t7: T7) { self = .v7(t7) }
 
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(v))))))
         case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v2(v))))))
@@ -1568,8 +1578,10 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type {
     @inlinable public init(t8: T8) { self = .v8(t8) }
     @inlinable public init(_ t8: T8) { self = .v8(t8) }
 
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(v)))))))
         case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v2(v)))))))
@@ -1783,8 +1795,10 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type {
     @inlinable public init(t9: T9) { self = .v9(t9) }
     @inlinable public init(_ t9: T9) { self = .v9(t9) }
 
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(v))))))))
         case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v2(v))))))))
@@ -2012,8 +2026,10 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10T
     @inlinable public init(t10: T10) { self = .v10(t10) }
     @inlinable public init(_ t10: T10) { self = .v10(t10) }
 
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>, T10>
+
     /// Split the tuple into nested OneOf2 instances
-    @inlinable public func split() -> OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>, T10> {
+    @inlinable public func split() -> Split {
         switch self {
         case .v1(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(v)))))))))
         case .v2(let v): return .v1(.v1(.v1(.v1(.v1(.v1(.v1(.v1(.v2(v)))))))))

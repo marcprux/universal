@@ -128,8 +128,18 @@ extension Bric : TextOutputStreamable {
 }
 
 extension Bric : CustomDebugStringConvertible {
-    public var debugDescription: String {
-        return stringify()
+    @inlinable public var debugDescription: String {
+        // stringify can be slow and debugDescription can be invoked internally in some surprising situations, so do not perform a full stringify when debugging…
+        // return stringify()
+        // … instead just have a very simple summary
+        switch self {
+            case .nul: return "Bric.nul"
+            case .bol: return "Bric.bol"
+            case .str: return "Bric.str"
+            case .num: return "Bric.num"
+            case .arr: return "Bric.arr"
+            case .obj: return "Bric.obj"
+        }
     }
 }
 

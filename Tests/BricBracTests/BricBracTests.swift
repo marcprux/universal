@@ -2149,26 +2149,60 @@ extension BricBracTests {
         // ensure that `encodedString` returns sorted keys
         XCTAssertEqual("""
 {"i2":{"i3":{"name":"Foo"}},"map":{"1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9"}}
-""", try i1.encodedStringOrdered())
+""", try i1.encodedStringSorted())
 
         for i in 1..<10000 {
             i1.map["\(i)"] = "\(i)"
         }
 
-        let str = try i1.encodedStringOrdered()
+        let str = try i1.encodedStringSorted()
         let strlen = str.count
 
         // stress test parallel encoding; tack on a few more 9's to really try it out
         // 999: direct memory string: 16.263 seconds, 16.472 seconds, 16.468 seconds
         // 999: string copy: 16.812 seconds, 16.194 seconds, 15.793 seconds
         DispatchQueue.concurrentPerform(iterations: 99) { _ in
-            let str = try? i1.encodedStringUnordered()
+            let str = try? i1.encodedString()
             // make sure the string is really the same
             // we use assert in case `XCTAssert*` functions have some internal locks or something
             assert(strlen == str?.count) // ordered vs. unordered should be the same character count
         }
     }
 
+    func testCustomKeySorting() throws {
+        struct SortedOutput : Codable {
+            let az = "A"
+            let by = 1.0
+            let cx = false
+            let qq = "Q"
+
+            private enum CodingKeys : String, CaseIterable, Equatable, OrderedCodingKey {
+                case by, az = "az", cx = "cx", qq
+            }
+        }
+
+        let obj = SortedOutput()
+
+
+        // by default, keys are in undefined order:
+        // SortedOutput prop order:  az, by, cx
+        // CoddingKey order:         by, az, cx
+        // JSON output:              az, cx, by
+        // XCTAssertEqual failed: ("Optional("{\"az\":\"A\",\"cx\":false,\"by\":1}")") is not equal to ("Optional("{\"az\":\"A\",\"by\":1,\"cx\":false}")")
+
+        XCTAssertEqual(try obj.encodedStringSorted(), """
+        {"az":"A","by":1,"cx":false,"qq":"Q"}
+        """)
+
+        // default encoding order should *not* be in the declared order (although it is possible that via random hashing this sometimes happens anyway)
+        XCTAssertNotEqual(try obj.encodedString(), """
+        {"by":1,"az":"A","cx":false,"qq":"Q"}
+        """)
+
+        XCTAssertEqual(try obj.encodedStringOrdered(format: []), """
+        {"by":1,"az":"A","cx":false,"qq":"Q"}
+        """)
+    }
 }
 
 extension Decodable where Self: Encodable {

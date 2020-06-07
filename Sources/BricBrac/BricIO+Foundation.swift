@@ -191,6 +191,30 @@ public extension JSONEncoder {
     }
 }
 
+/// A general coding key implementation.
+public struct AnyCodingKey : CodingKey {
+    public var stringValue: String
+    public var intValue: Int?
+
+    public init(stringValue: String) {
+        self.init(stringValue: stringValue, intValue: nil)
+    }
+
+    public init(intValue: Int) {
+        self.init(stringValue: "\(intValue)", intValue: intValue)
+    }
+
+    init(stringValue: String, intValue: Int?) {
+        self.stringValue = stringValue
+        self.intValue = intValue
+    }
+
+    init(index: Int) {
+        self.stringValue = "Index \(index)"
+        self.intValue = index
+    }
+}
+
 public extension Encodable {
     /// Returns an encoded string for the encodable with a custom key ordering for types whose `CodingKey` conforms to `OrderedCodingKey`
     /// This function will return any `OrderedCodingKey` instances in the order they are declared (at the cost of some expensive post-processing on the data)

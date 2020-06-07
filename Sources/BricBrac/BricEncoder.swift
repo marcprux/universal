@@ -923,32 +923,32 @@ fileprivate class _BricReferencingEncoder<B : Bricolage> : _BricolageEncoder<B> 
 //===----------------------------------------------------------------------===//
 // Shared Key Types
 //===----------------------------------------------------------------------===//
-fileprivate struct _BricKey : CodingKey {
+public struct AnyCodingKey : CodingKey {
     public var stringValue: String
     public var intValue: Int?
     
-    public init?(stringValue: String) {
-        self.stringValue = stringValue
-        self.intValue = nil
+    public init(stringValue: String) {
+        self.init(stringValue: stringValue, intValue: nil)
     }
     
-    public init?(intValue: Int) {
-        self.stringValue = "\(intValue)"
-        self.intValue = intValue
+    public init(intValue: Int) {
+        self.init(stringValue: "\(intValue)", intValue: intValue)
     }
     
-    public init(stringValue: String, intValue: Int?) {
+    init(stringValue: String, intValue: Int?) {
         self.stringValue = stringValue
         self.intValue = intValue
     }
     
-    fileprivate init(index: Int) {
+    init(index: Int) {
         self.stringValue = "Index \(index)"
         self.intValue = index
     }
     
-    fileprivate static let `super` = _BricKey(stringValue: "super")!
+    static let `super` = AnyCodingKey(stringValue: "super")
 }
+
+fileprivate typealias _BricKey = AnyCodingKey
 
 //===----------------------------------------------------------------------===//
 // Shared ISO8601 Date Formatter

@@ -35,22 +35,22 @@ private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting)
     return encoder
 }
 
-/// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
-/// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
-@available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-public let BricBracSharedSortedJSONEncoder = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes]) // we want consistent key ordering
+public extension Bric {
+    /// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
+    /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
+    static let JSONEncoderUnsorted = createJSONEncoder([.withoutEscapingSlashes]) // we want it to be unsorted
 
-/// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
-/// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
-public let BricBracSharedUnsortedJSONEncoder = createJSONEncoder([.withoutEscapingSlashes]) // we want it to be unsorted
+    /// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
+    /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
+    @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
+    static let JSONEncoderSorted = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes]) // we want consistent key ordering
 
-@available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-public let BricBracSharedFormattedJSONEncoder = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes, .prettyPrinted])
-
+    static let JSONEncoderFormatted = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes, .prettyPrinted])
+}
 
 public extension Encodable {
     /// Returns a simple debug description of the JSON encoding of the given `Encodable`.
-    var jsonDebugDescription: String { (try? encodedStringOrdered()) ?? "{}" }
+    var jsonDebugDescription: String { (try? encodedStringSorted()) ?? "{}" }
 }
 
 public extension JSONEncoder {
@@ -84,33 +84,26 @@ public extension JSONDecoder {
 }
 
 public extension Encodable {
-    /// Returns an encoded string for the given encoder (defaulting to a JSON encoder)
-    @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-    @available(*, deprecated, renamed: "encodedStringOrdered")
+    /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
+    /// this is somewhat faster than `encodedStringSorted` because it returns unordered keys.
+    ///
+    /// Example: for a 2.3MB JSON, this has been seen to be almost 3x faster (269ms vs. 769ms)
     @inlinable func encodedString() throws -> String {
-        try encodedStringOrdered()
+        return String(data: try Bric.JSONEncoderUnsorted.encode(self), encoding: .utf8) ?? "{}"
     }
 
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
-    /// this is somewhat slower than `encodedStringUnordered` because it returns unordered keys.
+    /// this is somewhat slower than `encodedString` because it returns unordered keys.
     ///
     /// Example: for a 2.3MB JSON, this has been seen to be almost 3x slower (269ms vs. 769ms)
     @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-    @inlinable func encodedStringOrdered(encoder: (Self) throws -> (Data) = BricBracSharedSortedJSONEncoder.encode) rethrows -> String {
+    @inlinable func encodedStringSorted(encoder: (Self) throws -> (Data) = Bric.JSONEncoderSorted.encode) rethrows -> String {
         return String(data: try encoder(self), encoding: .utf8) ?? "{}"
-    }
-
-    /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
-    /// this is somewhat faster than `encodedString` because it returns unordered keys.
-    ///
-    /// Example: for a 2.3MB JSON, this has been seen to be almost 3x faster (269ms vs. 769ms)
-    @inlinable func encodedStringUnordered() throws -> String {
-        return String(data: try BricBracSharedUnsortedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
     }
 
     /// Returns an pretty-printed encoded string for the encodable.
     @inlinable func encodedStringFormatted() throws -> String {
-        return String(data: try BricBracSharedFormattedJSONEncoder.encode(self), encoding: .utf8) ?? "{}"
+        return String(data: try Bric.JSONEncoderFormatted.encode(self), encoding: .utf8) ?? "{}"
     }
 
 
@@ -131,6 +124,98 @@ public extension Encodable {
         return try Bric.parse(str)
     }
 }
+
+public extension JSONEncoder {
+    /// Encodes the given `Encodable` using custom key ordering.
+    /// This function will return any `OrderedCodingKey` instances in the order they are declared (at the cost of some expensive post-processing on the data)
+    ///
+    /// - See Also: `OrderedCodingKey`
+    /// - Note: Unlike `JSONEncoder.encode`, this function is not thread-safe due to needing to modify internal properties of the `JSONEncoder`.
+    func encodeOrdered<T: Encodable>(_ value: T) throws -> Data {
+        // we need to sort the keys in order for our replacement scheme to work
+        let hadSorted = self.outputFormatting.contains(.sortedKeys)
+        if !hadSorted { self.outputFormatting.insert(.sortedKeys) } // add the `sortedKeys` formatting…
+        defer { if !hadSorted { self.outputFormatting.remove(.sortedKeys) } } // …then remove it afterwards
+
+        // we use a custom keyEncodingStrategy to enable sorting by custom keys
+        let prevEncodingStrategy = self.keyEncodingStrategy
+        defer { self.keyEncodingStrategy = prevEncodingStrategy }
+
+        // while JSONEncoder doesn't let us specify a custom sort order for keys, but can use a `KeyEncodingStrategy.custom`
+        // to replace any keys that have specified an ordering with a prefix that contains the desired ordering,
+        // so that when it is later sorted (due to `OutputFormatting.sortedKeys`), it will show up in the correct order.
+        let orderPrefix = "___KEYORDER___"
+        let indexDigits = 5 // a max of 99,999 keys should be sufficient
+        let keylen = orderPrefix.count + indexDigits
+        func keyPrefix(index: Int) -> String {
+            let key = index.description
+            let padzeros = indexDigits - key.count
+            if padzeros <= 0 {
+                return orderPrefix + key
+            } else { // convert "keyName" to "___KEYORDER___00009keyName"
+                return orderPrefix + String(repeating: "0", count: padzeros) + key
+            }
+        }
+
+        self.keyEncodingStrategy = .custom({ (keys) -> CodingKey in
+            let lastKey = keys.last ?? AnyCodingKey(stringValue: "key")
+
+            guard let orderedKey = lastKey as? OrderedCodingKey else {
+                return lastKey
+            }
+
+            if orderedKey.intValue != nil {
+                return lastKey // we don't support custom ordering for int key
+            }
+
+            guard let index = orderedKey.keyOrder else {
+                return lastKey
+            }
+
+            // convert the key "key" to "___KEYORDER___00009key"
+            return AnyCodingKey(stringValue: keyPrefix(index: index) + lastKey.stringValue)
+        })
+
+        var data = try self.encode(value)
+
+        // now post-process the encoded data to cut out any "___KEYORDER___12345" instances, thus restoring the original keys
+        if let orderPrefixData = orderPrefix.data(using: .utf8) { // JSON encoding is always UTF8
+            for i in data.indices.reversed() { // go from back to front so we can remove data chunks with impunity
+                if data[i...].starts(with: orderPrefixData) { // Data slice subscript is complexity: O(1)
+                    data.removeSubrange(i..<i+keylen) // remove the prefix, along with the key number
+                }
+            }
+        }
+
+        return data
+    }
+}
+
+public extension Encodable {
+    /// Returns an encoded string for the encodable with a custom key ordering for types whose `CodingKey` conforms to `OrderedCodingKey`
+    /// This function will return any `OrderedCodingKey` instances in the order they are declared (at the cost of some expensive post-processing on the data)
+    func encodedStringOrdered(format: JSONEncoder.OutputFormatting = [.prettyPrinted, .withoutEscapingSlashes]) throws -> String {
+        let encoder = JSONEncoder()
+        return String(data: try encoder.encodeOrdered(self), encoding: .utf8) ?? "{}"
+    }
+}
+
+/// A key that specifies a sort order for encoding.
+/// - See Also: `Encodable.encodedStringOrdered`
+public protocol OrderedCodingKey : CodingKey {
+    /// The sort order of the key, if any.
+    /// - See Also: `Encodable.encodedStringOrdered`
+    var keyOrder: Int? { get }
+}
+
+public extension OrderedCodingKey where Self : CaseIterable & Equatable {
+    /// The default key ordering for an `OrderedCodingKey` is the position of this key in its `allCases` list.
+    /// - See Also: `Encodable.encodedStringOrdered`
+    var keyOrder: Self.AllCases.Index? {
+        Self.allCases.firstIndex(of: self)
+    }
+}
+
 
 public extension Encodable where Self : Decodable {
     /// Attempts to merge one object with another by encoding the two objects and deep-merging their JSON representations. Note that conflicting keys will resove to that defined by this instance (or the other instance, if `reverse` is true).
@@ -210,7 +295,7 @@ public extension Bricable {
             decoder.userInfo = userInfo
         }
 
-        return try decoder.decode(type, from: BricBracSharedUnsortedJSONEncoder.encode(self.bric()))
+        return try decoder.decode(type, from: Bric.JSONEncoderUnsorted.encode(self.bric()))
     }
 }
 

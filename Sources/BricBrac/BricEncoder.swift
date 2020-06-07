@@ -923,29 +923,9 @@ fileprivate class _BricReferencingEncoder<B : Bricolage> : _BricolageEncoder<B> 
 //===----------------------------------------------------------------------===//
 // Shared Key Types
 //===----------------------------------------------------------------------===//
-public struct AnyCodingKey : CodingKey {
-    public var stringValue: String
-    public var intValue: Int?
-    
-    public init(stringValue: String) {
-        self.init(stringValue: stringValue, intValue: nil)
-    }
-    
-    public init(intValue: Int) {
-        self.init(stringValue: "\(intValue)", intValue: intValue)
-    }
-    
-    init(stringValue: String, intValue: Int?) {
-        self.stringValue = stringValue
-        self.intValue = intValue
-    }
-    
-    init(index: Int) {
-        self.stringValue = "Index \(index)"
-        self.intValue = index
-    }
-    
-    static let `super` = AnyCodingKey(stringValue: "super")
+
+extension AnyCodingKey {
+    static let `super` = Self(stringValue: "super")
 }
 
 fileprivate typealias _BricKey = AnyCodingKey

@@ -125,6 +125,7 @@ public extension Encodable {
     }
 }
 
+
 public extension JSONEncoder {
     /// Encodes the given `Encodable` using custom key ordering.
     /// This function will return any `OrderedCodingKey` instances in the order they are declared (at the cost of some expensive post-processing on the data)

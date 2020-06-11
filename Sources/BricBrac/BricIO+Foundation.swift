@@ -132,6 +132,7 @@ public extension JSONEncoder {
     ///
     /// - See Also: `OrderedCodingKey`
     /// - Note: Unlike `JSONEncoder.encode`, this function is not thread-safe due to needing to modify internal properties of the `JSONEncoder`.
+    /// - Note: The underlying impementation is a *total* hack – it swaps out key names with a prefix that can be lexically sorted by the built in `sortedKeys` key, and then post-processes the underlying raw data to get rid of the key prefixes (thus restoring the original key names)
     func encodeOrdered<T: Encodable>(_ value: T) throws -> Data {
         // we need to sort the keys in order for our replacement scheme to work
         let hadSorted = self.outputFormatting.contains(.sortedKeys)
@@ -183,7 +184,7 @@ public extension JSONEncoder {
         if let orderPrefixData = orderPrefix.data(using: .utf8) { // JSON encoding is always UTF8
             for i in data.indices.reversed() { // go from back to front so we can remove data chunks with impunity
                 if data[i...].starts(with: orderPrefixData) { // Data slice subscript is complexity: O(1)
-                    data.removeSubrange(i..<i+keylen) // remove the prefix, along with the key number
+                    data.removeSubrange(i..<i+keylen) // remove the prefix, along with the key number; the prefix is a fixed length, so we can simply cut out the raw bytes without needing to look at the contents
                 }
             }
         }
@@ -236,7 +237,9 @@ public protocol OrderedCodingKey : CodingKey {
 public extension OrderedCodingKey where Self : CaseIterable & Equatable {
     /// The default key ordering for an `OrderedCodingKey` is the position of this key in its `allCases` list.
     /// - See Also: `Encodable.encodedStringOrdered`
+    /// - Complexity: O(N) on the number of keys
     var keyOrder: Self.AllCases.Index? {
+        // this could be optimized by caching a [Self: Index] in the type, but we'd need to manually cache it separately in each type since protocol extension cannot have stored static properties
         Self.allCases.firstIndex(of: self)
     }
 }

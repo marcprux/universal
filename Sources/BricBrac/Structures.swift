@@ -127,14 +127,26 @@ public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseItera
     }
 }
 
+/// A type that permits items to be initialized non-optionally
+public protocol RawInitializable : RawRepresentable {
+    init(rawValue: RawValue)
+}
+
+public extension RawInitializable {
+    /// Defer optional initializer to the guaranteed initializer.
+    /// - Parameter rawValue: <#rawValue description#>
+    init?(rawValue: RawValue) {
+        self.init(rawValue: rawValue)
+    }
+}
+
 /// A RawCodable is a simple `RawRepresentable` wrapper except its coding
 /// will store the underlying value directly rather than keyed as "rawValue",
 /// thus requiring that the `init(rawValue:)` be non-failable; it is useful
 /// as a codable typesafe wrapper for some general type like UUID where the
 /// Codable implementation does not automatically use the underlying type (like
 /// it does with primitives and Strings)
-public protocol RawCodable : RawRepresentable, Codable where RawValue : Codable {
-    init(rawValue: RawValue)
+public protocol RawCodable : RawInitializable, Codable where RawValue : Codable {
 }
 
 

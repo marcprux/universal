@@ -692,7 +692,7 @@ public struct Curio {
                 anonPropCount += 1
                 return anonPropCount - 1
             }
-            var props: [PropDec] = properties
+            let props: [PropDec] = properties
                 .map({
                     PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, prop: $0.schema, anon: $0.name == nil)
                 })
@@ -803,7 +803,7 @@ public struct Curio {
                 proptypes.append(pt)
             }
 
-            var addPropType: CodeType? = nil
+            let addPropType: CodeType? = nil
             let hasAdditionalProps: Bool? // true=yes, false=no, nil=unspecified
 
             // currently we simply choose to allow or forbid additionalProperties

@@ -653,10 +653,10 @@ class BricBracTests : XCTestCase {
     func expectFail(_ s: String, _ msg: String? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
         do {
             _ = try Bric.parse(s, options: options)
-            XCTFail("Should have failed to parse", file: file, line: line)
+            XCTFail("Should have failed to parse", file: (file), line: line)
         } catch {
             if let m = msg {
-                XCTAssertEqual(m, String(describing: error), file: file, line: line)
+                XCTAssertEqual(m, String(describing: error), file: (file), line: line)
             }
         }
     }
@@ -665,12 +665,12 @@ class BricBracTests : XCTestCase {
         do {
             let b = try Bric.parse(s, options: options)
             if let bric = bric {
-                XCTAssertEqual(bric, b, file: file, line: line)
+                XCTAssertEqual(bric, b, file: (file), line: line)
             } else {
                 // no comparison bric; just pass
             }
         } catch {
-            XCTFail("\(error)", file: file, line: line)
+            XCTFail("\(error)", file: (file), line: line)
         }
     }
 
@@ -957,7 +957,7 @@ class BricBracTests : XCTestCase {
             }
             #if os(iOS)
             // for some reason, iOS numbers do not equate true for some floats, so we just compare the strings
-            XCTAssertTrue(j.description == c.description, "Parsed contents differed for «\(msg)»", file: file, line: line)
+            XCTAssertTrue(j.description == c.description, "Parsed contents differed for «\(msg)»", file: (file), line: line)
             #else
             XCTAssertTrue(j == c, "Parsed contents differed for «\(msg)»", file: file, line: line)
             #endif
@@ -969,11 +969,11 @@ class BricBracTests : XCTestCase {
             }
             break
         case (_, _, _, .some(let ce)):
-            XCTFail("Cocoa failed/BricBrac passed «\(msg)»: \(ce)", file: file, line: line)
+            XCTFail("Cocoa failed/BricBrac passed «\(msg)»: \(ce)", file: (file), line: line)
         case (_, _, .some(let je), _):
-            XCTFail("BricBrac failed/Cocoa passed «\(msg)»: \(je)", file: file, line: line)
+            XCTFail("BricBrac failed/Cocoa passed «\(msg)»: \(je)", file: (file), line: line)
         default:
-            XCTFail("Unexpected scenario «\(msg)»", file: file, line: line)
+            XCTFail("Unexpected scenario «\(msg)»", file: (file), line: line)
         }
     }
 
@@ -1002,21 +1002,21 @@ class BricBracTests : XCTestCase {
         let bstr = bric.stringify()
 
         let evaluated = ctx?.evaluateScript("testOb = " + bstr)
-        XCTAssertTrue((evaluated?.isObject)!, "\(msg) parsed instance was not an object: \(bstr)", file: file, line: line)
-        XCTAssertNil(ctx?.exception, "\(msg) error evaluating brac'd string: \(String(describing: ctx?.exception))", file: file, line: line)
+        XCTAssertTrue((evaluated?.isObject)!, "\(msg) parsed instance was not an object: \(bstr)", file: (file), line: line)
+        XCTAssertNil(ctx?.exception, "\(msg) error evaluating brac'd string: \(String(describing: ctx?.exception))", file: (file), line: line)
 
         let bricString = bric.stringify(space: space, mapper: mapper)
 
         let stringified = ctx?.evaluateScript("JSON.stringify(testOb, function(key, value) { if (value === null || value === void(0) || value.constructor !== Object) { return value; } else { return Object.keys(value).sort().reduce(function (sorted, key) { sorted[key] = value[key]; return sorted; }, {}); } }, \(space))")
         if !(stringified?.isString)! {
-            XCTFail("\(msg) could not stringify instance in JS context: \(String(describing: ctx?.exception))", file: file, line: line)
+            XCTFail("\(msg) could not stringify instance in JS context: \(String(describing: ctx?.exception))", file: (file), line: line)
         } else {
             let str = stringified?.toString()
             if bricString.contains("e+") { // we differ in that we output exponential notation
                 return
             }
 
-            XCTAssertTrue(str == bricString, "\(msg) did not match:\n\(String(describing: str))\n\(bricString)", file: file, line: line)
+            XCTAssertTrue(str == bricString, "\(msg) did not match:\n\(String(describing: str))\n\(bricString)", file: (file), line: line)
         }
 
     }
@@ -1409,9 +1409,9 @@ class BricBracTests : XCTestCase {
 
             let parser = JSONParser(options: JSONParser.Options.Strict, delegate: cb)
             try parser.parseString(string)
-            XCTAssertEqual(evts, events, file: file, line: line)
+            XCTAssertEqual(evts, events, file: (file), line: line)
         } catch {
-            XCTFail(String(describing: error), file: file, line: line)
+            XCTFail(String(describing: error), file: (file), line: line)
         }
     }
 

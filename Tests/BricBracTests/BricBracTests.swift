@@ -47,6 +47,7 @@ class BricBracTests : XCTestCase {
         ("testBracSwap", testBracSwap),
         ("testFidelityBricolage", testFidelityBricolage),
         ("testOneOfStruct", testOneOfStruct),
+        ("testOneOfCoalesce", testOneOfCoalesce),
         ("testOptionalPerformance", testOptionalPerformance),
         ("testDeepMerge", testDeepMerge),
         ("testShallowMerge", testShallowMerge),
@@ -959,7 +960,7 @@ class BricBracTests : XCTestCase {
             // for some reason, iOS numbers do not equate true for some floats, so we just compare the strings
             XCTAssertTrue(j.description == c.description, "Parsed contents differed for «\(msg)»", file: (file), line: line)
             #else
-            XCTAssertTrue(j == c, "Parsed contents differed for «\(msg)»", file: file, line: line)
+            XCTAssertTrue(j == c, "Parsed contents differed for «\(msg)»", file: (file), line: line)
             #endif
         case (_, _, .some(let je), .some(let ce)):
             // for manual inspection of error messages, change equality to inequality
@@ -1652,6 +1653,23 @@ class BricBracTests : XCTestCase {
             manyOrOneString.swap_2_1.array.removeAll()
             guard case .v1 = manyOrOneString else { return XCTFail("wrong type after swap array") }
         }
+    }
+
+    func testOneOfCoalesce() {
+        func failString() -> String {
+            XCTFail("should not be called bcause coalesce takes autoclosures")
+            return ""
+        }
+
+        let o2 = OneOf2<String, Int>.coalesce(1, failString())
+        XCTAssertEqual(1, o2.v2)
+
+        let o5 = OneOf5<String, Int, Double, Float, Int>.coalesce(nil, nil, 1.7, 9, failString())
+        XCTAssertEqual(1.7, o5.v3)
+
+        /// coalescing operator
+        let oneof4: OneOf2<OneOf2<OneOf2<Bool, Double>, Int>, String> = nil ??? nil ??? 3.456 ??? true // returns .v1(.v1(.v2(3.456))
+        XCTAssertEqual(.v1(.v1(.v2(3.456))), oneof4)
     }
 
     func testKeyRouting() {

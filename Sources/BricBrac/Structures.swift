@@ -268,6 +268,16 @@ public extension OneOf2Type {
     @inlinable var v2: T2? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
+public extension OneOf2Type {
+    /// Construct a `OneOf2` by evaluating the autoclosures returning optional `T2`, falling back to `T1` other args are `nil`.
+    /// - Parameters:
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v2` is `nil`
+    @inlinable static func coalesce(_ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v2().map(Self.init(t2:)) ?? Self(t1: v1())
+    }
+}
+
 /// A simple union type that can be one of either T1 or T2
 public indirect enum OneOf2<T1, T2> : OneOf2Type {
     case v1(T1), v2(T2)
@@ -434,6 +444,18 @@ public extension OneOf2 {
     }
 }
 
+/// Returns a `OneOf2` with the optional `T2` autoclosure, falling back to the required `T1` if it is missing.
+/// This coalesces `nil` through heterogeneous types, analagous to the `??` operation for homogeneous types.
+/// Example:
+/// ```swift
+/// let oneof2: OneOf2<Bool, String> = "ABC" ??? false // returns .v2("ABC")
+/// let oneof4: OneOf2<OneOf2<OneOf2<Bool, Double>, Int>, String> = nil ??? nil ??? 3.456 ??? true // returns .v1(.v1(.v2(3.456)))
+/// ```
+@inlinable public func ??? <T2, T1>(optional: @autoclosure () -> T2?, fallback: @autoclosure () -> T1) -> OneOf2<T1, T2> {
+    OneOf2.coalesce(optional(), fallback())
+}
+
+infix operator ??? : NilCoalescingPrecedence
 
 /// A `OneOrAny` is either a specific value or a generic `Bric` instance.
 /// This can be useful for deserialization where you want to handle a certain
@@ -528,6 +550,17 @@ public protocol OneOf3Type : OneOf2Type {
 
 public extension OneOf3Type {
     @inlinable var v3: T3? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+}
+
+public extension OneOf3Type {
+    /// Construct a `OneOf3` by evaluating the sequence of autoclosures returning optional `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v3` and `v2` are both `nil`
+    @inlinable static func coalesce(_ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v3().map(Self.init(t3:)) ?? Self.coalesce(v2(), v1())
+    }
 }
 
 /// Construct a `OneOf3Type` from T3.
@@ -772,6 +805,18 @@ public extension OneOf4Type {
     @inlinable var v4: T4? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
+public extension OneOf4Type {
+    /// Construct a `OneOf4` by evaluating the sequence of autoclosures returning optional `T4`, `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v4: the `T4` optional autoclosure
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v4`, `v3` and `v2` all return `.none`
+    @inlinable static func coalesce(_ v4: @autoclosure () -> T4?, _ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v4().map(Self.init(t4:)) ?? Self.coalesce(v3(), v2(), v1())
+    }
+}
+
 /// Construct a `OneOf4Type` from T4.
 @inlinable public func oneOf<T: OneOf4Type>(_ value: T.T4) -> T { .init(value) }
 
@@ -964,6 +1009,19 @@ public protocol OneOf5Type : OneOf4Type {
 
 public extension OneOf5Type {
     @inlinable var v5: T5? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+}
+
+public extension OneOf5Type {
+    /// Construct a `OneOf5` by evaluating the sequence of autoclosures returning optional `T5`, `T4`, `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v5: the `T5` optional autoclosure
+    ///   - v4: the `T4` optional autoclosure
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v5`, `v4`, `v3` and `v2` all return `.none`
+    @inlinable static func coalesce(_ v5: @autoclosure () -> T5?, _ v4: @autoclosure () -> T4?, _ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v5().map(Self.init(t5:)) ?? Self.coalesce(v4(), v3(), v2(), v1())
+    }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5
@@ -1175,6 +1233,19 @@ public extension OneOf6Type {
     @inlinable var v6: T6? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
+public extension OneOf6Type {
+    /// Construct a `OneOf6` by evaluating the sequence of autoclosures returning optional `T6`, `T5`, `T4`, `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v6: the `T6` optional autoclosure
+    ///   - v5: the `T5` optional autoclosure
+    ///   - v4: the `T4` optional autoclosure
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v6`, `v5`, `v4`, `v3` and `v2` all return `.none`
+    @inlinable static func coalesce(_ v6: @autoclosure () -> T6?, _ v5: @autoclosure () -> T5?, _ v4: @autoclosure () -> T4?, _ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v6().map(Self.init(t6:)) ?? Self.coalesce(v5(), v4(), v3(), v2(), v1())
+    }
+}
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
@@ -1361,7 +1432,20 @@ public extension OneOf7Type {
     @inlinable var v7: T7? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
-
+public extension OneOf7Type {
+    /// Construct a `OneOf7` by evaluating the sequence of autoclosures returning optional `T7`, `T6`, `T5`, `T4`, `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v7: the `T7` optional autoclosure
+    ///   - v6: the `T6` optional autoclosure
+    ///   - v5: the `T5` optional autoclosure
+    ///   - v4: the `T4` optional autoclosure
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v7`, `v6`, `v5`, `v4`, `v3` and `v2` all return `.none`
+    @inlinable static func coalesce(_ v7: @autoclosure () -> T7?, _ v6: @autoclosure () -> T6?, _ v5: @autoclosure () -> T5?, _ v4: @autoclosure () -> T4?, _ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v7().map(Self.init(t7:)) ?? Self.coalesce(v6(), v5(), v4(), v3(), v2(), v1())
+    }
+}
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
@@ -1560,6 +1644,22 @@ public protocol OneOf8Type : OneOf7Type {
 
 public extension OneOf8Type {
     @inlinable var v8: T8? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+}
+
+public extension OneOf8Type {
+    /// Construct a `OneOf8` by evaluating the sequence of autoclosures returning optional `T8`, `T7`, `T6`, `T5`, `T4`, `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v8: the `T8` optional autoclosure
+    ///   - v7: the `T7` optional autoclosure
+    ///   - v6: the `T6` optional autoclosure
+    ///   - v5: the `T5` optional autoclosure
+    ///   - v4: the `T4` optional autoclosure
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v8`, `v7`, `v6`, `v5`, `v4`, `v3` and `v2` all return `.none`
+    @inlinable static func coalesce(_ v8: @autoclosure () -> T8?, _ v7: @autoclosure () -> T7?, _ v6: @autoclosure () -> T6?, _ v5: @autoclosure () -> T5?, _ v4: @autoclosure () -> T4?, _ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?,  _ v1: @autoclosure () -> T1) -> Self {
+        v8().map(Self.init(t8:)) ?? Self.coalesce(v7(), v6(), v5(), v4(), v3(), v2(), v1())
+    }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
@@ -1774,6 +1874,23 @@ public protocol OneOf9Type : OneOf8Type {
 
 public extension OneOf9Type {
     @inlinable var v9: T9? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+}
+
+public extension OneOf9Type {
+    /// Construct a `OneOf9` by evaluating the sequence of autoclosures returning optional `T9`, `T8`, `T7`, `T6`, `T5`, `T4`, `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v9: the `T9` optional autoclosure
+    ///   - v8: the `T8` optional autoclosure
+    ///   - v7: the `T7` optional autoclosure
+    ///   - v6: the `T6` optional autoclosure
+    ///   - v5: the `T5` optional autoclosure
+    ///   - v4: the `T4` optional autoclosure
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v9`, `v8`, `v7`, `v6`, `v5`, `v4`, `v3` and `v2` all return `.none`
+    @inlinable static func coalesce(_ v9: @autoclosure () -> T9?, _ v8: @autoclosure () -> T8?, _ v7: @autoclosure () -> T7?, _ v6: @autoclosure () -> T6?, _ v5: @autoclosure () -> T5?, _ v4: @autoclosure () -> T4?, _ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v9().map(Self.init(t9:)) ?? Self.coalesce(v8(), v7(), v6(), v5(), v4(), v3(), v2(), v1())
+    }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
@@ -2002,6 +2119,24 @@ public protocol OneOf10Type : OneOf9Type {
 
 public extension OneOf10Type {
     @inlinable var v10: T10? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
+}
+
+public extension OneOf10Type {
+    /// Construct a `OneOf10` by evaluating the sequence of autoclosures returning optional `T10`, `T9`, `T8`, `T7`, `T6`, `T5`, `T4`, `T3` or `T2`, falling back to `T1`.
+    /// - Parameters:
+    ///   - v10: the `T10` optional autoclosure
+    ///   - v9: the `T9` optional autoclosure
+    ///   - v8: the `T8` optional autoclosure
+    ///   - v7: the `T7` optional autoclosure
+    ///   - v6: the `T6` optional autoclosure
+    ///   - v5: the `T5` optional autoclosure
+    ///   - v4: the `T4` optional autoclosure
+    ///   - v3: the `T3` optional autoclosure
+    ///   - v2: the `T2` optional autoclosure
+    ///   - v1: the `T1` non-optional autoclosure fallback `v10`, `v9`, `v8`, `v7`, `v6`, `v5`, `v4`, `v3` and `v2` all return `.none`
+    @inlinable static func coalesce(_ v10: @autoclosure () -> T10?, _ v9: @autoclosure () -> T9?, _ v8: @autoclosure () -> T8?, _ v7: @autoclosure () -> T7?, _ v6: @autoclosure () -> T6?, _ v5: @autoclosure () -> T5?, _ v4: @autoclosure () -> T4?, _ v3: @autoclosure () -> T3?, _ v2: @autoclosure () -> T2?, _ v1: @autoclosure () -> T1) -> Self {
+        v10().map(Self.init(t10:)) ?? Self.coalesce(v9(), v8(), v7(), v6(), v5(), v4(), v3(), v2(), v1())
+    }
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10

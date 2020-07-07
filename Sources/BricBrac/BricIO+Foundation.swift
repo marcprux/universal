@@ -146,7 +146,7 @@ public extension JSONEncoder {
         // while JSONEncoder doesn't let us specify a custom sort order for keys, but can use a `KeyEncodingStrategy.custom`
         // to replace any keys that have specified an ordering with a prefix that contains the desired ordering,
         // so that when it is later sorted (due to `OutputFormatting.sortedKeys`), it will show up in the correct order.
-        let orderPrefix = "___KEYORDER___"
+        let orderPrefix = "@#_KEYORDER___"
         let indexDigits = 5 // a max of 99,999 keys should be sufficient
         let keylen = orderPrefix.count + indexDigits
         func keyPrefix(index: Int) -> String {
@@ -154,7 +154,7 @@ public extension JSONEncoder {
             let padzeros = indexDigits - key.count
             if padzeros <= 0 {
                 return orderPrefix + key
-            } else { // convert "keyName" to "___KEYORDER___00009keyName"
+            } else { // convert "keyName" to "@__KEYORDER___00009keyName"
                 return orderPrefix + String(repeating: "0", count: padzeros) + key
             }
         }
@@ -174,13 +174,13 @@ public extension JSONEncoder {
                 return lastKey
             }
 
-            // convert the key "key" to "___KEYORDER___00009key"
+            // convert the key "key" to "@#_KEYORDER___00009key"
             return AnyCodingKey(stringValue: keyPrefix(index: index) + lastKey.stringValue)
         })
 
         var data = try self.encode(value)
 
-        // now post-process the encoded data to cut out any "___KEYORDER___12345" instances, thus restoring the original keys
+        // now post-process the encoded data to excise out any "@#_KEYORDER___12345" substrings, thus restoring the original keys
         if let orderPrefixData = orderPrefix.data(using: .utf8) { // JSON encoding is always UTF8
             for i in data.indices.reversed() { // go from back to front so we can remove data chunks with impunity
                 if data[i...].starts(with: orderPrefixData) { // Data slice subscript is complexity: O(1)

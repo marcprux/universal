@@ -26,6 +26,11 @@ extension Decodable {
     @inlinable public static func loadFromJSON(data: Data) throws -> Self {
         try JSONDecoder().decode(Self.self, from: data)
     }
+
+    /// Instantiates the given type by parsing the JSON string.
+    @inlinable public static func parseJSON(_ json: String, using decoder: JSONDecoder = JSONDecoder()) throws -> Self {
+        try decoder.decode(Self.self, from: json.data(using: .utf8) ?? .init())
+    }
 }
 
 

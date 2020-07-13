@@ -311,10 +311,7 @@ public indirect enum OneOf2<T1, T2> : OneOf2Type {
 
 extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        }
+        self[routing: (T1.bric, T2.bric)]()
     }
 }
 
@@ -329,10 +326,7 @@ extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
 
 extension OneOf2 : Encodable where T1 : Encodable, T2 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode)](encoder)
     }
 }
 
@@ -389,11 +383,12 @@ public extension OneOf2 {
     }
 
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>)) -> T {
+    /// Enables reading multiple different keyPaths that lead to the same type
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
             }
         }
     }
@@ -606,11 +601,7 @@ public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
 
 extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric)]()
     }
 }
 
@@ -625,13 +616,8 @@ extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
 }
 
 extension OneOf3 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode)](encoder)
     }
 }
 
@@ -694,12 +680,12 @@ public extension OneOf3 {
     }
 
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
             }
         }
     }
@@ -867,12 +853,7 @@ public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
 
 extension OneOf4 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        case .v4(let t4): return t4.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric)]()
     }
 }
 
@@ -888,14 +869,8 @@ extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 extension OneOf4 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        case .v4(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode)](encoder)
     }
 }
 
@@ -963,13 +938,13 @@ public extension OneOf4 {
     }
 
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
+            case .v4(let x4): return blocks.f4(x4)
             }
         }
     }
@@ -1076,13 +1051,7 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type {
 
 extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        case .v4(let t4): return t4.bric()
-        case .v5(let t5): return t5.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric)]()
     }
 }
 
@@ -1099,15 +1068,8 @@ extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 extension OneOf5 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        case .v4(let x): try x.encode(to: encoder)
-        case .v5(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode)](encoder)
     }
 }
 
@@ -1181,14 +1143,14 @@ public extension OneOf5 {
     }
 
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
+            case .v4(let x4): return blocks.f4(x4)
+            case .v5(let x5): return blocks.f5(x5)
             }
         }
     }
@@ -1305,14 +1267,7 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
 
 extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        case .v4(let t4): return t4.bric()
-        case .v5(let t5): return t5.bric()
-        case .v6(let t6): return t6.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric)]()
     }
 }
 
@@ -1330,16 +1285,8 @@ extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 extension OneOf6 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        case .v4(let x): try x.encode(to: encoder)
-        case .v5(let x): try x.encode(to: encoder)
-        case .v6(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode)](encoder)
     }
 }
 
@@ -1377,15 +1324,15 @@ extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf6 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
+            case .v4(let x4): return blocks.f4(x4)
+            case .v5(let x5): return blocks.f5(x5)
+            case .v6(let x6): return blocks.f6(x6)
             }
         }
     }
@@ -1511,15 +1458,7 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
 
 extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        case .v4(let t4): return t4.bric()
-        case .v5(let t5): return t5.bric()
-        case .v6(let t6): return t6.bric()
-        case .v7(let t7): return t7.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric)]()
     }
 }
 
@@ -1538,17 +1477,8 @@ extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 extension OneOf7 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        case .v4(let x): try x.encode(to: encoder)
-        case .v5(let x): try x.encode(to: encoder)
-        case .v6(let x): try x.encode(to: encoder)
-        case .v7(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode)](encoder)
     }
 }
 
@@ -1588,16 +1518,16 @@ extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf7 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
+            case .v4(let x4): return blocks.f4(x4)
+            case .v5(let x5): return blocks.f5(x5)
+            case .v6(let x6): return blocks.f6(x6)
+            case .v7(let x7): return blocks.f7(x7)
             }
         }
     }
@@ -1732,16 +1662,7 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type {
 
 extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        case .v4(let t4): return t4.bric()
-        case .v5(let t5): return t5.bric()
-        case .v6(let t6): return t6.bric()
-        case .v7(let t7): return t7.bric()
-        case .v8(let t8): return t8.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric)]()
     }
 }
 
@@ -1761,18 +1682,8 @@ extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 extension OneOf8 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        case .v4(let x): try x.encode(to: encoder)
-        case .v5(let x): try x.encode(to: encoder)
-        case .v6(let x): try x.encode(to: encoder)
-        case .v7(let x): try x.encode(to: encoder)
-        case .v8(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode, T8.encode)](encoder)
     }
 }
 
@@ -1815,17 +1726,17 @@ extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf8 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T), f8: (T8)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
-            case .v8(let x8): return x8[keyPath: keys.kp8]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
+            case .v4(let x4): return blocks.f4(x4)
+            case .v5(let x5): return blocks.f5(x5)
+            case .v6(let x6): return blocks.f6(x6)
+            case .v7(let x7): return blocks.f7(x7)
+            case .v8(let x8): return blocks.f8(x8)
             }
         }
     }
@@ -1969,17 +1880,7 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type {
 
 extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        case .v4(let t4): return t4.bric()
-        case .v5(let t5): return t5.bric()
-        case .v6(let t6): return t6.bric()
-        case .v7(let t7): return t7.bric()
-        case .v8(let t8): return t8.bric()
-        case .v9(let t9): return t9.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric, T9.bric)]()
     }
 }
 
@@ -2000,19 +1901,8 @@ extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 extension OneOf9 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable, T9 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        case .v4(let x): try x.encode(to: encoder)
-        case .v5(let x): try x.encode(to: encoder)
-        case .v6(let x): try x.encode(to: encoder)
-        case .v7(let x): try x.encode(to: encoder)
-        case .v8(let x): try x.encode(to: encoder)
-        case .v9(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode, T8.encode, T9.encode)](encoder)
     }
 }
 
@@ -2057,18 +1947,18 @@ extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 public extension OneOf9 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T), f8: (T8)->(T), f9: (T9)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
-            case .v8(let x8): return x8[keyPath: keys.kp8]
-            case .v9(let x9): return x9[keyPath: keys.kp9]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
+            case .v4(let x4): return blocks.f4(x4)
+            case .v5(let x5): return blocks.f5(x5)
+            case .v6(let x6): return blocks.f6(x6)
+            case .v7(let x7): return blocks.f7(x7)
+            case .v8(let x8): return blocks.f8(x8)
+            case .v9(let x9): return blocks.f9(x9)
             }
         }
     }
@@ -2221,18 +2111,7 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10T
 
 extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable, T10: Bricable {
     @inlinable public func bric() -> Bric {
-        switch self {
-        case .v1(let t1): return t1.bric()
-        case .v2(let t2): return t2.bric()
-        case .v3(let t3): return t3.bric()
-        case .v4(let t4): return t4.bric()
-        case .v5(let t5): return t5.bric()
-        case .v6(let t6): return t6.bric()
-        case .v7(let t7): return t7.bric()
-        case .v8(let t8): return t8.bric()
-        case .v9(let t9): return t9.bric()
-        case .v10(let t10): return t10.bric()
-        }
+        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric, T9.bric, T10.bric)]()
     }
 }
 
@@ -2254,20 +2133,8 @@ extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4:
 }
 
 extension OneOf10 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable, T9 : Encodable, T10 : Encodable {
-
     @inlinable public func encode(to encoder: Encoder) throws {
-        switch self {
-        case .v1(let x): try x.encode(to: encoder)
-        case .v2(let x): try x.encode(to: encoder)
-        case .v3(let x): try x.encode(to: encoder)
-        case .v4(let x): try x.encode(to: encoder)
-        case .v5(let x): try x.encode(to: encoder)
-        case .v6(let x): try x.encode(to: encoder)
-        case .v7(let x): try x.encode(to: encoder)
-        case .v8(let x): try x.encode(to: encoder)
-        case .v9(let x): try x.encode(to: encoder)
-        case .v10(let x): try x.encode(to: encoder)
-        }
+        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode, T8.encode, T9.encode, T10.encode)](encoder)
     }
 }
 
@@ -2315,19 +2182,19 @@ extension OneOf10 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, 
 
 public extension OneOf10 {
     /// Enables reading multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: KeyPath<T1, T>, kp2: KeyPath<T2, T>, kp3: KeyPath<T3, T>, kp4: KeyPath<T4, T>, kp5: KeyPath<T5, T>, kp6: KeyPath<T6, T>, kp7: KeyPath<T7, T>, kp8: KeyPath<T8, T>, kp9: KeyPath<T9, T>, kp10: KeyPath<T10, T>)) -> T {
+    @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T), f8: (T8)->(T), f9: (T9)->(T), f10: (T10)->(T))) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
-            case .v8(let x8): return x8[keyPath: keys.kp8]
-            case .v9(let x9): return x9[keyPath: keys.kp9]
-            case .v10(let x10): return x10[keyPath: keys.kp10]
+            case .v1(let x1): return blocks.f1(x1)
+            case .v2(let x2): return blocks.f2(x2)
+            case .v3(let x3): return blocks.f3(x3)
+            case .v4(let x4): return blocks.f4(x4)
+            case .v5(let x5): return blocks.f5(x5)
+            case .v6(let x6): return blocks.f6(x6)
+            case .v7(let x7): return blocks.f7(x7)
+            case .v8(let x8): return blocks.f8(x8)
+            case .v9(let x9): return blocks.f9(x9)
+            case .v10(let x10): return blocks.f10(x10)
             }
         }
     }

@@ -326,7 +326,11 @@ extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
 
 extension OneOf2 : Encodable where T1 : Encodable, T2 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode)](encoder)
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .v1(let x): try container.encode(x)
+        case .v2(let x): try container.encode(x)
+        }
     }
 }
 
@@ -617,7 +621,7 @@ extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
 
 extension OneOf3 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 
@@ -870,7 +874,7 @@ extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf4 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 
@@ -1069,7 +1073,7 @@ extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf5 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 
@@ -1286,7 +1290,7 @@ extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf6 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 
@@ -1478,7 +1482,7 @@ extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf7 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 
@@ -1683,7 +1687,7 @@ extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf8 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode, T8.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 
@@ -1902,7 +1906,7 @@ extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 
 extension OneOf9 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable, T9 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode, T8.encode, T9.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 
@@ -2134,7 +2138,7 @@ extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4:
 
 extension OneOf10 : Encodable where T1 : Encodable, T2 : Encodable, T3 : Encodable, T4 : Encodable, T5 : Encodable, T6 : Encodable, T7 : Encodable, T8 : Encodable, T9 : Encodable, T10 : Encodable {
     @inlinable public func encode(to encoder: Encoder) throws {
-        try self[routing: (T1.encode, T2.encode, T3.encode, T4.encode, T5.encode, T6.encode, T7.encode, T8.encode, T9.encode, T10.encode)](encoder)
+        try split().encode(to: encoder) // defers to OneOf2.encoder(to:)
     }
 }
 

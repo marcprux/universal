@@ -483,9 +483,9 @@ public struct Curio {
 
                 switch sub.type {
                 case .some(.v1(.string)) where sub._enum == nil: casetype = CodeExternalType.string
-                case .some(.v1(.number)): casetype = CodeExternalType.double
-                case .some(.v1(.boolean)): casetype = CodeExternalType.bool
-                case .some(.v1(.integer)): casetype = CodeExternalType.int
+                case .some(.v1(.number)): casetype = CodeExternalType.number
+                case .some(.v1(.boolean)): casetype = CodeExternalType.boolean
+                case .some(.v1(.integer)): casetype = CodeExternalType.integer
                 case .some(.v1(.null)): casetype = CodeExternalType.null
                 default:
                     if let values = sub._enum {
@@ -602,16 +602,16 @@ public struct Curio {
                     assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.string))
                 case .number:
                     let caseName = enumCase == .upper ? "Number" : "number"
-                    subTypes.append(CodeExternalType.double)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.double))
+                    subTypes.append(CodeExternalType.number)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.number))
                 case .boolean:
                     let caseName = enumCase == .upper ? "Boolean" : "boolean"
-                    subTypes.append(CodeExternalType.bool)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.bool))
+                    subTypes.append(CodeExternalType.boolean)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.boolean))
                 case .integer:
                     let caseName = enumCase == .upper ? "Integer" : "integer"
-                    subTypes.append(CodeExternalType.int)
-                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.int))
+                    subTypes.append(CodeExternalType.integer)
+                    assoc.cases.append(CodeEnum.Case(name: caseName, type: CodeExternalType.integer))
                 case .array:
                     let caseName = enumCase == .upper ? "List" : "list"
                     subTypes.append(CodeExternalType.array)
@@ -719,9 +719,9 @@ public struct Curio {
                 } else {
                     switch prop.type {
                     case .some(.v1(.string)) where prop._enum == nil: proptype = CodeExternalType.string
-                    case .some(.v1(.number)): proptype = CodeExternalType.double
-                    case .some(.v1(.boolean)): proptype = CodeExternalType.bool
-                    case .some(.v1(.integer)): proptype = CodeExternalType.int
+                    case .some(.v1(.number)): proptype = CodeExternalType.number
+                    case .some(.v1(.boolean)): proptype = CodeExternalType.boolean
+                    case .some(.v1(.integer)): proptype = CodeExternalType.integer
                     case .some(.v1(.null)): proptype = CodeExternalType.null
 
                     case .some(.v2(let types)):
@@ -1157,10 +1157,10 @@ public struct Curio {
             for type in multiType {
                 switch type {
                 case .array: subTypes.append(arrayType(CodeExternalType.bric))
-                case .boolean: subTypes.append(CodeExternalType.bool)
-                case .integer: subTypes.append(CodeExternalType.int)
+                case .boolean: subTypes.append(CodeExternalType.boolean)
+                case .integer: subTypes.append(CodeExternalType.integer)
                 case .null: subTypes.append(CodeExternalType.null)
-                case .number: subTypes.append(CodeExternalType.double)
+                case .number: subTypes.append(CodeExternalType.number)
                 case .object: subTypes.append(CodeExternalType.bric)
                 case .string: subTypes.append(CodeExternalType.string)
                 }
@@ -1169,11 +1169,11 @@ public struct Curio {
         } else if case .some(.v1(.string)) = type {
             return aliasSimpleType(name: typename, type: CodeExternalType.string)
         } else if case .some(.v1(.integer)) = type {
-            return aliasSimpleType(name: typename, type: CodeExternalType.int)
+            return aliasSimpleType(name: typename, type: CodeExternalType.integer)
         } else if case .some(.v1(.number)) = type {
-            return aliasSimpleType(name: typename, type: CodeExternalType.double)
+            return aliasSimpleType(name: typename, type: CodeExternalType.number)
         } else if case .some(.v1(.boolean)) = type {
-            return aliasSimpleType(name: typename, type: CodeExternalType.bool)
+            return aliasSimpleType(name: typename, type: CodeExternalType.boolean)
         } else if case .some(.v1(.null)) = type {
             return aliasSimpleType(name: typename, type: CodeExternalType.null)
         } else if case .some(.v1(.array)) = type {
@@ -1636,9 +1636,9 @@ extension Curio {
 /// Standard types
 extension CodeExternalType {
     static let string = CodeExternalType("String")
-    static let int = CodeExternalType("Int")
-    static let double = CodeExternalType("Double")
-    static let bool = CodeExternalType("Bool")
+    static let number = CodeExternalType("Double")
+    static let integer = CodeExternalType("Int")
+    static let boolean = CodeExternalType("Bool")
     static let void = CodeExternalType("Void")
     static let encoder = CodeExternalType("Encoder")
     static let decoder = CodeExternalType("Decoder")

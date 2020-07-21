@@ -694,6 +694,14 @@ class BricBracTests : XCTestCase {
 
     }
 
+    func testDecimalEncoding() throws {
+        XCTAssertEqual("[12.800000000000001]", [Double(12.8)].jsonDebugDescription)
+        XCTAssertEqual("[12.8]", [Decimal(12.8)].jsonDebugDescription)
+
+        XCTAssertEqual("[12.800000000000001]", [OneOf2<Double, Decimal>.v1(Double(12.8))].jsonDebugDescription)
+        XCTAssertEqual("[12.8]", [OneOf2<Double, Decimal>.v2(Decimal(12.8))].jsonDebugDescription)
+    }
+
     func testBricSwapping() {
         struct Swapper : KeyedCodable, Equatable {
             static let codableKeys = [\Self.x : CodingKeys.x, \Self.y : CodingKeys.y]

@@ -134,7 +134,7 @@ open class CodeModule : CodeImplementationType {
     }
 
     open func emit(_ emitter: CodeEmitterType) {
-        for i in imports + ["BricBrac"] {
+        for i in Set(imports + ["BricBrac"]).sorted() {
             emitter.emit("import", i)
         }
 

@@ -63,6 +63,18 @@ class BricBracTests : XCTestCase {
         XCTAssertNotNil(cocoa.object)
         let bric2 = cocoa.bric()
         XCTAssertEqual(bric, bric2)
+
+        XCTAssertEqual(Bric.str("ABC"), FoundationBricolage(primitive: "ABC" as NSObject)?.bric())
+        XCTAssertEqual(Bric.bol(false), FoundationBricolage(primitive: false as NSObject)?.bric())
+        XCTAssertEqual(Bric.bol(true), FoundationBricolage(primitive: true as NSObject)?.bric())
+        XCTAssertEqual(Bric.num(1.0), FoundationBricolage(primitive: 1 as NSObject)?.bric())
+        XCTAssertEqual(Bric.num(1.0), FoundationBricolage(primitive: 1.0 as NSObject)?.bric())
+        XCTAssertEqual(Bric.num(3.14159), FoundationBricolage(primitive: 3.14159 as NSObject)?.bric())
+        XCTAssertEqual(Bric.nul, FoundationBricolage(primitive: NSNull() as NSObject)?.bric())
+
+        // array and dict are unsupported
+        XCTAssertEqual(nil, FoundationBricolage(primitive: [] as NSObject)?.bric())
+        XCTAssertEqual(nil, FoundationBricolage(primitive: [:] as NSObject)?.bric())
     }
 #endif
 

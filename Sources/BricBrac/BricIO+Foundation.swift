@@ -414,13 +414,31 @@ public final class FoundationBricolage: NSObject, Bricolage {
 
 
 extension FoundationBricolage : Bricable, Bracable {
+    /// Try to create from a the given primitive object, returning `nil` if the object is not one of the Bricolage types.
+    /// Arrays and Objects are not supported, and will return `nil`.
+    public convenience init?(primitive object: NSObject) {
+        if let str = object as? NSString {
+            self.init(str: str)
+        } else if let num = object as? NSNumber {
+            if Self.bolTypes.contains(String(cString: num.objCType)) {
+                self.init(bol: num)
+            } else {
+                self.init(num: num)
+            }
+        } else if let null = object as? NSNull {
+            self.init(nul: null)
+        } else {
+            return nil
+        }
+    }
+
     public func bric() -> Bric {
         return FoundationBricolage.toBric(object)
     }
 
     fileprivate static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
     fileprivate static func toBric(_ object: Any) -> Bric {
-        if let bol = object as? BolType , bolTypes.contains(String(cString: bol.objCType)) {
+        if let bol = object as? BolType, bolTypes.contains(String(cString: bol.objCType)) {
             if let b = bol as? Bool {
                 return Bric.bol(b)
             } else {

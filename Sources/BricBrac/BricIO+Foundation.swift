@@ -412,11 +412,10 @@ public final class FoundationBricolage: NSObject, Bricolage {
     }
 }
 
-
-extension FoundationBricolage : Bricable, Bracable {
+public extension FoundationBricolage {
     /// Try to create from a the given primitive object, returning `nil` if the object is not one of the Bricolage types.
     /// Arrays and Objects are not supported, and will return `nil`.
-    public convenience init?(primitive object: NSObject) {
+    @inlinable convenience init?(primitive object: NSObject) {
         if let str = object as? NSString {
             self.init(str: str)
         } else if let num = object as? NSNumber {
@@ -432,12 +431,26 @@ extension FoundationBricolage : Bricable, Bracable {
         }
     }
 
-    public func bric() -> Bric {
+    /// Returns the Cocoa wrapper from the given bric.
+    @inlinable static func primitiveValue(for bric: Bric) -> NSObject? {
+        switch bric {
+        case .arr: return nil // not primitive
+        case .obj: return nil // not primitive
+        case .str(let str): return str as NSString
+        case .num(let num): return num as NSNumber
+        case .bol(let bol): return bol as NSNumber
+        case .nul: return NSNull()
+        }
+    }
+}
+
+extension FoundationBricolage : Bricable, Bracable {
+    @inlinable public func bric() -> Bric {
         return FoundationBricolage.toBric(object)
     }
 
-    fileprivate static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
-    fileprivate static func toBric(_ object: Any) -> Bric {
+    @usableFromInline static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
+    @usableFromInline static func toBric(_ object: Any) -> Bric {
         if let bol = object as? BolType, bolTypes.contains(String(cString: bol.objCType)) {
             if let b = bol as? Bool {
                 return Bric.bol(b)

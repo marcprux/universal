@@ -1203,5 +1203,3 @@ public class FilterEncoder {
         func encode(_ value: UInt64) throws { filter((key: codingPath, value: value)) }
     }
 }
-
-

@@ -317,9 +317,9 @@
 			buildConfigurationList = 49DB61572063426E00022D2C /* Build configuration list for PBXNativeTarget "CurioDemoModels" */;
 			buildPhases = (
 				49DB61502063426D00022D2C /* Resources */,
+				49DB614F2063426D00022D2C /* Headers */,
 				49DB614D2063426D00022D2C /* Sources */,
 				49DB614E2063426D00022D2C /* Frameworks */,
-				49DB614F2063426D00022D2C /* Headers */,
 			);
 			buildRules = (
 				49DB615A2063428000022D2C /* PBXBuildRule */,
@@ -371,10 +371,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7E7F9B301B3615860058706A /* Build configuration list for PBXNativeTarget "BricBrac" */;
 			buildPhases = (
+				7E7F9B1A1B3615850058706A /* Resources */,
 				7E7F9B171B3615850058706A /* Sources */,
 				7E7F9B181B3615850058706A /* Frameworks */,
 				7E7F9B191B3615850058706A /* Headers */,
-				7E7F9B1A1B3615850058706A /* Resources */,
 			);
 			buildRules = (
 			);

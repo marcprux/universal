@@ -64,40 +64,12 @@
 /* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
-		49DB615B206342B800022D2C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 49DB61512063426D00022D2C;
-			remoteInfo = CurioDemoModels;
-		};
 		49DB615D206342C100022D2C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 7E8E74591B9F31E8004EA61F;
 			remoteInfo = CurioTool;
-		};
-		49DB616F2063487E00022D2C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7E7F9B1B1B3615850058706A;
-			remoteInfo = BricBrac;
-		};
-		7E28A5C71B5AD5EE00A5F27F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7E28A5BB1B5AD5EE00A5F27F;
-			remoteInfo = BricBracSchema;
-		};
-		7E7F9B281B3615860058706A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7E7F9B1B1B3615850058706A;
-			remoteInfo = BricBrac;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -344,10 +316,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 49DB61572063426E00022D2C /* Build configuration list for PBXNativeTarget "CurioDemoModels" */;
 			buildPhases = (
+				49DB61502063426D00022D2C /* Resources */,
 				49DB614D2063426D00022D2C /* Sources */,
 				49DB614E2063426D00022D2C /* Frameworks */,
 				49DB614F2063426D00022D2C /* Headers */,
-				49DB61502063426D00022D2C /* Resources */,
 			);
 			buildRules = (
 				49DB615A2063428000022D2C /* PBXBuildRule */,
@@ -364,10 +336,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7E28A5CD1B5AD5EE00A5F27F /* Build configuration list for PBXNativeTarget "Curio" */;
 			buildPhases = (
+				7E28A5BA1B5AD5EE00A5F27F /* Resources */,
 				7E28A5B71B5AD5EE00A5F27F /* Sources */,
 				7E28A5B81B5AD5EE00A5F27F /* Frameworks */,
 				7E28A5B91B5AD5EE00A5F27F /* Headers */,
-				7E28A5BA1B5AD5EE00A5F27F /* Resources */,
 			);
 			buildRules = (
 			);
@@ -382,16 +354,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7E28A5D01B5AD5EE00A5F27F /* Build configuration list for PBXNativeTarget "CurioTests" */;
 			buildPhases = (
+				7E28A5C31B5AD5EE00A5F27F /* Resources */,
 				7E28A5C11B5AD5EE00A5F27F /* Sources */,
 				7E28A5C21B5AD5EE00A5F27F /* Frameworks */,
-				7E28A5C31B5AD5EE00A5F27F /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				49DB61702063487E00022D2C /* PBXTargetDependency */,
-				49DB615C206342B800022D2C /* PBXTargetDependency */,
-				7E28A5C81B5AD5EE00A5F27F /* PBXTargetDependency */,
 			);
 			name = CurioTests;
 			productName = BricBracSchemaTests;
@@ -420,14 +389,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7E7F9B331B3615860058706A /* Build configuration list for PBXNativeTarget "BricBracTests" */;
 			buildPhases = (
+				7E7F9B241B3615860058706A /* Resources */,
 				7E7F9B221B3615860058706A /* Sources */,
 				7E7F9B231B3615860058706A /* Frameworks */,
-				7E7F9B241B3615860058706A /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				7E7F9B291B3615860058706A /* PBXTargetDependency */,
 			);
 			name = BricBracTests;
 			productName = BricBracTests;
@@ -628,30 +596,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		49DB615C206342B800022D2C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 49DB61512063426D00022D2C /* CurioDemoModels */;
-			targetProxy = 49DB615B206342B800022D2C /* PBXContainerItemProxy */;
-		};
 		49DB615E206342C100022D2C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 7E8E74591B9F31E8004EA61F /* CurioTool */;
 			targetProxy = 49DB615D206342C100022D2C /* PBXContainerItemProxy */;
-		};
-		49DB61702063487E00022D2C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
-			targetProxy = 49DB616F2063487E00022D2C /* PBXContainerItemProxy */;
-		};
-		7E28A5C81B5AD5EE00A5F27F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7E28A5BB1B5AD5EE00A5F27F /* Curio */;
-			targetProxy = 7E28A5C71B5AD5EE00A5F27F /* PBXContainerItemProxy */;
-		};
-		7E7F9B291B3615860058706A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
-			targetProxy = 7E7F9B281B3615860058706A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

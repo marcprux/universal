@@ -85,6 +85,13 @@
 			remoteGlobalIDString = 7E7F9B1B1B3615850058706A;
 			remoteInfo = BricBrac;
 		};
+		49E6639824D161C4006517C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 49DB61512063426D00022D2C;
+			remoteInfo = CurioDemoModels;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -375,6 +382,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				49E6639924D161C4006517C4 /* PBXTargetDependency */,
 				49E6639524D160FC006517C4 /* PBXTargetDependency */,
 			);
 			name = CurioTests;
@@ -626,6 +634,11 @@
 			isa = PBXTargetDependency;
 			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
 			targetProxy = 49E6639624D160FF006517C4 /* PBXContainerItemProxy */;
+		};
+		49E6639924D161C4006517C4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 49DB61512063426D00022D2C /* CurioDemoModels */;
+			targetProxy = 49E6639824D161C4006517C4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

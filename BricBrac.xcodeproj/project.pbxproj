@@ -59,7 +59,7 @@
 			outputFiles = (
 				"$(DERIVED_SOURCES_DIR)/$(INPUT_FILE_BASE).swift",
 			);
-			script = "cat ${INPUT_FILE_PATH} | ${BUILT_PRODUCTS_DIR}/curio -name ${INPUT_FILE_BASE} > ${DERIVED_SOURCES_DIR}/${INPUT_FILE_BASE}.swift";
+			script = "cat ${INPUT_FILE_PATH} | ${BUILT_PRODUCTS_DIR}/curio -name ${INPUT_FILE_BASE} > ${DERIVED_SOURCES_DIR}/${INPUT_FILE_BASE}.swift\n";
 		};
 /* End PBXBuildRule section */
 
@@ -79,13 +79,6 @@
 			remoteInfo = CurioTool;
 		};
 		49DB616F2063487E00022D2C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7E7F9B1B1B3615850058706A;
-			remoteInfo = BricBrac;
-		};
-		7E23650C1B5B3DAF007D53AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
 			proxyType = 1;
@@ -379,7 +372,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				7E23650D1B5B3DAF007D53AB /* PBXTargetDependency */,
 			);
 			name = Curio;
 			productName = BricBracSchema;
@@ -650,11 +642,6 @@
 			isa = PBXTargetDependency;
 			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
 			targetProxy = 49DB616F2063487E00022D2C /* PBXContainerItemProxy */;
-		};
-		7E23650D1B5B3DAF007D53AB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
-			targetProxy = 7E23650C1B5B3DAF007D53AB /* PBXContainerItemProxy */;
 		};
 		7E28A5C81B5AD5EE00A5F27F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

@@ -1,5 +1,4 @@
 import BricBrac
-import Foundation
 
 public struct Thing : Equatable, Hashable, Codable, KeyedCodable {
     public var weight: Int?

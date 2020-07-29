@@ -1,5 +1,4 @@
 import BricBrac
-import Foundation
 
 public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     public var allOfField: AllOfField
@@ -79,11 +78,11 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         /// SecondAll
         public struct SecondAll : Equatable, Hashable, Codable, KeyedCodable {
             public var a3: Bool
-            public var a4: Decimal
+            public var a4: Double
             public static let codingKeyPaths = (\Self.a3, \Self.a4)
             public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.a3 : CodingKeys.a3, \Self.a4 : CodingKeys.a4]
 
-            public init(a3: Bool, a4: Decimal) {
+            public init(a3: Bool, a4: Double) {
                 self.a3 = a3 
                 self.a4 = a4 
             }
@@ -91,7 +90,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
             public init(from decoder: Decoder) throws {
                 let values = try decoder.container(keyedBy: CodingKeys.self) 
                 self.a3 = try values.decode(Bool.self, forKey: .a3) 
-                self.a4 = try values.decode(Decimal.self, forKey: .a4) 
+                self.a4 = try values.decode(Double.self, forKey: .a4) 
             }
 
             public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable, Identifiable {
@@ -155,11 +154,11 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         /// SecondAny
         public struct SecondAny : Equatable, Hashable, Codable, KeyedCodable {
             public var b3: Bool
-            public var b4: Decimal
+            public var b4: Double
             public static let codingKeyPaths = (\Self.b3, \Self.b4)
             public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.b3 : CodingKeys.b3, \Self.b4 : CodingKeys.b4]
 
-            public init(b3: Bool, b4: Decimal) {
+            public init(b3: Bool, b4: Double) {
                 self.b3 = b3 
                 self.b4 = b4 
             }
@@ -167,7 +166,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
             public init(from decoder: Decoder) throws {
                 let values = try decoder.container(keyedBy: CodingKeys.self) 
                 self.b3 = try values.decode(Bool.self, forKey: .b3) 
-                self.b4 = try values.decode(Decimal.self, forKey: .b4) 
+                self.b4 = try values.decode(Double.self, forKey: .b4) 
             }
 
             public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable, Identifiable {
@@ -232,11 +231,11 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         /// SecondOne
         public struct SecondOne : Equatable, Hashable, Codable, KeyedCodable {
             public var c3: Bool
-            public var c4: Decimal
+            public var c4: Double
             public static let codingKeyPaths = (\Self.c3, \Self.c4)
             public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.c3 : CodingKeys.c3, \Self.c4 : CodingKeys.c4]
 
-            public init(c3: Bool, c4: Decimal) {
+            public init(c3: Bool, c4: Double) {
                 self.c3 = c3 
                 self.c4 = c4 
             }
@@ -245,7 +244,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
                 try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
                 let values = try decoder.container(keyedBy: CodingKeys.self) 
                 self.c3 = try values.decode(Bool.self, forKey: .c3) 
-                self.c4 = try values.decode(Decimal.self, forKey: .c4) 
+                self.c4 = try values.decode(Double.self, forKey: .c4) 
             }
 
             public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable, Identifiable {
@@ -267,7 +266,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     }
 
     /// Should generate a simple OneOf enum
-    public typealias SimpleOneOfChoice = OneOf2<String, Decimal>
+    public typealias SimpleOneOfChoice = OneOf2<String, Double>
 
     public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable, Identifiable {
         case allOfField

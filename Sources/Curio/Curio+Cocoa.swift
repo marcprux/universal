@@ -12,7 +12,7 @@
 import Cocoa
 
 public extension Curio {
-    func emit(_ module: CodeModule, name: String, dir: String) throws {
+    func emit(_ module: CodeModule, name: String, dir: String) throws -> Bool {
         let locpath = (dir as NSString).appendingPathComponent(name)
 
         let emitter = CodeEmitter(stream: "")
@@ -30,7 +30,7 @@ public extension Curio {
         }
 
         if loccode == code {
-            return // contents are unchanged from local version; skip compiling
+            return false // contents are unchanged from local version; skip compiling
         }
 
         let bundle = Bundle(for: JSONParser.self).executablePath!
@@ -63,6 +63,8 @@ public extension Curio {
                 try code.write(toFile: locpath, atomically: true, encoding: String.Encoding.utf8)
             }
         }
+
+        return true
     }
 }
 #endif

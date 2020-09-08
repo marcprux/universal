@@ -496,11 +496,13 @@ extension OneOrMany where T2 == [T1] {
             array(expanding: { [$0] })
         }
 
-        set {
-            if let singleValue = newValue.first, newValue.count == 1 {
+        _modify {
+            var value = self.array
+            yield &value
+            if let singleValue = value.first, value.count == 1 {
                 self = .v1(singleValue)
             } else {
-                self = .v2(newValue)
+                self = .v2(value)
             }
         }
     }

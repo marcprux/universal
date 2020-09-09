@@ -29,6 +29,29 @@ Any instance that supports **Encodable** automatically has a **bricEncoded()** f
   XCTAssertEqual(["encoding":["color":["value":"blue"]]], try encoding.bricEncoded())
 ````
 
+
+## Installation
+
+### Swift Package Manager (SPM)
+
+The Swift Package Manager is a dependency manager integrated with the Swift build system. To learn how to use the Swift Package Manager for your project, please read the [official documentation](https://github.com/apple/swift-package-manager/blob/master/Documentation/Usage.md).
+
+Add BricBrac to the `dependencies` of your `Package.swift` file and refer to that dependency in your `target`.
+
+```swift
+// swift-tools-version:5.0
+import PackageDescription
+let package = Package(
+    name: "<Your Product Name>",
+    dependencies: [
+        .package(url: "https://github.com/glimpseio/BricBrac.git", .upToNextMajor(from: "1.0.0"))
+    ],
+    targets: [
+        .target(name: "<Your Target Name>", dependencies: ["BricBrac"])
+    ]
+)
+```
+
 ## Curio
 
 Curio is a tool that generates swift value types (structs and enums) from a valid JSON Schema (Draft 5) file. Note that the Curio tool may generate code that has a dependency on the **BricBrac** library, but **Curio** itself never needs to be included as a runtime dependency.
@@ -100,26 +123,3 @@ cat ${INPUT_FILE_PATH} | ${BUILT_PRODUCTS_DIR}/curio -name ${INPUT_FILE_BASE} > 
  * Under the "Output Files" section, click the plus sign to add a new output file, and then enter: `$(BUILT_PRODUCTS_DIR)/$(INPUT_FILE_BASE).swift`
 
 Now any file with the suffix ".jsonschema" will automatiucally have a Swift file generated in the ${SRCDIR}. After the first time this is run you will need to manually add the subsequently generated files to your project's source files, but any changes to the JSON Schema files will then be reflected in the generated sources as part of the build process.
-
-## Installation
-
-### Swift Package Manager (SPM)
-
-The Swift Package Manager is a dependency manager integrated with the Swift build system. To learn how to use the Swift Package Manager for your project, please read the [official documentation](https://github.com/apple/swift-package-manager/blob/master/Documentation/Usage.md).
-
-Add BricBrac to the `dependencies` of your `Package.swift` file and refer to that dependency in your `target`.
-
-```swift
-// swift-tools-version:5.0
-import PackageDescription
-let package = Package(
-    name: "<Your Product Name>",
-    dependencies: [
-        .package(url: "https://github.com/glimpseio/BricBrac.git", .upToNextMajor(from: "1.0.0"))
-    ],
-    targets: [
-        .target(name: "<Your Target Name>", dependencies: ["BricBrac"])
-    ]
-)
-```
-

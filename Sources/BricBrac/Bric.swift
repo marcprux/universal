@@ -615,131 +615,6 @@ extension Mirror : Bricable {
 }
 
 
-#if swift(>=5.1)
-
-/// A vaguely-defined type that can hold some concrete properties as well as
-/// an underlying `Bric` that is used to store `@dynamicMemberLookup` properties.
-@dynamicMemberLookup public protocol Vague : Hashable, Codable {
-    /// The container for the underlying unstructured items.
-    var bric: Bric { get set }
-    /// The property type for unstructured items
-    associatedtype Property : VagueProperty = Stuff
-    subscript(dynamicMember member: String) -> Property { get set }
-}
-
-public protocol VagueProperty : Vague {
-    init(initialValue value: Bric)
-}
-
-public extension Vague {
-    /// Dyanmic lookup for members, which will be resolved to an empty object if not found.
-    subscript(dynamicMember member: String) -> Property {
-        get { return Property(initialValue: bric[member] ?? .obj([:])) }
-        set { bric[member] = newValue.bric }
-    }
-}
-
-/// Vaguely wraps a concrete value and merges its properties with a vague `Stuff`,
-/// enabling semi-structured properties.
-@propertyWrapper public struct Vaguely<T: Codable> : Codable {
-    public var wrappedValue: T
-    public var vague: Stuff = nil
-
-    public init(wrappedValue value: T) {
-        self.wrappedValue = value
-    }
-
-    /// Decodability passed through to the underlying `Bric.init(from:)`
-    public init(from decoder: Decoder) throws {
-        self.wrappedValue = try T(from: decoder)
-        self.vague = try Stuff(from: decoder) // TODO: eliminate keys from value
-    }
-
-    /// Encodability passed through to the underlying `Bric.encode(to:)`
-    public func encode(to encoder: Encoder) throws {
-        try vague.encode(to: encoder)
-        try wrappedValue.encode(to: encoder)
-    }
-}
-
-extension Vaguely : Equatable where T : Equatable {
-}
-
-extension Vaguely : Hashable where T : Hashable {
-}
-
-
-/// A wrapper for a piece of `Bric` that dynamically looks up its value. Members default to an
-/// empty `.obj`, which enables the dynamic creation of nested `Bric` objects like so:
-///
-/// ```
-/// var ob: Stuff = nil // Bric.nul
-/// ob.x.y.z = 1.234 // ["x": ["y": ["z": 1.2234]]]
-/// ```
-public struct Stuff : VagueProperty, ExpressibleByNilLiteral, ExpressibleByFloatLiteral, ExpressibleByStringLiteral, ExpressibleByBooleanLiteral, ExpressibleByIntegerLiteral, ExpressibleByArrayLiteral, ExpressibleByDictionaryLiteral {
-    public typealias Property = Stuff
-    public var bric: Bric
-
-    /// Array accessor; unlike `dynamicMember`, accessing specific indices is not a guarded operation,
-    /// and so accessing out of bounds values will crash.
-    public subscript(index: Int) -> Stuff {
-        get { return Stuff(initialValue: bric.arr?[index] ?? .obj([:])) }
-        set { bric.arr?[index] = newValue.bric }
-    }
-
-    public init(initialValue value: Bric) {
-        self.bric = value
-    }
-
-    public init(nilLiteral: ()) {
-        self.bric = .nul
-    }
-
-    public init(floatLiteral value: Double) {
-        self.bric = .init(floatLiteral: value)
-    }
-
-    public init(stringLiteral value: String) {
-        self.bric = .init(stringLiteral: value)
-    }
-
-    public init(booleanLiteral value: Bool) {
-        self.bric = .init(booleanLiteral: value)
-    }
-
-    public init(integerLiteral value: Int) {
-        self.bric = .init(integerLiteral: value)
-    }
-
-    public init(arrayLiteral elements: Bric...) {
-        self.bric = .arr(elements)
-    }
-
-    public init(dictionaryLiteral elements: (String, Bric)...) {
-        self.bric = .init(object: elements)
-    }
-
-    public subscript(coercing to: String) -> String {
-        get { fatalError() }
-        set { fatalError() }
-    }
-
-}
-
-extension Stuff : Codable {
-    /// Decodability passed through to the underlying `Bric.init(from:)`
-    public init(from decoder: Decoder) throws {
-        self.bric = try Bric(from: decoder)
-    }
-
-    /// Encodability passed through to the underlying `Bric.encode(to:)`
-    public func encode(to encoder: Encoder) throws {
-        if bric != nil {
-            try bric.encode(to: encoder)
-        }
-    }
-}
-
 /// A type that is codable using its contained `CodingKeys` type.
 public protocol KeyedCodable : Codable {
     associatedtype CodingKeyPaths
@@ -757,7 +632,7 @@ public protocol KeyedCodable : Codable {
 public extension KeyedCodable where CodingKeys : RawRepresentable, CodingKeys.RawValue == String {
     /// Swaps the values of two separate coding keys. This can be used, for example, to re-assign two different types that are serialization-compatible but not type-compatible.
     /// - Parameter keys: the two keys to swap
-    mutating func swapBricValues(keys: (CodingKeys, CodingKeys)) throws {
+    @inlinable mutating func swapBricValues(keys: (CodingKeys, CodingKeys)) throws {
         var bric = try self.bricEncoded()
         let v0 = bric[keys.0.rawValue]
         let v1 = bric[keys.1.rawValue]
@@ -787,7 +662,3 @@ public extension FixedCodingKeys where Self : RawRepresentable, Self.RawValue ==
         return bric
     }
 }
-
-
-
-#endif

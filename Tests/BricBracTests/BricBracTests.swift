@@ -10,7 +10,6 @@ import XCTest
 import BricBrac
 import JavaScriptCore
 
-
 class BricBracTests : XCTestCase {
 
     public static var allTests: [(String, (BricBracTests) -> () throws -> Void)] = [
@@ -228,127 +227,6 @@ class BricBracTests : XCTestCase {
         //        testDateParse("-271821-04-20T00:01:00.000+00:01", -8640000000000000)
         
     }
-
-    #if swift(>=5.1)
-    func testVagueStuff() {
-        var ob: Stuff = [:]
-        XCTAssertEqual([:], ob.bric)
-
-        ob.name = "xyz"
-        XCTAssertEqual(["name": "xyz"], ob.bric)
-
-        ob.age = 12
-        XCTAssertEqual(["name": "xyz", "age": 12], ob.bric)
-
-        ob.props.salary = 12.3
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": ["salary": 12.3]], ob.bric)
-
-        ob.props.salary = nil
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": ["salary": nil]], ob.bric)
-
-        ob.props = []
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": []], ob.bric)
-
-        ob.props = [false]
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": [false]], ob.bric)
-
-        ob.props.bric.arr?.append(true)
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": [false, true]], ob.bric)
-
-        ob.stuff.a.b.c = 1
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": [false, true], "stuff": ["a": ["b": ["c": 1]]]], ob.bric)
-
-        let kp: WritableKeyPath<Stuff, Stuff> = \Stuff.stuff.a.b.c // kp lookup
-        XCTAssertEqual(1, ob[keyPath: kp])
-
-        ob[keyPath: kp] = false
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": [false, true], "stuff": ["a": ["b": ["c": false]]]], ob.bric)
-
-        ob.stuff = "X" // swap parent container type
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": [false, true], "stuff": "X"], ob.bric)
-
-        ob[keyPath: kp] = 99 // note that we cannot swap child container type
-        XCTAssertEqual(["name": "xyz", "age": 12, "props": [false, true], "stuff": "X"], ob.bric)
-
-
-        struct Thing : Hashable, Codable {
-            var num: Int = 1
-            var str: Stuff = "abc"
-            var obj: Stuff = ["x": true]
-            @Vaguely var misc = Misc()
-
-            // broken: https://forums.swift.org/t/propertywrapper-codingkeys/26489
-            // enum CodingKeys : String, CodingKey { case num, str, obj, misc = "misc" }
-
-            // https://github.com/apple/swift/blob/93aed56cc97462c9eb797f933f9d43f9737057ff/test/decl/protocol/special/coding/property_wrappers_codable.swift
-//            private func getMiscKey() -> CodingKeys {
-//                return .misc
-//            }
-        }
-
-        struct Misc : Hashable, Codable, Vague {
-            var a: Int = 0
-            var b: String = ""
-            var bric: Bric = [:]
-
-            public enum CodingKeys: String, FixedCodingKeys {
-                case a, b
-            }
-
-            public init() {
-            }
-
-            public init(from decoder: Decoder) throws {
-                let values = try decoder.container(keyedBy: CodingKeys.self)
-                self.a = try CodingKeys.a.decode(values)
-                self.b = try CodingKeys.b.decode(values)
-                self.bric = CodingKeys.purgeKeys(from: try Bric(from: decoder))
-            }
-
-            public func encode(to encoder: Encoder) throws {
-                try CodingKeys.purgeKeys(from: self.bric).encode(to: encoder)
-                var container = encoder.container(keyedBy: CodingKeys.self)
-                try container.encode(a, forKey: .a)
-                try container.encode(b, forKey: .b)
-            }
-
-        }
-
-        var thing = Thing()
-        XCTAssertEqual(["obj": ["x": true], "num": 1, "str": "abc", "misc": ["a": 0, "b": ""]], try thing.bricEncoded())
-
-        // test structured properties
-        thing.obj.y = false
-        XCTAssertEqual(["obj": ["x": true, "y": false], "num": 1, "str": "abc", "misc": ["a": 0, "b": ""]], try thing.bricEncoded())
-
-        thing.obj.x = nil // props need to be cleared before that can change types
-        thing.obj.x.y.z = 1.23
-        XCTAssertEqual(["obj": ["x": ["y": ["z": 1.23]], "y": false], "num": 1, "str": "abc", "misc": ["a": 0, "b": ""]], try thing.bricEncoded())
-
-        // test unstructured properties
-        thing.misc.a += 1
-        XCTAssertEqual(["obj": ["x": ["y": ["z": 1.23]], "y": false], "num": 1, "str": "abc", "misc": ["a": 1, "b": ""]], try thing.bricEncoded())
-
-        thing.misc.b += "X"
-        XCTAssertEqual(["obj": ["x": ["y": ["z": 1.23]], "y": false], "num": 1, "str": "abc", "misc": ["a": 1, "b": "X"]], try thing.bricEncoded())
-
-        thing.misc.c = true
-        XCTAssertEqual(["obj": ["x": ["y": ["z": 1.23]], "y": false], "num": 1, "str": "abc", "misc": ["a": 1, "b": "X", "c": true]], try thing.bricEncoded())
-
-        thing.misc.c.bric.bol?.toggle()
-        //thing.misc.b = 1.1 // vague must not override value
-
-        XCTAssertEqual(["obj": ["x": ["y": ["z": 1.23]], "y": false], "num": 1, "str": "abc", "misc": ["a": 1, "b": "X", "c": false]], try thing.bricEncoded())
-
-        thing.misc.d = false
-        thing.misc.d = 1.0
-        thing.misc.e.f.g = true
-        thing.misc.e.f.h = false
-
-        XCTAssertEqual(["obj": ["x": ["y": ["z": 1.23]], "y": false], "num": 1, "str": "abc", "misc": ["a": 1, "b": "X", "c": false, "d": 1, "e": ["f": ["g": true, "h": false]]]], try thing.bricEncoded())
-
-    }
-    #endif
 
     func testBricBracPerson() {
         do {
@@ -2017,7 +1895,9 @@ extension Date : Bricable, Bracable {
 extension BricBracTests {
     func testIndirect() {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .sortedKeys // we want consistent key ordering
+        if #available(OSX 10.13, *) {
+            encoder.outputFormatting = .sortedKeys
+        }
 
         do {
             let value = Indirect(["Foo"])
@@ -2039,7 +1919,9 @@ extension BricBracTests {
 
 
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .sortedKeys // we want consistent key ordering
+        if #available(OSX 10.13, *) {
+            encoder.outputFormatting = .sortedKeys
+        }
 
         do {
             let nh = ExplicitNullHolder(optionalString: nil, nullableString: .init(.null), nullable: nil, nullableOptional: nil)
@@ -2086,7 +1968,9 @@ extension BricBracTests {
         }
 
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .sortedKeys // we want consistent key ordering
+        if #available(OSX 10.13, *) {
+            encoder.outputFormatting = .sortedKeys
+        }
 
         do {
             let nh = NullableHolder(ons: .none)
@@ -2124,6 +2008,7 @@ extension BricBracTests {
     /// This could be resolved with the `nullDecodingStrategy` property discussed at
     /// https://forums.swift.org/t/pitch-jsondecoder-nulldecodingstrategy/13980
     /// but it doesn't look like it will be implemented.
+    @available(OSX 10.13, *)
     func testOptionalOptionalsLosingSerializationFidelity() {
         struct OptionalOptional : Codable, Equatable {
             public let oos: Optional<Optional<String>>
@@ -2237,9 +2122,11 @@ extension BricBracTests {
         {"by":1,"az":"A","cx":false,"qq":"Q"}
         """)
 
-        XCTAssertEqual(try obj.encodedStringOrdered(format: []), """
-        {"by":1,"az":"A","cx":false,"qq":"Q"}
-        """)
+        if #available(macOS 10.15, *) {
+            XCTAssertEqual(try obj.encodedStringOrdered(format: []), """
+            {"by":1,"az":"A","cx":false,"qq":"Q"}
+            """)
+        }
     }
 }
 

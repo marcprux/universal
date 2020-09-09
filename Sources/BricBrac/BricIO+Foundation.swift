@@ -34,23 +34,32 @@ extension Decodable {
 }
 
 
-private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting) -> JSONEncoder {
+private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting, sortedKeys: Bool, withoutEscapingSlashes: Bool) -> JSONEncoder {
     let encoder = JSONEncoder()
-    encoder.outputFormatting = outputFormatting
+    var fmt = outputFormatting
+
+    if sortedKeys, #available(macOS 10.13, *) {
+        fmt = fmt.union(.sortedKeys)
+    }
+
+    if withoutEscapingSlashes, #available(macOS 10.15, *) {
+        fmt = fmt.union(.withoutEscapingSlashes)
+    }
+
+    encoder.outputFormatting = fmt
     return encoder
 }
 
 public extension Bric {
     /// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
     /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
-    static let JSONEncoderUnsorted = createJSONEncoder([.withoutEscapingSlashes]) // we want it to be unsorted
+    static let JSONEncoderUnsorted = createJSONEncoder([], sortedKeys: false, withoutEscapingSlashes: true) // we want it to be unsorted
 
     /// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
     /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
-    @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
-    static let JSONEncoderSorted = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes]) // we want consistent key ordering
+    static let JSONEncoderSorted = createJSONEncoder([], sortedKeys: true, withoutEscapingSlashes: true) // we want consistent key ordering
 
-    static let JSONEncoderFormatted = createJSONEncoder([.sortedKeys, .withoutEscapingSlashes, .prettyPrinted])
+    static let JSONEncoderFormatted = createJSONEncoder([.prettyPrinted], sortedKeys: true, withoutEscapingSlashes: true)
 }
 
 public extension Encodable {
@@ -101,7 +110,6 @@ public extension Encodable {
     /// this is somewhat slower than `encodedString` because it returns unordered keys.
     ///
     /// Example: for a 2.3MB JSON, this has been seen to be almost 3x slower (269ms vs. 769ms)
-    @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
     @inlinable func encodedStringSorted(encoder: (Self) throws -> (Data) = Bric.JSONEncoderSorted.encode) rethrows -> String {
         return String(data: try encoder(self), encoding: .utf8) ?? "{}"
     }
@@ -138,6 +146,7 @@ public extension JSONEncoder {
     /// - See Also: `OrderedCodingKey`
     /// - Note: Unlike `JSONEncoder.encode`, this function is not thread-safe due to needing to modify internal properties of the `JSONEncoder`.
     /// - Note: The underlying impementation is a *total* hack – it swaps out key names with a prefix that can be lexically sorted by the built in `sortedKeys` key, and then post-processes the underlying raw data to get rid of the key prefixes (thus restoring the original key names)
+    @available(macOS 10.13, *)
     func encodeOrdered<T: Encodable>(_ value: T) throws -> Data {
         // we need to sort the keys in order for our replacement scheme to work
         let hadSorted = self.outputFormatting.contains(.sortedKeys)
@@ -225,6 +234,7 @@ public struct AnyCodingKey : CodingKey {
 public extension Encodable {
     /// Returns an encoded string for the encodable with a custom key ordering for types whose `CodingKey` conforms to `OrderedCodingKey`
     /// This function will return any `OrderedCodingKey` instances in the order they are declared (at the cost of some expensive post-processing on the data)
+    @available(macOS 10.15, *)
     func encodedStringOrdered(format: JSONEncoder.OutputFormatting = [.prettyPrinted, .withoutEscapingSlashes]) throws -> String {
         let encoder = JSONEncoder()
         return String(data: try encoder.encodeOrdered(self), encoding: .utf8) ?? "{}"

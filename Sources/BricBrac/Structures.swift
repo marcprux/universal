@@ -370,6 +370,7 @@ extension OneOf2 : RawRepresentable where T1 : RawRepresentable, T2 : RawReprese
 
 extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
 extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf2 : Identifiable where T1 : Identifiable, T2 : Identifiable {
     public var id: OneOf2<T1.ID, T2.ID> { map2({ $0.id }, { $0.id }) }
 }
@@ -667,6 +668,8 @@ extension OneOf3 : RawRepresentable where T1 : RawRepresentable, T2 : RawReprese
 
 extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable { }
 extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { }
+
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf3 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable {
     public var id: OneOf3<T1.ID, T2.ID, T3.ID> { map3({ $0.id }, { $0.id }, { $0.id }) }
 }
@@ -923,6 +926,7 @@ extension OneOf4 : RawRepresentable where T1 : RawRepresentable, T2 : RawReprese
 
 extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable { }
 extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable { }
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf4 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable {
     public var id: OneOf4<T1.ID, T2.ID, T3.ID, T4.ID> { map4({ $0.id }, { $0.id }, { $0.id }, { $0.id }) }
 }
@@ -1125,6 +1129,7 @@ extension OneOf5 : RawRepresentable where T1 : RawRepresentable, T2 : RawReprese
 
 extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable { }
 extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf5 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable {
     public var id: OneOf5<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID> { map5({ $0.id }, { $0.id }, { $0.id }, { $0.id }, { $0.id }) }
 }

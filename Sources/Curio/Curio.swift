@@ -13,6 +13,7 @@
 ///
 /// TODO:
 /// • hide Indirect in private fields and make public Optional getters/setters
+
 public struct Curio {
 
     /// The swift version to generate

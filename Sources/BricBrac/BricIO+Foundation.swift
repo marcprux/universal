@@ -138,6 +138,13 @@ public extension Encodable {
     }
 }
 
+public extension Encodable where Self : Hashable {
+    /// A `memoz`-compatible key for the encoded string
+    var formattedJSON: Result<String, Error> {
+        Result { try self.encodedStringFormatted() }
+    }
+}
+
 
 public extension JSONEncoder {
     /// Encodes the given `Encodable` using custom key ordering.

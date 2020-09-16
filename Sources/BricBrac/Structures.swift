@@ -376,6 +376,15 @@ extension OneOf2 : Identifiable where T1 : Identifiable, T2 : Identifiable {
 }
 
 public extension OneOf2 {
+    /// Converts this `OneOf2` into a `OneOf3`
+    typealias WithT1<T> = OneOf3<T, T1, T2>
+    /// Converts this `OneOf2` into a `OneOf3`
+    typealias WithT2<T> = OneOf3<T1, T, T2>
+    /// Converts this `OneOf2` into a `OneOf3`
+    typealias WithT3<T> = OneOf3<T1, T2, T>
+}
+
+public extension OneOf2 {
     /// Apply the separate mapping functions for the individual options.
     /// - Parameters:
     ///   - f1: the function to apply to `T1`
@@ -675,6 +684,17 @@ extension OneOf3 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 :
 }
 
 public extension OneOf3 {
+    /// Converts this `OneOf3` into a `OneOf4`
+    typealias WithT1<T> = OneOf4<T, T1, T2, T3>
+    /// Converts this `OneOf3` into a `OneOf4`
+    typealias WithT2<T> = OneOf4<T1, T, T2, T3>
+    /// Converts this `OneOf3` into a `OneOf4`
+    typealias WithT3<T> = OneOf4<T1, T2, T, T3>
+    /// Converts this `OneOf3` into a `OneOf4`
+    typealias WithT4<T> = OneOf4<T1, T2, T3, T>
+}
+
+public extension OneOf3 {
     /// Apply the separate mapping functions for the individual options.
     /// - Parameters:
     ///   - f1: the function to apply to `T1`
@@ -929,6 +949,19 @@ extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf4 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable {
     public var id: OneOf4<T1.ID, T2.ID, T3.ID, T4.ID> { map4({ $0.id }, { $0.id }, { $0.id }, { $0.id }) }
+}
+
+public extension OneOf4 {
+    /// Converts this `OneOf4` into a `OneOf5`
+    typealias WithT1<T> = OneOf5<T, T1, T2, T3, T4>
+    /// Converts this `OneOf4` into a `OneOf5`
+    typealias WithT2<T> = OneOf5<T1, T, T2, T3, T4>
+    /// Converts this `OneOf4` into a `OneOf5`
+    typealias WithT3<T> = OneOf5<T1, T2, T, T3, T4>
+    /// Converts this `OneOf4` into a `OneOf5`
+    typealias WithT4<T> = OneOf5<T1, T2, T3, T, T4>
+    /// Converts this `OneOf4` into a `OneOf5`
+    typealias WithT5<T> = OneOf5<T1, T2, T3, T4, T>
 }
 
 public extension OneOf4 {

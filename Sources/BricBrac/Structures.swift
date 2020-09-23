@@ -201,8 +201,40 @@ public extension WrapperType where Self : ExpressibleByNilLiteral {
         get { flatMap({ .init($0) }) }
         set { self = newValue?.fullValue.flatMap({ .init($0) }) ?? nil }
     }
-
 }
+
+public extension WrapperType where Wrapped : Equatable, Self : ExpressibleByNilLiteral {
+    /// Convenience for mapping between a sub-set of cases for the given optional. For example, given
+    /// `enum EnumX { case left, middle, right }` and `enum EnumY { case top, middle, bottom }`
+    /// one could map between `middle` values with:
+    /// ```optionalX[narrowMap: [.middle: .middle]]```
+    @inlinable subscript<Value: Equatable>(narrowMap valueMapping: KeyValuePairs<Wrapped, Value>) -> Value? {
+        get {
+            guard let wrappedValue = self.flatValue else {
+                return nil
+            }
+            for (key, value) in valueMapping {
+                if wrappedValue == key {
+                    return value
+                }
+            }
+            return nil
+        }
+
+        set {
+            if let newValue = newValue {
+                for (key, value) in valueMapping {
+                    if newValue == value {
+                        self = .init(key)
+                        return
+                    }
+                }
+            }
+            self = nil // fall back to nil
+        }
+    }
+}
+
 
 public extension Nullable {
     /// A nullable `.full`, similar to `Optional.some`

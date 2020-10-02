@@ -213,7 +213,9 @@ public struct Curio {
         } else {
             // we need to swap out "[]" for "Array" before we start stripping out illegal characters
             // because there might be some schema type like: ConditionalAxisProperty<(number[]|undefined|null)
-            nm = fromName.replacingOccurrences(of: "[]", with: "Array")
+            nm = fromName
+                .replacingOccurrences(of: "[]", with: "Array")
+                .replacingOccurrences(of: "<>", with: "Any") // need to replace blank generic (like MarkConfig<>)
         }
 
         var name = ""

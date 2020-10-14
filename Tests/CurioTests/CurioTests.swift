@@ -186,7 +186,7 @@ class CurioTests: XCTestCase {
             let code = try gen.reify(schema, id: "SampleModel", parents: [])
             let module = CodeModule()
             module.types.append(code)
-            try gen.emit(module, name: "SampleModel.swift", dir: (#file as NSString).deletingLastPathComponent)
+            let _ = try gen.emit(module, name: "SampleModel.swift", dir: (#file as NSString).deletingLastPathComponent)
         }
     }
 
@@ -237,7 +237,7 @@ class CurioTests: XCTestCase {
                     if file == "schema.jsonschema" { continue }
 
                     let id = (file as NSString).deletingPathExtension
-                    try curio.emit(module, name: id + ".swift", dir: (#file as NSString).deletingLastPathComponent)
+                    let _ = try curio.emit(module, name: id + ".swift", dir: (#file as NSString).deletingLastPathComponent)
                 } catch {
                     XCTFail("schema «\(file)» failed: \(error)")
                 }

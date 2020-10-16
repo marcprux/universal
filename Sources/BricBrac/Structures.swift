@@ -771,6 +771,36 @@ public extension OneOf3 {
     }
 }
 
+public extension OneOf3 {
+    /// Drops the `T3` case to return an optional `OneOf2`
+    func narrowing() -> OneOf2<T1, T2>? {
+        switch self {
+        case .v3: return nil
+        case .v1(let x): return oneOf(x)
+        case .v2(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T1` case to return an optional `OneOf2`
+    func narrowing() -> OneOf2<T2, T3>? {
+        switch self {
+        case .v1: return nil
+        case .v2(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T2` case to return an optional `OneOf2`
+    func narrowing() -> OneOf2<T1, T3>? {
+        switch self {
+        case .v2: return nil
+        case .v1(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        }
+    }
+
+}
+
 /// Reversed the OneOf2 ordering
 public extension OneOf3 {
     /// Returns a swapped instance of this OneOf3
@@ -1046,6 +1076,50 @@ public extension OneOf4 {
     }
 }
 
+public extension OneOf4 {
+    /// Drops the `T4` case to return an optional `OneOf3`
+    func narrowing() -> OneOf3<T1, T2, T3>? {
+        switch self {
+        case .v4: return nil
+        case .v1(let x): return oneOf(x)
+        case .v2(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T3` case to return an optional `OneOf3`
+    func narrowing() -> OneOf3<T1, T2, T4>? {
+        switch self {
+        case .v3: return nil
+        case .v1(let x): return oneOf(x)
+        case .v2(let x): return oneOf(x)
+        case .v4(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T2` case to return an optional `OneOf3`
+    func narrowing() -> OneOf3<T1, T3, T4>? {
+        switch self {
+        case .v2: return nil
+        case .v1(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        case .v4(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T1` case to return an optional `OneOf3`
+    func narrowing() -> OneOf3<T2, T3, T4>? {
+        switch self {
+        case .v1: return nil
+        case .v2(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        case .v4(let x): return oneOf(x)
+        }
+    }
+
+}
+
+
 /// The protocol of a type that can contain one out of 5 or more exclusive options
 public protocol OneOf5Type : OneOf4Type {
     associatedtype T5
@@ -1253,6 +1327,64 @@ public extension OneOf5 {
             }
         }
     }
+}
+
+public extension OneOf5 {
+    /// Drops the `T5` case to return an optional `OneOf4`
+    func narrowing() -> OneOf4<T1, T2, T3, T4>? {
+        switch self {
+        case .v5: return nil
+        case .v1(let x): return oneOf(x)
+        case .v2(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        case .v4(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T4` case to return an optional `OneOf4`
+    func narrowing() -> OneOf4<T1, T2, T3, T5>? {
+        switch self {
+        case .v4: return nil
+        case .v1(let x): return oneOf(x)
+        case .v2(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        case .v5(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T3` case to return an optional `OneOf4`
+    func narrowing() -> OneOf4<T1, T2, T4, T5>? {
+        switch self {
+        case .v3: return nil
+        case .v1(let x): return oneOf(x)
+        case .v2(let x): return oneOf(x)
+        case .v4(let x): return oneOf(x)
+        case .v5(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T2` case to return an optional `OneOf4`
+    func narrowing() -> OneOf4<T1, T3, T4, T5>? {
+        switch self {
+        case .v2: return nil
+        case .v1(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        case .v4(let x): return oneOf(x)
+        case .v5(let x): return oneOf(x)
+        }
+    }
+
+    /// Drops the `T1` case to return an optional `OneOf4`
+    func narrowing() -> OneOf4<T2, T3, T4, T5>? {
+        switch self {
+        case .v1: return nil
+        case .v2(let x): return oneOf(x)
+        case .v3(let x): return oneOf(x)
+        case .v4(let x): return oneOf(x)
+        case .v5(let x): return oneOf(x)
+        }
+    }
+
 }
 
 

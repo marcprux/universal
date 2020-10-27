@@ -22,7 +22,7 @@ extension Decodable {
         try loadFromJSON(data: Data(contentsOf: url))
     }
 
-    /// Loads this `Decodable` from the JSON stored in the given URL.
+    /// Loads this `Decodable` from the JSON stored in the given data.
     @inlinable public static func loadFromJSON(data: Data) throws -> Self {
         try JSONDecoder().decode(Self.self, from: data)
     }

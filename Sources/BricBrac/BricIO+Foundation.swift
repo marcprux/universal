@@ -459,6 +459,19 @@ public extension FoundationBricolage {
         case .nul: return NSNull()
         }
     }
+
+    /// Returns the Cocoa wrapper from the given bric.
+    @inlinable static func cocoaValue(for bric: Bric) -> NSObject {
+        switch bric {
+        case .arr(let arr): return arr as NSArray
+        case .obj(let obj): return obj as NSDictionary
+        case .str(let str): return str as NSString
+        case .num(let num): return num as NSNumber
+        case .bol(let bol): return bol as NSNumber
+        case .nul: return NSNull()
+        }
+    }
+
 }
 
 extension FoundationBricolage : Bricable, Bracable {

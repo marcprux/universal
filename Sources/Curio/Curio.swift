@@ -491,7 +491,7 @@ public struct Curio {
                 case .some(.v1(.integer)): casetype = CodeExternalType.integer
                 case .some(.v1(.null)): casetype = CodeExternalType.null
                 default:
-                    if let values = sub._enum {
+                    if let values = sub._enum ?? sub.const.flatMap({ [$0] }) {
                         let literalEnum = try createLiteralEnum(values: values)
                         code.nestedTypes.append(literalEnum) // we will later try to promote any CodeSimpleEnum<String> to be a peer of an alias type
                         casetype = literalEnum
@@ -1144,7 +1144,7 @@ public struct Curio {
         let type = schema.type
         let typename = typeName(parents, id)
         let explicitName = id.hasPrefix("#") // explicit named like "#/definitions/LocalMultiTimeUnit" must be used literally
-        if var values = schema._enum {
+        if var values = schema._enum ?? schema.const.flatMap({ [$0] }) {
             // when creating a string enum, explcit names must be used, otherwise we generate a name like "LiteralXOrYOrZ"
             var containsNul = false
             if let nulIndex = values.firstIndex(of: .nul) {

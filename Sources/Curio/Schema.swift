@@ -37,6 +37,8 @@ public struct Schema : Codable, Equatable, Hashable {
     public var patternProperties: [String: Schema]? = nil  // "additionalProperties": { "$ref": "#" }
     public var dependencies: [String: Dependencies]? = nil
     public var _enum: [Bric]? = nil // "enum": { "type": "array", "minItems": 1, "uniqueItems": true }
+    /// https://json-schema.org/understanding-json-schema/reference/generic.html#constant-values
+    public var const: Bric? = nil // "const": "XXX" == { "enum": [ "XXX" ] }
     public var allOf: [Schema]? = nil // { "$ref": "#/definitions/schemaArray" }
     public var anyOf: [Schema]? = nil // { "$ref": "#/definitions/schemaArray" }
     public var oneOf: [Schema]? = nil // { "$ref": "#/definitions/schemaArray" }
@@ -74,6 +76,7 @@ public struct Schema : Codable, Equatable, Hashable {
         case patternProperties = "patternProperties"
         case dependencies = "dependencies"
         case _enum = "enum"
+        case const = "const"
         case allOf = "allOf"
         case anyOf = "anyOf"
         case oneOf = "oneOf"

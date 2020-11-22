@@ -485,7 +485,7 @@ public struct Curio {
                 let casetype: CodeType
 
                 switch sub.type {
-                case .some(.v1(.string)) where sub._enum == nil: casetype = CodeExternalType.string
+                case .some(.v1(.string)) where sub._enum == nil && sub.const == nil: casetype = CodeExternalType.string
                 case .some(.v1(.number)): casetype = CodeExternalType.number
                 case .some(.v1(.boolean)): casetype = CodeExternalType.boolean
                 case .some(.v1(.integer)): casetype = CodeExternalType.integer
@@ -566,7 +566,10 @@ public struct Curio {
 
             if useOneOfEnums && casetypes.count >= 2 && casetypes.count <= 10 {
                 let constantEnums = code.nestedTypes.compactMap({ $0 as? CodeSimpleEnum<String> })
-                if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
+                let topLevel = parents.isEmpty
+                if topLevel { // all top-level typealias definitions go into a RawCodable
+                    return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, encapsulate: true, peerTypes: constantEnums)
+                } else if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
                     return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, peerTypes: constantEnums)
                 } else { // otherwise we need to continue to use the nested inner types in a hollow enum and return the typealias
                     let choiceName = oneOfSuffix
@@ -643,21 +646,21 @@ public struct Curio {
             return assoc
         }
 
-        func aliasOneOf(_ subTypes: [CodeType], name typename: CodeTypeName, optional: Bool, defined: Bool, peerTypes: [CodeNamedType] = []) -> CodeNamedType {
+        func aliasOneOf(_ subTypes: [CodeType], name typename: CodeTypeName, optional: Bool, defined: Bool, encapsulate: Bool? = nil, peerTypes: [CodeNamedType] = []) -> CodeNamedType {
             // There's no OneOf1; this can happen e.g. when a schema has types: ["double", "null"]
             // In these cases, simply return an alias to the types
             let aname = defined ? typename : (unescape(typename) + oneOfSuffix)
 
             // typealiases to OneOfX work but are difficult to extend (e.g., generic types cannot conform to the same protocol with different type constraints), so we add an additional level of serialization-compatible indirection
-            if let encapsulatedType = self.encapsulate[typename], peerTypes.isEmpty, !optional, subTypes.count > 1, defined {
+            if let encapsulatedType = self.encapsulate[typename] ?? (encapsulate == true ? CodeExternalType(typename) : nil), peerTypes.isEmpty, !optional, subTypes.count > 1, defined {
                 let wrapType = encapsulatedType.name == typename ? oneOfType(subTypes) : encapsulatedType
                 return encapsulateType(name: typename, type: wrapType, access: accessor(parents))
+            } else {
+                let type = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
+                var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(type) : type, access: accessor(parents), peerTypes: peerTypes)
+                alias.comments = comments
+                return alias
             }
-
-            let type = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
-            var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(type) : type, access: accessor(parents), peerTypes: peerTypes)
-            alias.comments = comments
-            return alias
         }
 
         func aliasSimpleType(name typename: CodeTypeName, type: CodeExternalType) -> CodeNamedType {
@@ -721,7 +724,7 @@ public struct Curio {
                     proptype = CodeExternalType(tname, access: accessor(parents + [typename]))
                 } else {
                     switch prop.type {
-                    case .some(.v1(.string)) where prop._enum == nil: proptype = CodeExternalType.string
+                    case .some(.v1(.string)) where prop._enum == nil && prop.const == nil: proptype = CodeExternalType.string
                     case .some(.v1(.number)): proptype = CodeExternalType.number
                     case .some(.v1(.boolean)): proptype = CodeExternalType.boolean
                     case .some(.v1(.integer)): proptype = CodeExternalType.integer

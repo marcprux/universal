@@ -149,7 +149,6 @@ public extension RawInitializable {
 public protocol RawCodable : RawInitializable, Codable where RawValue : Codable {
 }
 
-
 public extension RawCodable {
     /// A `RawCodable` deserializes from the underlying type's decoding with any intermediate wrapper
     init(from decoder: Decoder) throws {
@@ -180,6 +179,81 @@ public extension OneOf2 where T1 == ExplicitNull /* i.e., Nullable */ {
     /// The non-`null` side of the `Nullable`.
     var fullValue: T2? { v2 }
 }
+
+/// Conformance of `RawInitializable` to `OneOfNType` when the `rawValue` is a `OneOfN`.
+/// ```swift
+/// struct DemoChoice : RawInitializable, OneOf2Type { let rawValue: OneOf2<String, Int> }
+/// ```
+public extension RawInitializable where RawValue : OneOfNType {
+    init(_ t1: RawValue.T1) { self.init(rawValue: .init(t1: t1)) }
+    init(t1: RawValue.T1) { self.init(rawValue: .init(t1: t1)) }
+    func infer() -> RawValue.T1? { rawValue.infer() }
+}
+
+public extension RawInitializable where RawValue : OneOf2Type {
+    init(_ t2: RawValue.T2) { self.init(rawValue: .init(t2: t2)) }
+    init(t2: RawValue.T2) { self.init(rawValue: .init(t2: t2)) }
+    func infer() -> RawValue.T2? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf3Type {
+    init(_ t3: RawValue.T3) { self.init(rawValue: .init(t3: t3)) }
+    init(t3: RawValue.T3) { self.init(rawValue: .init(t3: t3)) }
+    func infer() -> RawValue.T3? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf4Type {
+    init(_ t4: RawValue.T4) { self.init(rawValue: .init(t4: t4)) }
+    init(t4: RawValue.T4) { self.init(rawValue: .init(t4: t4)) }
+    func infer() -> RawValue.T4? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf5Type {
+    init(_ t5: RawValue.T5) { self.init(rawValue: .init(t5: t5)) }
+    init(t5: RawValue.T5) { self.init(rawValue: .init(t5: t5)) }
+    func infer() -> RawValue.T5? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf6Type {
+    init(_ t6: RawValue.T6) { self.init(rawValue: .init(t6: t6)) }
+    init(t6: RawValue.T6) { self.init(rawValue: .init(t6: t6)) }
+    func infer() -> RawValue.T6? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf7Type {
+    init(_ t7: RawValue.T7) { self.init(rawValue: .init(t7: t7)) }
+    init(t7: RawValue.T7) { self.init(rawValue: .init(t7: t7)) }
+    func infer() -> RawValue.T7? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf8Type {
+    init(_ t8: RawValue.T8) { self.init(rawValue: .init(t8: t8)) }
+    init(t8: RawValue.T8) { self.init(rawValue: .init(t8: t8)) }
+    func infer() -> RawValue.T8? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf9Type {
+    init(_ t9: RawValue.T9) { self.init(rawValue: .init(t9: t9)) }
+    init(t9: RawValue.T9) { self.init(rawValue: .init(t9: t9)) }
+    func infer() -> RawValue.T9? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+public extension RawInitializable where RawValue : OneOf10Type {
+    init(_ t10: RawValue.T10) { self.init(rawValue: .init(t10: t10)) }
+    init(t10: RawValue.T10) { self.init(rawValue: .init(t10: t10)) }
+    func infer() -> RawValue.T10? { rawValue.infer() }
+    var tupleValue: RawValue.T { rawValue.tupleValue }
+}
+
+
 
 public extension Optional where Wrapped == ExplicitNull {
     /// Converts an `.some(ExplicitNull.null)` to `false` and `.none` to `true`
@@ -290,8 +364,8 @@ public protocol OneOf2Type : OneOfNType {
     func infer() -> T2?
 }
 
-/// Construct a `OneOf2Type` from T1.
-@inlinable public func oneOf<T: OneOf2Type>(_ value: T.T1) -> T { .init(value) }
+/// Construct a `OneOfNType` from T1.
+@inlinable public func oneOf<T: OneOfNType>(_ value: T.T1) -> T { .init(value) }
 
 /// Construct a `OneOf2Type` from T2.
 @inlinable public func oneOf<T: OneOf2Type>(_ value: T.T2) -> T { .init(value) }

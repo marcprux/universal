@@ -395,7 +395,7 @@ public struct Curio {
     }
 
     /// Encapsulates the given typename with the specified external type
-    func encapsulateType(name typename: CodeTypeName, type: CodeExternalType, access: CodeAccess) -> CodeNamedType {
+    func encapsulateType(name typename: CodeTypeName, type: CodeExternalType, nestedTypes: [CodeNamedType] = [], access: CodeAccess) -> CodeStruct {
         let aliasType = type
         let propn = CodePropName("rawValue")
         let propd = CodeProperty.Declaration(name: propn, type: aliasType, access: access, mutable: true)
@@ -403,6 +403,8 @@ public struct Curio {
 
         enc.conforms += standardAdoptions
         enc.conforms.append(.rawCodable)
+
+        enc.nestedTypes = nestedTypes
 
         for anon in [false, true] { // make both a named rawValue init as well as an anonymous one…
             let rawInit = CodeFunction.Declaration(name: "init", access: access, instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: aliasType, value: nil, anon: anon)]), returns: CodeTuple(elements: []))
@@ -567,15 +569,19 @@ public struct Curio {
             if useOneOfEnums && casetypes.count >= 2 && casetypes.count <= 10 {
                 let constantEnums = code.nestedTypes.compactMap({ $0 as? CodeSimpleEnum<String> })
                 let topLevel = parents.isEmpty
-                if topLevel { // all top-level typealias definitions go into a RawCodable
-                    return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, encapsulate: true, peerTypes: constantEnums)
-                } else if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
+
+                let choiceName = oneOfSuffix
+                let nestedAlias = CodeTypeAlias(name: choiceName, type: oneOfType(casetypes), access: accessor(parents))
+
+//                if topLevel { // all top-level typealias definitions go into a RawCodable
+//                    let encapsulated = encapsulateType(name: ename, type: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
+//                    return encapsulated
+//                } else
+                if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
                     return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, peerTypes: constantEnums)
                 } else { // otherwise we need to continue to use the nested inner types in a hollow enum and return the typealias
-                    let choiceName = oneOfSuffix
                     let aliasName = ename + (parents.isEmpty ? "" : choiceName) // top-level aliases are fully-qualified types because they are defined in defs and refs
                     // the enum code now just contains the nested types, so copy over only the embedded types
-                    let nestedAlias = CodeTypeAlias(name: choiceName, type: oneOfType(casetypes), access: accessor(parents))
                     var nestedEnum = CodeEnum(name: ename + "Types", access: accessor(parents))
                     nestedEnum.nestedTypes = [nestedAlias] + code.nestedTypes
 
@@ -649,13 +655,13 @@ public struct Curio {
         func aliasOneOf(_ subTypes: [CodeType], name typename: CodeTypeName, optional: Bool, defined: Bool, encapsulate: Bool? = nil, peerTypes: [CodeNamedType] = []) -> CodeNamedType {
             // There's no OneOf1; this can happen e.g. when a schema has types: ["double", "null"]
             // In these cases, simply return an alias to the types
-            let aname = defined ? typename : (unescape(typename) + oneOfSuffix)
 
             // typealiases to OneOfX work but are difficult to extend (e.g., generic types cannot conform to the same protocol with different type constraints), so we add an additional level of serialization-compatible indirection
             if let encapsulatedType = self.encapsulate[typename] ?? (encapsulate == true ? CodeExternalType(typename) : nil), peerTypes.isEmpty, !optional, subTypes.count > 1, defined {
                 let wrapType = encapsulatedType.name == typename ? oneOfType(subTypes) : encapsulatedType
                 return encapsulateType(name: typename, type: wrapType, access: accessor(parents))
             } else {
+                let aname = defined ? typename : (unescape(typename) + oneOfSuffix)
                 let type = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
                 var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(type) : type, access: accessor(parents), peerTypes: peerTypes)
                 alias.comments = comments

@@ -923,7 +923,7 @@ infix operator ??? : NilCoalescingPrecedence
 /// case while falling back to a general structure.
 public typealias OneOrAny<T> = OneOf2<T, Bric>
 
-/// A `OneOrMany` is either a single value or any array or zero or multiple values
+/// A `OneOrMany` is either a single value or any array of zero or multiple values
 public typealias OneOrMany<T> = OneOf2<T, [T]>
 
 extension OneOrMany : ExpressibleByArrayLiteral where T2 == [T1] {

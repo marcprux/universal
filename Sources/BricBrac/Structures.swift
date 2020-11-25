@@ -140,13 +140,17 @@ public extension RawInitializable {
     }
 }
 
+/// A `RawRepresentable` and `RawInitializable` that guarantees that the contents of `rawValue` are fully equivalent to the wrapper itself, thereby enabling isomorphic behaviors such as encoding & decoding itself as it's underlying value.
+public protocol RawIsomorphism : RawInitializable {
+}
+
 /// A RawCodable is a simple `RawRepresentable` wrapper except its coding
 /// will store the underlying value directly rather than keyed as "rawValue",
 /// thus requiring that the `init(rawValue:)` be non-failable; it is useful
 /// as a codable typesafe wrapper for some general type like UUID where the
 /// Codable implementation does not automatically use the underlying type (like
 /// it does with primitives and Strings)
-public protocol RawCodable : RawInitializable, Codable where RawValue : Codable {
+public protocol RawCodable : RawIsomorphism, Codable where RawValue : Codable {
 }
 
 public extension RawCodable {
@@ -180,9 +184,21 @@ public extension OneOf2 where T1 == ExplicitNull /* i.e., Nullable */ {
     var fullValue: T2? { v2 }
 }
 
-/// Conformance of `RawInitializable` to `OneOfNType` when the `rawValue` is a `OneOfN`.
+/// Conformance requirements of `RawIsomorphism` to `CaseIterable` when the `rawValue` is a `CaseIterable`.
+///
 /// ```swift
-/// struct DemoChoice : RawInitializable, OneOf2Type { let rawValue: OneOf2<String, Int> }
+/// struct DemoChoice : RawIsomorphism, CaseIterable { let rawValue: SomeEnum }
+/// ```
+extension RawIsomorphism where RawValue : CaseIterable {
+    public static var allCases: [Self] {
+        RawValue.allCases.map(Self.init(rawValue:))
+    }
+}
+
+
+/// Conformance requirements of `RawInitializable` to `OneOfNType` when the `rawValue` is a `OneOfN`.
+/// ```swift
+/// struct DemoChoice : RawIsomorphism, OneOf2Type { let rawValue: OneOf2<String, Int> }
 /// ```
 public extension RawInitializable where RawValue : OneOfNType {
     init(_ t1: RawValue.T1) { self.init(rawValue: .init(t1: t1)) }
@@ -333,7 +349,7 @@ public func ==(lhs: HollowBric, rhs: HollowBric) -> Bool {
     return true
 }
 
-// Swift 4 TODO: Variadic Generics: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#variadic-generics
+// Swift 6+ TODO: Variadic Generics: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#variadic-generics
 
 public protocol SomeOf {
     associatedtype T
@@ -344,8 +360,338 @@ public protocol SomeOf {
 
 /// MARK: OneOf implementations
 
+/// Marker protocol for a type that encapsulates one of exactly 2 other types
+public protocol Either2Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T = (T1?, T2?)
+
+    /// Convert this instance into a `OneOf2`
+    func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> OneOf2<U1, U2>
+}
+
+/// Convenience for use when mapping a thing to itself
+@usableFromInline func it<T>(_ value: T) -> T { value }
+
+public extension Either2Type where Self : OneOf2Type {
+    @inlinable var oneOf2: OneOf2<T1, T2> {
+        get { map2(it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+public extension Either2Type where Self : RawIsomorphism, Self.RawValue : Either2Type {
+    @inlinable func map2<U1, U2>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2)) rethrows -> OneOf2<U1, U2> {
+        try rawValue.map2(f1, f2)
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 3 types
+public protocol Either3Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T = (T1?, T2?, T3?)
+
+    /// Convert this instance into a `OneOf3`
+    func map3<U1, U2, U3>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3)) rethrows -> OneOf3<U1, U2, U3>
+}
+
+public extension Either3Type where Self : RawIsomorphism, RawValue : Either3Type {
+    func map3<U1, U2, U3>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3)) rethrows -> OneOf3<U1, U2, U3> {
+        try rawValue.map3(f1, f2, f3)
+    }
+}
+
+public extension Either3Type where Self : OneOf3Type {
+    @inlinable var oneOf3: OneOf3<T1, T2, T3> {
+        get { map3(it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 4 types
+public protocol Either4Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T4
+    associatedtype T = (T1?, T2?, T3?, T4?)
+
+    /// Convert this instance into a `OneOf4`
+    func map4<U1, U2, U3, U4>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4)) rethrows -> OneOf4<U1, U2, U3, U4>
+}
+
+public extension Either4Type where Self : RawIsomorphism, Self.RawValue : Either4Type {
+    func map4<U1, U2, U3, U4>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4)) rethrows -> OneOf4<U1, U2, U3, U4> {
+        try rawValue.map4(f1, f2, f3, f4)
+    }
+}
+
+
+public extension Either4Type where Self : OneOf4Type {
+    @inlinable var oneOf4: OneOf4<T1, T2, T3, T4> {
+        get { map4(it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 5 types
+public protocol Either5Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T4
+    associatedtype T5
+    associatedtype T = (T1?, T2?, T3?, T4?, T5?)
+
+    /// Convert this instance into a `OneOf5`
+    func map5<U1, U2, U3, U4, U5>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5)) rethrows -> OneOf5<U1, U2, U3, U4, U5>
+}
+
+public extension Either5Type where Self : RawIsomorphism, Self.RawValue : Either5Type {
+    func map5<U1, U2, U3, U4, U5>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5)) rethrows -> OneOf5<U1, U2, U3, U4, U5> {
+        try rawValue.map5(f1, f2, f3, f4, f5)
+    }
+}
+
+
+public extension Either5Type where Self : OneOf5Type  {
+    @inlinable var oneOf5: OneOf5<T1, T2, T3, T4, T5> {
+        get { map5(it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 6 types
+public protocol Either6Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T4
+    associatedtype T5
+    associatedtype T6
+    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?)
+
+    func map6<U1, U2, U3, U4, U5, U6>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6)) rethrows -> OneOf6<U1, U2, U3, U4, U5, U6>
+}
+
+public extension Either6Type where Self : RawIsomorphism, Self.RawValue : Either6Type {
+    func map6<U1, U2, U3, U4, U5, U6>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6)) rethrows -> OneOf6<U1, U2, U3, U4, U5, U6> {
+        try rawValue.map6(f1, f2, f3, f4, f5, f6)
+    }
+}
+
+
+public extension Either6Type where Self : OneOf6Type {
+    @inlinable var oneOf6: OneOf6<T1, T2, T3, T4, T5, T6> {
+        get { map6(it, it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 7 types
+public protocol Either7Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T4
+    associatedtype T5
+    associatedtype T6
+    associatedtype T7
+    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?)
+
+    func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7)) rethrows -> OneOf7<U1, U2, U3, U4, U5, U6, U7>
+}
+
+public extension Either7Type where Self : RawIsomorphism, Self.RawValue : Either7Type {
+    func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7)) rethrows -> OneOf7<U1, U2, U3, U4, U5, U6, U7> {
+        try rawValue.map7(f1, f2, f3, f4, f5, f6, f7)
+    }
+}
+
+
+public extension Either7Type where Self : OneOf7Type {
+    @inlinable var oneOf7: OneOf7<T1, T2, T3, T4, T5, T6, T7> {
+        get { map7(it, it, it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 8 types
+public protocol Either8Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T4
+    associatedtype T5
+    associatedtype T6
+    associatedtype T7
+    associatedtype T8
+    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?)
+
+    func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8)) rethrows -> OneOf8<U1, U2, U3, U4, U5, U6, U7, U8>
+}
+
+public extension Either8Type where Self : RawIsomorphism, Self.RawValue : Either8Type {
+    func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8)) rethrows -> OneOf8<U1, U2, U3, U4, U5, U6, U7, U8> {
+        try rawValue.map8(f1, f2, f3, f4, f5, f6, f7, f8)
+    }
+}
+
+
+public extension Either8Type where Self : OneOf8Type {
+    @inlinable var oneOf8: OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> {
+        get { map8(it, it, it, it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 9 types
+public protocol Either9Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T4
+    associatedtype T5
+    associatedtype T6
+    associatedtype T7
+    associatedtype T8
+    associatedtype T9
+    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?)
+
+    func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9)) rethrows -> OneOf9<U1, U2, U3, U4, U5, U6, U7, U8, U9>
+}
+
+public extension Either9Type where Self : RawIsomorphism, Self.RawValue : Either9Type {
+    func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8), _ f9: (RawValue.T9) throws -> (U9)) rethrows -> OneOf9<U1, U2, U3, U4, U5, U6, U7, U8, U9> {
+        try rawValue.map9(f1, f2, f3, f4, f5, f6, f7, f8, f9)
+    }
+}
+
+
+public extension Either9Type where Self : OneOf9Type {
+    @inlinable var oneOf9: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> {
+        get { map9(it, it, it, it, it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            case .v9(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+/// Marker protocol for a type that encapsulates one of exactly 10 types
+public protocol Either10Type {
+    associatedtype T1
+    associatedtype T2
+    associatedtype T3
+    associatedtype T4
+    associatedtype T5
+    associatedtype T6
+    associatedtype T7
+    associatedtype T8
+    associatedtype T9
+    associatedtype T10
+    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?)
+
+    func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9), _ f10: (T10) throws -> (U10)) rethrows -> OneOf10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>
+}
+
+public extension Either10Type where Self : RawIsomorphism, Self.RawValue : Either10Type {
+    func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8), _ f9: (RawValue.T9) throws -> (U9), _ f10: (RawValue.T10) throws -> (U10)) rethrows -> OneOf10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10> {
+        try rawValue.map10(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10)
+    }
+}
+
+
+public extension Either10Type where Self : OneOf10Type {
+    @inlinable var oneOf10: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> {
+        get { map10(it, it, it, it, it, it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            case .v9(let x): self = .init(x)
+            case .v10(let x): self = .init(x)
+            }
+        }
+    }
+}
+
 /// The protocol of a type that can contain one out of 1 or more exclusive options
 public protocol OneOfNType : SomeOf {
+    /// The first type of this `OneOfN`
     associatedtype T1
     init(t1: T1)
     init(_ t1: T1)
@@ -385,7 +731,7 @@ public extension OneOf2Type {
 }
 
 /// A simple union type that can be one of either T1 or T2
-public indirect enum OneOf2<T1, T2> : OneOf2Type {
+public indirect enum OneOf2<T1, T2> : OneOf2Type, Either2Type {
     case v1(T1), v2(T2)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -684,7 +1030,7 @@ public extension OneOf3Type {
 @inlinable public func oneOf<T: OneOf3Type>(_ value: T.T3) -> T { .init(value) }
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public indirect enum OneOf3<T1, T2, T3> : OneOf3Type {
+public indirect enum OneOf3<T1, T2, T3> : OneOf3Type, Either3Type {
     case v1(T1), v2(T2), v3(T3)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -972,7 +1318,7 @@ public extension OneOf4Type {
 @inlinable public func oneOf<T: OneOf4Type>(_ value: T.T4) -> T { .init(value) }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4
-public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type {
+public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type, Either4Type {
     case v1(T1), v2(T2), v3(T3), v4(T4)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1223,7 +1569,7 @@ public extension OneOf5Type {
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5
-public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type {
+public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type, Either5Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1492,7 +1838,7 @@ public extension OneOf6Type {
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type {
+public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type, Either6Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1605,6 +1951,25 @@ extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable { }
 
 public extension OneOf6 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    ///   - f4: the function to apply to `T4`
+    ///   - f5: the function to apply to `T5`
+    ///   - f6: the function to apply to `T6`
+    @inlinable func map6<U1, U2, U3, U4, U5, U6>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6)) rethrows -> OneOf6<U1, U2, U3, U4, U5, U6> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        case .v4(let t4): return try .init(f4(t4))
+        case .v5(let t5): return try .init(f5(t5))
+        case .v6(let t6): return try .init(f6(t6))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T))) -> T {
         get {
@@ -1677,7 +2042,7 @@ public extension OneOf7Type {
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type {
+public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type, Either7Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1799,6 +2164,27 @@ extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable { }
 
 public extension OneOf7 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    ///   - f4: the function to apply to `T4`
+    ///   - f5: the function to apply to `T5`
+    ///   - f6: the function to apply to `T6`
+    ///   - f7: the function to apply to `T7`
+    @inlinable func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7)) rethrows -> OneOf7<U1, U2, U3, U4, U5, U6, U7> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        case .v4(let t4): return try .init(f4(t4))
+        case .v5(let t5): return try .init(f5(t5))
+        case .v6(let t6): return try .init(f6(t6))
+        case .v7(let t7): return try .init(f7(t7))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T))) -> T {
         get {
@@ -1875,7 +2261,7 @@ public extension OneOf8Type {
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type {
+public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type, Either8Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2007,6 +2393,29 @@ extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 
 public extension OneOf8 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    ///   - f4: the function to apply to `T4`
+    ///   - f5: the function to apply to `T5`
+    ///   - f6: the function to apply to `T6`
+    ///   - f7: the function to apply to `T7`
+    ///   - f8: the function to apply to `T8`
+    @inlinable func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8)) rethrows -> OneOf8<U1, U2, U3, U4, U5, U6, U7, U8> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        case .v4(let t4): return try .init(f4(t4))
+        case .v5(let t5): return try .init(f5(t5))
+        case .v6(let t6): return try .init(f6(t6))
+        case .v7(let t7): return try .init(f7(t7))
+        case .v8(let t8): return try .init(f8(t8))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T), f8: (T8)->(T))) -> T {
         get {
@@ -2087,7 +2496,7 @@ public extension OneOf9Type {
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type {
+public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type, Either9Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2228,6 +2637,31 @@ extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T
 
 
 public extension OneOf9 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    ///   - f4: the function to apply to `T4`
+    ///   - f5: the function to apply to `T5`
+    ///   - f6: the function to apply to `T6`
+    ///   - f7: the function to apply to `T7`
+    ///   - f8: the function to apply to `T8`
+    ///   - f9: the function to apply to `T9`
+    @inlinable func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9)) rethrows -> OneOf9<U1, U2, U3, U4, U5, U6, U7, U8, U9> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        case .v4(let t4): return try .init(f4(t4))
+        case .v5(let t5): return try .init(f5(t5))
+        case .v6(let t6): return try .init(f6(t6))
+        case .v7(let t7): return try .init(f7(t7))
+        case .v8(let t8): return try .init(f8(t8))
+        case .v9(let t9): return try .init(f9(t9))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T), f8: (T8)->(T), f9: (T9)->(T))) -> T {
         get {
@@ -2312,7 +2746,7 @@ public extension OneOf10Type {
 }
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10
-public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10Type {
+public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10Type, Either10Type {
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9), v10(T10)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2463,6 +2897,33 @@ extension OneOf10 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, 
 
 
 public extension OneOf10 {
+    /// Apply the separate mapping functions for the individual options.
+    /// - Parameters:
+    ///   - f1: the function to apply to `T1`
+    ///   - f2: the function to apply to `T2`
+    ///   - f3: the function to apply to `T3`
+    ///   - f4: the function to apply to `T4`
+    ///   - f5: the function to apply to `T5`
+    ///   - f6: the function to apply to `T6`
+    ///   - f7: the function to apply to `T7`
+    ///   - f8: the function to apply to `T8`
+    ///   - f9: the function to apply to `T9`
+    ///   - f10: the function to apply to `T10`
+    @inlinable func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9), _ f10: (T10) throws -> (U10)) rethrows -> OneOf10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10> {
+        switch self {
+        case .v1(let t1): return try .init(f1(t1))
+        case .v2(let t2): return try .init(f2(t2))
+        case .v3(let t3): return try .init(f3(t3))
+        case .v4(let t4): return try .init(f4(t4))
+        case .v5(let t5): return try .init(f5(t5))
+        case .v6(let t6): return try .init(f6(t6))
+        case .v7(let t7): return try .init(f7(t7))
+        case .v8(let t8): return try .init(f8(t8))
+        case .v9(let t9): return try .init(f9(t9))
+        case .v10(let t10): return try .init(f10(t10))
+        }
+    }
+
     /// Enables reading multiple different keyPaths that lead to the same type
     @inlinable subscript<T>(routing blocks: (f1: (T1)->(T), f2: (T2)->(T), f3: (T3)->(T), f4: (T4)->(T), f5: (T5)->(T), f6: (T6)->(T), f7: (T7)->(T), f8: (T8)->(T), f9: (T9)->(T), f10: (T10)->(T))) -> T {
         get {

@@ -573,11 +573,10 @@ public struct Curio {
                 let choiceName = oneOfSuffix
                 let nestedAlias = CodeTypeAlias(name: choiceName, type: oneOfType(casetypes), access: accessor(parents))
 
-//                if topLevel { // all top-level typealias definitions go into a RawCodable
-//                    let encapsulated = encapsulateType(name: ename, type: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
-//                    return encapsulated
-//                } else
-                if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
+                if topLevel { // all top-level typealias definitions go into a RawCodable
+                    let encapsulated = encapsulateType(name: ename, type: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
+                    return encapsulated
+                } else if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
                     return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, peerTypes: constantEnums)
                 } else { // otherwise we need to continue to use the nested inner types in a hollow enum and return the typealias
                     let aliasName = ename + (parents.isEmpty ? "" : choiceName) // top-level aliases are fully-qualified types because they are defined in defs and refs

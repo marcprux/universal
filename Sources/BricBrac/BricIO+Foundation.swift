@@ -119,14 +119,18 @@ public extension Encodable {
         return String(data: try Bric.JSONEncoderFormatted.encode(self), encoding: .utf8) ?? "{}"
     }
 
+    /// The result of a call with the default parameters to `bricEncoded()`.
+    /// `memoz`-able.
+    @inlinable var bricResult: Result<Bric, Error> {
+        Result { try bricEncoded() }
+    }
 
     /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric.
     /// This only works for top-level encodable properties (i.e., Array and Dictionary, but not String, Double, or Boolean).
     /// Full support would require a custom JSONEncoder to encode directly as a Bric.
-    @inlinable func bricEncoded(outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
+    @inlinable func bricEncoded(dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
         let encoder = JSONEncoder()
 
-        if let outputFormatting = outputFormatting { encoder.outputFormatting = outputFormatting }
         if let dateEncodingStrategy = dateEncodingStrategy { encoder.dateEncodingStrategy = dateEncodingStrategy }
         if let dataEncodingStrategy = dataEncodingStrategy { encoder.dataEncodingStrategy = dataEncodingStrategy }
         if let nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy { encoder.nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy }

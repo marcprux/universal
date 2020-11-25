@@ -702,7 +702,8 @@ public extension OneOfNType {
     @inlinable var v1: T1? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
-/// The protocol of a type that can contain one out of 2 or more exclusive options
+/// The protocol of a type that can contain one out of 2 or more exclusive options.
+/// An additional guarantee of exactly 2 options granted by implementing `Either2` will confer mappability of this type to`OneOf2`.
 public protocol OneOf2Type : OneOfNType {
     associatedtype T2
     init(t2: T2)
@@ -1004,6 +1005,7 @@ public extension OneOf2 {
 }
 
 /// The protocol of a type that can contain one out of 3 or more exclusive options
+/// An additional guarantee of exactly 3 options granted by implementing `Either3` will confer mappability of this type to`OneOf3`.
 public protocol OneOf3Type : OneOf2Type {
     associatedtype T3
     init(t3: T3)
@@ -1291,6 +1293,7 @@ public extension OneOf3 {
 
 
 /// The protocol of a type that can contain one out of 4 or more exclusive options
+/// An additional guarantee of exactly 4 options granted by implementing `Either4` will confer mappability of this type to`OneOf4`.
 public protocol OneOf4Type : OneOf3Type {
     associatedtype T4
     init(t4: T4)
@@ -1541,6 +1544,7 @@ public extension OneOf4 {
 
 
 /// The protocol of a type that can contain one out of 5 or more exclusive options
+/// An additional guarantee of exactly 5 options granted by implementing `Either5` will confer mappability of this type to`OneOf5`.
 public protocol OneOf5Type : OneOf4Type {
     associatedtype T5
     init(t5: T5)
@@ -1809,6 +1813,7 @@ public extension OneOf5 {
 
 
 /// The protocol of a type that can contain one out of 6 or more exclusive options
+/// An additional guarantee of exactly 6 options granted by implementing `Either6` will confer mappability of this type to`OneOf6`.
 public protocol OneOf6Type : OneOf5Type {
     associatedtype T6
     init(t6: T6)
@@ -2012,6 +2017,7 @@ public extension OneOf6 {
 
 
 /// The protocol of a type that can contain one out of 7 or more exclusive options
+/// An additional guarantee of exactly 7 options granted by implementing `Either7` will confer mappability of this type to`OneOf7`.
 public protocol OneOf7Type : OneOf6Type {
     associatedtype T7
     init(t7: T7)
@@ -2230,6 +2236,7 @@ public extension OneOf7 {
 
 
 /// The protocol of a type that can contain one out of 8 or more exclusive options
+/// An additional guarantee of exactly 8 options granted by implementing `Either8` will confer mappability of this type to`OneOf8`.
 public protocol OneOf8Type : OneOf7Type {
     associatedtype T8
     init(t8: T8)
@@ -2464,6 +2471,7 @@ public extension OneOf8 {
 
 
 /// The protocol of a type that can contain one out of 9 or more exclusive options
+/// An additional guarantee of exactly 9 options granted by implementing `Either9` will confer mappability of this type to`OneOf9`.
 public protocol OneOf9Type : OneOf8Type {
     associatedtype T9
     init(t9: T9)
@@ -2713,6 +2721,7 @@ public extension OneOf9 {
 
 
 /// The protocol of a type that can contain one out of 10 or more exclusive options
+/// An additional guarantee of exactly 10 options granted by implementing `Either10` will confer mappability of this type to`OneOf10`.
 public protocol OneOf10Type : OneOf9Type {
     associatedtype T10
     init(t10: T10)

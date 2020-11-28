@@ -326,6 +326,9 @@ public extension WrapperType where Wrapped : Equatable, Self : ExpressibleByNilL
 }
 
 
+/// Simply a `OneOf2<T, Never>` that permits a single value to be treated as a `OneOfNType`.
+public typealias OneOf1<T> = OneOf2<T, Never>
+
 public extension Nullable {
     /// A nullable `.full`, similar to `Optional.some`
     static func full(_ some: T2) -> Self { return .v2(some) }
@@ -2984,6 +2987,443 @@ public extension OneOf10 {
         }
     }
 }
+
+
+
+public extension OneOf2Type where Self : Either2Type {
+    /// Expands this `OneOf2` into a `OneOf3` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf3<T1, T2, Never> {
+        get {
+            switch oneOf2 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            }
+        }
+    }
+}
+
+public extension OneOf3Type where Self : Either3Type {
+    /// Expands this `OneOf3` into a `OneOf4` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf4<T1, T2, T3, Never> {
+        get {
+            switch oneOf3 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            }
+        }
+    }
+}
+
+public extension OneOf4Type where Self : Either4Type {
+    /// Expands this `OneOf4` into a `OneOf5` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf5<T1, T2, T3, T4, Never> {
+        get {
+            switch oneOf4 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            }
+        }
+    }
+}
+
+public extension OneOf5Type where Self : Either5Type {
+    /// Expands this `OneOf5` into a `OneOf6` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf6<T1, T2, T3, T4, T5, Never> {
+        get {
+            switch oneOf5 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            }
+        }
+    }
+}
+
+public extension OneOf6Type where Self : Either6Type {
+    /// Expands this `OneOf6` into a `OneOf7` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf7<T1, T2, T3, T4, T5, T6, Never> {
+        get {
+            switch oneOf6 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            }
+        }
+    }
+}
+
+public extension OneOf7Type where Self : Either7Type {
+    /// Expands this `OneOf7` into a `OneOf8` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf8<T1, T2, T3, T4, T5, T6, T7, Never> {
+        get {
+            switch oneOf7 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            case .v7(let v7): return .init(v7)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            case .v7(let v7): return self = .init(v7)
+            }
+        }
+    }
+}
+
+public extension OneOf8Type where Self : Either8Type {
+    /// Expands this `OneOf8` into a `OneOf9` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, Never> {
+        get {
+            switch oneOf8 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            case .v7(let v7): return .init(v7)
+            case .v8(let v8): return .init(v8)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            case .v7(let v7): return self = .init(v7)
+            case .v8(let v8): return self = .init(v8)
+            }
+        }
+    }
+}
+
+public extension OneOf9Type where Self : Either9Type {
+    /// Expands this `OneOf9` into a `OneOf10` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
+    @inlinable var expanded: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, Never> {
+        get {
+            switch oneOf9 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            case .v7(let v7): return .init(v7)
+            case .v8(let v8): return .init(v8)
+            case .v9(let v9): return .init(v9)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            case .v7(let v7): return self = .init(v7)
+            case .v8(let v8): return self = .init(v8)
+            case .v9(let v9): return self = .init(v9)
+            }
+        }
+    }
+}
+
+public extension OneOf2 where T2 == Never {
+    /// Contracts this `OneOf2` down to `OneOf1` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf1<T1> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            }
+        }
+    }
+}
+
+public extension OneOf3 where T3 == Never {
+    /// Contracts this `OneOf3` down to `OneOf2` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf2<T1, T2> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            }
+        }
+    }
+}
+
+public extension OneOf4 where T4 == Never {
+    /// Contracts this `OneOf4` down to `OneOf3` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf3<T1, T2, T3> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            }
+        }
+    }
+}
+
+public extension OneOf5 where T5 == Never {
+    /// Contracts this `OneOf5` down to `OneOf4` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf4<T1, T2, T3, T4> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            }
+        }
+    }
+}
+
+public extension OneOf6 where T6 == Never {
+    /// Contracts this `OneOf6` down to `OneOf5` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf5<T1, T2, T3, T4, T5> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            }
+        }
+    }
+}
+
+public extension OneOf7 where T7 == Never {
+    /// Contracts this `OneOf7` down to `OneOf6` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf6<T1, T2, T3, T4, T5, T6> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            }
+        }
+    }
+}
+
+public extension OneOf8 where T8 == Never {
+    /// Contracts this `OneOf8` down to `OneOf7` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf7<T1, T2, T3, T4, T5, T6, T7> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            case .v7(let v7): return .init(v7)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            case .v7(let v7): return self = .init(v7)
+            }
+        }
+    }
+}
+
+public extension OneOf9 where T9 == Never {
+    /// Contracts this `OneOf9` down to `OneOf8` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            case .v7(let v7): return .init(v7)
+            case .v8(let v8): return .init(v8)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            case .v7(let v7): return self = .init(v7)
+            case .v8(let v8): return self = .init(v8)
+            }
+        }
+    }
+}
+
+public extension OneOf10 where T10 == Never {
+    /// Contracts this `OneOf10` down to `OneOf9` when the final parameter is `Never`.
+    @inlinable var contracted: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> {
+        get {
+            switch self {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            case .v7(let v7): return .init(v7)
+            case .v8(let v8): return .init(v8)
+            case .v9(let v9): return .init(v9)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            case .v7(let v7): return self = .init(v7)
+            case .v8(let v8): return self = .init(v8)
+            case .v9(let v9): return self = .init(v9)
+            }
+        }
+    }
+}
+
+
 
 
 /// An error that indicates that multiple errors occured when decoding the type;

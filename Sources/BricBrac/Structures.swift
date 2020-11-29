@@ -3198,6 +3198,41 @@ public extension OneOf9Type where Self : Either9Type {
     }
 }
 
+public extension OneOf10Type where Self : Either10Type {
+    /// End of the line, pal: returns the `OneOf10` itself
+    @inlinable var expanded: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> {
+        get {
+            switch oneOf10 {
+            case .v1(let v1): return .init(v1)
+            case .v2(let v2): return .init(v2)
+            case .v3(let v3): return .init(v3)
+            case .v4(let v4): return .init(v4)
+            case .v5(let v5): return .init(v5)
+            case .v6(let v6): return .init(v6)
+            case .v7(let v7): return .init(v7)
+            case .v8(let v8): return .init(v8)
+            case .v9(let v9): return .init(v9)
+            case .v10(let v10): return .init(v10)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let v1): return self = .init(v1)
+            case .v2(let v2): return self = .init(v2)
+            case .v3(let v3): return self = .init(v3)
+            case .v4(let v4): return self = .init(v4)
+            case .v5(let v5): return self = .init(v5)
+            case .v6(let v6): return self = .init(v6)
+            case .v7(let v7): return self = .init(v7)
+            case .v8(let v8): return self = .init(v8)
+            case .v9(let v9): return self = .init(v9)
+            case .v10(let v10): return self = .init(v10)
+            }
+        }
+    }
+}
+
 public extension OneOf2 where T2 == Never {
     /// Contracts this `OneOf2` down to `OneOf1` when the final parameter is `Never`.
     @inlinable var contracted: OneOf1<T1> {

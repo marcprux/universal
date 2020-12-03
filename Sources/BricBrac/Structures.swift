@@ -388,6 +388,16 @@ public extension Either2Type where Self : OneOf2Type {
     }
 }
 
+public extension Either2Type where Self : OneOf2Type, T1 == T2 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf2 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        }
+    }
+}
+
 public extension Either2Type where Self : RawIsomorphism, Self.RawValue : Either2Type {
     @inlinable func map2<U1, U2>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2)) rethrows -> OneOf2<U1, U2> {
         try rawValue.map2(f1, f2)
@@ -424,6 +434,17 @@ public extension Either3Type where Self : OneOf3Type {
     }
 }
 
+public extension Either3Type where Self : OneOf3Type, T1 == T2, T2 == T3 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf3 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        }
+    }
+}
+
 /// Marker protocol for a type that encapsulates one of exactly 4 types
 public protocol Either4Type {
     associatedtype T1
@@ -453,6 +474,18 @@ public extension Either4Type where Self : OneOf4Type {
             case .v3(let x): self = .init(x)
             case .v4(let x): self = .init(x)
             }
+        }
+    }
+}
+
+public extension Either4Type where Self : OneOf4Type, T1 == T2, T2 == T3, T3 == T4 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf4 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        case .v4(let x): return x
         }
     }
 }
@@ -492,6 +525,19 @@ public extension Either5Type where Self : OneOf5Type  {
     }
 }
 
+public extension Either5Type where Self : OneOf5Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf5 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        case .v4(let x): return x
+        case .v5(let x): return x
+        }
+    }
+}
+
 /// Marker protocol for a type that encapsulates one of exactly 6 types
 public protocol Either6Type {
     associatedtype T1
@@ -524,6 +570,20 @@ public extension Either6Type where Self : OneOf6Type {
             case .v5(let x): self = .init(x)
             case .v6(let x): self = .init(x)
             }
+        }
+    }
+}
+
+public extension Either6Type where Self : OneOf6Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf6 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        case .v4(let x): return x
+        case .v5(let x): return x
+        case .v6(let x): return x
         }
     }
 }
@@ -566,6 +626,21 @@ public extension Either7Type where Self : OneOf7Type {
     }
 }
 
+public extension Either7Type where Self : OneOf7Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf7 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        case .v4(let x): return x
+        case .v5(let x): return x
+        case .v6(let x): return x
+        case .v7(let x): return x
+        }
+    }
+}
+
 /// Marker protocol for a type that encapsulates one of exactly 8 types
 public protocol Either8Type {
     associatedtype T1
@@ -602,6 +677,22 @@ public extension Either8Type where Self : OneOf8Type {
             case .v7(let x): self = .init(x)
             case .v8(let x): self = .init(x)
             }
+        }
+    }
+}
+
+public extension Either8Type where Self : OneOf8Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf8 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        case .v4(let x): return x
+        case .v5(let x): return x
+        case .v6(let x): return x
+        case .v7(let x): return x
+        case .v8(let x): return x
         }
     }
 }
@@ -648,6 +739,23 @@ public extension Either9Type where Self : OneOf9Type {
     }
 }
 
+public extension Either9Type where Self : OneOf9Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf9 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        case .v4(let x): return x
+        case .v5(let x): return x
+        case .v6(let x): return x
+        case .v7(let x): return x
+        case .v8(let x): return x
+        case .v9(let x): return x
+        }
+    }
+}
+
 /// Marker protocol for a type that encapsulates one of exactly 10 types
 public protocol Either10Type {
     associatedtype T1
@@ -688,6 +796,24 @@ public extension Either10Type where Self : OneOf10Type {
             case .v9(let x): self = .init(x)
             case .v10(let x): self = .init(x)
             }
+        }
+    }
+}
+
+public extension Either10Type where Self : OneOf10Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9, T9 == T10 {
+    /// The single value of all the underlying possibilities
+    @inlinable var oneOfValue: T1 {
+        switch oneOf10 {
+        case .v1(let x): return x
+        case .v2(let x): return x
+        case .v3(let x): return x
+        case .v4(let x): return x
+        case .v5(let x): return x
+        case .v6(let x): return x
+        case .v7(let x): return x
+        case .v8(let x): return x
+        case .v9(let x): return x
+        case .v10(let x): return x
         }
     }
 }

@@ -772,9 +772,12 @@ public struct Curio {
 
                 if !required {
                     let structProps = props.filter({ (name, required, prop, anon) in
-
-                        var types: [Schema.SimpleTypes] = prop.type?.tupleValue.1 ?? []
-                        if let typ = prop.type?.tupleValue.0 { types.append(typ) }
+                        let types: [Schema.SimpleTypes]
+                        switch prop.type {
+                        case .none: types = []
+                        case .v1(let typ): types = [typ]
+                        case .v2(let typs): types = typs
+                        }
 
                         switch types.first {
                         case .none: return true // unspecified object type: maybe a $ref

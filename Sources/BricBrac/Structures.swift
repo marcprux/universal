@@ -210,63 +210,54 @@ public extension RawInitializable where RawValue : OneOf2Type {
     init(_ t2: RawValue.T2) { self.init(rawValue: .init(t2: t2)) }
     init(t2: RawValue.T2) { self.init(rawValue: .init(t2: t2)) }
     func infer() -> RawValue.T2? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf3Type {
     init(_ t3: RawValue.T3) { self.init(rawValue: .init(t3: t3)) }
     init(t3: RawValue.T3) { self.init(rawValue: .init(t3: t3)) }
     func infer() -> RawValue.T3? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf4Type {
     init(_ t4: RawValue.T4) { self.init(rawValue: .init(t4: t4)) }
     init(t4: RawValue.T4) { self.init(rawValue: .init(t4: t4)) }
     func infer() -> RawValue.T4? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf5Type {
     init(_ t5: RawValue.T5) { self.init(rawValue: .init(t5: t5)) }
     init(t5: RawValue.T5) { self.init(rawValue: .init(t5: t5)) }
     func infer() -> RawValue.T5? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf6Type {
     init(_ t6: RawValue.T6) { self.init(rawValue: .init(t6: t6)) }
     init(t6: RawValue.T6) { self.init(rawValue: .init(t6: t6)) }
     func infer() -> RawValue.T6? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf7Type {
     init(_ t7: RawValue.T7) { self.init(rawValue: .init(t7: t7)) }
     init(t7: RawValue.T7) { self.init(rawValue: .init(t7: t7)) }
     func infer() -> RawValue.T7? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf8Type {
     init(_ t8: RawValue.T8) { self.init(rawValue: .init(t8: t8)) }
     init(t8: RawValue.T8) { self.init(rawValue: .init(t8: t8)) }
     func infer() -> RawValue.T8? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf9Type {
     init(_ t9: RawValue.T9) { self.init(rawValue: .init(t9: t9)) }
     init(t9: RawValue.T9) { self.init(rawValue: .init(t9: t9)) }
     func infer() -> RawValue.T9? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 public extension RawInitializable where RawValue : OneOf10Type {
     init(_ t10: RawValue.T10) { self.init(rawValue: .init(t10: t10)) }
     init(t10: RawValue.T10) { self.init(rawValue: .init(t10: t10)) }
     func infer() -> RawValue.T10? { rawValue.infer() }
-    var tupleValue: RawValue.T { rawValue.tupleValue }
 }
 
 
@@ -355,10 +346,6 @@ public func ==(lhs: HollowBric, rhs: HollowBric) -> Bool {
 // Swift 6+ TODO: Variadic Generics: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#variadic-generics
 
 public protocol SomeOf {
-    associatedtype T
-
-    /// Returns a tuple of the possible value types for this OneOf
-    var tupleValue: T { get }
 }
 
 /// MARK: OneOf implementations
@@ -367,7 +354,6 @@ public protocol SomeOf {
 public protocol Either2Type {
     associatedtype T1
     associatedtype T2
-    associatedtype T = (T1?, T2?)
 
     /// Convert this instance into a `OneOf2`
     func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> OneOf2<U1, U2>
@@ -409,7 +395,6 @@ public protocol Either3Type {
     associatedtype T1
     associatedtype T2
     associatedtype T3
-    associatedtype T = (T1?, T2?, T3?)
 
     /// Convert this instance into a `OneOf3`
     func map3<U1, U2, U3>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3)) rethrows -> OneOf3<U1, U2, U3>
@@ -451,7 +436,6 @@ public protocol Either4Type {
     associatedtype T2
     associatedtype T3
     associatedtype T4
-    associatedtype T = (T1?, T2?, T3?, T4?)
 
     /// Convert this instance into a `OneOf4`
     func map4<U1, U2, U3, U4>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4)) rethrows -> OneOf4<U1, U2, U3, U4>
@@ -497,7 +481,6 @@ public protocol Either5Type {
     associatedtype T3
     associatedtype T4
     associatedtype T5
-    associatedtype T = (T1?, T2?, T3?, T4?, T5?)
 
     /// Convert this instance into a `OneOf5`
     func map5<U1, U2, U3, U4, U5>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5)) rethrows -> OneOf5<U1, U2, U3, U4, U5>
@@ -546,7 +529,6 @@ public protocol Either6Type {
     associatedtype T4
     associatedtype T5
     associatedtype T6
-    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?)
 
     func map6<U1, U2, U3, U4, U5, U6>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6)) rethrows -> OneOf6<U1, U2, U3, U4, U5, U6>
 }
@@ -597,7 +579,6 @@ public protocol Either7Type {
     associatedtype T5
     associatedtype T6
     associatedtype T7
-    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?)
 
     func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7)) rethrows -> OneOf7<U1, U2, U3, U4, U5, U6, U7>
 }
@@ -651,7 +632,6 @@ public protocol Either8Type {
     associatedtype T6
     associatedtype T7
     associatedtype T8
-    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?)
 
     func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8)) rethrows -> OneOf8<U1, U2, U3, U4, U5, U6, U7, U8>
 }
@@ -708,7 +688,6 @@ public protocol Either9Type {
     associatedtype T7
     associatedtype T8
     associatedtype T9
-    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?)
 
     func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9)) rethrows -> OneOf9<U1, U2, U3, U4, U5, U6, U7, U8, U9>
 }
@@ -768,8 +747,7 @@ public protocol Either10Type {
     associatedtype T8
     associatedtype T9
     associatedtype T10
-    associatedtype T = (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?)
-
+    
     func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9), _ f10: (T10) throws -> (U10)) rethrows -> OneOf10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>
 }
 
@@ -876,14 +854,6 @@ public indirect enum OneOf2<T1, T2> : OneOf2Type, Either2Type {
             case .v1(let x): return .init(x[keyPath: keyPaths.0])
             case .v2(let x): return .init(x[keyPath: keyPaths.1])
             }
-        }
-    }
-
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?) {
-        switch self {
-        case .v1(let v): return (v, nil)
-        case .v2(let v): return (nil, v)
         }
     }
 
@@ -1184,15 +1154,6 @@ public indirect enum OneOf3<T1, T2, T3> : OneOf3Type, Either3Type {
         }
     }
 
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil)
-        case .v2(let v): return (nil, v, nil)
-        case .v3(let v): return (nil, nil, v)
-        }
-    }
-
     @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
     @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
@@ -1477,16 +1438,6 @@ public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type, Either4Type {
         }
     }
 
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil, nil)
-        case .v2(let v): return (nil, v, nil, nil)
-        case .v3(let v): return (nil, nil, v, nil)
-        case .v4(let v): return (nil, nil, nil, v)
-        }
-    }
-
     @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
     @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
@@ -1730,17 +1681,6 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type, Either5Type {
         case .v3(let v): return .v1(.v1(.v2(v)))
         case .v4(let v): return .v1(.v2(v))
         case .v5(let v): return .v2(v)
-        }
-    }
-
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil, nil, nil)
-        case .v2(let v): return (nil, v, nil, nil, nil)
-        case .v3(let v): return (nil, nil, v, nil, nil)
-        case .v4(let v): return (nil, nil, nil, v, nil)
-        case .v5(let v): return (nil, nil, nil, nil, v)
         }
     }
 
@@ -2007,18 +1947,6 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type, Either6Type {
         }
     }
 
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil, nil, nil, nil)
-        case .v2(let v): return (nil, v, nil, nil, nil, nil)
-        case .v3(let v): return (nil, nil, v, nil, nil, nil)
-        case .v4(let v): return (nil, nil, nil, v, nil, nil)
-        case .v5(let v): return (nil, nil, nil, nil, v, nil)
-        case .v6(let v): return (nil, nil, nil, nil, nil, v)
-        }
-    }
-
     @inlinable public func infer() -> T1? { if case .v1(let v1) = self { return v1 } else { return nil } }
     @inlinable public func infer() -> T2? { if case .v2(let v2) = self { return v2 } else { return nil } }
     @inlinable public func infer() -> T3? { if case .v3(let v3) = self { return v3 } else { return nil } }
@@ -2213,19 +2141,6 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type, Either7Typ
         case .v5(let v): return .v1(.v1(.v2(v)))
         case .v6(let v): return .v1(.v2(v))
         case .v7(let v): return .v2(v)
-        }
-    }
-
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil)
-        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil)
-        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil)
-        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil)
-        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil)
-        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil)
-        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v)
         }
     }
 
@@ -2437,20 +2352,6 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type, Either
         case .v6(let v): return .v1(.v1(.v2(v)))
         case .v7(let v): return .v1(.v2(v))
         case .v8(let v): return .v2(v)
-        }
-    }
-
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil, nil)
-        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil, nil)
-        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil, nil)
-        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil, nil)
-        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil, nil)
-        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil, nil)
-        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v, nil)
-        case .v8(let v): return (nil, nil, nil, nil, nil, nil, nil, v)
         }
     }
 
@@ -2677,21 +2578,6 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type, Ei
         case .v7(let v): return .v1(.v1(.v2(v)))
         case .v8(let v): return .v1(.v2(v))
         case .v9(let v): return .v2(v)
-        }
-    }
-
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil, nil, nil)
-        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil, nil, nil)
-        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil, nil, nil)
-        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil, nil, nil)
-        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil, nil, nil)
-        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil, nil, nil)
-        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v, nil, nil)
-        case .v8(let v): return (nil, nil, nil, nil, nil, nil, nil, v, nil)
-        case .v9(let v): return (nil, nil, nil, nil, nil, nil, nil, nil, v)
         }
     }
 
@@ -2932,22 +2818,6 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10T
         case .v8(let v): return .v1(.v1(.v2(v)))
         case .v9(let v): return .v1(.v2(v))
         case .v10(let v): return .v2(v)
-        }
-    }
-
-    /// Returns a tuple of optionals, exactly one of which will be non-nil
-    @inlinable public var tupleValue: (T1?, T2?, T3?, T4?, T5?, T6?, T7?, T8?, T9?, T10?) {
-        switch self {
-        case .v1(let v): return (v, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-        case .v2(let v): return (nil, v, nil, nil, nil, nil, nil, nil, nil, nil)
-        case .v3(let v): return (nil, nil, v, nil, nil, nil, nil, nil, nil, nil)
-        case .v4(let v): return (nil, nil, nil, v, nil, nil, nil, nil, nil, nil)
-        case .v5(let v): return (nil, nil, nil, nil, v, nil, nil, nil, nil, nil)
-        case .v6(let v): return (nil, nil, nil, nil, nil, v, nil, nil, nil, nil)
-        case .v7(let v): return (nil, nil, nil, nil, nil, nil, v, nil, nil, nil)
-        case .v8(let v): return (nil, nil, nil, nil, nil, nil, nil, v, nil, nil)
-        case .v9(let v): return (nil, nil, nil, nil, nil, nil, nil, nil, v, nil)
-        case .v10(let v): return (nil, nil, nil, nil, nil, nil, nil, nil, nil, v)
         }
     }
 

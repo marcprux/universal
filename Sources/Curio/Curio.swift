@@ -1648,14 +1648,14 @@ extension Curio {
 }
 
 /// Standard types
-extension CodeExternalType {
-    static let string = CodeExternalType("String")
-    static let number = CodeExternalType("Double")
-    static let integer = CodeExternalType("Int")
-    static let boolean = CodeExternalType("Bool")
-    static let void = CodeExternalType("Void")
-    static let encoder = CodeExternalType("Encoder")
-    static let decoder = CodeExternalType("Decoder")
+public extension CodeExternalType {
+    static var string = CodeExternalType("String")
+    static var number = CodeExternalType("Double")
+    static var integer = CodeExternalType("Int")
+    static var boolean = CodeExternalType("Bool")
+    static var void = CodeExternalType("Void")
+    static var encoder = CodeExternalType("Encoder")
+    static var decoder = CodeExternalType("Decoder")
 }
 
 /// BricBrac types

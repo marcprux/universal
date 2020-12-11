@@ -201,6 +201,8 @@ extension RawIsomorphism where RawValue : CaseIterable {
 /// struct DemoChoice : RawIsomorphism, OneOf2Type { let rawValue: OneOf2<String, Int> }
 /// ```
 public extension RawInitializable where RawValue : OneOfNType {
+    typealias OneOfNext = RawValue.OneOfNext
+    typealias TN = RawValue.TN
     init(_ t1: RawValue.T1) { self.init(rawValue: .init(t1: t1)) }
     init(t1: RawValue.T1) { self.init(rawValue: .init(t1: t1)) }
     func infer() -> RawValue.T1? { rawValue.infer() }
@@ -259,8 +261,6 @@ public extension RawInitializable where RawValue : OneOf10Type {
     init(t10: RawValue.T10) { self.init(rawValue: .init(t10: t10)) }
     func infer() -> RawValue.T10? { rawValue.infer() }
 }
-
-
 
 public extension Optional where Wrapped == ExplicitNull {
     /// Converts an `.some(ExplicitNull.null)` to `false` and `.none` to `true`
@@ -351,7 +351,7 @@ public protocol SomeOf {
 /// MARK: OneOf implementations
 
 /// Marker protocol for a type that encapsulates one of exactly 2 other types
-public protocol Either2Type {
+public protocol Either2Type : OneOf2Type where OneOfNext == OneOf3<T1, T2, Never> {
     associatedtype T1
     associatedtype T2
 
@@ -362,7 +362,7 @@ public protocol Either2Type {
 /// Convenience for use when mapping a thing to itself
 @usableFromInline func it<T>(_ value: T) -> T { value }
 
-public extension Either2Type where Self : OneOf2Type {
+public extension Either2Type {
     @inlinable var oneOf2: OneOf2<T1, T2> {
         get { map2(it, it) }
         set {
@@ -374,9 +374,9 @@ public extension Either2Type where Self : OneOf2Type {
     }
 }
 
-public extension Either2Type where Self : OneOf2Type, T1 == T2 {
+public extension Either2Type where T1 == T2 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf2 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -391,7 +391,7 @@ public extension Either2Type where Self : RawIsomorphism, Self.RawValue : Either
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 3 types
-public protocol Either3Type {
+public protocol Either3Type : OneOf3Type where OneOfNext == OneOf4<T1, T2, T3, Never> {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -406,7 +406,7 @@ public extension Either3Type where Self : RawIsomorphism, RawValue : Either3Type
     }
 }
 
-public extension Either3Type where Self : OneOf3Type {
+public extension Either3Type {
     @inlinable var oneOf3: OneOf3<T1, T2, T3> {
         get { map3(it, it, it) }
         set {
@@ -419,9 +419,9 @@ public extension Either3Type where Self : OneOf3Type {
     }
 }
 
-public extension Either3Type where Self : OneOf3Type, T1 == T2, T2 == T3 {
+public extension Either3Type where T1 == T2, T2 == T3 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf3 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -431,7 +431,7 @@ public extension Either3Type where Self : OneOf3Type, T1 == T2, T2 == T3 {
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 4 types
-public protocol Either4Type {
+public protocol Either4Type : OneOf4Type where OneOfNext == OneOf5<T1, T2, T3, T4, Never> {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -448,7 +448,7 @@ public extension Either4Type where Self : RawIsomorphism, Self.RawValue : Either
 }
 
 
-public extension Either4Type where Self : OneOf4Type {
+public extension Either4Type {
     @inlinable var oneOf4: OneOf4<T1, T2, T3, T4> {
         get { map4(it, it, it, it) }
         set {
@@ -462,9 +462,9 @@ public extension Either4Type where Self : OneOf4Type {
     }
 }
 
-public extension Either4Type where Self : OneOf4Type, T1 == T2, T2 == T3, T3 == T4 {
+public extension Either4Type where T1 == T2, T2 == T3, T3 == T4 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf4 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -475,7 +475,7 @@ public extension Either4Type where Self : OneOf4Type, T1 == T2, T2 == T3, T3 == 
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 5 types
-public protocol Either5Type {
+public protocol Either5Type : OneOf5Type where OneOfNext == OneOf6<T1, T2, T3, T4, T5, Never> {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -493,7 +493,7 @@ public extension Either5Type where Self : RawIsomorphism, Self.RawValue : Either
 }
 
 
-public extension Either5Type where Self : OneOf5Type  {
+public extension Either5Type  {
     @inlinable var oneOf5: OneOf5<T1, T2, T3, T4, T5> {
         get { map5(it, it, it, it, it) }
         set {
@@ -508,9 +508,9 @@ public extension Either5Type where Self : OneOf5Type  {
     }
 }
 
-public extension Either5Type where Self : OneOf5Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5 {
+public extension Either5Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf5 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -522,7 +522,7 @@ public extension Either5Type where Self : OneOf5Type, T1 == T2, T2 == T3, T3 == 
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 6 types
-public protocol Either6Type {
+public protocol Either6Type : OneOf6Type where OneOfNext == OneOf7<T1, T2, T3, T4, T5, T6, Never> {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -540,7 +540,7 @@ public extension Either6Type where Self : RawIsomorphism, Self.RawValue : Either
 }
 
 
-public extension Either6Type where Self : OneOf6Type {
+public extension Either6Type {
     @inlinable var oneOf6: OneOf6<T1, T2, T3, T4, T5, T6> {
         get { map6(it, it, it, it, it, it) }
         set {
@@ -556,9 +556,9 @@ public extension Either6Type where Self : OneOf6Type {
     }
 }
 
-public extension Either6Type where Self : OneOf6Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6 {
+public extension Either6Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf6 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -571,7 +571,7 @@ public extension Either6Type where Self : OneOf6Type, T1 == T2, T2 == T3, T3 == 
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 7 types
-public protocol Either7Type {
+public protocol Either7Type : OneOf7Type where OneOfNext == OneOf8<T1, T2, T3, T4, T5, T6, T7, Never> {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -590,7 +590,7 @@ public extension Either7Type where Self : RawIsomorphism, Self.RawValue : Either
 }
 
 
-public extension Either7Type where Self : OneOf7Type {
+public extension Either7Type {
     @inlinable var oneOf7: OneOf7<T1, T2, T3, T4, T5, T6, T7> {
         get { map7(it, it, it, it, it, it, it) }
         set {
@@ -607,9 +607,9 @@ public extension Either7Type where Self : OneOf7Type {
     }
 }
 
-public extension Either7Type where Self : OneOf7Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7 {
+public extension Either7Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf7 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -623,7 +623,7 @@ public extension Either7Type where Self : OneOf7Type, T1 == T2, T2 == T3, T3 == 
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 8 types
-public protocol Either8Type {
+public protocol Either8Type : OneOf8Type where OneOfNext == OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, Never> {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -643,7 +643,7 @@ public extension Either8Type where Self : RawIsomorphism, Self.RawValue : Either
 }
 
 
-public extension Either8Type where Self : OneOf8Type {
+public extension Either8Type {
     @inlinable var oneOf8: OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> {
         get { map8(it, it, it, it, it, it, it, it) }
         set {
@@ -661,9 +661,9 @@ public extension Either8Type where Self : OneOf8Type {
     }
 }
 
-public extension Either8Type where Self : OneOf8Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8 {
+public extension Either8Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf8 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -678,7 +678,7 @@ public extension Either8Type where Self : OneOf8Type, T1 == T2, T2 == T3, T3 == 
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 9 types
-public protocol Either9Type {
+public protocol Either9Type : OneOf9Type where OneOfNext == OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, Never> {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -699,7 +699,7 @@ public extension Either9Type where Self : RawIsomorphism, Self.RawValue : Either
 }
 
 
-public extension Either9Type where Self : OneOf9Type {
+public extension Either9Type {
     @inlinable var oneOf9: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> {
         get { map9(it, it, it, it, it, it, it, it, it) }
         set {
@@ -718,9 +718,9 @@ public extension Either9Type where Self : OneOf9Type {
     }
 }
 
-public extension Either9Type where Self : OneOf9Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9 {
+public extension Either9Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf9 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -736,7 +736,7 @@ public extension Either9Type where Self : OneOf9Type, T1 == T2, T2 == T3, T3 == 
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 10 types
-public protocol Either10Type {
+public protocol Either10Type : OneOf10Type where OneOfNext == Self {
     associatedtype T1
     associatedtype T2
     associatedtype T3
@@ -758,7 +758,7 @@ public extension Either10Type where Self : RawIsomorphism, Self.RawValue : Eithe
 }
 
 
-public extension Either10Type where Self : OneOf10Type {
+public extension Either10Type {
     @inlinable var oneOf10: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> {
         get { map10(it, it, it, it, it, it, it, it, it, it) }
         set {
@@ -778,9 +778,9 @@ public extension Either10Type where Self : OneOf10Type {
     }
 }
 
-public extension Either10Type where Self : OneOf10Type, T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9, T9 == T10 {
+public extension Either10Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9, T9 == T10 {
     /// The single value of all the underlying possibilities
-    @inlinable var oneOfValue: T1 {
+    @inlinable var unifiedValue: T1 {
         switch oneOf10 {
         case .v1(let x): return x
         case .v2(let x): return x
@@ -800,14 +800,51 @@ public extension Either10Type where Self : OneOf10Type, T1 == T2, T2 == T3, T3 =
 public protocol OneOfNType : SomeOf {
     /// The first type of this `OneOfN`
     associatedtype T1
+    /// The last type of this `OneOfN`
+    associatedtype TN
+    /// The `OneOfN+1` for this `OneOfN`, or the type itself if there there is no type to handle the increased arity; typically, this will be the `OneOfN+1` type with the final type being `Never`.
+    associatedtype OneOfNext : OneOfNType
+
     init(t1: T1)
     init(_ t1: T1)
     func infer() -> T1?
+    /// The type with oncreased arity by tacking `Never` on to the end of the type list (e.g., `OneOf2<X, Y>` becomes `OneOf3<X, Y, Never>`)
+    var expanded: OneOfNext { get set }
 }
 
 public extension OneOfNType {
     @inlinable var v1: T1? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
+
+public extension Either2Type where T1 : Either2Type, T2 : Either3Type {
+    @available(*, deprecated, message: "work-in-progress for generalizing extrication")
+    var extricated: OneOf5<T1.T1, T1.T2, T2.T1, T2.T2, T2.T3> {
+        self[unifying: ({ $0[unifying: (oneOf, oneOf)] }, { $0[unifying: (oneOf, oneOf, oneOf)] })]
+    }
+}
+
+public extension Either2Type {
+    subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U))) -> U {
+        map2(paths.0, paths.1).unifiedValue
+    }
+}
+
+public extension Either3Type {
+    subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U))) -> U {
+        map3(paths.0, paths.1, paths.2).unifiedValue
+    }
+}
+
+//public extension Either2Type where T1 : OneOf2Type {
+//    var extricated: T1.OneOfNext {
+//        return map2({ x in
+//            x.map2(oneOf, oneOf).unifiedValue
+//        }, { x in
+//            .init(x)
+//        }).unifiedValue
+//    }
+//}
+
 
 /// The protocol of a type that can contain one out of 2 or more exclusive options.
 /// An additional guarantee of exactly 2 options granted by implementing `Either2` will confer mappability of this type to`OneOf2`.
@@ -839,7 +876,10 @@ public extension OneOf2Type {
 }
 
 /// A simple union type that can be one of either T1 or T2
-public indirect enum OneOf2<T1, T2> : OneOf2Type, Either2Type {
+public indirect enum OneOf2<T1, T2> : Either2Type {
+    public typealias TN = T2
+    public typealias OneOfNext = OneOf3<T1, T2, Never>
+
     case v1(T1), v2(T2)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1132,6 +1172,9 @@ public extension OneOf3Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3
 public indirect enum OneOf3<T1, T2, T3> : OneOf3Type, Either3Type {
+    public typealias TN = T3
+    public typealias OneOfNext = OneOf4<T1, T2, T3, Never>
+
     case v1(T1), v2(T2), v3(T3)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1412,6 +1455,9 @@ public extension OneOf4Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4
 public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type, Either4Type {
+    public typealias TN = T4
+    public typealias OneOfNext = OneOf5<T1, T2, T3, T4, Never>
+
     case v1(T1), v2(T2), v3(T3), v4(T4)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1654,6 +1700,9 @@ public extension OneOf5Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5
 public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type, Either5Type {
+    public typealias TN = T5
+    public typealias OneOfNext = OneOf6<T1, T2, T3, T4, T5, Never>
+
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -1913,6 +1962,9 @@ public extension OneOf6Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type, Either6Type {
+    public typealias TN = T6
+    public typealias OneOfNext = OneOf7<T1, T2, T3, T4, T5, T6, Never>
+
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2106,6 +2158,9 @@ public extension OneOf7Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type, Either7Type {
+    public typealias TN = T7
+    public typealias OneOfNext = OneOf8<T1, T2, T3, T4, T5, T6, T7, Never>
+
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2313,6 +2368,9 @@ public extension OneOf8Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type, Either8Type {
+    public typealias TN = T8
+    public typealias OneOfNext = OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, Never>
+
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2535,6 +2593,9 @@ public extension OneOf9Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
 public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type, Either9Type {
+    public typealias TN = T9
+    public typealias OneOfNext = OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, Never>
+
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2771,6 +2832,9 @@ public extension OneOf10Type {
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10
 public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10Type, Either10Type {
+    public typealias TN = T10
+    public typealias OneOfNext = Self // end of the line, pal
+
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9), v10(T10)
 
     @inlinable public init(t1: T1) { self = .v1(t1) }
@@ -2986,9 +3050,9 @@ public extension OneOf10 {
 
 
 
-public extension OneOf2Type where Self : Either2Type {
+public extension Either2Type {
     /// Expands this `OneOf2` into a `OneOf3` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf3<T1, T2, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf2 {
             case .v1(let v1): return .init(v1)
@@ -3005,9 +3069,9 @@ public extension OneOf2Type where Self : Either2Type {
     }
 }
 
-public extension OneOf3Type where Self : Either3Type {
+public extension Either3Type {
     /// Expands this `OneOf3` into a `OneOf4` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf4<T1, T2, T3, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf3 {
             case .v1(let v1): return .init(v1)
@@ -3026,9 +3090,9 @@ public extension OneOf3Type where Self : Either3Type {
     }
 }
 
-public extension OneOf4Type where Self : Either4Type {
+public extension Either4Type {
     /// Expands this `OneOf4` into a `OneOf5` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf5<T1, T2, T3, T4, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf4 {
             case .v1(let v1): return .init(v1)
@@ -3049,9 +3113,9 @@ public extension OneOf4Type where Self : Either4Type {
     }
 }
 
-public extension OneOf5Type where Self : Either5Type {
+public extension Either5Type {
     /// Expands this `OneOf5` into a `OneOf6` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf6<T1, T2, T3, T4, T5, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf5 {
             case .v1(let v1): return .init(v1)
@@ -3074,9 +3138,9 @@ public extension OneOf5Type where Self : Either5Type {
     }
 }
 
-public extension OneOf6Type where Self : Either6Type {
+public extension Either6Type {
     /// Expands this `OneOf6` into a `OneOf7` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf7<T1, T2, T3, T4, T5, T6, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf6 {
             case .v1(let v1): return .init(v1)
@@ -3101,9 +3165,9 @@ public extension OneOf6Type where Self : Either6Type {
     }
 }
 
-public extension OneOf7Type where Self : Either7Type {
+public extension Either7Type {
     /// Expands this `OneOf7` into a `OneOf8` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf8<T1, T2, T3, T4, T5, T6, T7, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf7 {
             case .v1(let v1): return .init(v1)
@@ -3130,9 +3194,9 @@ public extension OneOf7Type where Self : Either7Type {
     }
 }
 
-public extension OneOf8Type where Self : Either8Type {
+public extension Either8Type {
     /// Expands this `OneOf8` into a `OneOf9` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf8 {
             case .v1(let v1): return .init(v1)
@@ -3161,9 +3225,9 @@ public extension OneOf8Type where Self : Either8Type {
     }
 }
 
-public extension OneOf9Type where Self : Either9Type {
+public extension Either9Type {
     /// Expands this `OneOf9` into a `OneOf10` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
-    @inlinable var expanded: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, Never> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf9 {
             case .v1(let v1): return .init(v1)
@@ -3194,9 +3258,9 @@ public extension OneOf9Type where Self : Either9Type {
     }
 }
 
-public extension OneOf10Type where Self : Either10Type {
+public extension Either10Type {
     /// End of the line, pal: returns the `OneOf10` itself
-    @inlinable var expanded: OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> {
+    @inlinable var expanded: OneOfNext {
         get {
             switch oneOf10 {
             case .v1(let v1): return .init(v1)
@@ -3213,7 +3277,7 @@ public extension OneOf10Type where Self : Either10Type {
         }
 
         set {
-            switch newValue {
+            switch newValue.oneOf10 {
             case .v1(let v1): return self = .init(v1)
             case .v2(let v2): return self = .init(v2)
             case .v3(let v3): return self = .init(v3)

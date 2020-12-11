@@ -46,7 +46,9 @@ class BricBracTests : XCTestCase {
         ("testBracSwap", testBracSwap),
         ("testFidelityBricolage", testFidelityBricolage),
         ("testOneOfStruct", testOneOfStruct),
+        ("testKeyRouting", testKeyRouting),
         ("testOneOfCoalesce", testOneOfCoalesce),
+        ("testExtricate", testExtricate),
         ("testOptionalPerformance", testOptionalPerformance),
         ("testDeepMerge", testDeepMerge),
         ("testShallowMerge", testShallowMerge),
@@ -1568,6 +1570,17 @@ class BricBracTests : XCTestCase {
         /// coalescing operator
         let oneof4: OneOf2<OneOf2<OneOf2<Bool, Double>, Int>, String> = nil ??? nil ??? 3.456 ??? true // returns .v1(.v1(.v2(3.456))
         XCTAssertEqual(.v1(.v1(.v2(3.456))), oneof4)
+    }
+
+    func testExtricate() {
+        do {
+            typealias Src = OneOf2<OneOf2<String, Int>, OneOf3<Bool, Never, Double>>
+            typealias Dst = OneOf5<String, Int, Bool, Never, Double>
+            let x: Src = Src(oneOf("abc"))
+            let y: Dst = x.extricated
+
+            // x.extricated = oneOf(1.2)
+        }
     }
 
     func testKeyRouting() {

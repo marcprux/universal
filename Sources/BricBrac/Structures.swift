@@ -372,6 +372,27 @@ public extension Either2Type {
             }
         }
     }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable subscript<T: OneOf2Type>(shifting shifting: T.Type) -> T where T.T1 == Self.T2, T.T2 == Self.T1 {
+        switch self.oneOf2 {
+        case .v1(let x): return .init(x)
+        case .v2(let x): return .init(x)
+        }
+    }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf2<T2, T1> {
+        get { self[shifting: OneOf2<T2, T1>.self] }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either2Type where T1 == T2 {
@@ -409,6 +430,26 @@ public extension Either3Type where Self : RawIsomorphism, RawValue : Either3Type
 public extension Either3Type {
     @inlinable var oneOf3: OneOf3<T1, T2, T3> {
         get { map3(it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            }
+        }
+    }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf3<T3, T1, T2> {
+        get {
+            switch self.oneOf3 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            }
+        }
+
         set {
             switch newValue {
             case .v1(let x): self = .init(x)
@@ -460,6 +501,28 @@ public extension Either4Type {
             }
         }
     }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf4<T4, T1, T2, T3> {
+        get {
+            switch self.oneOf4 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either4Type where T1 == T2, T2 == T3, T3 == T4 {
@@ -496,6 +559,30 @@ public extension Either5Type where Self : RawIsomorphism, Self.RawValue : Either
 public extension Either5Type  {
     @inlinable var oneOf5: OneOf5<T1, T2, T3, T4, T5> {
         get { map5(it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            }
+        }
+    }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf5<T5, T1, T2, T3, T4> {
+        get {
+            switch self.oneOf5 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            }
+        }
+
         set {
             switch newValue {
             case .v1(let x): self = .init(x)
@@ -554,6 +641,32 @@ public extension Either6Type {
             }
         }
     }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf6<T6, T1, T2, T3, T4, T5> {
+        get {
+            switch self.oneOf6 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either6Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6 {
@@ -593,6 +706,34 @@ public extension Either7Type where Self : RawIsomorphism, Self.RawValue : Either
 public extension Either7Type {
     @inlinable var oneOf7: OneOf7<T1, T2, T3, T4, T5, T6, T7> {
         get { map7(it, it, it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            }
+        }
+    }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf7<T7, T1, T2, T3, T4, T5, T6> {
+        get {
+            switch self.oneOf7 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            }
+        }
+
         set {
             switch newValue {
             case .v1(let x): self = .init(x)
@@ -659,6 +800,36 @@ public extension Either8Type {
             }
         }
     }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf8<T8, T1, T2, T3, T4, T5, T6, T7> {
+        get {
+            switch self.oneOf8 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            case .v8(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either8Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8 {
@@ -702,6 +873,38 @@ public extension Either9Type where Self : RawIsomorphism, Self.RawValue : Either
 public extension Either9Type {
     @inlinable var oneOf9: OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> {
         get { map9(it, it, it, it, it, it, it, it, it) }
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            case .v9(let x): self = .init(x)
+            }
+        }
+    }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf9<T9, T1, T2, T3, T4, T5, T6, T7, T8> {
+        get {
+            switch self.oneOf9 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            case .v8(let x): return .init(x)
+            case .v9(let x): return .init(x)
+            }
+        }
+
         set {
             switch newValue {
             case .v1(let x): self = .init(x)
@@ -776,6 +979,40 @@ public extension Either10Type {
             }
         }
     }
+
+    /// Shifts the first type forward and cycles the final type back into the first position.
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    @inlinable var shifting: OneOf10<T10, T1, T2, T3, T4, T5, T6, T7, T8, T9> {
+        get {
+            switch self.oneOf10 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            case .v8(let x): return .init(x)
+            case .v9(let x): return .init(x)
+            case .v10(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            case .v9(let x): self = .init(x)
+            case .v10(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either10Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9, T9 == T10 {
@@ -816,35 +1053,22 @@ public extension OneOfNType {
     @inlinable var v1: T1? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
 
-public extension Either2Type where T1 : Either2Type, T2 : Either3Type {
-    @available(*, deprecated, message: "work-in-progress for generalizing extrication")
-    var extricated: OneOf5<T1.T1, T1.T2, T2.T1, T2.T2, T2.T3> {
-        self[unifying: ({ $0[unifying: (oneOf, oneOf)] }, { $0[unifying: (oneOf, oneOf, oneOf)] })]
-    }
-}
-
-public extension Either2Type {
-    subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U))) -> U {
-        map2(paths.0, paths.1).unifiedValue
-    }
-}
-
-public extension Either3Type {
-    subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U))) -> U {
-        map3(paths.0, paths.1, paths.2).unifiedValue
-    }
-}
-
-//public extension Either2Type where T1 : OneOf2Type {
-//    var extricated: T1.OneOfNext {
-//        return map2({ x in
-//            x.map2(oneOf, oneOf).unifiedValue
-//        }, { x in
-//            .init(x)
-//        }).unifiedValue
+//public extension Either2Type {
+//    subscript<Other: Either2Type>(flattening flattening: Other) -> OneOf4<Self.T1, Self.T2, Other.T1, Other.T2> {
+//        get {
+//            self[unifying: ({ $0[unifying: (oneOf, oneOf)] }, { $0[unifying: (oneOf, oneOf)] })]
+//        }
 //    }
 //}
 
+public extension OneOfNType {
+    /// This keypath is used to flatten nested `OneOfN` types into a single top-level type. If it hits this keypath, then no exact matches were found to flatten this instance.
+    @available(*, deprecated, message: "no exact match found for flattened")
+    @inlinable var flattened: Self {
+        get { self }
+        set { self = newValue }
+    }
+}
 
 /// The protocol of a type that can contain one out of 2 or more exclusive options.
 /// An additional guarantee of exactly 2 options granted by implementing `Either2` will confer mappability of this type to`OneOf2`.
@@ -3049,15 +3273,20 @@ public extension OneOf10 {
 }
 
 
-
 public extension Either2Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U))) -> U {
+        map2(paths.0, paths.1).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf2Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2 {
+        self[unifying: (T.init(t1:), T.init(t2:))]
+    }
+
     /// Expands this `OneOf2` into a `OneOf3` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf2 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3070,14 +3299,19 @@ public extension Either2Type {
 }
 
 public extension Either3Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U))) -> U {
+        map3(paths.0, paths.1, paths.2).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf3Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:))]
+    }
+
     /// Expands this `OneOf3` into a `OneOf4` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf3 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3091,15 +3325,19 @@ public extension Either3Type {
 }
 
 public extension Either4Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U), ((T4) -> U))) -> U {
+        map4(paths.0, paths.1, paths.2, paths.3).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf4Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3, T.T4 == Self.T4 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:), T.init(t4:))]
+    }
+
     /// Expands this `OneOf4` into a `OneOf5` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf4 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            case .v4(let v4): return .init(v4)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3114,16 +3352,19 @@ public extension Either4Type {
 }
 
 public extension Either5Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U), ((T4) -> U), ((T5) -> U))) -> U {
+        map5(paths.0, paths.1, paths.2, paths.3, paths.4).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf5Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3, T.T4 == Self.T4, T.T5 == Self.T5 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:), T.init(t4:), T.init(t5:))]
+    }
+
     /// Expands this `OneOf5` into a `OneOf6` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf5 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            case .v4(let v4): return .init(v4)
-            case .v5(let v5): return .init(v5)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3139,17 +3380,19 @@ public extension Either5Type {
 }
 
 public extension Either6Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U), ((T4) -> U), ((T5) -> U), ((T6) -> U))) -> U {
+        map6(paths.0, paths.1, paths.2, paths.3, paths.4, paths.5).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf6Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3, T.T4 == Self.T4, T.T5 == Self.T5, T.T6 == Self.T6 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:), T.init(t4:), T.init(t5:), T.init(t6:))]
+    }
+
     /// Expands this `OneOf6` into a `OneOf7` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf6 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            case .v4(let v4): return .init(v4)
-            case .v5(let v5): return .init(v5)
-            case .v6(let v6): return .init(v6)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3166,18 +3409,19 @@ public extension Either6Type {
 }
 
 public extension Either7Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U), ((T4) -> U), ((T5) -> U), ((T6) -> U), ((T7) -> U))) -> U {
+        map7(paths.0, paths.1, paths.2, paths.3, paths.4, paths.5, paths.6).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf7Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3, T.T4 == Self.T4, T.T5 == Self.T5, T.T6 == Self.T6, T.T7 == Self.T7 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:), T.init(t4:), T.init(t5:), T.init(t6:), T.init(t7:))]
+    }
+
     /// Expands this `OneOf7` into a `OneOf8` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf7 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            case .v4(let v4): return .init(v4)
-            case .v5(let v5): return .init(v5)
-            case .v6(let v6): return .init(v6)
-            case .v7(let v7): return .init(v7)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3195,19 +3439,19 @@ public extension Either7Type {
 }
 
 public extension Either8Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U), ((T4) -> U), ((T5) -> U), ((T6) -> U), ((T7) -> U), ((T8) -> U))) -> U {
+        map8(paths.0, paths.1, paths.2, paths.3, paths.4, paths.5, paths.6, paths.7).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf8Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3, T.T4 == Self.T4, T.T5 == Self.T5, T.T6 == Self.T6, T.T7 == Self.T7, T.T8 == Self.T8 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:), T.init(t4:), T.init(t5:), T.init(t6:), T.init(t7:), T.init(t8:))]
+    }
+
     /// Expands this `OneOf8` into a `OneOf9` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf8 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            case .v4(let v4): return .init(v4)
-            case .v5(let v5): return .init(v5)
-            case .v6(let v6): return .init(v6)
-            case .v7(let v7): return .init(v7)
-            case .v8(let v8): return .init(v8)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3226,20 +3470,19 @@ public extension Either8Type {
 }
 
 public extension Either9Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U), ((T4) -> U), ((T5) -> U), ((T6) -> U), ((T7) -> U), ((T8) -> U), ((T9) -> U))) -> U {
+        map9(paths.0, paths.1, paths.2, paths.3, paths.4, paths.5, paths.6, paths.7, paths.8).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf9Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3, T.T4 == Self.T4, T.T5 == Self.T5, T.T6 == Self.T6, T.T7 == Self.T7, T.T8 == Self.T8, T.T9 == Self.T9 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:), T.init(t4:), T.init(t5:), T.init(t6:), T.init(t7:), T.init(t8:), T.init(t9:))]
+    }
+
     /// Expands this `OneOf9` into a `OneOf10` with the final parameter being `Never`. Useful when an API wants to abstract across multiple `OneOfXType` arities.
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf9 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            case .v4(let v4): return .init(v4)
-            case .v5(let v5): return .init(v5)
-            case .v6(let v6): return .init(v6)
-            case .v7(let v7): return .init(v7)
-            case .v8(let v8): return .init(v8)
-            case .v9(let v9): return .init(v9)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3259,21 +3502,19 @@ public extension Either9Type {
 }
 
 public extension Either10Type {
+    @inlinable subscript<U>(unifying paths: (((T1) -> U), ((T2) -> U), ((T3) -> U), ((T4) -> U), ((T5) -> U), ((T6) -> U), ((T7) -> U), ((T8) -> U), ((T9) -> U), ((T10) -> U))) -> U {
+        map10(paths.0, paths.1, paths.2, paths.3, paths.4, paths.5, paths.6, paths.7, paths.8, paths.9).unifiedValue
+    }
+
+    /// Type-inferred conversion of this 2-type to an N type. This can be used to derive a `OneOfN` from any equal-or-lower-arity `OneOfN-`.
+    @inlinable func asOneOfN<T: OneOf10Type>() -> T where T.T1 == Self.T1, T.T2 == Self.T2, T.T3 == Self.T3, T.T4 == Self.T4, T.T5 == Self.T5, T.T6 == Self.T6, T.T7 == Self.T7, T.T8 == Self.T8, T.T9 == Self.T9, T.T10 == Self.T10 {
+        self[unifying: (T.init(t1:), T.init(t2:), T.init(t3:), T.init(t4:), T.init(t5:), T.init(t6:), T.init(t7:), T.init(t8:), T.init(t9:), T.init(t10:))]
+    }
+
     /// End of the line, pal: returns the `OneOf10` itself
     @inlinable var expanded: OneOfNext {
         get {
-            switch oneOf10 {
-            case .v1(let v1): return .init(v1)
-            case .v2(let v2): return .init(v2)
-            case .v3(let v3): return .init(v3)
-            case .v4(let v4): return .init(v4)
-            case .v5(let v5): return .init(v5)
-            case .v6(let v6): return .init(v6)
-            case .v7(let v7): return .init(v7)
-            case .v8(let v8): return .init(v8)
-            case .v9(let v9): return .init(v9)
-            case .v10(let v10): return .init(v10)
-            }
+            asOneOfN()
         }
 
         set {
@@ -3288,6 +3529,137 @@ public extension Either10Type {
             case .v8(let v8): return self = .init(v8)
             case .v9(let v9): return self = .init(v9)
             case .v10(let v10): return self = .init(v10)
+            }
+        }
+    }
+}
+
+
+public extension Either2Type where T1 : Either2Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf3<T1.T1, T1.T2, T2> {
+        get {
+            self[unifying: ({ $0.asOneOfN() }, oneOf)]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(.init(x))
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+public extension Either2Type where T1 : Either3Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf4<T1.T1, T1.T2, T1.T3, T2> {
+        get {
+            self[unifying: ({ $0.asOneOfN() }, oneOf)]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(.init(x))
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+public extension Either2Type where T1 : Either4Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf5<T1.T1, T1.T2, T1.T3, T1.T4, T2> {
+        get {
+            self[unifying: ({ $0.asOneOfN() }, oneOf)]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(.init(x))
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            case .v5(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+public extension Either2Type where T1 : Either5Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf6<T1.T1, T1.T2, T1.T3, T1.T4, T1.T5, T2> {
+        get {
+            self[unifying: ({ $0.asOneOfN() }, oneOf)]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(.init(x))
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            case .v5(let x): self = .init(.init(x))
+            case .v6(let x): self = .init(x)
+            }
+        }
+    }
+}
+
+public extension Either2Type where T1 : Either2Type, T2 : Either2Type {
+    /// Flattens nested `EitherP` & `EitherQ` into a single top-level `Either(P+Q)`
+    @inlinable var flattened: OneOf4<T1.T1, T1.T2, T2.T1, T2.T2> {
+        get {
+            self[unifying: ({ $0.asOneOfN() }, { ($0.asOneOfN() as OneOf4).shifting.shifting })]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(.init(x))
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            }
+        }
+    }
+}
+
+public extension Either2Type where T1 : Either2Type, T2 : Either3Type {
+    /// Flattens nested `EitherP` & `EitherQ` into a single top-level `Either(P+Q)`
+    @inlinable var flattened: OneOf5<T1.T1, T1.T2, T2.T1, T2.T2, T2.T3> {
+        get {
+            self[unifying: ({ $0.asOneOfN() }, { ($0.asOneOfN() as OneOf5).shifting.shifting })]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(.init(x))
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            case .v5(let x): self = .init(.init(x))
+            }
+        }
+    }
+}
+
+public extension Either2Type where T1 : Either3Type, T2 : Either2Type {
+    /// Flattens nested `EitherP` & `EitherQ` into a single top-level `Either(P+Q)`
+    @inlinable var flattened: OneOf5<T1.T1, T1.T2, T1.T3, T2.T1, T2.T2> {
+        get {
+            self.shifting.flattened.shifting.shifting.shifting
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(.init(x))
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            case .v5(let x): self = .init(.init(x))
             }
         }
     }

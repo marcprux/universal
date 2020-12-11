@@ -1574,12 +1574,24 @@ class BricBracTests : XCTestCase {
 
     func testExtricate() {
         do {
+            typealias Src = OneOf2<OneOf2<String, Int>, OneOf2<Bool, Double>>
+            typealias Dst = OneOf4<String, Int, Bool, Double>
+            let x: Src = Src(oneOf("abc"))
+            let _: Dst = x.flattened
+        }
+
+        do {
+            typealias Src = OneOf2<OneOf3<String, Int, Void>, OneOf2<Bool, Double>>
+            typealias Dst = OneOf5<String, Int, Void, Bool, Double>
+            let x: Src = Src(oneOf("abc"))
+            let _: Dst = x.flattened
+        }
+
+        do {
             typealias Src = OneOf2<OneOf2<String, Int>, OneOf3<Bool, Never, Double>>
             typealias Dst = OneOf5<String, Int, Bool, Never, Double>
             let x: Src = Src(oneOf("abc"))
-            let y: Dst = x.extricated
-
-            // x.extricated = oneOf(1.2)
+            let _: Dst = x.flattened
         }
     }
 

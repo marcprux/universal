@@ -590,7 +590,7 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual("[12.800000000000001]", [Double(12.8)].jsonDebugDescription)
         XCTAssertEqual("[12.8]", [Decimal(12.8)].jsonDebugDescription)
 
-        XCTAssertEqual("[12.800000000000001]", [Either<Double>.Or<Decimal>.v1(Double(12.8))].jsonDebugDescription)
+        XCTAssertEqual("[12.800000000000001]", [OneOf<Double>.Or<Decimal>.v1(Double(12.8))].jsonDebugDescription)
         XCTAssertEqual("[12.8]", [OneOf2<Double, Decimal>.v2(Decimal(12.8))].jsonDebugDescription)
     }
 
@@ -1530,20 +1530,20 @@ class BricBracTests : XCTestCase {
 
     func testOneOfStruct() {
         do {
-            let one = Either<String>.Or<String>(t1: "xxx")
-            let two = Either<String>.Or<String>(t1: "xxx")
+            let one = OneOf<String>.Or<String>(t1: "xxx")
+            let two = OneOf<String>.Or<String>(t1: "xxx")
             XCTAssertEqual(one, two)
         }
 
         do {
-            let one = Either<String>.Or<String>(t2: "xxx")
-            let two = Either<String>.Or<String>(t2: "xxx")
+            let one = OneOf<String>.Or<String>(t2: "xxx")
+            let two = OneOf<String>.Or<String>(t2: "xxx")
             XCTAssertEqual(one, two)
         }
 
         do {
-            let one = Either<String>.Or<String>(t1: "xxx")
-            let two = Either<String>.Or<String>(t2: "xxx")
+            let one = OneOf<String>.Or<String>(t1: "xxx")
+            let two = OneOf<String>.Or<String>(t2: "xxx")
             XCTAssertNotEqual(one, two)
         }
 
@@ -1561,7 +1561,7 @@ class BricBracTests : XCTestCase {
             return ""
         }
 
-        let o2 = Either<String>.Or<Int>.coalesce(1, failString())
+        let o2 = OneOf<String>.Or<Int>.coalesce(1, failString())
         XCTAssertEqual(1, o2.v2)
 
         let o5 = OneOf5<String, Int, Double, Float, Int>.coalesce(nil, nil, 1.7, 9, failString())
@@ -1574,10 +1574,11 @@ class BricBracTests : XCTestCase {
 
     func testExtricate() {
         do {
-            typealias Src = OneOf2<Either<String>.Or<Int>, OneOf2<Bool, Double>>
+            typealias Src = OneOf2<OneOf<String>.Or<Int>, OneOf2<Bool, Double>>
             typealias Dst = OneOf4<String, Int, Bool, Double>
             let x: Src = Src(oneOf("abc"))
             let _: Dst = x.flattened
+            let _: Dst = x.flattened.swapped.swapped // double swapped is always the same as itself
         }
 
         do {
@@ -1585,15 +1586,17 @@ class BricBracTests : XCTestCase {
             typealias Dst = OneOf5<String, Int, Void, Bool, Double>
             let x: Src = Src(oneOf("abc"))
             let _: Dst = x.flattened
+            let _: Dst = x.flattened.swapped.swapped // double swapped is always the same as itself
         }
 
         do {
-            typealias Src1 = Either<String>.Or<Int>
-            typealias Src2 = Either<Bool>.Or<Never>.Or<Double>
-            typealias Src = Either<Src1>.Or<Src2>
-            typealias Dst = Either<String>.Or<Int>.Or<Bool>.Or<Never>.Or<Double>
+            typealias Src1 = OneOf<String>.Or<Int>
+            typealias Src2 = OneOf<Bool>.Or<Never>.Or<Double>
+            typealias Src = OneOf<Src1>.Or<Src2>
+            typealias Dst = OneOf<String>.Or<Int>.Or<Bool>.Or<Never>.Or<Double>
             let x: Src = Src(oneOf("abc"))
             let _: Dst = x.flattened
+            let _: Dst = x.flattened.swapped.swapped // double swapped is always the same as itself
         }
     }
 
@@ -1608,7 +1611,7 @@ class BricBracTests : XCTestCase {
         }
 
         struct Things {
-            var thing: Either<Thing1>.Or<Thing2>
+            var thing: OneOf<Thing1>.Or<Thing2>
             var name: String? {
                 get { return thing[routing: (\.name, \.name)] }
                 set { thing[routing: (\.name, \.name)] = newValue }

@@ -144,45 +144,45 @@ public extension RawInitializable {
 public protocol RawIsomorphism : RawInitializable {
 }
 
-extension Result : Either2Type {
-    public typealias T1 = Failure
-    public typealias T2 = Success
-    public typealias TN = T2
-    public typealias Or<X> = OneOf3<T1, T2, X>
-    public typealias OneOfNext = Or<Never>
-
-
-    public func map2<U1, U2>(_ f1: (Failure) throws -> (U1), _ f2: (Success) throws -> (U2)) rethrows -> Either<U1>.Or<U2> {
-        switch self {
-        case .failure(let x): return try .init(f1(x))
-        case .success(let x): return try .init(f2(x))
-        }
-    }
-
-    public init(t2: Success) {
-        self = .success(t2)
-    }
-
-    public init(_ t2: Success) {
-        self = .success(t2)
-    }
-
-    public func infer() -> Success? {
-        oneOf2.infer()
-    }
-
-    public init(t1: Failure) {
-        self = .failure(t1)
-    }
-
-    public init(_ t1: Failure) {
-        self = .failure(t1)
-    }
-
-    public func infer() -> Failure? {
-        oneOf2.infer()
-    }
-}
+//extension Result : Either2Type {
+//    public typealias T1 = Failure
+//    public typealias T2 = Success
+//    public typealias TN = T2
+//    public typealias Or<X> = OneOf3<T1, T2, X>
+//    public typealias OneOfNext = Or<Never>
+//
+//
+//    public func map2<U1, U2>(_ f1: (Failure) throws -> (U1), _ f2: (Success) throws -> (U2)) rethrows -> This<U1>.Or<U2> {
+//        switch self {
+//        case .failure(let x): return try .init(f1(x))
+//        case .success(let x): return try .init(f2(x))
+//        }
+//    }
+//
+//    public init(t2: Success) {
+//        self = .success(t2)
+//    }
+//
+//    public init(_ t2: Success) {
+//        self = .success(t2)
+//    }
+//
+//    public func infer() -> Success? {
+//        oneOf2.infer()
+//    }
+//
+//    public init(t1: Failure) {
+//        self = .failure(t1)
+//    }
+//
+//    public init(_ t1: Failure) {
+//        self = .failure(t1)
+//    }
+//
+//    public func infer() -> Failure? {
+//        oneOf2.infer()
+//    }
+//}
 
 //extension Optional : Either2Type {
 //    public typealias T1 = Void
@@ -192,7 +192,7 @@ extension Result : Either2Type {
 //    public typealias OneOfNext = Or<Never>
 //
 //
-//    public func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> Either<U1>.Or<U2> {
+//    public func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> This<U1>.Or<U2> {
 //        switch self {
 //        case .none(let x): return try .init(f1(x))
 //        case .some(let x): return try .init(f2(x))
@@ -247,7 +247,7 @@ public extension RawCodable {
 
 
 /// A Nullable is a type that can be either explicitly null or a given type.
-public typealias Nullable<T> = Either<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
+public typealias Nullable<T> = OneOf<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
 public extension OneOfNType where T1 == ExplicitNull /* e.g., Nullable */ {
     /// A nullable `.null`, similar to `Optional.none`
@@ -424,13 +424,20 @@ public func ==(lhs: HollowBric, rhs: HollowBric) -> Bool {
 public protocol SomeOf {
 }
 
-/// MARK: Either implementations
+// MARK: OneOf.Or/OneOf.And implementations
 
-/// A type basis of a `OneOfN` type. For example:
-/// `Either<X>.Or<Y>` is `OneOf2<X, Y>`, and
-/// `Either<X>.Or<Y>.Or<Z>` is `OneOf3<X, Y, Z>`
-public enum Either<T> {
+/// A hollow type basis that provided associated `OneOfN` and `AllOfN` types. For example:
+///
+/// `This<X>.Or<Y>` is `OneOf2<X, Y>`, and
+/// `This<X>.Or<Y>.Or<Z>` is `OneOf3<X, Y, Z>`
+///
+///  and:
+///
+/// `This<X>.And<Y>` is `AllOf2<X, Y>`, and
+/// `This<X>.And<Y>.And<Z>` is `AllOf2<X, AllOf2<Y, Z>>`
+public enum OneOf<T> {
     public typealias Or<X> = OneOf2<T, X>
+    public typealias And<X> = AllOf2<T, X>
 }
 
 /// Marker protocol for a type that encapsulates one of exactly 2 other types
@@ -439,14 +446,14 @@ public protocol Either2Type : OneOf2Type where OneOfNext == OneOf3<T1, T2, Never
     associatedtype T2
 
     /// Convert this instance into a `OneOf2`
-    func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> Either<U1>.Or<U2>
+    func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> OneOf<U1>.Or<U2>
 }
 
 /// Convenience for use when mapping a thing to itself
 @usableFromInline func it<T>(_ value: T) -> T { value }
 
 public extension Either2Type {
-    @inlinable var oneOf2: Either<T1>.Or<T2> {
+    @inlinable var oneOf2: OneOf<T1>.Or<T2> {
         get { map2(it, it) }
         set {
             switch newValue {
@@ -466,7 +473,7 @@ public extension Either2Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T2>.Or<T1>
+    typealias Shifted = OneOf<T2>.Or<T1>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -492,8 +499,14 @@ public extension Either2Type where T1 == T2 {
 }
 
 public extension Either2Type where Self : RawIsomorphism, Self.RawValue : Either2Type {
-    @inlinable func map2<U1, U2>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2)) rethrows -> Either<U1>.Or<U2> {
+    @inlinable func map2<U1, U2>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2)) rethrows -> OneOf<U1>.Or<U2> {
         try rawValue.map2(f1, f2)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOf2.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -504,12 +517,18 @@ public protocol Either3Type : OneOf3Type where OneOfNext == OneOf4<T1, T2, T3, N
     associatedtype T3
 
     /// Convert this instance into a `OneOf3`
-    func map3<U1, U2, U3>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3)) rethrows -> OneOf3<U1, U2, U3>
+    func map3<U1, U2, U3>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>
 }
 
-public extension Either3Type where Self : RawIsomorphism, RawValue : Either3Type {
-    func map3<U1, U2, U3>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3)) rethrows -> OneOf3<U1, U2, U3> {
+public extension Either3Type where Self : RawIsomorphism, Self.RawValue : Either3Type {
+    func map3<U1, U2, U3>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3)) rethrows -> OneOf<U1>.Or<U2>.Or<U3> {
         try rawValue.map3(f1, f2, f3)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -526,7 +545,7 @@ public extension Either3Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T3>.Or<T1>.Or<T2>
+    typealias Shifted = OneOf<T3>.Or<T1>.Or<T2>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -568,12 +587,18 @@ public protocol Either4Type : OneOf4Type where OneOfNext == OneOf5<T1, T2, T3, T
     associatedtype T4
 
     /// Convert this instance into a `OneOf4`
-    func map4<U1, U2, U3, U4>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4)) rethrows -> OneOf4<U1, U2, U3, U4>
+    func map4<U1, U2, U3, U4>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>
 }
 
 public extension Either4Type where Self : RawIsomorphism, Self.RawValue : Either4Type {
-    func map4<U1, U2, U3, U4>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4)) rethrows -> OneOf4<U1, U2, U3, U4> {
+    func map4<U1, U2, U3, U4>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4> {
         try rawValue.map4(f1, f2, f3, f4)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -592,7 +617,7 @@ public extension Either4Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T4>.Or<T1>.Or<T2>.Or<T3>
+    typealias Shifted = OneOf<T4>.Or<T1>.Or<T2>.Or<T3>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -638,12 +663,18 @@ public protocol Either5Type : OneOf5Type where OneOfNext == OneOf6<T1, T2, T3, T
     associatedtype T5
 
     /// Convert this instance into a `OneOf5`
-    func map5<U1, U2, U3, U4, U5>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5)) rethrows -> OneOf5<U1, U2, U3, U4, U5>
+    func map5<U1, U2, U3, U4, U5>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>
 }
 
 public extension Either5Type where Self : RawIsomorphism, Self.RawValue : Either5Type {
-    func map5<U1, U2, U3, U4, U5>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5)) rethrows -> OneOf5<U1, U2, U3, U4, U5> {
+    func map5<U1, U2, U3, U4, U5>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5> {
         try rawValue.map5(f1, f2, f3, f4, f5)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -663,7 +694,7 @@ public extension Either5Type  {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T5>.Or<T1>.Or<T2>.Or<T3>.Or<T4>
+    typealias Shifted = OneOf<T5>.Or<T1>.Or<T2>.Or<T3>.Or<T4>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -712,12 +743,18 @@ public protocol Either6Type : OneOf6Type where OneOfNext == OneOf7<T1, T2, T3, T
     associatedtype T5
     associatedtype T6
 
-    func map6<U1, U2, U3, U4, U5, U6>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6)) rethrows -> OneOf6<U1, U2, U3, U4, U5, U6>
+    func map6<U1, U2, U3, U4, U5, U6>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>
 }
 
 public extension Either6Type where Self : RawIsomorphism, Self.RawValue : Either6Type {
-    func map6<U1, U2, U3, U4, U5, U6>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6)) rethrows -> OneOf6<U1, U2, U3, U4, U5, U6> {
+    func map6<U1, U2, U3, U4, U5, U6>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6> {
         try rawValue.map6(f1, f2, f3, f4, f5, f6)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -738,7 +775,7 @@ public extension Either6Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T6>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>
+    typealias Shifted = OneOf<T6>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -791,12 +828,18 @@ public protocol Either7Type : OneOf7Type where OneOfNext == OneOf8<T1, T2, T3, T
     associatedtype T6
     associatedtype T7
 
-    func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7)) rethrows -> OneOf7<U1, U2, U3, U4, U5, U6, U7>
+    func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>
 }
 
 public extension Either7Type where Self : RawIsomorphism, Self.RawValue : Either7Type {
-    func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7)) rethrows -> OneOf7<U1, U2, U3, U4, U5, U6, U7> {
+    func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7> {
         try rawValue.map7(f1, f2, f3, f4, f5, f6, f7)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -818,7 +861,7 @@ public extension Either7Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T7>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>
+    typealias Shifted = OneOf<T7>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -875,12 +918,18 @@ public protocol Either8Type : OneOf8Type where OneOfNext == OneOf9<T1, T2, T3, T
     associatedtype T7
     associatedtype T8
 
-    func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8)) rethrows -> OneOf8<U1, U2, U3, U4, U5, U6, U7, U8>
+    func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8>
 }
 
 public extension Either8Type where Self : RawIsomorphism, Self.RawValue : Either8Type {
-    func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8)) rethrows -> OneOf8<U1, U2, U3, U4, U5, U6, U7, U8> {
+    func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8> {
         try rawValue.map8(f1, f2, f3, f4, f5, f6, f7, f8)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -903,7 +952,7 @@ public extension Either8Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T8>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>
+    typealias Shifted = OneOf<T8>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -964,12 +1013,18 @@ public protocol Either9Type : OneOf9Type where OneOfNext == OneOf10<T1, T2, T3, 
     associatedtype T8
     associatedtype T9
 
-    func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9)) rethrows -> OneOf9<U1, U2, U3, U4, U5, U6, U7, U8, U9>
+    func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8>.Or<U9>
 }
 
 public extension Either9Type where Self : RawIsomorphism, Self.RawValue : Either9Type {
-    func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8), _ f9: (RawValue.T9) throws -> (U9)) rethrows -> OneOf9<U1, U2, U3, U4, U5, U6, U7, U8, U9> {
+    func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8), _ f9: (RawValue.T9) throws -> (U9)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8>.Or<U9> {
         try rawValue.map9(f1, f2, f3, f4, f5, f6, f7, f8, f9)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -993,7 +1048,7 @@ public extension Either9Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T9>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>
+    typealias Shifted = OneOf<T9>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -1058,12 +1113,18 @@ public protocol Either10Type : OneOf10Type where OneOfNext == Self {
     associatedtype T9
     associatedtype T10
     
-    func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9), _ f10: (T10) throws -> (U10)) rethrows -> OneOf10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>
+    func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9), _ f10: (T10) throws -> (U10)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8>.Or<U9>.Or<U10>
 }
 
 public extension Either10Type where Self : RawIsomorphism, Self.RawValue : Either10Type {
-    func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8), _ f9: (RawValue.T9) throws -> (U9), _ f10: (RawValue.T10) throws -> (U10)) rethrows -> OneOf10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10> {
+    func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (RawValue.T1) throws -> (U1), _ f2: (RawValue.T2) throws -> (U2), _ f3: (RawValue.T3) throws -> (U3), _ f4: (RawValue.T4) throws -> (U4), _ f5: (RawValue.T5) throws -> (U5), _ f6: (RawValue.T6) throws -> (U6), _ f7: (RawValue.T7) throws -> (U7), _ f8: (RawValue.T8) throws -> (U8), _ f9: (RawValue.T9) throws -> (U9), _ f10: (RawValue.T10) throws -> (U10)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8>.Or<U9>.Or<U10> {
         try rawValue.map10(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10)
+    }
+
+    /// A `RawIsomorphism` swaps back to itself; use `.oneOfN.swapped` to swap underlying structures
+    @inlinable var swapped: Self {
+        get { self }
+        set { self = newValue }
     }
 }
 
@@ -1088,7 +1149,7 @@ public extension Either10Type {
     }
 
     /// The type shifted over by one
-    typealias Shifted = Either<T10>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>.Or<T9>
+    typealias Shifted = OneOf<T10>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>.Or<T9>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
@@ -1154,6 +1215,7 @@ public protocol OneOfNType : SomeOf {
 
     init(t1: T1)
     init(_ t1: T1)
+    /// Returns the `T1` type or `nil` if this instance does not represent a `T1`
     func infer() -> T1?
     /// The type with oncreased arity by tacking `Never` on to the end of the type list (e.g., `OneOf2<X, Y>` becomes `OneOf3<X, Y, Never>`)
     var expanded: OneOfNext { get set }
@@ -1162,14 +1224,6 @@ public protocol OneOfNType : SomeOf {
 public extension OneOfNType {
     @inlinable var v1: T1? { get { return infer() } set { if let newValue = newValue { self = Self.init(newValue)} } }
 }
-
-//public extension Either2Type {
-//    subscript<Other: Either2Type>(flattening flattening: Other) -> OneOf4<Self.T1, Self.T2, Other.T1, Other.T2> {
-//        get {
-//            self[unifying: ({ $0[unifying: (oneOf, oneOf)] }, { $0[unifying: (oneOf, oneOf)] })]
-//        }
-//    }
-//}
 
 public extension OneOfNType {
     /// This keypath is used to flatten nested `OneOfN` types into a single top-level type. If it hits this keypath, then no exact matches were found to flatten this instance.
@@ -1186,7 +1240,18 @@ public protocol OneOf2Type : OneOfNType {
     associatedtype T2
     init(t2: T2)
     init(_ t2: T2)
+
+    /// Returns the `T2` type or `nil` if this instance does not represent a `T2`
     func infer() -> T2?
+
+    /// The type of swapping  the first two types
+    associatedtype Swapped : OneOf2Type
+
+    /// Returns some shuffled form of this type; `OneOf2Invertable` sub-types can add the additional constraint that `Self == Swapped.Swapped`, thereby guaranteeing that the operation is .
+    var swapped: Swapped { get set }
+}
+
+public protocol OneOf2Invertable : OneOf2Type where Swapped.Swapped == Self {
 }
 
 /// Construct a `OneOfNType` from T1.
@@ -1209,12 +1274,15 @@ public extension OneOf2Type {
     }
 }
 
+// MARK: OneOf2
+
 /// A simple union type that can be one of either T1 or T2
-public indirect enum OneOf2<T1, T2> : Either2Type {
+public indirect enum OneOf2<T1, T2> : Either2Type, OneOf2Invertable {
     public typealias TN = T2
     /// Turns a `OneOf2` into a `OneOf3` with the given type at the end
     public typealias Or<X> = OneOf3<T1, T2, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf<T2>.Or<T1>
 
     case v1(T1), v2(T2)
 
@@ -1224,7 +1292,7 @@ public indirect enum OneOf2<T1, T2> : Either2Type {
     @inlinable public init(t2: T2) { self = .v2(t2) }
     @inlinable public init(_ t2: T2) { self = .v2(t2) }
 
-    @inlinable subscript<U1, U2>(oneOf keyPaths: (KeyPath<T1, U1>, KeyPath<T2, U2>)) -> OneOf2<U1, U2> {
+    @inlinable subscript<U1, U2>(oneOf keyPaths: (KeyPath<T1, U1>, KeyPath<T2, U2>)) -> OneOf<U1>.Or<U2> {
         get {
             switch self {
             case .v1(let x): return .init(x[keyPath: keyPaths.0])
@@ -1317,7 +1385,7 @@ public extension OneOf2 {
     /// - Parameters:
     ///   - f1: the function to apply to `T1`
     ///   - f2: the function to apply to `T2`
-    @inlinable func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> Either<U1>.Or<U2> {
+    @inlinable func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> OneOf<U1>.Or<U2> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -1388,7 +1456,7 @@ public extension OneOf2 {
 /// let oneof2: OneOf2<Bool, String> = "ABC" ??? false // returns .v2("ABC")
 /// let oneof4: OneOf2<OneOf2<OneOf2<Bool, Double>, Int>, String> = nil ??? nil ??? 3.456 ??? true // returns .v1(.v1(.v2(3.456)))
 /// ```
-@inlinable public func ??? <T2, T1>(optional: @autoclosure () -> T2?, fallback: @autoclosure () -> T1) -> OneOf2<T1, T2> {
+@inlinable public func ??? <T2, T1>(optional: @autoclosure () -> T2?, fallback: @autoclosure () -> T1) -> OneOf<T1>.Or<T2> {
     OneOf2.coalesce(optional(), fallback())
 }
 
@@ -1397,10 +1465,10 @@ infix operator ??? : NilCoalescingPrecedence
 /// A `OneOrAny` is either a specific value or a generic `Bric` instance.
 /// This can be useful for deserialization where you want to handle a certain
 /// case while falling back to a general structure.
-public typealias OneOrAny<T> = OneOf2<T, Bric>
+public typealias OneOrAny<T> = OneOf<T>.Or<Bric>
 
 /// A `OneOrMany` is either a single value or any array of zero or multiple values
-public typealias OneOrMany<T> = OneOf2<T, [T]>
+public typealias OneOrMany<T> = OneOf<T>.Or<[T]>
 
 extension OneOrMany : ExpressibleByArrayLiteral where T2 == [T1] {
     public init(arrayLiteral elements: T1...) {
@@ -1459,7 +1527,12 @@ extension OneOrMany where T2 == [T1] {
 
 /// Reversed the OneOf2 ordering
 public extension OneOf2 {
-    /// Returns a swapped instance of this OneOf2<T1, T2> as a OneOf2<T2, T1>
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf2<T1, T2>` as a `OneOf2<T2, T1>`
     @inlinable var swap_2_1: OneOf2<T2, T1> {
         get {
             switch self {
@@ -1485,6 +1558,7 @@ public protocol OneOf3Type : OneOf2Type {
     associatedtype T3
     init(t3: T3)
     init(_ t3: T3)
+    /// Returns the `T3` type or `nil` if this instance does not represent a `T3`
     func infer() -> T3?
 }
 
@@ -1506,12 +1580,15 @@ public extension OneOf3Type {
 /// Construct a `OneOf3Type` from T3.
 @inlinable public func oneOf<T: OneOf3Type>(_ value: T.T3) -> T { .init(value) }
 
+// MARK: OneOf3
+
 /// A simple union type that can be one of either T1 or T2 or T3
-public indirect enum OneOf3<T1, T2, T3> : OneOf3Type, Either3Type {
+public indirect enum OneOf3<T1, T2, T3> : Either3Type, OneOf2Invertable {
     public typealias TN = T3
     /// Turns a `OneOf3` into a `OneOf4` with the given type at the end
     public typealias Or<X> = OneOf4<T1, T2, T3, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf3<T2, T1, T3>
 
     case v1(T1), v2(T2), v3(T3)
 
@@ -1625,7 +1702,7 @@ public extension OneOf3 {
     ///   - f1: the function to apply to `T1`
     ///   - f2: the function to apply to `T2`
     ///   - f3: the function to apply to `T3`
-    @inlinable func map3<U1, U2, U3>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3)) rethrows -> OneOf3<U1, U2, U3> {
+    @inlinable func map3<U1, U2, U3>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3)) rethrows -> OneOf<U1>.Or<U2>.Or<U3> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -1666,7 +1743,7 @@ public extension OneOf3 {
 
 public extension OneOf3 {
     /// Drops the `T3` case to return an optional `OneOf2`
-    func narrowing() -> OneOf2<T1, T2>? {
+    func narrowing() -> OneOf<T1>.Or<T2>? {
         switch self {
         case .v3: return nil
         case .v1(let x): return oneOf(x)
@@ -1675,7 +1752,7 @@ public extension OneOf3 {
     }
 
     /// Drops the `T1` case to return an optional `OneOf2`
-    func narrowing() -> OneOf2<T2, T3>? {
+    func narrowing() -> OneOf<T2>.Or<T3>? {
         switch self {
         case .v1: return nil
         case .v2(let x): return oneOf(x)
@@ -1684,7 +1761,7 @@ public extension OneOf3 {
     }
 
     /// Drops the `T2` case to return an optional `OneOf2`
-    func narrowing() -> OneOf2<T1, T3>? {
+    func narrowing() -> OneOf<T1>.Or<T3>? {
         switch self {
         case .v2: return nil
         case .v1(let x): return oneOf(x)
@@ -1696,6 +1773,11 @@ public extension OneOf3 {
 
 /// Reversed the OneOf2 ordering
 public extension OneOf3 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
     /// Returns a swapped instance of this OneOf3
     @inlinable var swap_2_1: OneOf3<T2, T1, T3> {
         get {
@@ -1769,6 +1851,7 @@ public protocol OneOf4Type : OneOf3Type {
     associatedtype T4
     init(t4: T4)
     init(_ t4: T4)
+    /// Returns the `T4` type or `nil` if this instance does not represent a `T4`
     func infer() -> T4?
 }
 
@@ -1791,12 +1874,15 @@ public extension OneOf4Type {
 /// Construct a `OneOf4Type` from T4.
 @inlinable public func oneOf<T: OneOf4Type>(_ value: T.T4) -> T { .init(value) }
 
+// MARK: OneOf4
+
 /// A simple union type that can be one of either T1 or T2 or T3 or T4
-public indirect enum OneOf4<T1, T2, T3, T4> : OneOf4Type, Either4Type {
+public indirect enum OneOf4<T1, T2, T3, T4> : Either4Type, OneOf2Invertable {
     public typealias TN = T4
     /// Turns a `OneOf4` into a `OneOf5` with the given type at the end
     public typealias Or<X> = OneOf5<T1, T2, T3, T4, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf4<T2, T1, T3, T4>
 
     case v1(T1), v2(T2), v3(T3), v4(T4)
 
@@ -1922,7 +2008,7 @@ public extension OneOf4 {
     ///   - f2: the function to apply to `T2`
     ///   - f3: the function to apply to `T3`
     ///   - f4: the function to apply to `T4`
-    @inlinable func map4<U1, U2, U3, U4>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4)) rethrows -> OneOf4<U1, U2, U3, U4> {
+    @inlinable func map4<U1, U2, U3, U4>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -1967,7 +2053,7 @@ public extension OneOf4 {
 
 public extension OneOf4 {
     /// Drops the `T4` case to return an optional `OneOf3`
-    func narrowing() -> OneOf3<T1, T2, T3>? {
+    func narrowing() -> OneOf<T1>.Or<T2>.Or<T3>? {
         switch self {
         case .v4: return nil
         case .v1(let x): return oneOf(x)
@@ -1977,7 +2063,7 @@ public extension OneOf4 {
     }
 
     /// Drops the `T3` case to return an optional `OneOf3`
-    func narrowing() -> OneOf3<T1, T2, T4>? {
+    func narrowing() -> OneOf<T1>.Or<T2>.Or<T4>? {
         switch self {
         case .v3: return nil
         case .v1(let x): return oneOf(x)
@@ -1987,7 +2073,7 @@ public extension OneOf4 {
     }
 
     /// Drops the `T2` case to return an optional `OneOf3`
-    func narrowing() -> OneOf3<T1, T3, T4>? {
+    func narrowing() -> OneOf<T1>.Or<T3>.Or<T4>? {
         switch self {
         case .v2: return nil
         case .v1(let x): return oneOf(x)
@@ -1997,7 +2083,7 @@ public extension OneOf4 {
     }
 
     /// Drops the `T1` case to return an optional `OneOf3`
-    func narrowing() -> OneOf3<T2, T3, T4>? {
+    func narrowing() -> OneOf<T2>.Or<T3>.Or<T4>? {
         switch self {
         case .v1: return nil
         case .v2(let x): return oneOf(x)
@@ -2008,6 +2094,35 @@ public extension OneOf4 {
 
 }
 
+public extension OneOf4 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf4`
+    @inlinable var swap_2_1: OneOf4<T2, T1, T3, T4> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            case .v4(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            case .v4(let x): self = oneOf(x)
+            }
+        }
+    }
+}
 
 /// The protocol of a type that can contain one out of 5 or more exclusive options
 /// An additional guarantee of exactly 5 options granted by implementing `Either5` will confer mappability of this type to`OneOf5`.
@@ -2015,6 +2130,7 @@ public protocol OneOf5Type : OneOf4Type {
     associatedtype T5
     init(t5: T5)
     init(_ t5: T5)
+    /// Returns the `T5` type or `nil` if this instance does not represent a `T5`
     func infer() -> T5?
 }
 
@@ -2038,12 +2154,15 @@ public extension OneOf5Type {
     }
 }
 
+// MARK: OneOf5
+
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5
-public indirect enum OneOf5<T1, T2, T3, T4, T5> : OneOf5Type, Either5Type {
+public indirect enum OneOf5<T1, T2, T3, T4, T5> : Either5Type, OneOf2Invertable {
     public typealias TN = T5
     /// Turns a `OneOf5` into a `OneOf6` with the given type at the end
     public typealias Or<X> = OneOf6<T1, T2, T3, T4, T5, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf5<T2, T1, T3, T4, T5>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5)
 
@@ -2166,7 +2285,7 @@ public extension OneOf5 {
     ///   - f3: the function to apply to `T3`
     ///   - f4: the function to apply to `T4`
     ///   - f5: the function to apply to `T5`
-    @inlinable func map5<U1, U2, U3, U4, U5>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5)) rethrows -> OneOf5<U1, U2, U3, U4, U5> {
+    @inlinable func map5<U1, U2, U3, U4, U5>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -2215,7 +2334,7 @@ public extension OneOf5 {
 
 public extension OneOf5 {
     /// Drops the `T5` case to return an optional `OneOf4`
-    func narrowing() -> OneOf4<T1, T2, T3, T4>? {
+    func narrowing() -> OneOf<T1>.Or<T2>.Or<T3>.Or<T4>? {
         switch self {
         case .v5: return nil
         case .v1(let x): return oneOf(x)
@@ -2226,7 +2345,7 @@ public extension OneOf5 {
     }
 
     /// Drops the `T4` case to return an optional `OneOf4`
-    func narrowing() -> OneOf4<T1, T2, T3, T5>? {
+    func narrowing() -> OneOf<T1>.Or<T2>.Or<T3>.Or<T5>? {
         switch self {
         case .v4: return nil
         case .v1(let x): return oneOf(x)
@@ -2237,7 +2356,7 @@ public extension OneOf5 {
     }
 
     /// Drops the `T3` case to return an optional `OneOf4`
-    func narrowing() -> OneOf4<T1, T2, T4, T5>? {
+    func narrowing() -> OneOf<T1>.Or<T2>.Or<T4>.Or<T5>? {
         switch self {
         case .v3: return nil
         case .v1(let x): return oneOf(x)
@@ -2248,7 +2367,7 @@ public extension OneOf5 {
     }
 
     /// Drops the `T2` case to return an optional `OneOf4`
-    func narrowing() -> OneOf4<T1, T3, T4, T5>? {
+    func narrowing() -> OneOf<T1>.Or<T3>.Or<T4>.Or<T5>? {
         switch self {
         case .v2: return nil
         case .v1(let x): return oneOf(x)
@@ -2259,7 +2378,7 @@ public extension OneOf5 {
     }
 
     /// Drops the `T1` case to return an optional `OneOf4`
-    func narrowing() -> OneOf4<T2, T3, T4, T5>? {
+    func narrowing() -> OneOf<T2>.Or<T3>.Or<T4>.Or<T5>? {
         switch self {
         case .v1: return nil
         case .v2(let x): return oneOf(x)
@@ -2271,6 +2390,37 @@ public extension OneOf5 {
 
 }
 
+public extension OneOf5 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf5`
+    @inlinable var swap_2_1: OneOf5<T2, T1, T3, T4, T5> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            case .v4(let x): return oneOf(x)
+            case .v5(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            case .v4(let x): self = oneOf(x)
+            case .v5(let x): self = oneOf(x)
+            }
+        }
+    }
+}
 
 /// The protocol of a type that can contain one out of 6 or more exclusive options
 /// An additional guarantee of exactly 6 options granted by implementing `Either6` will confer mappability of this type to`OneOf6`.
@@ -2278,6 +2428,7 @@ public protocol OneOf6Type : OneOf5Type {
     associatedtype T6
     init(t6: T6)
     init(_ t6: T6)
+    /// Returns the `T6` type or `nil` if this instance does not represent a `T6`
     func infer() -> T6?
 }
 
@@ -2302,12 +2453,15 @@ public extension OneOf6Type {
     }
 }
 
+// MARK: OneOf6
+
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : OneOf6Type, Either6Type {
+public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : Either6Type, OneOf2Invertable {
     public typealias TN = T6
     /// Turns a `OneOf6` into a `OneOf7` with the given type at the end
     public typealias Or<X> = OneOf7<T1, T2, T3, T4, T5, T6, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf6<T2, T1, T3, T4, T5, T6>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6)
 
@@ -2417,7 +2571,7 @@ public extension OneOf6 {
     ///   - f4: the function to apply to `T4`
     ///   - f5: the function to apply to `T5`
     ///   - f6: the function to apply to `T6`
-    @inlinable func map6<U1, U2, U3, U4, U5, U6>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6)) rethrows -> OneOf6<U1, U2, U3, U4, U5, U6> {
+    @inlinable func map6<U1, U2, U3, U4, U5, U6>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -2468,6 +2622,39 @@ public extension OneOf6 {
     }
 }
 
+public extension OneOf6 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf6`
+    @inlinable var swap_2_1: OneOf6<T2, T1, T3, T4, T5, T6> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            case .v4(let x): return oneOf(x)
+            case .v5(let x): return oneOf(x)
+            case .v6(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            case .v4(let x): self = oneOf(x)
+            case .v5(let x): self = oneOf(x)
+            case .v6(let x): self = oneOf(x)
+            }
+        }
+    }
+}
 
 /// The protocol of a type that can contain one out of 7 or more exclusive options
 /// An additional guarantee of exactly 7 options granted by implementing `Either7` will confer mappability of this type to`OneOf7`.
@@ -2475,6 +2662,7 @@ public protocol OneOf7Type : OneOf6Type {
     associatedtype T7
     init(t7: T7)
     init(_ t7: T7)
+    /// Returns the `T7` type or `nil` if this instance does not represent a `T7`
     func infer() -> T7?
 }
 
@@ -2500,12 +2688,15 @@ public extension OneOf7Type {
     }
 }
 
+// MARK: OneOf7
+
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : OneOf7Type, Either7Type {
+public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : Either7Type, OneOf2Invertable {
     public typealias TN = T7
     /// Turns a `OneOf7` into a `OneOf8` with the given type at the end
     public typealias Or<X> = OneOf8<T1, T2, T3, T4, T5, T6, T7, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf7<T2, T1, T3, T4, T5, T6, T7>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7)
 
@@ -2624,7 +2815,7 @@ public extension OneOf7 {
     ///   - f5: the function to apply to `T5`
     ///   - f6: the function to apply to `T6`
     ///   - f7: the function to apply to `T7`
-    @inlinable func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7)) rethrows -> OneOf7<U1, U2, U3, U4, U5, U6, U7> {
+    @inlinable func map7<U1, U2, U3, U4, U5, U6, U7>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -2680,12 +2871,49 @@ public extension OneOf7 {
 }
 
 
+public extension OneOf7 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf7`
+    @inlinable var swap_2_1: OneOf7<T2, T1, T3, T4, T5, T6, T7> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            case .v4(let x): return oneOf(x)
+            case .v5(let x): return oneOf(x)
+            case .v6(let x): return oneOf(x)
+            case .v7(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            case .v4(let x): self = oneOf(x)
+            case .v5(let x): self = oneOf(x)
+            case .v6(let x): self = oneOf(x)
+            case .v7(let x): self = oneOf(x)
+            }
+        }
+    }
+}
+
 /// The protocol of a type that can contain one out of 8 or more exclusive options
 /// An additional guarantee of exactly 8 options granted by implementing `Either8` will confer mappability of this type to`OneOf8`.
 public protocol OneOf8Type : OneOf7Type {
     associatedtype T8
     init(t8: T8)
     init(_ t8: T8)
+    /// Returns the `T8` type or `nil` if this instance does not represent a `T8`
     func infer() -> T8?
 }
 
@@ -2712,12 +2940,15 @@ public extension OneOf8Type {
     }
 }
 
+// MARK: OneOf8
+
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : OneOf8Type, Either8Type {
+public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : Either8Type, OneOf2Invertable {
     public typealias TN = T8
     /// Turns a `OneOf8` into a `OneOf9` with the given type at the end
     public typealias Or<X> = OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf8<T2, T1, T3, T4, T5, T6, T7, T8>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8)
 
@@ -2846,7 +3077,7 @@ public extension OneOf8 {
     ///   - f6: the function to apply to `T6`
     ///   - f7: the function to apply to `T7`
     ///   - f8: the function to apply to `T8`
-    @inlinable func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8)) rethrows -> OneOf8<U1, U2, U3, U4, U5, U6, U7, U8> {
+    @inlinable func map8<U1, U2, U3, U4, U5, U6, U7, U8>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -2905,6 +3136,44 @@ public extension OneOf8 {
     }
 }
 
+public extension OneOf8 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf8`
+    @inlinable var swap_2_1: OneOf8<T2, T1, T3, T4, T5, T6, T7, T8> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            case .v4(let x): return oneOf(x)
+            case .v5(let x): return oneOf(x)
+            case .v6(let x): return oneOf(x)
+            case .v7(let x): return oneOf(x)
+            case .v8(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            case .v4(let x): self = oneOf(x)
+            case .v5(let x): self = oneOf(x)
+            case .v6(let x): self = oneOf(x)
+            case .v7(let x): self = oneOf(x)
+            case .v8(let x): self = oneOf(x)
+            }
+        }
+    }
+}
+
 
 /// The protocol of a type that can contain one out of 9 or more exclusive options
 /// An additional guarantee of exactly 9 options granted by implementing `Either9` will confer mappability of this type to`OneOf9`.
@@ -2912,6 +3181,7 @@ public protocol OneOf9Type : OneOf8Type {
     associatedtype T9
     init(t9: T9)
     init(_ t9: T9)
+    /// Returns the `T9` type or `nil` if this instance does not represent a `T9`
     func infer() -> T9?
 }
 
@@ -2939,12 +3209,15 @@ public extension OneOf9Type {
     }
 }
 
+// MARK: OneOf9
+
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : OneOf9Type, Either9Type {
+public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Either9Type, OneOf2Invertable {
     public typealias TN = T9
     /// Turns a `OneOf9` into a `OneOf10` with the given type at the end
     public typealias Or<X> = OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, X>
     public typealias OneOfNext = Or<Never>
+    public typealias Swapped = OneOf9<T2, T1, T3, T4, T5, T6, T7, T8, T9>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9)
 
@@ -3082,7 +3355,7 @@ public extension OneOf9 {
     ///   - f7: the function to apply to `T7`
     ///   - f8: the function to apply to `T8`
     ///   - f9: the function to apply to `T9`
-    @inlinable func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9)) rethrows -> OneOf9<U1, U2, U3, U4, U5, U6, U7, U8, U9> {
+    @inlinable func map9<U1, U2, U3, U4, U5, U6, U7, U8, U9>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8>.Or<U9> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -3145,6 +3418,45 @@ public extension OneOf9 {
     }
 }
 
+public extension OneOf9 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf9`
+    @inlinable var swap_2_1: OneOf9<T2, T1, T3, T4, T5, T6, T7, T8, T9> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            case .v4(let x): return oneOf(x)
+            case .v5(let x): return oneOf(x)
+            case .v6(let x): return oneOf(x)
+            case .v7(let x): return oneOf(x)
+            case .v8(let x): return oneOf(x)
+            case .v9(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            case .v4(let x): self = oneOf(x)
+            case .v5(let x): self = oneOf(x)
+            case .v6(let x): self = oneOf(x)
+            case .v7(let x): self = oneOf(x)
+            case .v8(let x): self = oneOf(x)
+            case .v9(let x): self = oneOf(x)
+            }
+        }
+    }
+}
 
 /// The protocol of a type that can contain one out of 10 or more exclusive options
 /// An additional guarantee of exactly 10 options granted by implementing `Either10` will confer mappability of this type to`OneOf10`.
@@ -3152,6 +3464,7 @@ public protocol OneOf10Type : OneOf9Type {
     associatedtype T10
     init(t10: T10)
     init(_ t10: T10)
+    /// Returns the `T10` type or `nil` if this instance does not represent a `T10`
     func infer() -> T10?
 }
 
@@ -3180,10 +3493,13 @@ public extension OneOf10Type {
     }
 }
 
+// MARK: OneOf10
+
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10
-public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : OneOf10Type, Either10Type {
+public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either10Type, OneOf2Invertable {
     public typealias TN = T10
     public typealias OneOfNext = Self // end of the line, pal
+    public typealias Swapped = OneOf10<T2, T1, T3, T4, T5, T6, T7, T8, T9, T10>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9), v10(T10)
 
@@ -3331,7 +3647,7 @@ public extension OneOf10 {
     ///   - f8: the function to apply to `T8`
     ///   - f9: the function to apply to `T9`
     ///   - f10: the function to apply to `T10`
-    @inlinable func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9), _ f10: (T10) throws -> (U10)) rethrows -> OneOf10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10> {
+    @inlinable func map10<U1, U2, U3, U4, U5, U6, U7, U8, U9, U10>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2), _ f3: (T3) throws -> (U3), _ f4: (T4) throws -> (U4), _ f5: (T5) throws -> (U5), _ f6: (T6) throws -> (U6), _ f7: (T7) throws -> (U7), _ f8: (T8) throws -> (U8), _ f9: (T9) throws -> (U9), _ f10: (T10) throws -> (U10)) rethrows -> OneOf<U1>.Or<U2>.Or<U3>.Or<U4>.Or<U5>.Or<U6>.Or<U7>.Or<U8>.Or<U9>.Or<U10> {
         switch self {
         case .v1(let t1): return try .init(f1(t1))
         case .v2(let t2): return try .init(f2(t2))
@@ -3393,6 +3709,49 @@ public extension OneOf10 {
             case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = Self(x8)
             case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = Self(x9)
             case .v10(var x10): x10[keyPath: keys.kp10] = newValue; self = Self(x10)
+            }
+        }
+    }
+}
+
+
+public extension OneOf10 {
+    @inlinable var swapped: Swapped {
+        get { swap_2_1 }
+        set { swap_2_1 = newValue }
+    }
+
+    /// Returns a swapped instance of this `OneOf10`
+    @inlinable var swap_2_1: OneOf10<T2, T1, T3, T4, T5, T6, T7, T8, T9, T10> {
+        get {
+            switch self {
+            case .v1(let x): return oneOf(x)
+            case .v2(let x): return oneOf(x)
+            case .v3(let x): return oneOf(x)
+            case .v4(let x): return oneOf(x)
+            case .v5(let x): return oneOf(x)
+            case .v6(let x): return oneOf(x)
+            case .v7(let x): return oneOf(x)
+            case .v8(let x): return oneOf(x)
+            case .v9(let x): return oneOf(x)
+            case .v10(let x): return oneOf(x)
+            }
+        }
+
+        _modify {
+            var swap = swap_2_1
+            yield &swap
+            switch swap {
+            case .v1(let x): self = oneOf(x)
+            case .v2(let x): self = oneOf(x)
+            case .v3(let x): self = oneOf(x)
+            case .v4(let x): self = oneOf(x)
+            case .v5(let x): self = oneOf(x)
+            case .v6(let x): self = oneOf(x)
+            case .v7(let x): self = oneOf(x)
+            case .v8(let x): self = oneOf(x)
+            case .v9(let x): self = oneOf(x)
+            case .v10(let x): self = oneOf(x)
             }
         }
     }
@@ -3663,7 +4022,7 @@ public extension Either10Type {
 
 public extension Either2Type where T1 : Either2Type {
     /// Flattens nested `EitherN` into a single top-level `EitherN+1`
-    @inlinable var flattened: Either<T1.T1>.Or<T1.T2>.Or<T2> {
+    @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T2> {
         get {
             self[unifying: ({ $0.asOneOfN() }, oneOf)]
         }
@@ -3680,7 +4039,7 @@ public extension Either2Type where T1 : Either2Type {
 
 public extension Either2Type where T1 : Either3Type {
     /// Flattens nested `EitherN` into a single top-level `EitherN+1`
-    @inlinable var flattened: Either<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T2> {
+    @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T2> {
         get {
             self[unifying: ({ $0.asOneOfN() }, oneOf)]
         }
@@ -3698,7 +4057,7 @@ public extension Either2Type where T1 : Either3Type {
 
 public extension Either2Type where T1 : Either4Type {
     /// Flattens nested `EitherN` into a single top-level `EitherN+1`
-    @inlinable var flattened: Either<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T1.T4>.Or<T2> {
+    @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T1.T4>.Or<T2> {
         get {
             self[unifying: ({ $0.asOneOfN() }, oneOf)]
         }
@@ -3717,7 +4076,7 @@ public extension Either2Type where T1 : Either4Type {
 
 public extension Either2Type where T1 : Either5Type {
     /// Flattens nested `EitherN` into a single top-level `EitherN+1`
-    @inlinable var flattened: Either<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T1.T4>.Or<T1.T5>.Or<T2> {
+    @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T1.T4>.Or<T1.T5>.Or<T2> {
         get {
             self[unifying: ({ $0.asOneOfN() }, oneOf)]
         }
@@ -3737,7 +4096,7 @@ public extension Either2Type where T1 : Either5Type {
 
 public extension Either2Type where T1 : Either2Type, T2 : Either2Type {
     /// Flattens nested `EitherP` & `EitherQ` into a single top-level `Either(P+Q)`
-    @inlinable var flattened: Either<T1.T1>.Or<T1.T2>.Or<T2.T1>.Or<T2.T2> {
+    @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T2.T1>.Or<T2.T2> {
         get {
             self[unifying: ({ $0.asOneOfN() }, { ($0.asOneOfN() as OneOf4).shifted.shifted })]
         }
@@ -3755,7 +4114,7 @@ public extension Either2Type where T1 : Either2Type, T2 : Either2Type {
 
 public extension Either2Type where T1 : Either2Type, T2 : Either3Type {
     /// Flattens nested `EitherP` & `EitherQ` into a single top-level `Either(P+Q)`
-    @inlinable var flattened: Either<T1.T1>.Or<T1.T2>.Or<T2.T1>.Or<T2.T2>.Or<T2.T3> {
+    @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T2.T1>.Or<T2.T2>.Or<T2.T3> {
         get {
             self[unifying: ({ $0.asOneOfN() }, { ($0.asOneOfN() as OneOf5).shifted.shifted })]
         }
@@ -3774,7 +4133,7 @@ public extension Either2Type where T1 : Either2Type, T2 : Either3Type {
 
 public extension Either2Type where T1 : Either3Type, T2 : Either2Type {
     /// Flattens nested `EitherP` & `EitherQ` into a single top-level `Either(P+Q)`
-    @inlinable var flattened: Either<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T2.T1>.Or<T2.T2> {
+    @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T1.T3>.Or<T2.T1>.Or<T2.T2> {
         get {
             self.shifted.flattened.shifted.shifted.shifted
         }
@@ -3793,7 +4152,7 @@ public extension Either2Type where T1 : Either3Type, T2 : Either2Type {
 
 public extension OneOf3 where T3 == Never {
     /// Contracts this `OneOf3` down to `OneOf2` when the final parameter is `Never`.
-    @inlinable var contracted: Either<T1>.Or<T2> {
+    @inlinable var contracted: OneOf<T1>.Or<T2> {
         get {
             switch self {
             case .v1(let v1): return .init(v1)
@@ -4012,13 +4371,16 @@ public struct OneOfDecodingError : Error {
 
 
 
-/// MARK: AllOf implementations
+// MARK: AllOf implementations
 
 public protocol AllOf : SomeOf {
 }
 
 /// A simple sum type that must conform to both v1 and v2
 public struct AllOf2<T1, T2> : AllOf {
+    public typealias And<X> = AllOf3<T1, T2, X>
+    public typealias Or<X> = OneOf2<Self, X>
+
     public var v1: T1
     public var v2: T2
 
@@ -4094,7 +4456,7 @@ public typealias AllOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> = AllOf2<T1, A
 
 
 
-/// MARK: AnyOf implementations
+// MARK: AnyOf implementations
 
 public protocol AnyOf : SomeOf {
 }
@@ -4341,3 +4703,45 @@ public extension ISO8601DateTime {
         return dtm
     }
 }
+
+
+//public enum Choose<A, B> : OneOf2Type, Either2Type, OneOf2Invertable {
+//    public typealias T1 = A
+//    public typealias T2 = B
+//    public typealias TN = B
+//    public typealias Swapped = Choose<B, A>
+//
+//    public typealias OneOfNext = Self // Or<Never>
+//
+//    case a(A)
+//    case b(B)
+//
+//    public init(t1: A) { self = .a(t1) }
+//    public init(_ t1: A) { self = .a(t1) }
+//    public init(t2: B) { self = .b(t2) }
+//    public init(_ t2: B) { self = .b(t2) }
+//
+//    public func infer() -> A? {
+//        if case .a(let x) = self { return x } else { return nil }
+//    }
+//
+//    public func infer() -> B? {
+//        if case .b(let x) = self { return x } else { return nil }
+//    }
+//
+//    public var swapped: Choose<B, A> {
+//        fatalError()
+//    }
+//
+//    public func map2<U1, U2>(_ f1: (A) throws -> (U1), _ f2: (B) throws -> (U2)) rethrows -> This<U1>.Or<U2> {
+//        switch self {
+//        case .a(let a): return .init(try f1(a))
+//        case .b(let b): return .init(try f2(b))
+//        }
+//    }
+//
+//
+////    public enum Or<C> : OneOf2Type, Either2Type, OneOf2Invertable {
+////
+////    }
+//}

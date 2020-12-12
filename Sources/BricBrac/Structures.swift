@@ -1312,7 +1312,7 @@ extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
 }
 
 extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf2 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -1624,7 +1624,7 @@ extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
 }
 
 extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf3 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -1924,7 +1924,7 @@ extension OneOf4 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf4 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -2208,7 +2208,7 @@ extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf5 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -2512,7 +2512,7 @@ extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf6 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -2752,7 +2752,7 @@ extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf7 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -3009,7 +3009,7 @@ extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf8 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -3283,7 +3283,7 @@ extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: 
 }
 
 extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf9 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -3570,7 +3570,7 @@ extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4:
 }
 
 extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable, T10: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> OneOf10 {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },

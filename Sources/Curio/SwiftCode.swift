@@ -196,14 +196,16 @@ public extension CodeType {
 public struct CodeExternalType : CodeType {
     public var name : CodeTypeName
     public var generics : [CodeType]
+    public var stitchType: String? = nil
     public var access: CodeAccess
     public var comments: [String] = []
     public var defaultValue: String? = nil
     public var shorthand: (prefix: String?, suffix: String?)?
 
-    public init(_ name: CodeTypeName, generics: [CodeType] = [], access: CodeAccess = CodeAccess.public, defaultValue: String? = nil, shorthand: (prefix: String?, suffix: String?)? = nil) {
+    public init(_ name: CodeTypeName, generics: [CodeType] = [], stitchType: String? = nil, access: CodeAccess = CodeAccess.public, defaultValue: String? = nil, shorthand: (prefix: String?, suffix: String?)? = nil) {
         self.name = name
         self.generics = generics
+        self.stitchType = stitchType
         self.access = access
         self.defaultValue = defaultValue
         self.shorthand = shorthand
@@ -218,7 +220,8 @@ public struct CodeExternalType : CodeType {
             str += (shorthand.suffix ?? "")
             return str
         } else {
-            return name + "<" + (generics.map(\.identifier)).joined(separator: ", ") + ">"
+            let sep = stitchType.flatMap({ ">." + $0 + "<" }) ?? ", "
+            return name + "<" + (generics.map(\.identifier)).joined(separator: sep) + ">"
         }
     }
 

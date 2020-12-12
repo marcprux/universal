@@ -311,7 +311,8 @@ public struct Curio {
         } else if types.count == 2 && hasNullable {
             return CodeExternalType("Nullable", generics: Array(types.dropFirst()))
         } else {
-            return CodeExternalType("OneOf\(types.count)", generics: types)
+            // return CodeExternalType("OneOf\(types.count)", generics: types)
+            return CodeExternalType("OneOf", generics: types, stitchType: "Or")
         }
     }
 

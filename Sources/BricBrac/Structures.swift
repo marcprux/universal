@@ -1589,6 +1589,7 @@ public indirect enum OneOf3<T1, T2, T3> : Either3Type, OneOf2Invertable {
     public typealias Or<X> = OneOf4<T1, T2, T3, X>
     public typealias OneOfNext = Or<Never>
     public typealias Swapped = OneOf3<T2, T1, T3>
+    public typealias Split = OneOf2<OneOf2<T1, T2>, T3>
 
     case v1(T1), v2(T2), v3(T3)
 
@@ -1601,7 +1602,6 @@ public indirect enum OneOf3<T1, T2, T3> : Either3Type, OneOf2Invertable {
     @inlinable public init(t3: T3) { self = .v3(t3) }
     @inlinable public init(_ t3: T3) { self = .v3(t3) }
 
-    public typealias Split = OneOf2<OneOf2<T1, T2>, T3>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {
@@ -1883,6 +1883,7 @@ public indirect enum OneOf4<T1, T2, T3, T4> : Either4Type, OneOf2Invertable {
     public typealias Or<X> = OneOf5<T1, T2, T3, T4, X>
     public typealias OneOfNext = Or<Never>
     public typealias Swapped = OneOf4<T2, T1, T3, T4>
+    public typealias Split = OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>
 
     case v1(T1), v2(T2), v3(T3), v4(T4)
 
@@ -1898,7 +1899,6 @@ public indirect enum OneOf4<T1, T2, T3, T4> : Either4Type, OneOf2Invertable {
     @inlinable public init(t4: T4) { self = .v4(t4) }
     @inlinable public init(_ t4: T4) { self = .v4(t4) }
 
-    public typealias Split = OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {
@@ -2163,6 +2163,7 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : Either5Type, OneOf2Invertable 
     public typealias Or<X> = OneOf6<T1, T2, T3, T4, T5, X>
     public typealias OneOfNext = Or<Never>
     public typealias Swapped = OneOf5<T2, T1, T3, T4, T5>
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5)
 
@@ -2181,7 +2182,6 @@ public indirect enum OneOf5<T1, T2, T3, T4, T5> : Either5Type, OneOf2Invertable 
     @inlinable public init(t5: T5) { self = .v5(t5) }
     @inlinable public init(_ t5: T5) { self = .v5(t5) }
 
-    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {
@@ -2462,6 +2462,7 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : Either6Type, OneOf2Inverta
     public typealias Or<X> = OneOf7<T1, T2, T3, T4, T5, T6, X>
     public typealias OneOfNext = Or<Never>
     public typealias Swapped = OneOf6<T2, T1, T3, T4, T5, T6>
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6)
 
@@ -2483,7 +2484,6 @@ public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : Either6Type, OneOf2Inverta
     @inlinable public init(t6: T6) { self = .v6(t6) }
     @inlinable public init(_ t6: T6) { self = .v6(t6) }
 
-    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {
@@ -2697,6 +2697,7 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : Either7Type, OneOf2Inv
     public typealias Or<X> = OneOf8<T1, T2, T3, T4, T5, T6, T7, X>
     public typealias OneOfNext = Or<Never>
     public typealias Swapped = OneOf7<T2, T1, T3, T4, T5, T6, T7>
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7)
 
@@ -2721,7 +2722,6 @@ public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : Either7Type, OneOf2Inv
     @inlinable public init(t7: T7) { self = .v7(t7) }
     @inlinable public init(_ t7: T7) { self = .v7(t7) }
 
-    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {
@@ -2949,6 +2949,7 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : Either8Type, OneOf
     public typealias Or<X> = OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, X>
     public typealias OneOfNext = Or<Never>
     public typealias Swapped = OneOf8<T2, T1, T3, T4, T5, T6, T7, T8>
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8)
 
@@ -2976,7 +2977,6 @@ public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : Either8Type, OneOf
     @inlinable public init(t8: T8) { self = .v8(t8) }
     @inlinable public init(_ t8: T8) { self = .v8(t8) }
 
-    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {
@@ -3218,6 +3218,7 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Either9Type, O
     public typealias Or<X> = OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, X>
     public typealias OneOfNext = Or<Never>
     public typealias Swapped = OneOf9<T2, T1, T3, T4, T5, T6, T7, T8, T9>
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9)
 
@@ -3248,7 +3249,6 @@ public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Either9Type, O
     @inlinable public init(t9: T9) { self = .v9(t9) }
     @inlinable public init(_ t9: T9) { self = .v9(t9) }
 
-    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {
@@ -3500,6 +3500,7 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either10
     public typealias TN = T10
     public typealias OneOfNext = Self // end of the line, pal
     public typealias Swapped = OneOf10<T2, T1, T3, T4, T5, T6, T7, T8, T9, T10>
+    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>, T10>
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9), v10(T10)
 
@@ -3533,7 +3534,6 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either10
     @inlinable public init(t10: T10) { self = .v10(t10) }
     @inlinable public init(_ t10: T10) { self = .v10(t10) }
 
-    public typealias Split = OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<OneOf2<T1, T2>, T3>, T4>, T5>, T6>, T7>, T8>, T9>, T10>
 
     /// Split the tuple into nested OneOf2 instances
     @inlinable public func split() -> Split {

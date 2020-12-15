@@ -190,7 +190,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     public typealias OneOfFieldChoice = OneOfFieldTypes.Choice
     public enum OneOfFieldTypes {
 
-        public typealias Choice = OneOf2<FirstOne, SecondOne>
+        public typealias Choice = OneOf<FirstOne>.Or<SecondOne>
 
         /// FirstOne
         public struct FirstOne : Equatable, Hashable, Codable, KeyedCodable {
@@ -266,7 +266,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     }
 
     /// Should generate a simple OneOf enum
-    public typealias SimpleOneOfChoice = OneOf2<String, Double>
+    public typealias SimpleOneOfChoice = OneOf<String>.Or<Double>
 
     public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable, Identifiable {
         case allOfField

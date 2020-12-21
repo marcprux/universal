@@ -4094,6 +4094,81 @@ public extension Either2Type where T1 : Either5Type {
     }
 }
 
+public extension Either2Type where T2 : Either2Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf<T1>.Or<T2.T1>.Or<T2.T2> {
+        get {
+            self[unifying: (oneOf, { ($0.asOneOfN() as OneOf3).shifted })]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            }
+        }
+    }
+}
+
+public extension Either2Type where T2 : Either3Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf<T1>.Or<T2.T1>.Or<T2.T2>.Or<T2.T3> {
+        get {
+            self[unifying: (oneOf, { ($0.asOneOfN() as OneOf4).shifted })]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            }
+        }
+    }
+}
+
+public extension Either2Type where T2 : Either4Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf<T1>.Or<T2.T1>.Or<T2.T2>.Or<T2.T3>.Or<T2.T4> {
+        get {
+            self[unifying: (oneOf, { ($0.asOneOfN() as OneOf5).shifted })]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            case .v5(let x): self = .init(.init(x))
+            }
+        }
+    }
+}
+
+public extension Either2Type where T2 : Either5Type {
+    /// Flattens nested `EitherN` into a single top-level `EitherN+1`
+    @inlinable var flattened: OneOf<T1>.Or<T2.T1>.Or<T2.T2>.Or<T2.T3>.Or<T2.T4>.Or<T2.T5> {
+        get {
+            self[unifying: (oneOf, { ($0.asOneOfN() as OneOf6).shifted })]
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(.init(x))
+            case .v3(let x): self = .init(.init(x))
+            case .v4(let x): self = .init(.init(x))
+            case .v5(let x): self = .init(.init(x))
+            case .v6(let x): self = .init(.init(x))
+            }
+        }
+    }
+}
+
+
 public extension Either2Type where T1 : Either2Type, T2 : Either2Type {
     /// Flattens nested `EitherP` & `EitherQ` into a single top-level `Either(P+Q)`
     @inlinable var flattened: OneOf<T1.T1>.Or<T1.T2>.Or<T2.T1>.Or<T2.T2> {

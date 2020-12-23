@@ -464,7 +464,7 @@ public extension Either2Type {
     }
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable subscript<T: OneOf2Type>(shifting shifting: T.Type) -> T where T.T1 == Self.T2, T.T2 == Self.T1 {
         switch self.oneOf2 {
         case .v1(let x): return .init(x)
@@ -476,7 +476,7 @@ public extension Either2Type {
     typealias Shifted = OneOf<T2>.Or<T1>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get { self[shifting: Shifted.self] }
         set {
@@ -548,7 +548,7 @@ public extension Either3Type {
     typealias Shifted = OneOf<T3>.Or<T1>.Or<T2>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf3 {
@@ -620,7 +620,7 @@ public extension Either4Type {
     typealias Shifted = OneOf<T4>.Or<T1>.Or<T2>.Or<T3>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf4 {
@@ -697,7 +697,7 @@ public extension Either5Type  {
     typealias Shifted = OneOf<T5>.Or<T1>.Or<T2>.Or<T3>.Or<T4>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf5 {
@@ -778,7 +778,7 @@ public extension Either6Type {
     typealias Shifted = OneOf<T6>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf6 {
@@ -864,7 +864,7 @@ public extension Either7Type {
     typealias Shifted = OneOf<T7>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf7 {
@@ -955,7 +955,7 @@ public extension Either8Type {
     typealias Shifted = OneOf<T8>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf8 {
@@ -1051,7 +1051,7 @@ public extension Either9Type {
     typealias Shifted = OneOf<T9>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf9 {
@@ -1152,7 +1152,7 @@ public extension Either10Type {
     typealias Shifted = OneOf<T10>.Or<T1>.Or<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>.Or<T9>
 
     /// Shifts the first type forward and cycles the final type back into the first position.
-    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, Y, X>`
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`
     @inlinable var shifted: Shifted {
         get {
             switch self.oneOf10 {

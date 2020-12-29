@@ -1552,7 +1552,7 @@ class BricBracTests : XCTestCase {
         do {
             var manyOrOneString = OneOf2<[String], String>("foo")
             guard case .v2 = manyOrOneString else { return XCTFail("wrong type before swap array") }
-            manyOrOneString.swap_2_1.array.removeAll()
+            manyOrOneString.swapped.array.removeAll()
             guard case .v1 = manyOrOneString else { return XCTFail("wrong type after swap array") }
         }
     }

@@ -53,6 +53,8 @@ class BricBracTests : XCTestCase {
         ("testDeepMerge", testDeepMerge),
         ("testShallowMerge", testShallowMerge),
         ("testCodableConversion", testCodableConversion),
+        ("testCodingExtraction", testCodingExtraction),
+        ("testShifting", testShifting),
         ("testExplicitNull", testExplicitNull),
         ("testIndirect", testIndirect),
         ]
@@ -1975,6 +1977,22 @@ extension BricBracTests {
 {"nullable":null,"nullableOptional":null,"nullableString":"Foo"}
 """)
             //XCTAssertEqual(nh, try nh.roundtripped()) // this fails because optional intercepts the null
+        }
+    }
+
+    func testShifting() {
+        do {
+            enum X : Equatable { case x }
+            enum Y { case y }
+            enum Z { case z }
+            typealias XOrYOrZ = OneOf<X>.Or<Y>.Or<Z>
+
+            let xoryorz: OneOf3<X, Y, Z> = XOrYOrZ(.x)
+            let xoryorzShifted: OneOf3<Z, X, Y> = xoryorz.shifted
+            let xoryorzUnshifted: OneOf3<Y, Z, X> = xoryorz.unshifted
+
+            XCTAssertEqual(xoryorzShifted, .init(.x))
+            XCTAssertEqual(xoryorzUnshifted, .init(.x))
         }
     }
 

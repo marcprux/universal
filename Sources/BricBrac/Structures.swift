@@ -489,11 +489,20 @@ public extension Either2Type {
 }
 
 public extension Either2Type where T1 == T2 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf2 {
-        case .v1(let x): return x
-        case .v2(let x): return x
+        get {
+            switch oneOf2 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf2 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            }
         }
     }
 }
@@ -566,15 +575,48 @@ public extension Either3Type {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = OneOf<T2>.Or<T3>.Or<T1>
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf3 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either3Type where T1 == T2, T2 == T3 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf3 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
+        get {
+            switch oneOf3 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf3 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            }
         }
     }
 }
@@ -640,16 +682,52 @@ public extension Either4Type {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = OneOf<T2>.Or<T3>.Or<T4>.Or<T1>
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf4 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either4Type where T1 == T2, T2 == T3, T3 == T4 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf4 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
-        case .v4(let x): return x
+        get {
+            switch oneOf4 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            case .v4(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf4 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            case .v4: self = .init(t4: newValue)
+            }
         }
     }
 }
@@ -719,17 +797,56 @@ public extension Either5Type  {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = OneOf<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T1>
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf5 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either5Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf5 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
-        case .v4(let x): return x
-        case .v5(let x): return x
+        get {
+            switch oneOf5 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            case .v4(let x): return x
+            case .v5(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf5 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            case .v4: self = .init(t4: newValue)
+            case .v5: self = .init(t5: newValue)
+            }
         }
     }
 }
@@ -802,18 +919,60 @@ public extension Either6Type {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = OneOf<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T1>
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf6 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either6Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf6 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
-        case .v4(let x): return x
-        case .v5(let x): return x
-        case .v6(let x): return x
+        get {
+            switch oneOf6 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            case .v4(let x): return x
+            case .v5(let x): return x
+            case .v6(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf6 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            case .v4: self = .init(t4: newValue)
+            case .v5: self = .init(t5: newValue)
+            case .v6: self = .init(t6: newValue)
+            }
         }
     }
 }
@@ -890,19 +1049,64 @@ public extension Either7Type {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = OneOf<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T1>
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf7 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either7Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf7 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
-        case .v4(let x): return x
-        case .v5(let x): return x
-        case .v6(let x): return x
-        case .v7(let x): return x
+        get {
+            switch oneOf7 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            case .v4(let x): return x
+            case .v5(let x): return x
+            case .v6(let x): return x
+            case .v7(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf7 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            case .v4: self = .init(t4: newValue)
+            case .v5: self = .init(t5: newValue)
+            case .v6: self = .init(t6: newValue)
+            case .v7: self = .init(t7: newValue)
+            }
         }
     }
 }
@@ -983,20 +1187,68 @@ public extension Either8Type {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = OneOf<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>.Or<T1>
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf8 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            case .v8(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either8Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf8 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
-        case .v4(let x): return x
-        case .v5(let x): return x
-        case .v6(let x): return x
-        case .v7(let x): return x
-        case .v8(let x): return x
+        get {
+            switch oneOf8 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            case .v4(let x): return x
+            case .v5(let x): return x
+            case .v6(let x): return x
+            case .v7(let x): return x
+            case .v8(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf8 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            case .v4: self = .init(t4: newValue)
+            case .v5: self = .init(t5: newValue)
+            case .v6: self = .init(t6: newValue)
+            case .v7: self = .init(t7: newValue)
+            case .v8: self = .init(t8: newValue)
+            }
         }
     }
 }
@@ -1081,21 +1333,72 @@ public extension Either9Type {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = OneOf<T2>.Or<T3>.Or<T4>.Or<T5>.Or<T6>.Or<T7>.Or<T8>.Or<T9>.Or<T1>
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf9 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            case .v8(let x): return .init(x)
+            case .v9(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            case .v9(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either9Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf9 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
-        case .v4(let x): return x
-        case .v5(let x): return x
-        case .v6(let x): return x
-        case .v7(let x): return x
-        case .v8(let x): return x
-        case .v9(let x): return x
+        get {
+            switch oneOf9 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            case .v4(let x): return x
+            case .v5(let x): return x
+            case .v6(let x): return x
+            case .v7(let x): return x
+            case .v8(let x): return x
+            case .v9(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf9 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            case .v4: self = .init(t4: newValue)
+            case .v5: self = .init(t5: newValue)
+            case .v6: self = .init(t6: newValue)
+            case .v7: self = .init(t7: newValue)
+            case .v8: self = .init(t8: newValue)
+            case .v9: self = .init(t9: newValue)
+            }
         }
     }
 }
@@ -1184,22 +1487,76 @@ public extension Either10Type {
             }
         }
     }
+
+    /// The type shifted back by one
+    typealias Unshifted = Shifted.Shifted.Shifted.Shifted.Shifted.Shifted.Shifted.Shifted.Shifted
+
+    /// Shifts the types backward and cycles the first type to the last type
+    /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Y, Z, X>`
+    @inlinable var unshifted: Unshifted {
+        get {
+            switch self.oneOf10 {
+            case .v1(let x): return .init(x)
+            case .v2(let x): return .init(x)
+            case .v3(let x): return .init(x)
+            case .v4(let x): return .init(x)
+            case .v5(let x): return .init(x)
+            case .v6(let x): return .init(x)
+            case .v7(let x): return .init(x)
+            case .v8(let x): return .init(x)
+            case .v9(let x): return .init(x)
+            case .v10(let x): return .init(x)
+            }
+        }
+
+        set {
+            switch newValue {
+            case .v1(let x): self = .init(x)
+            case .v2(let x): self = .init(x)
+            case .v3(let x): self = .init(x)
+            case .v4(let x): self = .init(x)
+            case .v5(let x): self = .init(x)
+            case .v6(let x): self = .init(x)
+            case .v7(let x): self = .init(x)
+            case .v8(let x): self = .init(x)
+            case .v9(let x): self = .init(x)
+            case .v10(let x): self = .init(x)
+            }
+        }
+    }
 }
 
 public extension Either10Type where T1 == T2, T2 == T3, T3 == T4, T4 == T5, T5 == T6, T6 == T7, T7 == T8, T8 == T9, T9 == T10 {
-    /// The single value of all the underlying possibilities
+    /// The single value of all the underlying possibilities.
     @inlinable var unifiedValue: T1 {
-        switch oneOf10 {
-        case .v1(let x): return x
-        case .v2(let x): return x
-        case .v3(let x): return x
-        case .v4(let x): return x
-        case .v5(let x): return x
-        case .v6(let x): return x
-        case .v7(let x): return x
-        case .v8(let x): return x
-        case .v9(let x): return x
-        case .v10(let x): return x
+        get {
+            switch oneOf10 {
+            case .v1(let x): return x
+            case .v2(let x): return x
+            case .v3(let x): return x
+            case .v4(let x): return x
+            case .v5(let x): return x
+            case .v6(let x): return x
+            case .v7(let x): return x
+            case .v8(let x): return x
+            case .v9(let x): return x
+            case .v10(let x): return x
+            }
+        }
+
+        set {
+            switch oneOf10 {
+            case .v1: self = .init(t1: newValue)
+            case .v2: self = .init(t2: newValue)
+            case .v3: self = .init(t3: newValue)
+            case .v4: self = .init(t4: newValue)
+            case .v5: self = .init(t5: newValue)
+            case .v6: self = .init(t6: newValue)
+            case .v7: self = .init(t7: newValue)
+            case .v8: self = .init(t8: newValue)
+            case .v9: self = .init(t9: newValue)
+            case .v10: self = .init(t10: newValue)
+            }
         }
     }
 }

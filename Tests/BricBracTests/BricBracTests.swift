@@ -1600,6 +1600,16 @@ class BricBracTests : XCTestCase {
             let _: Dst = x.flattened
             let _: Dst = x.flattened.swapped.swapped // double swapped is always the same as itself
         }
+
+        do {
+            typealias Src = OneOf<String>.Or<Int>.Or<Bool>.Or<Double>.Or<Never>
+            typealias Dst1 = OneOf<Int>.Or<String>.Or<Bool>.Or<Double>.Or<Never>
+            typealias Dst2 = OneOf<String>.Or<Int>.Or<Bool>.Or<Never>.Or<Double>
+            let x: Src = Src("abc")
+            let _: Dst1 = x.swappingFirst
+            let _: Dst2 = x.swappingLast
+        }
+
     }
 
     func testKeyRouting() {

@@ -1019,6 +1019,18 @@ public extension OneOfShapable {
         get { swapFirstAndLast }
         set { swapFirstAndLast = newValue }
     }
+
+    /// Swaps the first two parameters
+    @inlinable var swappingFirst: Unshifted.Swapped.Shifted {
+        get { unshifted.swapped.shifted }
+        set { unshifted.swapped.shifted = newValue }
+    }
+
+    /// Swaps the last two parameters
+    @inlinable var swappingLast: Shifted.Swapped.Unshifted {
+        get { shifted.swapped.unshifted }
+        set { shifted.swapped.unshifted = newValue }
+    }
 }
 
 /// A `OneOfN` type that can be converted to another `OneOfN` with equivalent types through a series of `swapped` and `shifted` properties.

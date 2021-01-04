@@ -1227,6 +1227,7 @@ extension OneOf2 : OneOfMorphable {
     public typealias Swapped = OneOf<T2>.Or<T1>
     public typealias Shifted = OneOf<T2>.Or<T1>
     public typealias Unshifted = OneOf<T2>.Or<T1>
+    public typealias Split = Self
 
     /// Shifts the first type forward and cycles the final type back into the first position.
     /// E.g., converts between `OneOf3<X, Y, Z>` and `OneOf3<Z, X, Y>`

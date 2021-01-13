@@ -56,12 +56,8 @@ public extension Optional {
             }
         }
 
-        _modify {
-            switch self {
-            case .some(var x):
-                yield &x
-                self = .some(x)
-            }
+        set {
+            self = .some(newValue)
         }
     }
 
@@ -84,8 +80,7 @@ extension Indirect : RawRepresentable {
 // similar to Optional codability at:
 // https://github.com/apple/swift/blob/325a63a1bd59eb2b12ba310ffa93e83d1336885f/stdlib/public/core/Codable.swift.gyb#L1825
 extension Indirect : Encodable where Wrapped : Encodable {
-//    @inlinable // FIXME(sil-serialize-all)
-    public func encode(to encoder: Encoder) throws {
+    @inlinable public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.rawValue)
     }
@@ -95,7 +90,7 @@ extension Indirect : Encodable where Wrapped : Encodable {
 // https://github.com/apple/swift/blob/325a63a1bd59eb2b12ba310ffa93e83d1336885f/stdlib/public/core/Codable.swift.gyb#L1842
 // FIXME: doesn't work when nested
 extension Indirect : Decodable where Wrapped : Decodable {
-    public init(from decoder: Decoder) throws {
+    @inlinable public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let element = try container.decode(Wrapped.self)
         self.init(element)

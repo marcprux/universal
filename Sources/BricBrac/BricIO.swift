@@ -1025,7 +1025,7 @@ public extension KeyedDecodingContainerProtocol {
 }
 
 /// A no-op encoder that simply passes every encodable element through the specific callback filter.
-public class FilterEncoder {
+public class FilterEncoder { // }: Combine.TopLevelEncoder // no need to import Combine just for this
     public typealias Element = (key: [CodingKey], value: Encodable?)
 
     public static func encode<T: Encodable>(_ value: T, handler: @escaping (Element) -> ()) throws {

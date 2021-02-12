@@ -1007,6 +1007,7 @@ class BricBracTests : XCTestCase {
     }
 
     func testBricBracCompatibility() {
+        if #available(OSX 10.13, *) {
 
         let fm = FileManager.default
         do {
@@ -1124,6 +1125,7 @@ class BricBracTests : XCTestCase {
             }
         } catch {
             XCTFail("unexpected error when loading tests: \(error)")
+        }
         }
     }
 

@@ -6,7 +6,7 @@
 //  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
-#if canImport(Foundation)
+#if canImport(CoreFoundation)
 
 import Foundation
 import CoreFoundation

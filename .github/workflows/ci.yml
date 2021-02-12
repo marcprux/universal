@@ -1,19 +1,28 @@
-name: CI
+name: BricBrac CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches:
+      - '*'
+  schedule:
+    # run at 6AM & 6PM UTC
+    - cron:  '0 6,18 * * *'
 
-jobs:
-  build:
-
-    runs-on: macos-latest
-
+jobs:    
+  Linux:
+    name: BricBrac Linux Tests
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build
-      run: swift build -v
     - name: Run tests
-      run: swift test -v
+      run: swift test --enable-test-discovery
+
+  macOS:
+    name: BricBrac macOS Tests
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run tests
+      run: swift test --enable-test-discovery

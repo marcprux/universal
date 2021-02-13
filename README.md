@@ -1,9 +1,9 @@
 Bric-à-brac
 =======
 
-[![Swift 5](https://img.shields.io/badge/Swift-5-orange.svg?style=flat)](https://developer.apple.com/swift/)
+[![Build Status](https://github.com/glimpseio/BricBrac/workflows/BricBrac%20CI/badge.svg?branch=main)](https://github.com/glimpseio/BricBrac/actions)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
-[![Build Status](https://travis-ci.org/glimpseio/BricBrac.svg?branch=master)](https://travis-ci.org/glimpseio/BricBrac)
+[![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20iOS%20|%20tvOS%20|%20watchOS%20|%20Linux-lightgrey.svg)](https://github.com/glimpseio/MisMisc)
 
 **Bric-à-brac** is a lightweight, clean and efficient JSON toolkit for **Swift 5**.
 

@@ -6,7 +6,7 @@
 //  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
-#if !os(Linux)
+#if !os(macOS)
 
 import Foundation
 import CoreFoundation

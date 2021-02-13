@@ -8,7 +8,9 @@
 
 import XCTest
 import BricBrac
+#if canImport(JavaScriptCore)
 import JavaScriptCore
+#endif
 
 class BricBracTests : XCTestCase {
 
@@ -837,6 +839,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
+    #if canImport(JavaScriptCore)
     let ctx = JSContext()
 
     /// Asserts that Bric's stringify() exactly matches JavaScriptCore's JSON.stringify, with the following exceptions:
@@ -880,6 +883,7 @@ class BricBracTests : XCTestCase {
         }
 
     }
+    #endif
 
     func testNulNilEquivalence() {
         do {

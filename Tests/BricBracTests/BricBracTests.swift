@@ -36,6 +36,8 @@ class BricBracTests : XCTestCase {
     }
 #endif
 
+#if !os(Linux)
+
     func testAllocatonProfiling() throws {
         // json with unicode escapes
         // let path: String! = NSBundle(forClass: Self.self).pathForResource("test/profile/caliper.json", ofType: "")!
@@ -63,6 +65,7 @@ class BricBracTests : XCTestCase {
             }
         }
     }
+#endif
 
     func testEscaping() throws {
         func q(_ s: String)->String { return "\"" + s + "\"" }
@@ -749,6 +752,7 @@ class BricBracTests : XCTestCase {
         compareCocoaParsing("01.0", msg: "preceeding zero should fail")
     }
 
+    #if !os(Linux)
     func profileJSON(_ str: String, count: Int, validate: Bool, cocoa: Bool, cf: Bool) throws {
         let scalars = Array((str as String).unicodeScalars)
 
@@ -778,6 +782,7 @@ class BricBracTests : XCTestCase {
             print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": BricBrac: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
         }
     }
+    #endif
 
     @discardableResult func parsePath(_ path: String, strict: Bool, file: StaticString = #file, line: UInt = #line) throws -> Bric {
         let str = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
@@ -965,7 +970,8 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    
+    #if !os(Linux)
+
     func testBricBracCompatibility() throws {
         if true {
             throw XCTSkip("fails sometimes")
@@ -1089,7 +1095,7 @@ class BricBracTests : XCTestCase {
             XCTFail("unexpected error when loading tests: \(error)")
         }
     }
-
+    #endif
 
     func testStringReplace() {
         XCTAssertEqual("foo".replace(string: "oo", with: "X"), "fX")

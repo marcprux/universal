@@ -15,7 +15,7 @@ import JavaScriptCore
 class BricBracTests : XCTestCase {
 
 #if canImport(Foundation)
-    func testBricConversion() {
+    func testBricConversion() throws {
         #if !canImport(JavaScriptCore)
         throw XCTSkip("Linux fail")
         #endif

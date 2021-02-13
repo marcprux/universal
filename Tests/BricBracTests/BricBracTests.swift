@@ -784,6 +784,7 @@ class BricBracTests : XCTestCase {
     }
     #endif
 
+    #if canImport(JavaScriptCore)
     @discardableResult func parsePath(_ path: String, strict: Bool, file: StaticString = #file, line: UInt = #line) throws -> Bric {
         let str = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
         let bric = try Bric.parse(str as String, options: strict ? .Strict : .Lenient)
@@ -792,6 +793,7 @@ class BricBracTests : XCTestCase {
         compareJSCStringification(bric, msg: (path as NSString).lastPathComponent, file: file, line: line)
         return bric
     }
+    #endif
 
     func compareCocoaParsing(_ string: String, msg: String, file: StaticString = #file, line: UInt = #line) {
         var cocoaBric: NSObject?
@@ -970,8 +972,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    #if !os(Linux)
-
+    #if canImport(JavaScriptCore)
     func testBricBracCompatibility() throws {
         if true {
             throw XCTSkip("fails sometimes")
@@ -1404,6 +1405,7 @@ class BricBracTests : XCTestCase {
         return String(#file.reversed().drop(while: { $0 != "/" }).reversed()) + "test/"
     }
     
+    #if canImport(JavaScriptCore)
     func testSerializationPerformance() throws {
         do {
             let path = testResourcePath() + "/profile/rap.json"
@@ -1435,7 +1437,8 @@ class BricBracTests : XCTestCase {
             }
         }
     }
-
+    #endif
+    
     func testBricDate() throws {
         let now = Date(timeIntervalSince1970: 500000)
         let dict = ["timestamp": now]

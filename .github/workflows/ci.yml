@@ -19,10 +19,10 @@ jobs:
     - name: Run tests
       run: swift test --enable-test-discovery
 
-  macOS:
-    name: BricBrac macOS Tests
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run tests
-      run: swift test --enable-test-discovery
+  #macOS:
+  #  name: BricBrac macOS Tests
+  #  runs-on: macos-latest
+  #  steps:
+  #  - uses: actions/checkout@v2
+  #  - name: Run tests
+  #    run: swift test --enable-test-discovery

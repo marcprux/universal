@@ -534,6 +534,8 @@ extension FoundationBricolage : Bricable, Bracable {
     }
 }
 
+#if !os(Linux)
+
 /// Bricolage that represents the elements as Core Foundation types with reference semantics
 public final class CoreFoundationBricolage: Bricolage {
     public typealias NulType = CFNull
@@ -603,5 +605,7 @@ public final class CoreFoundationBricolage: Bricolage {
         return arr
     }
 }
+#endif
+
 #endif
 

@@ -2152,16 +2152,16 @@ extension BricBracTests {
         // JSON output:              az, cx, by
         // XCTAssertEqual failed: ("Optional("{\"az\":\"A\",\"cx\":false,\"by\":1}")") is not equal to ("Optional("{\"az\":\"A\",\"by\":1,\"cx\":false}")")
 
-        XCTAssertEqual(try obj.encodedStringSorted(), """
-        {"az":"A","by":1,"cx":false,"qq":"Q"}
-        """)
-
-        // default encoding order should *not* be in the declared order (although it is possible that via random hashing this sometimes happens anyway)
-        XCTAssertNotEqual(try obj.encodedString(), """
-        {"by":1,"az":"A","cx":false,"qq":"Q"}
-        """)
-
         if #available(macOS 10.15, *) {
+            XCTAssertEqual(try obj.encodedStringSorted(), """
+            {"az":"A","by":1,"cx":false,"qq":"Q"}
+            """)
+
+            // default encoding order should *not* be in the declared order (although it is possible that via random hashing this sometimes happens anyway)
+            XCTAssertNotEqual(try obj.encodedString(), """
+            {"by":1,"az":"A","cx":false,"qq":"Q"}
+            """)
+
             XCTAssertEqual(try obj.encodedStringOrdered(format: []), """
             {"by":1,"az":"A","cx":false,"qq":"Q"}
             """)

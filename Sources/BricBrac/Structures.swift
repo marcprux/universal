@@ -240,7 +240,6 @@ public extension RawCodable {
     }
 }
 
-
 /// A Nullable is a type that can be either explicitly null or a given type.
 public typealias Nullable<T> = OneOf<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
@@ -1146,7 +1145,7 @@ extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
 extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf2 : Identifiable where T1 : Identifiable, T2 : Identifiable {
-    public var id: OneOf2<T1.ID, T2.ID> { map2({ $0.id }, { $0.id }) }
+    public var id: OneOf2<T1.ID, T2.ID> { map2(\.id, \.id) }
 }
 
 public extension OneOf2 {
@@ -1482,7 +1481,7 @@ extension OneOf3 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable { 
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf3 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable {
-    public var id: OneOf3<T1.ID, T2.ID, T3.ID> { map3({ $0.id }, { $0.id }, { $0.id }) }
+    public var id: OneOf3<T1.ID, T2.ID, T3.ID> { map3(\.id, \.id, \.id) }
 }
 
 public extension OneOf3 {
@@ -1809,7 +1808,7 @@ extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf4 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable { }
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf4 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable {
-    public var id: OneOf4<T1.ID, T2.ID, T3.ID, T4.ID> { map4({ $0.id }, { $0.id }, { $0.id }, { $0.id }) }
+    public var id: OneOf4<T1.ID, T2.ID, T3.ID, T4.ID> { map4(\.id, \.id, \.id, \.id) }
 }
 
 public extension OneOf4 {
@@ -2124,7 +2123,7 @@ extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatabl
 extension OneOf5 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable { }
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension OneOf5 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable {
-    public var id: OneOf5<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID> { map5({ $0.id }, { $0.id }, { $0.id }, { $0.id }, { $0.id }) }
+    public var id: OneOf5<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID> { map5(\.id, \.id, \.id, \.id, \.id) }
 }
 
 
@@ -2455,6 +2454,10 @@ extension OneOf6 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable { }
 extension OneOf6 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable { }
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+extension OneOf6 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable, T6 : Identifiable {
+    public var id: OneOf6<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID, T6.ID> { map6(\.id, \.id, \.id, \.id, \.id, \.id) }
+}
 
 public extension OneOf6 {
     /// Apply the separate mapping functions for the individual options.
@@ -2746,6 +2749,10 @@ extension OneOf7 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable { }
 extension OneOf7 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable { }
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+extension OneOf7 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable, T6 : Identifiable, T7 : Identifiable {
+    public var id: OneOf7<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID, T6.ID, T7.ID> { map7(\.id, \.id, \.id, \.id, \.id, \.id, \.id) }
+}
 
 public extension OneOf7 {
     /// Apply the separate mapping functions for the individual options.
@@ -3057,6 +3064,10 @@ extension OneOf8 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable { }
 extension OneOf8 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable { }
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+extension OneOf8 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable, T6 : Identifiable, T7 : Identifiable, T8 : Identifiable {
+    public var id: OneOf8<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID, T6.ID, T7.ID, T8.ID> { map8(\.id, \.id, \.id, \.id, \.id, \.id, \.id, \.id) }
+}
 
 
 public extension OneOf8 {
@@ -3390,6 +3401,10 @@ extension OneOf9 : CaseIterable where T1 : CaseIterable, T2 : CaseIterable, T3 :
 
 extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable { }
 extension OneOf9 : Hashable where T1 : Hashable, T2 : Hashable, T3 : Hashable, T4 : Hashable, T5 : Hashable, T6 : Hashable, T7 : Hashable, T8 : Hashable, T9 : Hashable { }
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+extension OneOf9 : Identifiable where T1 : Identifiable, T2 : Identifiable, T3 : Identifiable, T4 : Identifiable, T5 : Identifiable, T6 : Identifiable, T7 : Identifiable, T8 : Identifiable, T9 : Identifiable {
+    public var id: OneOf9<T1.ID, T2.ID, T3.ID, T4.ID, T5.ID, T6.ID, T7.ID, T8.ID, T9.ID> { map9(\.id, \.id, \.id, \.id, \.id, \.id, \.id, \.id, \.id) }
+}
 
 
 public extension OneOf9 {

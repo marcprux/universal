@@ -13,17 +13,15 @@
 ///
 /// TODO:
 /// • hide Indirect in private fields and make public Optional getters/setters
-
 public struct Curio {
-
-    /// The swift version to generate
-    public var swiftVersion = 4.2
+    /// The universal field name for an identifier field, as required by the `Identifiable` protocol
+    private let idFieldName = "id"
 
     /// whether to generate codable implementations for each type
     public var generateCodable = true
 
-    /// whether to cause `CodingKeys` to conform to `Idenfiable`
-    public var generateIdentifiable = true
+    /// whether to cause `CodingKeys` to conform to `Identifiable`
+    public var generateIdentifiable = false // note that this conflicts with an "id" field name
 
     /// The name of a typealias from the `CodingKeys` implementation to the owning `Codable`
     public var codingOwner: CodeTypeName? = "CodingOwner"
@@ -97,6 +95,12 @@ public struct Curio {
 
     /// The list of type aliases that will wrap around their aliased types
     public var encapsulate: [CodeTypeName: CodeExternalType] = [:]
+
+    /// Synthesize `Identifiable` with the given type name
+    public var identifiables: [CodeTypeName: CodeTypeName] = [:]
+
+    /// The name of the internal wrapper for the ID type
+    public var identifiableWrapperName: CodeTypeName? = "Id"
 
     /// Override individual property types
     public var propertyTypeOverrides: [CodeTypeName: CodeTypeName] = [:]
@@ -373,8 +377,20 @@ public struct Curio {
 //        return false
     }
 
-    typealias PropInfo = (name: String?, required: Bool, schema: Schema)
-    typealias PropDec = (name: String, required: Bool, prop: Schema, anon: Bool)
+    struct PropInfo {
+        let name: String?
+        var required: Bool
+        let schema: Schema
+    }
+
+    struct PropDec {
+        let name: String
+        let required: Bool
+        let schema: Schema
+        let anon: Bool
+        @available(*, deprecated, renamed: "schema")
+        var prop: Schema { schema }
+    }
 
     func getPropInfo(_ schema: Schema, id: String, parents: [CodeTypeName]) -> [PropInfo] {
         let properties = schema.properties ?? [:]
@@ -396,14 +412,13 @@ public struct Curio {
     }
 
     /// Encapsulates the given typename with the specified external type
-    func encapsulateType(name typename: CodeTypeName, type: CodeExternalType, nestedTypes: [CodeNamedType] = [], access: CodeAccess) -> CodeStruct {
+    func createRawWrapper(name typename: CodeTypeName, type: CodeExternalType, protocols: [CodeProtocol]? = nil, nestedTypes: [CodeNamedType] = [], access: CodeAccess) -> CodeStruct {
         let aliasType = type
         let propn = CodePropName("rawValue")
         let propd = CodeProperty.Declaration(name: propn, type: aliasType, access: access, mutable: true)
         var enc = CodeStruct(name: typename, access: access, props: [propd.implementation])
 
-        enc.conforms += standardAdoptions
-        enc.conforms.append(.rawCodable)
+        enc.conforms += protocols ?? (standardAdoptions + [.rawCodable])
 
         enc.nestedTypes = nestedTypes
 
@@ -575,7 +590,7 @@ public struct Curio {
                 let nestedAlias = CodeTypeAlias(name: choiceName, type: oneOfType(casetypes), access: accessor(parents))
 
                 if topLevel { // all top-level typealias definitions go into a RawCodable
-                    let encapsulated = encapsulateType(name: ename, type: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
+                    let encapsulated = createRawWrapper(name: ename, type: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
                     return encapsulated
                 } else if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
                     return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, peerTypes: constantEnums)
@@ -659,7 +674,7 @@ public struct Curio {
             // typealiases to OneOfX work but are difficult to extend (e.g., generic types cannot conform to the same protocol with different type constraints), so we add an additional level of serialization-compatible indirection
             if let encapsulatedType = self.encapsulate[typename] ?? (encapsulate == true ? CodeExternalType(typename) : nil), peerTypes.isEmpty, !optional, subTypes.count > 1, defined {
                 let wrapType = encapsulatedType.name == typename ? oneOfType(subTypes) : encapsulatedType
-                return encapsulateType(name: typename, type: wrapType, access: accessor(parents))
+                return createRawWrapper(name: typename, type: wrapType, access: accessor(parents))
             } else {
                 let aname = defined ? typename : (unescape(typename) + oneOfSuffix)
                 let type = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
@@ -675,7 +690,7 @@ public struct Curio {
                 // if the encapsulated type name is exactly the same as the typename, then that means we should encapsulate
                 // with the preserved type name. E.g., if "FontWeight = OneOf2<String, Double>" and we encapsulate "FontWeight" = "FontWeight", then we will just generate a raw represented struct FontWeight { rawValue: OneOf2<String, Double> }
                 let wrapType = encapsulatedType.name == typename ? type : encapsulatedType
-                return encapsulateType(name: typename, type: wrapType, access: accessor(parents))
+                return createRawWrapper(name: typename, type: wrapType, access: accessor(parents))
             }
             return CodeTypeAlias(name: typename, type: type, access: accessor(parents))
         }
@@ -704,19 +719,40 @@ public struct Curio {
                 anonPropCount += 1
                 return anonPropCount - 1
             }
-            let props: [PropDec] = properties
+
+            var props: [PropDec] = properties
                 .map({
-                    PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, prop: $0.schema, anon: $0.name == nil)
+                    PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, schema: $0.schema, anon: $0.name == nil)
                 })
-                .filter({ name, required, prop, anon in
-                    !excludes.contains(typename + "." + name)
+                .filter({ dec in
+                    !excludes.contains(typename + "." + dec.name)
                 })
 
-            for (name, var required, prop, anon) in props {
-                let _ = anon
+            // the ID for this type (if any)
+            let idWrap = identifiables[typename]
+
+            if let idWrap = idWrap, let wrapperName = identifiableWrapperName {
+                code.conforms.append(.identifiable) // make the type conform to identifiable
+
+                // create a wrapper around the given external type (e.g., UUID or Int); Hashability is assumed
+                let idType = createRawWrapper(name: wrapperName, type: CodeExternalType(idWrap), protocols: [.rawCodable, .hashable], access: accessor(parents))
+                code.nestedTypes.append(idType)
+
+                let propn = propName(parents + [typename], "id") // "id" is hardwired as a requirement of Identifiable
+                var propd = CodeProperty.Declaration(name: propn, type: optionalType(idType), access: accessor(parents))
+                propd.comments = ["The unique identifier"]
+
+                let propi = propd.implementation
+                code.props.append(propi)
+            }
+
+
+            for prop in props {
+                let (name, schema) = (prop.name, prop.schema)
+                var required = prop.required
                 var proptype: CodeType
 
-                let propPath = typename + "." + name
+                let propPath = typename + "." + prop.name
 
                 let forceIndirect = propertyIndirects.contains(propPath)
 
@@ -725,25 +761,25 @@ public struct Curio {
                     if !required && overrideType.hasSuffix("!") {
                         required = true // the type can also override the required-ness with a "!"
                     }
-                } else if let ref = prop.ref {
+                } else if let ref = schema.ref {
                     let tname = typeName(parents, ref)
                     proptype = CodeExternalType(tname, access: accessor(parents + [typename]))
                 } else {
-                    switch prop.type {
-                    case .some(.v1(.string)) where prop._enum == nil && prop.const == nil: proptype = CodeExternalType.string
+                    switch schema.type {
+                    case .some(.v1(.string)) where schema._enum == nil && schema.const == nil: proptype = CodeExternalType.string
                     case .some(.v1(.number)): proptype = CodeExternalType.number
                     case .some(.v1(.boolean)): proptype = CodeExternalType.boolean
                     case .some(.v1(.integer)): proptype = CodeExternalType.integer
                     case .some(.v1(.null)): proptype = CodeExternalType.null
 
                     case .some(.v2(let types)):
-                        let assoc = createSimpleEnumeration(typename, name: name, types: types)
+                        let assoc = createSimpleEnumeration(typename, name: prop.name, types: types)
                         code.nestedTypes.append(assoc)
                         proptype = assoc
 
                     case .some(.v1(.array)):
                         // a set of all the items, eliminating duplicates; this eliminated redundant schema declarations in the items list
-                        let items: Set<Schema> = Set(prop.items?.v2 ?? prop.items?.v1.flatMap({ [$0] }) ?? [])
+                        let items: Set<Schema> = Set(schema.items?.v2 ?? schema.items?.v1.flatMap({ [$0] }) ?? [])
 
                         switch items.count {
                         case 0:
@@ -753,7 +789,7 @@ public struct Curio {
                             if let ref = item.ref {
                                 proptype = arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents)))
                             } else {
-                                let type = try reify(item, id: name + "Item", parents: parents + [code.name])
+                                let type = try reify(item, id: prop.name + "Item", parents: parents + [code.name])
                                 code.nestedTypes.append(type)
                                 proptype = arrayType(type)
                             }
@@ -763,7 +799,7 @@ public struct Curio {
 
                     default:
                         // generate the type for the object
-                        let subtype = try reify(prop, id: prop.title ?? (sanitizeString(name) + typeSuffix), parents: parents + [code.name])
+                        let subtype = try reify(schema, id: schema.title ?? (sanitizeString(prop.name) + typeSuffix), parents: parents + [code.name])
                         code.nestedTypes.append(subtype)
                         proptype = subtype
                     }
@@ -772,9 +808,9 @@ public struct Curio {
                 var indirect: CodeType?
 
                 if !required {
-                    let structProps = props.filter({ (name, required, prop, anon) in
+                    let structProps = props.filter({ prop in
                         let types: [Schema.SimpleTypes]
-                        switch prop.type {
+                        switch prop.schema.type {
                         case .none: types = []
                         case .v1(let typ): types = [typ]
                         case .v2(let typs): types = typs
@@ -795,7 +831,7 @@ public struct Curio {
 
                 let propn = propName(parents + [typename], name)
                 var propd = CodeProperty.Declaration(name: propn, type: proptype, access: accessor(parents))
-                propd.comments = [prop.title, prop.description].compactMap { $0 }
+                propd.comments = [schema.title, schema.description].compactMap { $0 }
 
                 var propi = propd.implementation
 
@@ -862,12 +898,17 @@ public struct Curio {
             /// Creates a Keys enumeration of all the valid keys for this state instance
             func makeKeys(_ keysName: String) {
                 var cases: [CodeCaseSimple<String>] = []
-                for (name, _, _, _) in props {
-                    let propPath = typename + "." + name
+
+                if idWrap != nil {
+                    cases.append(CodeCaseSimple(name: idFieldName, value: nil))
+                }
+
+                for prop in props {
+                    let propPath = typename + "." + prop.name
                     let forceIndirect = propertyIndirects.contains(propPath)
 
-                    let pname = propName(parents + [typename], (forceIndirect ? indirectPrefix : "") + name)
-                    cases.append(CodeCaseSimple(name: pname, value: name))
+                    let pname = propName(parents + [typename], (forceIndirect ? indirectPrefix : "") + prop.name)
+                    cases.append(CodeCaseSimple(name: pname, value: prop.name))
                 }
 
                 if addPropType != nil {
@@ -883,7 +924,7 @@ public struct Curio {
 
                     if generateIdentifiable == true { // "var id: Self { self }"
                         keysType.conforms.append(.identifiable)
-                        keysType.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "id", type: CodeExternalType("Self"), access: accessor(parents), instance: true, mutable: false), value: nil, body: ["self"], comments: []))
+                        keysType.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: idFieldName, type: CodeExternalType("Self"), access: accessor(parents), instance: true, mutable: false), value: nil, body: ["self"], comments: []))
                     }
 
                     // Add in a "CodingOwner" typealias to the owner
@@ -896,10 +937,15 @@ public struct Curio {
                         var keysBody: [String] = []
                         keysBody.append("switch self {")
 
-                        for (key, _, prop, _) in props {
-                            let pname = propName(parents + [typename], key)
-                            cases.append(CodeCaseSimple(name: pname, value: key))
-                            let desc = prop.description?.enquote("\"").replace(character: "\n", with: "\\n") ?? "nil"
+                        if idWrap != nil {
+                            // manually fill in the id description, since it is a meta-field
+                            keysBody.append("case .\(idFieldName): return nil")
+                        }
+
+                        for prop in props {
+                            let pname = propName(parents + [typename], prop.name)
+                            cases.append(CodeCaseSimple(name: pname, value: prop.name))
+                            let desc = prop.schema.description?.enquote("\"").replace(character: "\n", with: "\\n") ?? "nil"
                             let kname = keyName(name: pname)
                             keysBody.append("case .\(kname): return \(desc)")
                         }
@@ -919,7 +965,7 @@ public struct Curio {
                 if vars.isEmpty { return }
 
                 let codingKeyPathsValue = "("
-                    + vars.map({ "\\Self.\($0.declaration.name)" }).joined(separator: ", ")
+                    + vars.map({ "\\Self.\($0.declaration.name) as KeyPath" }).joined(separator: ", ")
                     + ")"
 
                 code.props.append(CodeProperty.Implementation(declaration: CodeProperty.Declaration(name: "codingKeyPaths", type: nil, access: accessor(parents), instance: false, mutable: false), value: codingKeyPathsValue, body: [], comments: []))
@@ -931,7 +977,7 @@ public struct Curio {
                 if vars.isEmpty { return }
 
                 let codableKeysValue = "["
-                    + vars.map({ "\\Self.\($0.declaration.name) : CodingKeys.\($0.declaration.name)" }).joined(separator: ", ")
+                    + vars.map({ "\\Self.\($0.declaration.name) as KeyPath : CodingKeys.\($0.declaration.name)" }).joined(separator: ", ")
                     + "]"
 
                 let codableKeysType = dictionaryType(CodeExternalType("PartialKeyPath", generics: [CodeExternalType("Self")]), CodeExternalType("CodingKeys"))
@@ -966,7 +1012,6 @@ public struct Curio {
                         }
                     }
                 }
-
 
                 // for the init declaration, unescape all the elements and only re-escape them if they are the few forbidden keywords
                 // https://github.com/apple/swift-evolution/blob/master/proposals/0001-keywords-as-argument-labels.md
@@ -1020,11 +1065,9 @@ public struct Curio {
                 code.funcs.append(decodeimp)
             }
 
-
-            let keysName = "CodingKeys"
+            // create an enumeration of "Keys" for all the object's properties
             if !isUnionType {
-                // create an enumeration of "Keys" for all the object's properties
-                makeKeys(keysName)
+                makeKeys("CodingKeys")
             }
 
             makeInit(false)
@@ -1194,7 +1237,8 @@ public struct Curio {
         } else if case .some(.v1(.array)) = type {
             return try createArray(typename)
         } else if let properties = schema.properties, !properties.isEmpty {
-            return try createObject(typename, properties: getPropInfo(schema, id: id, parents: parents), mode: .standard)
+            let props = getPropInfo(schema, id: id, parents: parents)
+            return try createObject(typename, properties: props, mode: .standard)
         } else if let allOf = schema.allOf {
             // represent allOf as a struct with non-optional properties
             var props: [PropInfo] = []
@@ -1326,7 +1370,7 @@ public struct Curio {
             // into wrappers without them being treated specially by the schema
             for (name, type) in self.encapsulate {
                 if !deepTypes.contains(where: { $0.name == name }) {
-                    let encap = encapsulateType(name: name, type: type, access: accessor([]))
+                    let encap = createRawWrapper(name: name, type: type, access: accessor([]))
                     types.append(encap)
                 }
             }
@@ -1654,6 +1698,7 @@ public extension CodeExternalType {
     static var number = CodeExternalType("Double")
     static var integer = CodeExternalType("Int")
     static var boolean = CodeExternalType("Bool")
+    static var uuid = CodeExternalType("UUID")
     static var void = CodeExternalType("Void")
     static var encoder = CodeExternalType("Encoder")
     static var decoder = CodeExternalType("Decoder")

@@ -240,6 +240,15 @@ public extension RawCodable {
     }
 }
 
+/// An `Identifiable` that is represented by a wrapped identity type that can be generated on-demand.
+public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable {
+    /// The mutable identity
+    var id: ID { get set }
+
+    /// Returns this instance with a guaranteed assigned identity
+    var actual: Self { get set }
+}
+
 /// A Nullable is a type that can be either explicitly null or a given type.
 public typealias Nullable<T> = OneOf<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
@@ -271,7 +280,7 @@ extension RawIsomorphism where RawValue : CaseIterable {
 
 public extension RawIsomorphism {
     /// Converts between two `RawCodable` types that have the same underlying value
-    @inlinable func morphed<T: RawCodable>() -> T where T.RawValue == Self.RawValue {
+    @inlinable func morphed<T: RawIsomorphism>() -> T where T.RawValue == Self.RawValue {
         T(rawValue: self.rawValue)
     }
 }

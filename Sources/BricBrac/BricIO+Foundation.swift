@@ -33,6 +33,34 @@ extension Decodable {
     }
 }
 
+extension Actualizable where ID.Wrapped.RawValue == UUID {
+    /// Assigns an ID to the element if one was not already assigned, returning any newly assigned ID.
+    @discardableResult @inlinable public mutating func actualize(with id: () -> UUID = { UUID() }) -> UUID? {
+        if let _ = self.id.flatMap({ a in a }) { // already has an ID
+            return nil
+        } else {
+            let newID = id()
+            self.id = ID(ID.Wrapped(rawValue: newID))
+            return newID
+        }
+    }
+
+    /// Accesses the guaranteed actualized (i.e., assigned id) instance
+    @inlinable public var actual: Self {
+        get {
+            var this = self
+            this.actualize()
+            return this
+        }
+
+        set {
+            var value = newValue
+            value.actualize()
+            self = value
+        }
+    }
+}
+
 
 private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting, sortedKeys: Bool, withoutEscapingSlashes: Bool) -> JSONEncoder {
     let encoder = JSONEncoder()

@@ -19,14 +19,14 @@ jobs:
       - name: Run tests
         run: swift test --enable-test-discovery
       - name: Release Snapshot
+        if: startsWith(github.ref, 'refs/tags/') == false
         uses: marvinpinto/action-automatic-releases@v1
-        if: !startsWith(github.ref, 'refs/tags/')
         prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Release Tag
+        if: startsWith(github.ref, 'refs/tags/') == true
         uses: marvinpinto/action-automatic-releases@v1
-        if: startsWith(github.ref, 'refs/tags/')
         prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

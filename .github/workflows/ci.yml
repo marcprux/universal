@@ -52,7 +52,7 @@ jobs:
 
   Release:
     runs-on: ubuntu-latest
-    needs: [Linux, macOS]
+    needs: [Linux, macOa, macOS11]
 
     steps:
       - name: Release Tag

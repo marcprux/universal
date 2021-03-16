@@ -5,7 +5,7 @@ Bric-à-brac
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
 [![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20iOS%20|%20tvOS%20|%20watchOS%20|%20Linux-lightgrey.svg)](https://github.com/glimpseio/MisMisc)
 
-**Bric-à-brac** is a lightweight, clean and efficient JSON toolkit for **Swift 5**.
+**Bric-à-brac** Data structures and JSON utilities for **Swift 5**.
 
 ## Features
 

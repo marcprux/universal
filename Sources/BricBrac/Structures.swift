@@ -269,6 +269,12 @@ extension RawIsomorphism where RawValue : CaseIterable {
     }
 }
 
+public extension RawIsomorphism {
+    /// Converts between two `RawCodable` types that have the same underlying value
+    @inlinable func morphed<T: RawCodable>() -> T where T.RawValue == Self.RawValue {
+        T(rawValue: self.rawValue)
+    }
+}
 
 /// Conformance requirements of `RawInitializable` to `OneOfNType` when the `rawValue` is a `OneOfN`.
 /// ```swift

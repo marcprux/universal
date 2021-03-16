@@ -18,9 +18,16 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run tests
         run: swift test --enable-test-discovery
-      - name: Release
-        uses: softprops/action-gh-release@v1
+      - name: Release Snapshot
+        uses: marvinpinto/action-automatic-releases@v1
+        if: !startsWith(github.ref, 'refs/tags/')
+        prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release Tag
+        uses: marvinpinto/action-automatic-releases@v1
         if: startsWith(github.ref, 'refs/tags/')
+        prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

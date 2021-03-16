@@ -9,13 +9,6 @@ on:
   schedule:
     # run at 6AM & 6PM UTC
     - cron:  '0 6,18 * * *'
-  workflow_run:
-    workflows:
-      - 'BricBrac Linux Tests'
-      - 'BricBrac macOS Tests'
-      - 'BricBrac macOS11 Tests'
-    types:
-      - completed
 
 jobs:    
   Linux:
@@ -54,6 +47,9 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: true
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        env:
+          # needed to override tag
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true' 
       - name: Release Tag
         if: startsWith(github.ref, 'refs/tags/') == true
         uses: marvinpinto/action-automatic-releases@v1.1.0

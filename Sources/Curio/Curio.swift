@@ -102,7 +102,10 @@ public struct Curio {
     /// The name of the internal wrapper for the ID type
     public var identifiableWrapperName: CodeTypeName? = "Id"
 
-    /// Override individual property types
+    /// Override individual property types with a newly generated top-level wrapper type
+    public var propertyWrap: [CodeTypeName: CodeTypeName] = [:]
+
+    /// Override individual property types, which are assumed to exist
     public var propertyTypeOverrides: [CodeTypeName: CodeTypeName] = [:]
 
     /// Manual specification of property indirects
@@ -412,10 +415,9 @@ public struct Curio {
     }
 
     /// Encapsulates the given typename with the specified external type
-    func createRawWrapper(name typename: CodeTypeName, type: CodeExternalType, protocols: [CodeProtocol]? = nil, nestedTypes: [CodeNamedType] = [], access: CodeAccess) -> CodeStruct {
-        let aliasType = type
+    func createRawWrapper(name typename: CodeTypeName, wrappedType: CodeExternalType, protocols: [CodeProtocol]? = nil, nestedTypes: [CodeNamedType] = [], access: CodeAccess) -> CodeStruct {
         let propn = CodePropName("rawValue")
-        let propd = CodeProperty.Declaration(name: propn, type: aliasType, access: access, mutable: true)
+        let propd = CodeProperty.Declaration(name: propn, type: wrappedType, access: access, mutable: true)
         var enc = CodeStruct(name: typename, access: access, props: [propd.implementation])
 
         enc.conforms += protocols ?? (standardAdoptions + [.rawCodable])
@@ -423,7 +425,7 @@ public struct Curio {
         enc.nestedTypes = nestedTypes
 
         for anon in [false, true] { // make both a named rawValue init as well as an anonymous one…
-            let rawInit = CodeFunction.Declaration(name: "init", access: access, instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: aliasType, value: nil, anon: anon)]), returns: CodeTuple(elements: []))
+            let rawInit = CodeFunction.Declaration(name: "init", access: access, instance: true, exception: false, arguments: CodeTuple(elements: [(name: "rawValue", type: wrappedType, value: nil, anon: anon)]), returns: CodeTuple(elements: []))
             let rawInitImp = CodeFunction.Implementation(declaration: rawInit, body: ["self.rawValue = rawValue"], comments: [])
             enc.funcs.append(rawInitImp)
         }
@@ -590,7 +592,7 @@ public struct Curio {
                 let nestedAlias = CodeTypeAlias(name: choiceName, type: oneOfType(casetypes), access: accessor(parents))
 
                 if topLevel { // all top-level typealias definitions go into a RawCodable
-                    let encapsulated = createRawWrapper(name: ename, type: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
+                    let encapsulated = createRawWrapper(name: ename, wrappedType: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
                     return encapsulated
                 } else if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
                     return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, peerTypes: constantEnums)
@@ -674,7 +676,7 @@ public struct Curio {
             // typealiases to OneOfX work but are difficult to extend (e.g., generic types cannot conform to the same protocol with different type constraints), so we add an additional level of serialization-compatible indirection
             if let encapsulatedType = self.encapsulate[typename] ?? (encapsulate == true ? CodeExternalType(typename) : nil), peerTypes.isEmpty, !optional, subTypes.count > 1, defined {
                 let wrapType = encapsulatedType.name == typename ? oneOfType(subTypes) : encapsulatedType
-                return createRawWrapper(name: typename, type: wrapType, access: accessor(parents))
+                return createRawWrapper(name: typename, wrappedType: wrapType, access: accessor(parents))
             } else {
                 let aname = defined ? typename : (unescape(typename) + oneOfSuffix)
                 let type = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
@@ -690,7 +692,7 @@ public struct Curio {
                 // if the encapsulated type name is exactly the same as the typename, then that means we should encapsulate
                 // with the preserved type name. E.g., if "FontWeight = OneOf2<String, Double>" and we encapsulate "FontWeight" = "FontWeight", then we will just generate a raw represented struct FontWeight { rawValue: OneOf2<String, Double> }
                 let wrapType = encapsulatedType.name == typename ? type : encapsulatedType
-                return createRawWrapper(name: typename, type: wrapType, access: accessor(parents))
+                return createRawWrapper(name: typename, wrappedType: wrapType, access: accessor(parents))
             }
             return CodeTypeAlias(name: typename, type: type, access: accessor(parents))
         }
@@ -720,7 +722,7 @@ public struct Curio {
                 return anonPropCount - 1
             }
 
-            var props: [PropDec] = properties
+            let props: [PropDec] = properties
                 .map({
                     PropDec(name: $0.name ?? propName(parents, "p\(incrementAnonPropCount())"), required: $0.required, schema: $0.schema, anon: $0.name == nil)
                 })
@@ -735,7 +737,7 @@ public struct Curio {
                 code.conforms.append(.identifiable) // make the type conform to identifiable
 
                 // create a wrapper around the given external type (e.g., UUID or Int); Hashability is assumed
-                let idType = createRawWrapper(name: wrapperName, type: CodeExternalType(idWrap), protocols: [.rawCodable, .hashable], access: accessor(parents))
+                let idType = createRawWrapper(name: wrapperName, wrappedType: CodeExternalType(idWrap), protocols: [.rawCodable, .hashable], access: accessor(parents))
                 code.nestedTypes.append(idType)
 
                 let propn = propName(parents + [typename], "id") // "id" is hardwired as a requirement of Identifiable
@@ -746,7 +748,6 @@ public struct Curio {
                 code.props.append(propi)
             }
 
-
             for prop in props {
                 let (name, schema) = (prop.name, prop.schema)
                 var required = prop.required
@@ -756,7 +757,28 @@ public struct Curio {
 
                 let forceIndirect = propertyIndirects.contains(propPath)
 
-                if let overrideType = propertyTypeOverrides[propPath] {
+                func reifySubtype() throws -> CodeNamedType {
+                    // generate the type for the object
+                    let subtype = try reify(schema, id: schema.title ?? (sanitizeString(prop.name) + typeSuffix), parents: parents + [code.name])
+                    code.nestedTypes.append(subtype)
+                    return subtype
+                }
+
+                if let wrapType = propertyWrap[propPath] {
+                    let propType = try reifySubtype()
+
+                    proptype = CodeExternalType(wrapType, access: accessor(parents + [typename]))
+                    if !required && wrapType.hasSuffix("!") {
+                        required = true // the type can also override the required-ness with a "!"
+                    }
+
+                    // we also need to promote the path
+                    // print("promoting \(propPath) to \(wrapType) for \(propType)")
+                    let wrapper = createRawWrapper(name: wrapType, wrappedType: CodeExternalType(propType.name), access: accessor(parents + [typename]))
+                    // print("wrapper", wrapper)
+                    code.nestedTypes.append(wrapper)
+
+                } else if let overrideType = propertyTypeOverrides[propPath] {
                     proptype = CodeExternalType(overrideType, access: accessor(parents + [typename]))
                     if !required && overrideType.hasSuffix("!") {
                         required = true // the type can also override the required-ness with a "!"
@@ -798,10 +820,7 @@ public struct Curio {
                         }
 
                     default:
-                        // generate the type for the object
-                        let subtype = try reify(schema, id: schema.title ?? (sanitizeString(prop.name) + typeSuffix), parents: parents + [code.name])
-                        code.nestedTypes.append(subtype)
-                        proptype = subtype
+                        proptype = try reifySubtype()
                     }
                 }
 
@@ -1370,7 +1389,7 @@ public struct Curio {
             // into wrappers without them being treated specially by the schema
             for (name, type) in self.encapsulate {
                 if !deepTypes.contains(where: { $0.name == name }) {
-                    let encap = createRawWrapper(name: name, type: type, access: accessor([]))
+                    let encap = createRawWrapper(name: name, wrappedType: type, access: accessor([]))
                     types.append(encap)
                 }
             }

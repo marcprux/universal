@@ -3641,7 +3641,7 @@ public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either10
     public typealias TN = T10
     /// `OneOf10.Or<X>` expands the tuples by converting the final element to a `OneOf2<T10, X>`
     public typealias Or<X> = OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, OneOf2<T10, X>>
-    public typealias OneOfNext = Self // end of the line, pal
+    public typealias OneOfNext = Self
 
     case v1(T1), v2(T2), v3(T3), v4(T4), v5(T5), v6(T6), v7(T7), v8(T8), v9(T9), v10(T10)
 

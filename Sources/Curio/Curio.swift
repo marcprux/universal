@@ -735,17 +735,22 @@ public struct Curio {
 
             if let idWrap = idWrap, let wrapperName = identifiableWrapperName {
                 code.conforms.append(.identifiable) // make the type conform to identifiable
+                let propn = propName(parents + [typename], idFieldName)
 
                 // create a wrapper around the given external type (e.g., UUID or Int); Hashability is assumed
-                let idType = createRawWrapper(name: wrapperName, wrappedType: CodeExternalType(idWrap), protocols: [.rawCodable, .hashable], access: accessor(parents))
-                code.nestedTypes.append(idType)
-
-                let propn = propName(parents + [typename], "id") // "id" is hardwired as a requirement of Identifiable
-                var propd = CodeProperty.Declaration(name: propn, type: optionalType(idType), access: accessor(parents))
-                propd.comments = ["The unique identifier"]
-
-                let propi = propd.implementation
-                code.props.append(propi)
+                if idWrap.hasSuffix("!") {
+                    // "!" indicates that id type is presumed to already exist; drop the trailing "!"
+                    let idTypeName = CodeTypeName(idWrap.dropLast() as Substring)
+                    var propd = CodeProperty.Declaration(name: propn, type: optionalType(CodeExternalType(idTypeName)), access: accessor(parents))
+                    propd.comments = ["The unique identifier"]
+                    code.props.append(propd.implementation)
+                } else {
+                    let idType = createRawWrapper(name: wrapperName, wrappedType: CodeExternalType(idWrap), protocols: [.rawCodable, .hashable], access: accessor(parents))
+                    var propd = CodeProperty.Declaration(name: propn, type: optionalType(idType), access: accessor(parents))
+                    propd.comments = ["The unique identifier"]
+                    code.props.append(propd.implementation)
+                    code.nestedTypes.append(idType) // also add the synthesized type
+                }
             }
 
             for prop in props {

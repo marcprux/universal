@@ -982,10 +982,6 @@ class BricBracTests : XCTestCase {
 
     #if canImport(JavaScriptCore)
     func testBricBracCompatibility() throws {
-        if true {
-            throw XCTSkip("fails sometimes")
-        }
-
         let fm = FileManager.default
         do {
             let rsrc: String? = testResourcePath()
@@ -2169,6 +2165,138 @@ extension BricBracTests {
         #endif
         }
     }
+
+    func testFixedUUID() {
+        XCTAssertEqual(UUID.fixedUUID().uuidString, "00000000-0000-0000-0000-000000000000")
+        XCTAssertEqual(UUID.fixedUUID(0).uuidString, "00000000-0000-0000-0000-000000000000")
+        XCTAssertEqual(UUID.fixedUUID(1).uuidString, "00000000-0000-0000-0000-000000000001")
+        XCTAssertEqual(UUID.fixedUUID(2).uuidString, "00000000-0000-0000-0000-000000000002")
+        XCTAssertEqual(UUID.fixedUUID(255).uuidString, "00000000-0000-0000-0000-0000000000FF")
+        XCTAssertEqual(UUID.fixedUUID(.max).uuidString, "00000000-0000-0000-0000-0000000000FF")
+        XCTAssertEqual(UUID.fixedUUID(1, 2).uuidString, "00000000-0000-0000-0000-000000000201")
+        XCTAssertEqual(UUID.fixedUUID(1, 2, 0, 3).uuidString, "00000000-0000-0000-0000-000003000201")
+        XCTAssertEqual(UUID.fixedUUID(.max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max).uuidString, "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF")
+    }
+
+    func testKeyMap() throws {
+        struct KeyMapDemo : Codable {
+            enum Key : String, Codable {
+                case key1, key2, key3
+            }
+
+            var keyMapBare: [Key: Bool]
+            @KeyMap var keyMapWrapped: [Key: Bool]
+        }
+
+        var demo = KeyMapDemo(keyMapBare: [.key1: false, .key2: true, .key3: false], keyMapWrapped: .init(wrappedValue: [.key1: true, .key2: false, .key3: true]))
+
+        // there's to be no way to control the order of custom keys when they are serialzed through an array; so to test the output, we need to clear all but one key; perhaps someday the built-in Codable support will add an option for ordering custom keys, in which case we can enable this test
+        let customKeysRandomOrder = { true }()
+
+        if customKeysRandomOrder == false {
+            XCTAssertEqual(try demo.encodedStringFormatted(), """
+                {
+                  "keyMapBare" : [
+                    "key1",
+                    false,
+                    "key2",
+                    true
+                    "key3",
+                    false,
+                  ],
+                  "keyMapWrapped" : {
+                    "key1" : true,
+                    "key2" : false,
+                    "key3" : true
+                  }
+                }
+                """)
+        } else { // customKeysRandomOrder
+            (demo.keyMapBare[.key2], demo.keyMapBare[.key3]) = (nil, nil)
+            // note that keyMapBare is a hetergeneous array, but keyMapWrapped is a proper JSON object map
+            XCTAssertEqual(try demo.encodedStringFormatted(), """
+                {
+                  "keyMapBare" : [
+                    "key1",
+                    false
+                  ],
+                  "keyMapWrapped" : {
+                    "key1" : true,
+                    "key2" : false,
+                    "key3" : true
+                  }
+                }
+                """)
+        }
+    }
+
+    func testIdMap() throws {
+        struct IdMapDemo : Codable, Equatable {
+            struct ValueId : Hashable, RawCodable {
+                let rawValue: UUID
+            }
+
+            struct Value : Actualizable, Equatable, Hashable, Codable {
+                var id: ValueId?
+                var name: String
+            }
+
+            @IdMap var idMap: [ValueId: Value]?
+        }
+
+        var demo = IdMapDemo()
+        XCTAssertEqual(demo, try demo.roundtripped())
+        demo.idMap = [:]
+        XCTAssertEqual(demo, try demo.roundtripped())
+
+        let value1 = IdMapDemo.Value(id: .init(rawValue: .fixedUUID(1)), name: "First")
+        let value2 = IdMapDemo.Value(id: .init(rawValue: .fixedUUID(2)), name: "Second")
+
+        XCTAssertEqual(demo, try demo.roundtripped())
+        demo.idMap![value1.id!] = value1
+        XCTAssertEqual(demo, try demo.roundtripped())
+        demo.idMap![value2.id!] = value2
+        XCTAssertEqual(demo, try demo.roundtripped())
+
+        XCTAssertEqual(try demo.encodedStringFormatted(), """
+            {
+              "idMap" : {
+                "00000000-0000-0000-0000-000000000001" : {
+                  "id" : "00000000-0000-0000-0000-000000000001",
+                  "name" : "First"
+                },
+                "00000000-0000-0000-0000-000000000002" : {
+                  "id" : "00000000-0000-0000-0000-000000000002",
+                  "name" : "Second"
+                }
+              }
+            }
+            """)
+    }
+
+    /// Tests that the `defaulted` var of Optional, Array, Dictionary, and Set all work as expected.
+    /// Highlight the difference between `defaulted` and `defaulted` bahaviors
+    func testDefaulting() {
+        struct Holder : Equatable {
+            var dict: [String: [Int]]? = nil
+        }
+
+        var holder = Holder()
+        XCTAssertEqual(holder, Holder())
+
+        holder.dict.faulted["x"].faulted.append(2)
+        XCTAssertEqual(holder, Holder(dict: ["x": [2]]))
+
+        holder.dict.faulted["x"].faulted.removeAll()
+        XCTAssertEqual(holder, Holder(dict: ["x": []]))
+
+        holder.dict.faulted["x"].defaulted.removeAll()
+        XCTAssertEqual(holder, Holder(dict: [:]))
+
+        holder.dict.defaulted["x"].defaulted.removeAll()
+        XCTAssertEqual(holder, Holder(dict: nil))
+    }
+
 }
 
 extension Decodable where Self: Encodable {

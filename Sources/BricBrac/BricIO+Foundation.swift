@@ -33,34 +33,50 @@ extension Decodable {
     }
 }
 
-extension Actualizable where ID.Wrapped.RawValue == UUID {
-    /// Assigns an ID to the element if one was not already assigned, returning any newly assigned ID.
-    @discardableResult @inlinable public mutating func actualize(with id: () -> UUID = { UUID() }) -> UUID? {
-        if let _ = self.id.flatMap({ a in a }) { // already has an ID
-            return nil
-        } else {
-            let newID = id()
-            self.id = ID(ID.Wrapped(rawValue: newID))
-            return newID
-        }
-    }
+extension UUID : IdentifierString {
+    public init?(identifierString string: String) { self.init(uuidString: string) }
+    public var identifierString: String { uuidString }
 
-    /// Accesses the guaranteed actualized (i.e., assigned id) instance
-    @inlinable public var actual: Self {
-        get {
-            var this = self
-            this.actualize()
-            return this
-        }
-
-        set {
-            var value = newValue
-            value.actualize()
-            self = value
-        }
+    /// Returns a fixed UUID with the value of the arguments in least-signficant-first oeder.
+    ///
+    /// Examples:
+    /// ```
+    /// fixedUUID() => "00000000-0000-0000-0000-000000000000"
+    /// fixedUUID(0) => "00000000-0000-0000-0000-000000000000"
+    /// fixedUUID(1) => "00000000-0000-0000-0000-000000000001"
+    /// fixedUUID(2) => "00000000-0000-0000-0000-000000000002"
+    /// fixedUUID(255) => "00000000-0000-0000-0000-0000000000FF"
+    /// fixedUUID(.max) => "00000000-0000-0000-0000-0000000000FF"
+    /// fixedUUID(1, 2) => "00000000-0000-0000-0000-000000000201"
+    /// fixedUUID(1, 2, 0, 3) => "00000000-0000-0000-0000-000003000201"
+    /// fixedUUID(.max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max, .max) => "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"
+    /// ```
+    @inlinable public static func fixedUUID(_ ids: UInt8...) -> Self {
+        UUID(uuid: (ids.count > 15 ? ids[15] : 0,
+                    ids.count > 14 ? ids[14] : 0,
+                    ids.count > 13 ? ids[13] : 0,
+                    ids.count > 12 ? ids[12] : 0,
+                    ids.count > 11 ? ids[11] : 0,
+                    ids.count > 10 ? ids[10] : 0,
+                    ids.count > 9 ? ids[9] : 0,
+                    ids.count > 8 ? ids[8] : 0,
+                    ids.count > 7 ? ids[7] : 0,
+                    ids.count > 6 ? ids[6] : 0,
+                    ids.count > 5 ? ids[5] : 0,
+                    ids.count > 4 ? ids[4] : 0,
+                    ids.count > 3 ? ids[3] : 0,
+                    ids.count > 2 ? ids[2] : 0,
+                    ids.count > 1 ? ids[1] : 0,
+                    ids.count > 0 ? ids[0] : 0))
     }
 }
 
+extension IndexPath : Defaultable { } // inherits initializer from ExpressibleByArrayLiteral
+
+public extension IndexPath {
+    /// Symbolic constant for the root of a tree (which is simply an empty index path)
+    static let root: IndexPath = []
+}
 
 private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting, sortedKeys: Bool, withoutEscapingSlashes: Bool) -> JSONEncoder {
     let encoder = JSONEncoder()

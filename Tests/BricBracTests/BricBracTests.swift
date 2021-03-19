@@ -738,12 +738,15 @@ class BricBracTests : XCTestCase {
             compareCocoaParsing("1.2345678\n\n", msg: "fraction with trailing newlines")
         }
 
-        compareCocoaParsing("1", msg: "number with no newline")
-        compareCocoaParsing("1 ", msg: "number with trailing space")
-        compareCocoaParsing("1\n", msg: "number with trailing newline")
-        compareCocoaParsing("1\n\n", msg: "number with trailing newlines")
+        #if !os(Linux)
+            compareCocoaParsing("1", msg: "number with no newline")
+            compareCocoaParsing("1 ", msg: "number with trailing space")
+            compareCocoaParsing("1\n", msg: "number with trailing newline")
+            compareCocoaParsing("1\n\n", msg: "number with trailing newlines")
 
-        compareCocoaParsing("0.1", msg: "fractional number with leading zero")
+            compareCocoaParsing("0.1", msg: "fractional number with leading zero")
+        #endif
+
 //        compareCocoaParsing("1.234567890E+34", msg: "number with upper-case exponent")
 //        compareCocoaParsing("0.123456789e-12", msg: "number with lower-case exponent")
 

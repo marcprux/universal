@@ -240,15 +240,6 @@ public extension RawCodable {
     }
 }
 
-/// An `Identifiable` that is represented by a wrapped identity type that can be generated on-demand.
-public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable {
-    /// The mutable identity
-    var id: ID { get set }
-
-    /// Returns this instance with a guaranteed assigned identity
-    var actual: Self { get set }
-}
-
 /// A Nullable is a type that can be either explicitly null or a given type.
 public typealias Nullable<T> = OneOf<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
@@ -5021,3 +5012,140 @@ public extension ISO8601DateTime {
 ////    }
 //}
 
+
+/// An `Identifiable` that is represented by a wrapped identity type that can be generated on-demand.
+public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable {
+    /// The mutable identity
+    var id: ID { get set }
+
+    /// Returns this instance with a guaranteed assigned identity
+    var actual: Self { get set }
+}
+
+
+/// A generalization of a unique identifier.
+///
+/// Implemented in `Foundation.UUID`
+public protocol IdentifierString where Self : Hashable {
+    /// Initializes a random value.
+    init()
+
+    /// Create from a unique identifier string
+    ///
+    /// Returns nil for invalid strings.
+    init?(identifierString string: String)
+
+    /// Returns a string created from the identifier
+    var identifierString: String { get }
+}
+
+
+extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue : IdentifierString {
+    /// Assigns an ID to the element if one was not already assigned, returning any newly assigned ID.
+    @discardableResult @inlinable public mutating func actualize(with id: () -> ID.Wrapped.RawValue = { .init() }) -> ID.Wrapped {
+        if let existingID = self.id.flatMap({ a in a }) { // already has an ID
+            return existingID
+        } else {
+            let newID = ID.Wrapped(rawValue: id())
+            self.id = ID(newID)
+            return newID
+        }
+    }
+
+    /// Accesses the guaranteed actualized (i.e., assigned id) instance
+    @inlinable public var actual: Self {
+        get {
+            var this = self
+            this.actualize()
+            return this
+        }
+
+        set {
+            var value = newValue
+            value.actualize()
+            self = value
+        }
+    }
+}
+
+
+/// An `IdMap` enables dictionaries keyed by non-String/Int values to be encoded & decoded via JSON Objects (rather than the default behavior of encoding to an array of alternating keys & values)
+///
+/// - SeeAlso: `KeyMap`
+@propertyWrapper public struct IdMap<Key: RawRepresentable & Codable & Hashable, Value: Codable> : Codable where Key.RawValue : IdentifierString & Codable {
+    public var wrappedValue: [Key: Value]
+
+    public init() {
+        wrappedValue = [:]
+    }
+
+    public init(wrappedValue: [Key: Value]) {
+        self.wrappedValue = wrappedValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawKeyedDictionary = try container.decode([String: Value].self)
+
+        var map: [Key: Value] = [:]
+        for (rawKey, value) in rawKeyedDictionary {
+            guard let uuid = Key.RawValue(identifierString: rawKey),
+                  let key = Key(rawValue: uuid) else {
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "cannot create key '\(Key.self)' from invalid '\(Key.RawValue.self)' value '\(rawKey)'")
+            }
+            map[key] = value
+        }
+
+        self.wrappedValue = map
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        let rawKeyedDictionary: [String: Value] = Dictionary(uniqueKeysWithValues: wrappedValue.map { ($0.rawValue.identifierString, $1) })
+        var container = encoder.singleValueContainer()
+        try container.encode(rawKeyedDictionary)
+    }
+}
+
+extension IdMap : Equatable where Value : Equatable { }
+extension IdMap : Hashable where Value : Hashable { }
+
+/// A `KeyMap` enables dictionaries keyed by non-String/Int values to be encoded & decoded via JSON Objects (rather than the default behavior of encoding to an array of alternating keys & values)
+///
+/// Inspired by the sample from: https://fivestars.blog/swift/codable-swift-dictionaries.html
+///
+/// - SeeAlso: `IdMap`
+@propertyWrapper public struct KeyMap<Key: Hashable & RawRepresentable, Value: Codable>: Codable where Key.RawValue == String {
+    public var wrappedValue: [Key: Value]
+
+    public init() {
+        wrappedValue = [:]
+    }
+
+    public init(wrappedValue: [Key: Value]) {
+        self.wrappedValue = wrappedValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawKeyedDictionary = try container.decode([String: Value].self)
+
+        var map: [Key: Value] = [:]
+        for (rawKey, value) in rawKeyedDictionary {
+            guard let key = Key(rawValue: rawKey) else {
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "cannot create key '\(Key.self)' from invalid '\(Key.RawValue.self)' value '\(rawKey)'")
+            }
+            map[key] = value
+        }
+
+        self.wrappedValue = map
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        let rawKeyedDictionary = Dictionary(uniqueKeysWithValues: wrappedValue.map { ($0.rawValue, $1) })
+        var container = encoder.singleValueContainer()
+        try container.encode(rawKeyedDictionary)
+    }
+}
+
+extension KeyMap : Equatable where Value : Equatable { }
+extension KeyMap : Hashable where Value : Hashable { }

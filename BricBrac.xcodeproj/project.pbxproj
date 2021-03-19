@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4932B3FE206A79B100424366 /* BricEncoder.swift */; };
+		494E3F462603EAB9009D3CF8 /* Defaultables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494E3F452603EAB9009D3CF8 /* Defaultables.swift */; };
 		49BD181B20CD578D00692A3D /* CurioDemoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BD181A20CD578D00692A3D /* CurioDemoModels.swift */; };
 		49BD181D20CD594600692A3D /* schemas in Resources */ = {isa = PBXBuildFile; fileRef = 49BD181C20CD594600692A3D /* schemas */; };
 		49DB613720633ABE00022D2C /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
@@ -109,6 +110,7 @@
 /* Begin PBXFileReference section */
 		4932B3FE206A79B100424366 /* BricEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BricEncoder.swift; sourceTree = "<group>"; };
 		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		494E3F452603EAB9009D3CF8 /* Defaultables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaultables.swift; sourceTree = "<group>"; };
 		49BD181A20CD578D00692A3D /* CurioDemoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurioDemoModels.swift; sourceTree = "<group>"; };
 		49BD181C20CD594600692A3D /* schemas */ = {isa = PBXFileReference; lastKnownFileType = folder; path = schemas; sourceTree = "<group>"; };
 		49DB61522063426D00022D2C /* CurioDemoModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CurioDemoModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -280,6 +282,7 @@
 				7E10201F1B858F6000171AFE /* JSONParser.swift */,
 				7E8930141BEA570A00F245C5 /* Structures.swift */,
 				7E7F9B211B3615850058706A /* Info.plist */,
+				494E3F452603EAB9009D3CF8 /* Defaultables.swift */,
 			);
 			name = BricBrac;
 			path = Sources/BricBrac;
@@ -582,6 +585,7 @@
 				4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */,
 				7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */,
 				7E1020201B858F6000171AFE /* JSONParser.swift in Sources */,
+				494E3F462603EAB9009D3CF8 /* Defaultables.swift in Sources */,
 				7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */,
 				7E7F9B3A1B36159A0058706A /* Brac.swift in Sources */,
 				7E7F9B3B1B36159A0058706A /* BricIO.swift in Sources */,

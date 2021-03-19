@@ -730,16 +730,13 @@ class BricBracTests : XCTestCase {
 
     /// Verify that our serialization is compatible with NSJSONSerialization
     func testBricBracCocoaCompatNumbers() throws {
-        if true {
-            throw XCTSkip("fails sometimes")
+        // FIXME: something broke around 5.1
+        if false {
+            compareCocoaParsing("1.2345678", msg: "fraction alone")
+            compareCocoaParsing("1.2345678 ", msg: "fraction with trailing space")
+            compareCocoaParsing("1.2345678\n", msg: "fraction with trailing newline")
+            compareCocoaParsing("1.2345678\n\n", msg: "fraction with trailing newlines")
         }
-
-        #if swift(<5.1) // FIXME: something broke in the beta
-        compareCocoaParsing("1.2345678", msg: "fraction alone")
-        compareCocoaParsing("1.2345678 ", msg: "fraction with trailing space")
-        compareCocoaParsing("1.2345678\n", msg: "fraction with trailing newline")
-        compareCocoaParsing("1.2345678\n\n", msg: "fraction with trailing newlines")
-        #endif
 
         compareCocoaParsing("1", msg: "number with no newline")
         compareCocoaParsing("1 ", msg: "number with trailing space")
@@ -1013,15 +1010,11 @@ class BricBracTests : XCTestCase {
                                 }
 
                                 // dodge http://openradar.appspot.com/21472364
-                                if file != "caliper.json" && file != "pass1.json" && file != "vega2.schema.json" {
-                                    #if swift(>=5.1)
-                                    // something broke with the 5.1 beta
-                                    if file != "test_basic_03.json" {
-                                        compareCocoaParsing(contents, msg: file)
-                                    }
-                                    #else
+                                if file != "caliper.json"
+                                    && file != "pass1.json"
+                                    && file != "test_basic_03.json"
+                                {
                                     compareCocoaParsing(contents, msg: file)
-                                    #endif
                                 }
 
 

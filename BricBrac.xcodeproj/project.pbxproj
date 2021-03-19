@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4932B3FE206A79B100424366 /* BricEncoder.swift */; };
 		494E3F462603EAB9009D3CF8 /* Defaultables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494E3F452603EAB9009D3CF8 /* Defaultables.swift */; };
+		494E3F5A26043A7C009D3CF8 /* Defaultables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494E3F452603EAB9009D3CF8 /* Defaultables.swift */; };
 		49BD181B20CD578D00692A3D /* CurioDemoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BD181A20CD578D00692A3D /* CurioDemoModels.swift */; };
 		49BD181D20CD594600692A3D /* schemas in Resources */ = {isa = PBXBuildFile; fileRef = 49BD181C20CD594600692A3D /* schemas */; };
 		49DB613720633ABE00022D2C /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
@@ -281,8 +282,8 @@
 				7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */,
 				7E10201F1B858F6000171AFE /* JSONParser.swift */,
 				7E8930141BEA570A00F245C5 /* Structures.swift */,
-				7E7F9B211B3615850058706A /* Info.plist */,
 				494E3F452603EAB9009D3CF8 /* Defaultables.swift */,
+				7E7F9B211B3615850058706A /* Info.plist */,
 			);
 			name = BricBrac;
 			path = Sources/BricBrac;
@@ -610,6 +611,7 @@
 				49DB613D20633B2300022D2C /* Brac.swift in Sources */,
 				49DB613F20633B2300022D2C /* BricBrac.swift in Sources */,
 				49DB614020633B2300022D2C /* BricIO.swift in Sources */,
+				494E3F5A26043A7C009D3CF8 /* Defaultables.swift in Sources */,
 				49DB614120633B2300022D2C /* BricIO+Foundation.swift in Sources */,
 				49DB614220633B2300022D2C /* JSONParser.swift in Sources */,
 				49DB614320633B2300022D2C /* Structures.swift in Sources */,

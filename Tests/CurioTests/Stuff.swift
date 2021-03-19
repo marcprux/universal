@@ -2,8 +2,8 @@ import BricBrac
 
 public struct Thing : Equatable, Hashable, Codable, KeyedCodable {
     public var weight: Int?
-    public static let codingKeyPaths = (\Self.weight)
-    public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.weight : CodingKeys.weight]
+    public static let codingKeyPaths = (\Self.weight as KeyPath)
+    public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.weight as KeyPath : CodingKeys.weight]
 
     public init(weight: Int? = nil) {
         self.weight = weight 
@@ -15,11 +15,8 @@ public struct Thing : Equatable, Hashable, Codable, KeyedCodable {
         self.weight = try values.decodeOptional(Int.self, forKey: .weight) 
     }
 
-    public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable, Identifiable {
+    public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable {
         case weight
-        public var id: Self {
-            self
-        }
         public var keyDescription: String? {
             switch self {
             case .weight: return nil

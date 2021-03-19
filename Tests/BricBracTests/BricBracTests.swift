@@ -745,6 +745,7 @@ class BricBracTests : XCTestCase {
             compareCocoaParsing("1\n\n", msg: "number with trailing newlines")
 
             compareCocoaParsing("0.1", msg: "fractional number with leading zero")
+            compareCocoaParsing("0.1", msg: "preceeding zero OK")
         #endif
 
 //        compareCocoaParsing("1.234567890E+34", msg: "number with upper-case exponent")
@@ -753,7 +754,6 @@ class BricBracTests : XCTestCase {
         compareCocoaParsing("[0e]", msg: "number with trailing e at end of array")
         compareCocoaParsing("[0e+]", msg: "number with trailing e+ at end of array")
 
-        compareCocoaParsing("0.1", msg: "preceeding zero OK")
         compareCocoaParsing("01", msg: "preceeding zero should fail")
         compareCocoaParsing("01.23", msg: "preceeding zero should fail")
         compareCocoaParsing("01.01", msg: "preceeding zero should fail")

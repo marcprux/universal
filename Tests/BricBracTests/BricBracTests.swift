@@ -2241,7 +2241,7 @@ extension BricBracTests {
                 var name: String
             }
 
-            @IdMap var idMap: [ValueId: Value]?
+            @IdMap var idMap: [ValueId: Value]
         }
 
         var demo = IdMapDemo()
@@ -2253,9 +2253,9 @@ extension BricBracTests {
         let value2 = IdMapDemo.Value(id: .init(rawValue: .fixedUUID(2)), name: "Second")
 
         XCTAssertEqual(demo, try demo.roundtripped())
-        demo.idMap![value1.id!] = value1
+        demo.idMap[value1.id!] = value1
         XCTAssertEqual(demo, try demo.roundtripped())
-        demo.idMap![value2.id!] = value2
+        demo.idMap[value2.id!] = value2
         XCTAssertEqual(demo, try demo.roundtripped())
 
         XCTAssertEqual(try demo.encodedStringFormatted(), """

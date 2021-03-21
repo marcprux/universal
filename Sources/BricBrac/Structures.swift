@@ -1150,23 +1150,6 @@ extension OneOf2 : RawRepresentable where T1 : RawRepresentable, T2 : RawReprese
 extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
 extension OneOf2 : Hashable where T1 : Hashable, T2 : Hashable { }
 
-//@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-//extension OneOf2 : Identifiable where T1 : Identifiable, T2 : Identifiable, T1.ID == T2.ID {
-//    public typealias ID = T1.ID
-//
-//    public var id: ID {
-//        self[routing: (\.id, \.id)]
-//    }
-//}
-//
-//extension OneOf2 : Actualizable where T1 : Actualizable, T2 : Actualizable, T1.ID == T2.ID, ID.Wrapped : RawInitializable, ID.Wrapped.RawValue : IdentifierString {
-//    public var id: ID {
-//        get { self[routing: (\.id, \.id)] }
-//        set { self[routing: (\.id, \.id)] = newValue }
-//    }
-//}
-
-
 public extension OneOf2 {
     /// Apply the separate mapping functions for the individual options.
     /// - Parameters:

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4932B3FE206A79B100424366 /* BricEncoder.swift */; };
+		49391FE6260930D300178BDB /* JSONSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49391FCA2609237C00178BDB /* JSONSchema.swift */; };
+		49391FF32609313200178BDB /* JSONSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49391FCA2609237C00178BDB /* JSONSchema.swift */; };
 		494E3F462603EAB9009D3CF8 /* Defaultables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494E3F452603EAB9009D3CF8 /* Defaultables.swift */; };
 		494E3F5A26043A7C009D3CF8 /* Defaultables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 494E3F452603EAB9009D3CF8 /* Defaultables.swift */; };
 		49BD181B20CD578D00692A3D /* CurioDemoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49BD181A20CD578D00692A3D /* CurioDemoModels.swift */; };
@@ -110,6 +112,7 @@
 
 /* Begin PBXFileReference section */
 		4932B3FE206A79B100424366 /* BricEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BricEncoder.swift; sourceTree = "<group>"; };
+		49391FCA2609237C00178BDB /* JSONSchema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
 		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		494E3F452603EAB9009D3CF8 /* Defaultables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaultables.swift; sourceTree = "<group>"; };
 		49BD181A20CD578D00692A3D /* CurioDemoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurioDemoModels.swift; sourceTree = "<group>"; };
@@ -281,6 +284,7 @@
 				4932B3FE206A79B100424366 /* BricEncoder.swift */,
 				7EFA1FFC1B5D72DC00B2F12E /* BricIO+Foundation.swift */,
 				7E10201F1B858F6000171AFE /* JSONParser.swift */,
+				49391FCA2609237C00178BDB /* JSONSchema.swift */,
 				7E8930141BEA570A00F245C5 /* Structures.swift */,
 				494E3F452603EAB9009D3CF8 /* Defaultables.swift */,
 				7E7F9B211B3615850058706A /* Info.plist */,
@@ -585,6 +589,7 @@
 				7E7F9B391B36159A0058706A /* Bric.swift in Sources */,
 				4932B3FF206A79B100424366 /* BricEncoder.swift in Sources */,
 				7EC35EB71B8BAA0D00F41665 /* BricPointer.swift in Sources */,
+				49391FF32609313200178BDB /* JSONSchema.swift in Sources */,
 				7E1020201B858F6000171AFE /* JSONParser.swift in Sources */,
 				494E3F462603EAB9009D3CF8 /* Defaultables.swift in Sources */,
 				7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */,
@@ -607,7 +612,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				49DB613B20633B2300022D2C /* Bric.swift in Sources */,
-				49DB613C20633B2300022D2C /* BricPointer.swift in Sources */,
 				49DB613D20633B2300022D2C /* Brac.swift in Sources */,
 				49DB613F20633B2300022D2C /* BricBrac.swift in Sources */,
 				49DB614020633B2300022D2C /* BricIO.swift in Sources */,
@@ -615,10 +619,12 @@
 				49DB614120633B2300022D2C /* BricIO+Foundation.swift in Sources */,
 				49DB614220633B2300022D2C /* JSONParser.swift in Sources */,
 				49DB614320633B2300022D2C /* Structures.swift in Sources */,
-				49DB613820633AD100022D2C /* Curio+Cocoa.swift in Sources */,
 				49DB613920633AD100022D2C /* Schema.swift in Sources */,
 				49DB613A20633AD100022D2C /* SwiftCode.swift in Sources */,
+				49DB613C20633B2300022D2C /* BricPointer.swift in Sources */,
 				49DB613720633ABE00022D2C /* Curio.swift in Sources */,
+				49DB613820633AD100022D2C /* Curio+Cocoa.swift in Sources */,
+				49391FE6260930D300178BDB /* JSONSchema.swift in Sources */,
 				7E8E745D1B9F31E8004EA61F /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -821,6 +827,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-expression-type-checking=500";
 				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator watchos";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";

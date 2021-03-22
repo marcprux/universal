@@ -2,7 +2,7 @@ import BricBrac
 
 public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     public var allOfField: AllOfField
-    public var anyOfField: AnyOfField
+    public var anyOfField: AnyOfFieldChoice
     public var oneOfField: OneOfFieldChoice
     /// Should not escape keyword arguments
     public var keywordFields: KeywordFields?
@@ -13,7 +13,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
     public static let codingKeyPaths = (\Self.allOfField as KeyPath, \Self.anyOfField as KeyPath, \Self.oneOfField as KeyPath, \Self.keywordFields as KeyPath, \Self.list as KeyPath, \Self.nested1 as KeyPath, \Self.simpleOneOf as KeyPath)
     public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.allOfField as KeyPath : CodingKeys.allOfField, \Self.anyOfField as KeyPath : CodingKeys.anyOfField, \Self.oneOfField as KeyPath : CodingKeys.oneOfField, \Self.keywordFields as KeyPath : CodingKeys.keywordFields, \Self.list as KeyPath : CodingKeys.list, \Self.nested1 as KeyPath : CodingKeys.nested1, \Self.simpleOneOf as KeyPath : CodingKeys.simpleOneOf]
 
-    public init(allOfField: AllOfField, anyOfField: AnyOfField, oneOfField: OneOfFieldChoice, keywordFields: KeywordFields? = nil, list: [ListItem]? = nil, nested1: Nested1? = nil, simpleOneOf: SimpleOneOfChoice? = nil) {
+    public init(allOfField: AllOfField, anyOfField: AnyOfFieldChoice, oneOfField: OneOfFieldChoice, keywordFields: KeywordFields? = nil, list: [ListItem]? = nil, nested1: Nested1? = nil, simpleOneOf: SimpleOneOfChoice? = nil) {
         self.allOfField = allOfField 
         self.anyOfField = anyOfField 
         self.oneOfField = oneOfField 
@@ -27,7 +27,7 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases) 
         let values = try decoder.container(keyedBy: CodingKeys.self) 
         self.allOfField = try values.decode(AllOfField.self, forKey: .allOfField) 
-        self.anyOfField = try values.decode(AnyOfField.self, forKey: .anyOfField) 
+        self.anyOfField = try values.decode(AnyOfFieldChoice.self, forKey: .anyOfField) 
         self.oneOfField = try values.decode(OneOfFieldChoice.self, forKey: .oneOfField) 
         self.keywordFields = try values.decodeOptional(KeywordFields.self, forKey: .keywordFields) 
         self.list = try values.decodeOptional([ListItem].self, forKey: .list) 
@@ -105,10 +105,10 @@ public struct SampleModel : Equatable, Hashable, Codable, KeyedCodable {
         }
     }
 
-    public typealias AnyOfField = AnyOfFieldTypes.Some
+    public typealias AnyOfFieldChoice = AnyOfFieldTypes.Choice
     public enum AnyOfFieldTypes {
 
-        public typealias Some = AnyOf2<FirstAny?, SecondAny?>
+        public typealias Choice = OneOf<FirstAny>.Or<SecondAny>
 
         /// FirstAny
         public struct FirstAny : Equatable, Hashable, Codable, KeyedCodable {

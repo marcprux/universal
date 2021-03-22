@@ -48,10 +48,10 @@ public struct Curio {
     public var useAllOfEnums = true
 
     /// Whether to output optional sum types as a typealias to a BricBrac.AnyOf<T1, T2, ...> enum
-    public var useAnyOfEnums = true
+    public var useAnyOfEnums = false
 
     /// Whether AnyOf elements should be treated as OneOf elements
-    public var anyOfAsOneOf = false
+    public var anyOfAsOneOf = true
 
     /// Whether to generate `KeyedCodable` conformance
     public var generateKeyedCodable = true
@@ -71,6 +71,9 @@ public struct Curio {
 
     /// The suffic for a OneOf choice enum
     public var oneOfSuffix = "Choice"
+
+    /// When a `oneOf` type has an `object` choice that contains properties, this is the suffix that will be appended to the type name
+    public var objectChoiceSuffix = "Root"
 
     /// The suffic for a AllOf choice enum
     public var allOfSuffix = "Sum"
@@ -117,7 +120,7 @@ public struct Curio {
     public enum EnumCase { case upper, lower }
 
     /// special prefixes to trim (adheres to the convention that top-level types go in the "defintions" level)
-    public var trimPrefixes = ["#/definitions/", "#/defs/"]
+    public var trimPrefixes = ["#/definitions/", "#/defs/", "#/refs"]
 
     /// The suffix to append to generated types
     public var typeSuffix = ""
@@ -384,6 +387,18 @@ public struct Curio {
         let name: String?
         var required: Bool
         let schema: Schema
+
+        init(name: String?, required: Bool, schema: Schema) {
+            self.name = name
+            self.required = required
+            self.schema = schema
+        }
+
+        init(name: String?, required: Bool, schemaChoice: OneOf2<Bool, Schema>) {
+            self.name = name
+            self.required = required
+            self.schema = schemaChoice.infer() ?? Schema()
+        }
     }
 
     struct PropDec {
@@ -410,7 +425,7 @@ public struct Curio {
         
         let ordered = properties.sorted { a, b in return ordering.firstIndex(of: a.0)! <= ordering.firstIndex(of: b.0)! }
         let req = Set(schema.required ?? [])
-        let props: [PropInfo] = ordered.map({ PropInfo(name: $0, required: req.contains($0), schema: $1) })
+        let props: [PropInfo] = ordered.map({ PropInfo(name: $0, required: req.contains($0), schemaChoice: $1.swapFirstAndLast) })
         return props
     }
 
@@ -505,13 +520,13 @@ public struct Curio {
                 let casetype: CodeType
 
                 switch sub.type {
-                case .some(.v1(.string)) where sub._enum == nil && sub.const == nil: casetype = CodeExternalType.string
+                case .some(.v1(.string)) where sub.`enum` == nil && sub.const == nil: casetype = CodeExternalType.string
                 case .some(.v1(.number)): casetype = CodeExternalType.number
                 case .some(.v1(.boolean)): casetype = CodeExternalType.boolean
                 case .some(.v1(.integer)): casetype = CodeExternalType.integer
                 case .some(.v1(.null)): casetype = CodeExternalType.null
                 default:
-                    if let values = sub._enum ?? sub.const.flatMap({ [$0] }) {
+                    if let values = sub.`enum` ?? sub.const.flatMap({ [$0] }) {
                         let literalEnum = try createLiteralEnum(values: values)
                         code.nestedTypes.append(literalEnum) // we will later try to promote any CodeSimpleEnum<String> to be a peer of an alias type
                         casetype = literalEnum
@@ -595,7 +610,7 @@ public struct Curio {
                     let encapsulated = createRawWrapper(name: ename, wrappedType: oneOfType(casetypes), nestedTypes: code.nestedTypes, access: accessor(parents))
                     return encapsulated
                 } else if code.nestedTypes.count == constantEnums.count { // if there are no nested types, or they are all constant enums, we can simply return a typealias to the OneOfX type
-                    return aliasOneOf(casetypes, name: ename, optional: false, defined: parents.isEmpty, peerTypes: constantEnums)
+                    return aliasOneOf(casetypes, name: ename, optional: false, wrap: parents.isEmpty, peerTypes: constantEnums)
                 } else { // otherwise we need to continue to use the nested inner types in a hollow enum and return the typealias
                     let aliasName = ename + (parents.isEmpty ? "" : choiceName) // top-level aliases are fully-qualified types because they are defined in defs and refs
                     // the enum code now just contains the nested types, so copy over only the embedded types
@@ -663,22 +678,23 @@ public struct Curio {
             parents = Array(parents.dropLast())
 
             if subTypes.count > 0 {
-                return aliasOneOf(subTypes, name: assoc.name, optional: optional, defined: parents.isEmpty)
+                return aliasOneOf(subTypes, name: assoc.name, optional: optional, wrap: parents.isEmpty)
             }
 
             return assoc
         }
 
-        func aliasOneOf(_ subTypes: [CodeType], name typename: CodeTypeName, optional: Bool, defined: Bool, encapsulate: Bool? = nil, peerTypes: [CodeNamedType] = []) -> CodeNamedType {
+        func aliasOneOf(_ subTypes: [CodeType], name typename: CodeTypeName, optional: Bool, wrap: Bool, encapsulate: Bool? = nil, peerTypes: [CodeNamedType] = []) -> CodeNamedType {
             // There's no OneOf1; this can happen e.g. when a schema has types: ["double", "null"]
             // In these cases, simply return an alias to the types
 
             // typealiases to OneOfX work but are difficult to extend (e.g., generic types cannot conform to the same protocol with different type constraints), so we add an additional level of serialization-compatible indirection
-            if let encapsulatedType = self.encapsulate[typename] ?? (encapsulate == true ? CodeExternalType(typename) : nil), peerTypes.isEmpty, !optional, subTypes.count > 1, defined {
+            if let encapsulatedType = self.encapsulate[typename] ?? (encapsulate == true ? CodeExternalType(typename) : nil), peerTypes.isEmpty, !optional, subTypes.count > 1,
+                wrap == true {
                 let wrapType = encapsulatedType.name == typename ? oneOfType(subTypes) : encapsulatedType
                 return createRawWrapper(name: typename, wrappedType: wrapType, access: accessor(parents))
             } else {
-                let aname = defined ? typename : (unescape(typename) + oneOfSuffix)
+                let aname = wrap == true ? typename : (unescape(typename) + oneOfSuffix)
                 let type = subTypes.count == 1 ? subTypes[0] : oneOfType(subTypes)
                 var alias = CodeTypeAlias(name: aname, type: optional ? optionalType(type) : type, access: accessor(parents), peerTypes: peerTypes)
                 alias.comments = comments
@@ -793,7 +809,7 @@ public struct Curio {
                     proptype = CodeExternalType(tname, access: accessor(parents + [typename]))
                 } else {
                     switch schema.type {
-                    case .some(.v1(.string)) where schema._enum == nil && schema.const == nil: proptype = CodeExternalType.string
+                    case .some(.v1(.string)) where schema.`enum` == nil && schema.const == nil: proptype = CodeExternalType.string
                     case .some(.v1(.number)): proptype = CodeExternalType.number
                     case .some(.v1(.boolean)): proptype = CodeExternalType.boolean
                     case .some(.v1(.integer)): proptype = CodeExternalType.integer
@@ -886,7 +902,7 @@ public struct Curio {
             // e.g., `"additionalProperties": { "type": "number" }` should generate:
             // typealias AdditionalPropertiesValue = Double
             // var additionalProperties: [String: AdditionalPropertiesValue]?
-            switch schema.additionalProperties {
+            switch schema.additionalProperties?.swapFirstAndLast {
             case .none:
                 hasAdditionalProps = nil // TODO: make a global default for whether unspecified additionalProperties means yes or no
             case .some(.v1(false)):
@@ -1056,8 +1072,8 @@ public struct Curio {
                 code.funcs.append(initimp)
             }
 
-            /// Creates a custom decoder for special `Optional<Nullable<T>>` handling (which the synthesized decoders don't handle correctly)
-            func makeDecodable(permitSynthesizedImplementation: Bool = false) {
+            /// Creates a custom decoder for special `Optional<Indirect<T>>` handling (which the synthesized decoders don't handle correctly)
+            func makeDecodable() {
                 var decodebody: [String] = [ ]
 
                 if schema.additionalProperties == nil || schema.additionalProperties?.infer() == false {
@@ -1073,13 +1089,15 @@ public struct Curio {
                     if let typ = p.declaration.type {
                         var id = typ.identifier
                         if id.hasSuffix("!") { id = String(id.dropLast(1)) }
+                        
                         let kname = keyName(d)
-                        if id.hasSuffix("?") {
-                            id = String(id.dropLast(1)) // decode non-optional version
-
-                            decodebody.append("self.\(d.name) = try values.decodeOptional(\(id).self, forKey: .\(kname))")
-                        } else {
-                            decodebody.append("self.\(d.name) = try values.decode(\(id).self, forKey: .\(kname))")
+                        if p.body.isEmpty { // only decode non-synthesized properties
+                            if id.hasSuffix("?") {
+                                id = String(id.dropLast(1)) // decode non-optional version
+                                decodebody.append("self.\(d.name) = try values.decodeOptional(\(id).self, forKey: .\(kname))")
+                            } else {
+                                decodebody.append("self.\(d.name) = try values.decode(\(id).self, forKey: .\(kname))")
+                            }
                         }
                     }
                 }
@@ -1142,6 +1160,8 @@ public struct Curio {
             case .none: items = []
             case .some(.v1(let value)): items = [value]
             case .some(.v2(let values)): items = .init(values)
+            case .some(.v3(true)): items = [Schema()]
+            case .some(.v3(false)): items = []
             }
 
             if items.isEmpty {
@@ -1216,14 +1236,14 @@ public struct Curio {
                     enumType.name = enumType.name + enumType.associatedTypeName // suffix the type with the type
                     return enumType
                 }
-                return aliasOneOf(enumTypes, name: name ?? valueTypeNames, optional: false, defined: true, peerTypes: enumTypes)
+                return aliasOneOf(enumTypes, name: name ?? valueTypeNames, optional: false, wrap: true, peerTypes: enumTypes)
             }
         }
 
         let type = schema.type
         let typename = typeName(parents, id)
         let explicitName = id.hasPrefix("#") // explicit named like "#/definitions/LocalMultiTimeUnit" must be used literally
-        if var values = schema._enum ?? schema.const.flatMap({ [$0] }) {
+        if var values = schema.`enum` ?? schema.const.flatMap({ [$0] }) {
             // when creating a string enum, explcit names must be used, otherwise we generate a name like "LiteralXOrYOrZ"
             var containsNul = false
             if let nulIndex = values.firstIndex(of: .nul) {
@@ -1236,18 +1256,37 @@ public struct Curio {
         } else if case .some(.v2(let multiType)) = type {
             // "type": ["string", "number"]
             var subTypes: [CodeType] = []
+            var peerTypes: [CodeNamedType] = []
             for type in multiType {
                 switch type {
-                case .array: subTypes.append(arrayType(CodeExternalType.bric))
-                case .boolean: subTypes.append(CodeExternalType.boolean)
-                case .integer: subTypes.append(CodeExternalType.integer)
-                case .null: subTypes.append(CodeExternalType.null)
-                case .number: subTypes.append(CodeExternalType.number)
-                case .object: subTypes.append(CodeExternalType.bric)
-                case .string: subTypes.append(CodeExternalType.string)
+                case .array:
+                    subTypes.append(arrayType(CodeExternalType.bric))
+                case .boolean:
+                    subTypes.append(CodeExternalType.boolean)
+                case .integer:
+                    subTypes.append(CodeExternalType.integer)
+                case .null:
+                    subTypes.append(CodeExternalType.null)
+                case .number:
+                    subTypes.append(CodeExternalType.number)
+                case .string:
+                    subTypes.append(CodeExternalType.string)
+
+                case .object:
+                    // in the special case of a type that itself contains properties and one of the types is an "object", then that object will be the reified form of this schema
+                    if let properties = schema.properties, !properties.isEmpty {
+                        let props = getPropInfo(schema, id: id, parents: parents)
+                        let ob = try createObject(typename + objectChoiceSuffix, properties: props, mode: .standard)
+                        peerTypes.append(ob)
+                        subTypes.append(ob)
+                    } else {
+                        subTypes.append(CodeExternalType.bric)
+                    }
                 }
             }
-            return aliasOneOf(subTypes, name: typename, optional: false, defined: parents.isEmpty)
+
+            let wrapType = parents.isEmpty == true
+            return aliasOneOf(subTypes, name: typename, optional: false, wrap: wrapType, peerTypes: peerTypes)
         } else if case .some(.v1(.string)) = type {
             return aliasSimpleType(name: typename, type: CodeExternalType.string)
         } else if case .some(.v1(.integer)) = type {
@@ -1273,7 +1312,7 @@ public struct Curio {
 //                    props.appendContentsOf(getPropInfo(subProps))
 //                    // TODO: sub-schema "required" array
 //                } else {
-                    props.append(PropInfo(name: nil, required: true, schema: propSchema))
+                props.append(PropInfo(name: nil, required: true, schema: propSchema))
 //                }
             }
             return try createObject(typename, properties: props, mode: .allOf)
@@ -1297,7 +1336,7 @@ public struct Curio {
             let tname = typeName(parents, ref)
             let extern = CodeExternalType(tname)
             return CodeTypeAlias(name: typename == tname ? typename + "Type" : typename, type: extern, access: accessor(parents))
-        } else if let not = schema.not?.wrappedValue, (try not.bricEncoded()).count > 0 { // a "not" generates a validator against an inverse schema, but only if it isn't empty
+        } else if let not = schema.not?.wrappedValue, not != Schema() { // a "not" generates a validator against an inverse schema, but only if it isn't empty
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)
             return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peerTypes: [inverseSchema])
@@ -1308,11 +1347,11 @@ public struct Curio {
 //            return CodeTypeAlias(name: typename, type: notBracType(reqSchema), access: accessor(parents), peerTypes: [reqSchema])
         } else if isBricType(schema) { // an empty schema just generates pure Bric
             return CodeTypeAlias(name: typename, type: CodeExternalType.bric, access: accessor(parents))
-        } else if case .some(.v1(.object)) = type, case let .some(.v2(adp)) = schema.additionalProperties {
+        } else if case .some(.v1(.object)) = type, case let .some(.v1(adp)) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Type]
             let adpType = try reify(adp, id: typename + "Value", parents: parents)
             return CodeTypeAlias(name: typename, type: dictionaryType(CodeExternalType.string, adpType), access: accessor(parents), peerTypes: [adpType])
-        } else if case .some(.v1(.object)) = type, case .some(.v1(true)) = schema.additionalProperties {
+        } else if case .some(.v1(.object)) = type, case .some(.v2(true)) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Bric]
             //print("warning: making Brictionary for code: \(schema.bric().stringify())")
             return CodeTypeAlias(name: typename, type: CodeExternalType.object, access: self.accessor(parents))

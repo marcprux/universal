@@ -629,19 +629,6 @@ public protocol KeyedCodable : Codable {
     associatedtype CodingKeys : CodingKey & Hashable
 }
 
-public extension KeyedCodable where CodingKeys : RawRepresentable, CodingKeys.RawValue == String {
-    /// Swaps the values of two separate coding keys. This can be used, for example, to re-assign two different types that are serialization-compatible but not type-compatible.
-    /// - Parameter keys: the two keys to swap
-    @inlinable mutating func swapBricValues(keys: (CodingKeys, CodingKeys)) throws {
-        var bric = try self.bricEncoded()
-        let v0 = bric[keys.0.rawValue]
-        let v1 = bric[keys.1.rawValue]
-        bric[keys.0.rawValue] = v1
-        bric[keys.1.rawValue] = v0
-        self = try bric.decode(Self.self)
-    }
-}
-
 public protocol FixedCodingKeys : CaseIterable, CodingKey {
 
 }

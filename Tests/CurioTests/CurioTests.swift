@@ -211,7 +211,7 @@ class CurioTests: XCTestCase {
 
             for file in try fm.contentsOfDirectory(atPath: folder) {
                 do {
-                    if !file.hasSuffix(".jsonschema") { continue }
+                    if !file.hasSuffix(".jsonschema") && !file.hasSuffix(".json.schema") { continue }
 
                     let fullPath = (folder as NSString).appendingPathComponent(file)
                     let bric = try Bric.parse(String(contentsOfFile: fullPath))
@@ -219,22 +219,37 @@ class CurioTests: XCTestCase {
                     var curio = Curio()
                     curio.accessor = { _ in .public }
                     curio.renamer = { (_, id) in
-                        if id == "#" { return "Schema" }
+                        if id == "#" { return "JSONSchema" }
                         return nil
+                    }
+
+                    if file == "JSONSchema.jsonschema" || file == "JSONSchema.json.schema" {
+                        // no point in making the annoteted method, since the JSON Schema doesn't contains descriptions of properties
+                        curio.keyDescriptionMethod = false
+                        curio.anyOfAsOneOf = true
                     }
 
                     let module = CodeModule()
 
                     var refschema : [String : Schema] = [:]
                     for (key, value) in try bric.resolve() {
-                        let subschema = try Schema.bracDecoded(bric: value)
+                        var subschema = try Schema.bracDecoded(bric: value)
+
+                        if file == "JSONSchema.jsonschema" || file == "JSONSchema.json.schema" {
+                            // hack in the proposed `propertyOrder` for JSON Schema until there is some native solution:
+                            // see: https://github.com/json-schema/json-schema/issues/119
+                            // other impl: https://github.com/quicktype/quicktype/pull/1340
+                            var propertyOrder = Schema(type: .array)
+                            propertyOrder.items = .init(.init(type: .string))
+                            subschema.properties.faulted["propertyOrder"] = .init(propertyOrder)
+                        }
+
                         refschema[key] = subschema
                         let code = try curio.reify(subschema, id: key, parents: [])
+
+
                         module.types.append(code)
                     }
-
-                    // TODO: schema doesn't compile yet
-                    if file == "schema.jsonschema" { continue }
 
                     let id = (file as NSString).deletingPathExtension
                     let _ = try curio.emit(module, name: id + ".swift", dir: (#file as NSString).deletingLastPathComponent)

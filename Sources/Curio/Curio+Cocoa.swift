@@ -8,8 +8,9 @@
 
 /// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
 
-#if canImport(AppKit)
-import AppKit
+#if canImport(Cocoa)
+import Cocoa
+import BricBrac
 
 public extension Curio {
     /// Outputs a Swift file with the types for the given module. If the output text is the same as the destination

@@ -16,7 +16,6 @@
 		49BD181D20CD594600692A3D /* schemas in Resources */ = {isa = PBXBuildFile; fileRef = 49BD181C20CD594600692A3D /* schemas */; };
 		49DB613720633ABE00022D2C /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		49DB613820633AD100022D2C /* Curio+Cocoa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */; };
-		49DB613920633AD100022D2C /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
 		49DB613A20633AD100022D2C /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
 		49DB613B20633B2300022D2C /* Bric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F9B361B36159A0058706A /* Bric.swift */; };
 		49DB613C20633B2300022D2C /* BricPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC35EB61B8BAA0D00F41665 /* BricPointer.swift */; };
@@ -34,7 +33,6 @@
 		7E28A5B61B5ACA9B00A5F27F /* BricBrac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */; };
 		7E28A5C61B5AD5EE00A5F27F /* Curio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */; };
 		7E28A5CB1B5AD5EE00A5F27F /* CurioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5CA1B5AD5EE00A5F27F /* CurioTests.swift */; };
-		7E28A5D61B5AD66A00A5F27F /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D31B5AD66A00A5F27F /* Schema.swift */; };
 		7E28A5D71B5AD66A00A5F27F /* Curio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D41B5AD66A00A5F27F /* Curio.swift */; };
 		7E28A5D81B5AD66A00A5F27F /* SwiftCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */; };
 		7E28A5DD1B5ADD3500A5F27F /* SampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */; };
@@ -134,7 +132,6 @@
 		7E28A5C51B5AD5EE00A5F27F /* CurioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CurioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E28A5CA1B5AD5EE00A5F27F /* CurioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurioTests.swift; sourceTree = "<group>"; };
 		7E28A5CC1B5AD5EE00A5F27F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7E28A5D31B5AD66A00A5F27F /* Schema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
 		7E28A5D41B5AD66A00A5F27F /* Curio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Curio.swift; sourceTree = "<group>"; };
 		7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftCode.swift; sourceTree = "<group>"; };
 		7E28A5DC1B5ADD3500A5F27F /* SampleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleModel.swift; sourceTree = "<group>"; };
@@ -231,7 +228,6 @@
 			children = (
 				7E28A5D41B5AD66A00A5F27F /* Curio.swift */,
 				7EFA1FFE1B5D735400B2F12E /* Curio+Cocoa.swift */,
-				7E28A5D31B5AD66A00A5F27F /* Schema.swift */,
 				7E28A5D51B5AD66A00A5F27F /* SwiftCode.swift */,
 				7E28A5C01B5AD5EE00A5F27F /* Info.plist */,
 				7E348EE21B9F3DD700945F86 /* Curio.h */,
@@ -576,7 +572,6 @@
 				7E28A5D71B5AD66A00A5F27F /* Curio.swift in Sources */,
 				7E28A5D81B5AD66A00A5F27F /* SwiftCode.swift in Sources */,
 				7EFA1FFF1B5D735400B2F12E /* Curio+Cocoa.swift in Sources */,
-				7E28A5D61B5AD66A00A5F27F /* Schema.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -627,7 +622,6 @@
 				49DB614120633B2300022D2C /* BricIO+Foundation.swift in Sources */,
 				49DB614220633B2300022D2C /* JSONParser.swift in Sources */,
 				49DB614320633B2300022D2C /* Structures.swift in Sources */,
-				49DB613920633AD100022D2C /* Schema.swift in Sources */,
 				49DB613A20633AD100022D2C /* SwiftCode.swift in Sources */,
 				49DB613C20633B2300022D2C /* BricPointer.swift in Sources */,
 				49DB613720633ABE00022D2C /* Curio.swift in Sources */,

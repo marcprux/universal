@@ -3,6 +3,7 @@
 ## Build generated
 build/
 .build/
+.swiftpm/
 DerivedData/
 
 ## Various settings

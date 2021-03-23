@@ -11,6 +11,13 @@ import BricBrac
 import Curio
 
 class CurioTests: XCTestCase {
+    /// Ensure that we can load a `JSONSchema` from it's own source (which is stored in the global `JSONSchemaSource`)
+    func testLoadFromSchemaSource() throws {
+        let schema = try JSONSchema.loadFromJSON(data: JSONSchema.schemaSource.data(using: .utf8) ?? Data())
+        XCTAssertEqual(schema, try JSONSchema.schemaSchema.get())
+        XCTAssertEqual("Core schema meta-schema", schema.title)
+    }
+
     /// This is a sample schema file
     func testSampleSchema() throws {
         let schemaBric: Bric = [
@@ -214,10 +221,7 @@ class CurioTests: XCTestCase {
                 var outputDir = baseDir
 
                 // the JSON schema is special: it will be the one that BricBrac includes
-                let isJSONSchema = [
-                    "JSONSchema.schema.json",
-                    "JSONSchema.jsonschema",
-                ].contains(file.lastPathComponent)
+                let isJSONSchema = file.lastPathComponent == "JSONSchema.schema.json"
 
                 if isJSONSchema {
                     // instead of putting the output in the CurioTests, put it directly in the BricBrac Sources
@@ -230,7 +234,9 @@ class CurioTests: XCTestCase {
                     // no point in making the annoteted method, since the JSON Schema doesn't contains descriptions of properties
                     curio.keyDescriptionMethod = false
                     curio.anyOfAsOneOf = true
+                    curio.includeSchemaSourceVar = "JSONSchema.schemaSource" // include the raw schema source as a static string
 
+                    // the default naming would have JSONSchema = OneOf2<JSONSchemaElement, Bool>, which is sort of weird; this will flip the naming so the top-level `JSONSchema` is the actual schema with properties
                     curio.renamer = { (_, id) in
                         if id == "#" {
                             return "JSONSchemaOrBool"
@@ -246,7 +252,8 @@ class CurioTests: XCTestCase {
 
                 var refschema : [String : JSONSchema] = [:]
 
-                let bric = try Bric.parse(String(contentsOf: file))
+                let source = try String(contentsOf: file)
+                let bric = try Bric.parse(source)
 
                 for (key, value) in try bric.resolve() {
                     var subschema = try JSONSchema(bric: value)
@@ -272,7 +279,7 @@ class CurioTests: XCTestCase {
                     .deletingPathExtension() // twice to get rid of both `schema` and `json`
                     .lastPathComponent
 
-                let _ = try curio.emit(module, name: id + ".swift", dir: outputDir.path)
+                let _ = try curio.emit(module, name: id + ".swift", dir: outputDir.path, source: source)
             } catch {
                 XCTFail("schema «\(file)» failed: \(error)")
             }

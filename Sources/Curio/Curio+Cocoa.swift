@@ -12,13 +12,34 @@
 import AppKit
 
 public extension Curio {
-    func emit(_ module: CodeModule, name: String, dir: String) throws -> Bool {
+    /// Outputs a Swift file with the types for the given module. If the output text is the same as the destination
+    /// file, then nothing will be output and the file will remain untouched, making this tool suitable to use
+    /// as part of a build process (since it will not unnecessarily dirty a file).
+    ///
+    /// - Parameters:
+    ///   - module: the module to output
+    ///   - name: the rootname
+    ///   - dir: the folder
+    ///   - source: the schema source file (optional: to be included with `includeSchemaSourceVar`)
+    /// - Returns: true if the schema was output successfully *and* it was different than any pre-existing file that is present
+    func emit(_ module: CodeModule, name: String, dir: String, source: String? = nil) throws -> Bool {
         let locpath = (dir as NSString).appendingPathComponent(name)
 
         let emitter = CodeEmitter(stream: "")
         module.emit(emitter)
 
-        let code = emitter.stream
+        var code = emitter.stream
+
+        /// Embed the schema source string directly in the output file; the string can itself be parsed into a `JSONSchema` instance.
+        if let includeSchemaSourceVar = includeSchemaSourceVar,
+           let source = source {
+            let parts = includeSchemaSourceVar.split(separator: ".")
+            if parts.count == 2 {
+                code += "\n\npublic extension \(parts[0]) {\n    /// The source of the JSON Schema for this type.\n    static let \(parts[1]): String = \"\"\"\n\(source)\n\"\"\"\n}\n"
+            } else {
+                code += "public var \(includeSchemaSourceVar) = \"\"\"\n\(source)\n\"\"\""
+            }
+        }
         let tmppath = (NSTemporaryDirectory() as NSString).appendingPathComponent(name)
         try code.write(toFile: tmppath, atomically: true, encoding: String.Encoding.utf8)
 

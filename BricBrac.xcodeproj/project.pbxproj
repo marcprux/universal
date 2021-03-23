@@ -85,8 +85,6 @@
 		49391FCA2609237C00178BDB /* JSONSchema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
 		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		494E3F452603EAB9009D3CF8 /* Defaultables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaultables.swift; sourceTree = "<group>"; };
-		49BD181C20CD594600692A3D /* schemas */ = {isa = PBXFileReference; lastKnownFileType = folder; path = schemas; sourceTree = "<group>"; };
-		49DB61552063426E00022D2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7E10201F1B858F6000171AFE /* JSONParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONParser.swift; sourceTree = "<group>"; };
 		7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricBrac.swift; sourceTree = "<group>"; };
 		7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Curio.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -165,15 +163,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		49DB61532063426E00022D2C /* CurioDemoModels */ = {
-			isa = PBXGroup;
-			children = (
-				49BD181C20CD594600692A3D /* schemas */,
-				49DB61552063426E00022D2C /* Info.plist */,
-			);
-			path = CurioDemoModels;
-			sourceTree = "<group>";
-		};
 		7E28A5BD1B5AD5EE00A5F27F /* Curio */ = {
 			isa = PBXGroup;
 			children = (
@@ -208,7 +197,6 @@
 				7E28A5BD1B5AD5EE00A5F27F /* Curio */,
 				7E8E745B1B9F31E8004EA61F /* CurioTool */,
 				7E28A5C91B5AD5EE00A5F27F /* CurioTests */,
-				49DB61532063426E00022D2C /* CurioDemoModels */,
 				7E7F9B1D1B3615850058706A /* Products */,
 				49DB6128206338D900022D2C /* Frameworks */,
 			);

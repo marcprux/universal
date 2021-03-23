@@ -155,7 +155,7 @@ public struct Curio {
         case complexTypesNotAllowedInMultiType
         case illegalState(String)
         case unsupported(String)
-        indirect case illegalProperty(Schema)
+        indirect case illegalProperty(JSONSchema)
         case compileError(String)
         case emptyEnum
 
@@ -373,7 +373,7 @@ public struct Curio {
     }
 
     /// Returns true if the schema will be serialized as a raw Bric instance
-    func isBricType(_ schema: Schema) -> Bool {
+    func isBricType(_ schema: JSONSchema) -> Bool {
         return false
 //        var sch = schema
 //        // trim out extranneous values
@@ -389,31 +389,31 @@ public struct Curio {
     struct PropInfo {
         let name: String?
         var required: Bool
-        let schema: Schema
+        let schema: JSONSchema
 
-        init(name: String?, required: Bool, schema: Schema) {
+        init(name: String?, required: Bool, schema: JSONSchema) {
             self.name = name
             self.required = required
             self.schema = schema
         }
 
-        init(name: String?, required: Bool, schemaChoice: OneOf2<Bool, Schema>) {
+        init(name: String?, required: Bool, schemaChoice: OneOf2<Bool, JSONSchema>) {
             self.name = name
             self.required = required
-            self.schema = schemaChoice.infer() ?? Schema()
+            self.schema = schemaChoice.infer() ?? JSONSchema()
         }
     }
 
     struct PropDec {
         let name: String
         let required: Bool
-        let schema: Schema
+        let schema: JSONSchema
         let anon: Bool
         @available(*, deprecated, renamed: "schema")
-        var prop: Schema { schema }
+        var prop: JSONSchema { schema }
     }
 
-    func getPropInfo(_ schema: Schema, id: String, parents: [CodeTypeName]) -> [PropInfo] {
+    func getPropInfo(_ schema: JSONSchema, id: String, parents: [CodeTypeName]) -> [PropInfo] {
         let properties = schema.properties ?? [:]
 
         /// JSON Schema Draft 4 doesn't have any notion of property ordering, so we use a user-defined sorter
@@ -454,7 +454,7 @@ public struct Curio {
     }
 
     /// Reifies the given schema as a Swift data structure
-    public func reify(_ schema: Schema, id: String, parents parentsx: [CodeTypeName]) throws -> CodeNamedType {
+    public func reify(_ schema: JSONSchema, id: String, parents parentsx: [CodeTypeName]) throws -> CodeNamedType {
         var parents = parentsx
 
         func selfType(_ type: CodeType, name: String?) -> CodeTupleElement {
@@ -489,7 +489,7 @@ public struct Curio {
             return uniqueName
         }
 
-        func schemaTypeName(_ schema: Schema, types: [CodeType], suffix: String = "") -> String {
+        func schemaTypeName(_ schema: JSONSchema, types: [CodeType], suffix: String = "") -> String {
             if let titleName = schema.title.flatMap({ typeName(parents, $0) }) { return titleName }
 
             // before we fall-back to using a generic "Type" name, try to name a simple struct
@@ -506,7 +506,7 @@ public struct Curio {
             return "Type" + suffix
         }
 
-        func createOneOf(_ multi: [Schema]) throws -> CodeNamedType {
+        func createOneOf(_ multi: [JSONSchema]) throws -> CodeNamedType {
             let ename = typeName(parents, id)
             var code = CodeEnum(name: ename, access: accessor(parents))
             code.comments = comments
@@ -831,7 +831,7 @@ public struct Curio {
                         case 0:
                             proptype = arrayType(CodeExternalType.bric)
                         case 1:
-                            let item = items.first?.v1 ?? Schema()
+                            let item = items.first?.v1 ?? JSONSchema()
                             if let ref = item.ref {
                                 proptype = arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents)))
                             } else {
@@ -1158,11 +1158,11 @@ public struct Curio {
 
         func createArray(_ typename: CodeTypeName) throws -> CodeNamedType {
             // when a top-level type is an array, we make it a typealias with a type for the individual elements
-            let items: Array<Schema>
+            let items: Array<JSONSchema>
             switch schema.items {
             case .none: items = []
             case .some(.v1(.v1(let value))): items = [value]
-            case .some(.v1(.v2(true))): items = [Schema()]
+            case .some(.v1(.v2(true))): items = [JSONSchema()]
             case .some(.v1(.v2(false))): items = []
             case .some(.v2(let values)): items = values.compactMap(\.v1)
             }
@@ -1279,7 +1279,8 @@ public struct Curio {
                     // in the special case of a type that itself contains properties and one of the types is an "object", then that object will be the reified form of this schema
                     if let properties = schema.properties, !properties.isEmpty {
                         let props = getPropInfo(schema, id: id, parents: parents)
-                        let ob = try createObject(typename + objectChoiceSuffix, properties: props, mode: .standard)
+                        let subname = typename + objectChoiceSuffix
+                        let ob = try createObject(renamer(parents, subname) ?? subname, properties: props, mode: .standard)
                         peerTypes.append(ob)
                         subTypes.append(ob)
                     } else {
@@ -1348,7 +1349,7 @@ public struct Curio {
             let tname = typeName(parents, ref)
             let extern = CodeExternalType(tname)
             return CodeTypeAlias(name: typename == tname ? typename + "Type" : typename, type: extern, access: accessor(parents))
-        } else if let not = schema.not?.v1, not != Schema() { // a "not" generates a validator against an inverse schema, but only if it isn't empty
+        } else if let not = schema.not?.v1, not != JSONSchema() { // a "not" generates a validator against an inverse schema, but only if it isn't empty
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)
             return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peerTypes: [inverseSchema])
@@ -1377,7 +1378,7 @@ public struct Curio {
 
     /// Parses the given schema source into a module; if the rootSchema is non-nil, then all the schemas
     /// will be generated beneath the given root
-    public func assemble(_ schemas: [(String, Schema)], rootName: String? = nil) throws -> CodeModule {
+    public func assemble(_ schemas: [(String, JSONSchema)], rootName: String? = nil) throws -> CodeModule {
 
         var types: [CodeNamedType] = []
         for (key, schema) in schemas {
@@ -1516,7 +1517,7 @@ extension CodeNamedType {
     }
 }
 
-public extension Schema {
+public extension JSONSchema {
 
     enum BracReferenceError : Error, CustomDebugStringConvertible {
         case referenceRequiredRoot(String)
@@ -1556,23 +1557,23 @@ public extension Schema {
 //    }
 
     /// Parse the given JSON info an array of resolved schema references, maintaining property order from the source JSON
-    static func parse(_ source: String, rootName: String?) throws -> [(String, Schema)] {
+    static func parse(_ source: String, rootName: String?) throws -> [(String, JSONSchema)] {
         return try generate(impute(source), rootName: rootName)
     }
 
-    static func generate(_ json: Bric, rootName: String?) throws -> [(String, Schema)] {
+    static func generate(_ json: Bric, rootName: String?) throws -> [(String, JSONSchema)] {
         let refmap = try json.resolve()
 
-        var refschema : [String : Schema] = [:]
+        var refschema : [String : JSONSchema] = [:]
 
-        var schemas: [(String, Schema)] = []
+        var schemas: [(String, JSONSchema)] = []
         for (key, value) in refmap {
-            let subschema = try Schema.bracDecoded(bric: value)
+            let subschema = try JSONSchema.bracDecoded(bric: value)
             refschema[key] = subschema
             schemas.append((key, subschema))
         }
 
-        let schema = try Schema.bracDecoded(bric: json)
+        let schema = try JSONSchema.bracDecoded(bric: json)
         if let rootName = rootName {
             schemas.append((rootName, schema))
         }
@@ -1753,7 +1754,7 @@ extension Curio {
                 src += line
             }
             
-            let schemas = try Schema.parse(src, rootName: modelName)
+            let schemas = try JSONSchema.parse(src, rootName: modelName)
             let module = try curio.assemble(schemas)
 
             module.imports = imports

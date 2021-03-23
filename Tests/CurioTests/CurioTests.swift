@@ -181,7 +181,7 @@ class CurioTests: XCTestCase {
         ]
 
         do {
-            let schema = try Schema.bracDecoded(bric: schemaBric)
+            let schema = try JSONSchema.bracDecoded(bric: schemaBric)
             let gen = Curio()
             let code = try gen.reify(schema, id: "SampleModel", parents: [])
             let module = CodeModule()
@@ -207,22 +207,28 @@ class CurioTests: XCTestCase {
 
                 var curio = Curio()
                 curio.accessor = { _ in .public }
-                curio.renamer = { (_, id) in
-                    if id == "#" { return "JSONSchema" }
-                    return nil
-                }
 
                 if file == "JSONSchema.jsonschema" || file == "JSONSchema.json.schema" {
                     // no point in making the annoteted method, since the JSON Schema doesn't contains descriptions of properties
                     curio.keyDescriptionMethod = false
                     curio.anyOfAsOneOf = true
+
+                    curio.renamer = { (_, id) in
+                        if id == "#" {
+                            return "JSONSchemaOrBool"
+                        }
+                        if id == ("JSONSchemaOrBool" + curio.objectChoiceSuffix) {
+                            return "JSONSchema"
+                        }
+                        return nil
+                    }
                 }
 
                 let module = CodeModule()
 
-                var refschema : [String : Schema] = [:]
+                var refschema : [String : JSONSchema] = [:]
                 for (key, value) in try bric.resolve() {
-                    var subschema = try Schema.bracDecoded(bric: value)
+                    var subschema = try JSONSchema.bracDecoded(bric: value)
 
                     if file == "JSONSchema.jsonschema" ||
                         file == "JSONSchema.json.schema" {
@@ -230,7 +236,7 @@ class CurioTests: XCTestCase {
                             // hack in the proposed `propertyOrder` for JSON Schema until there is some native solution:
                             // see: https://github.com/json-schema/json-schema/issues/119
                             // other impl: https://github.com/quicktype/quicktype/pull/1340
-                            var propertyOrder = Schema(type: .init(.array))
+                            var propertyOrder = JSONSchema(type: .init(.array))
                             propertyOrder.items = .init(.init(.init(type: .init(.string))))
                             subschema.properties.faulted["propertyOrder"] = .init(propertyOrder)
                         }
@@ -238,8 +244,6 @@ class CurioTests: XCTestCase {
 
                     refschema[key] = subschema
                     let code = try curio.reify(subschema, id: key, parents: [])
-
-
                     module.types.append(code)
                 }
 

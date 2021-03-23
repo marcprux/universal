@@ -1749,7 +1749,7 @@ extension Curio {
             let emitter = CodeEmitter(stream: "")
             module.emit(emitter)
             
-            var code = emitter.stream
+            let code = emitter.stream
             print(code)
         }
     }

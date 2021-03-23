@@ -690,13 +690,13 @@ class BricBracTests : XCTestCase {
 
     /// Verify that our serialization is compatible with NSJSONSerialization
     func testBricBracCocoaCompatNumbers() throws {
+        #if false
         // FIXME: something broke around 5.1
-        if false {
             compareCocoaParsing("1.2345678", msg: "fraction alone")
             compareCocoaParsing("1.2345678 ", msg: "fraction with trailing space")
             compareCocoaParsing("1.2345678\n", msg: "fraction with trailing newline")
             compareCocoaParsing("1.2345678\n\n", msg: "fraction with trailing newlines")
-        }
+        #endif
 
         #if !os(Linux)
             compareCocoaParsing("1", msg: "number with no newline")

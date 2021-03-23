@@ -192,7 +192,7 @@ Now any file with the suffix ".jsonschema" will automatiucally have a Swift file
 
 ### Swift Package Manager (SPM)
 
-The Swift Package Manager is a dependency manager integrated with the Swift build system. To learn how to use the Swift Package Manager for your project, please read the [official documentation](https://github.com/apple/swift-package-manager/blob/master/Documentation/Usage.md).
+The Swift Package Manager is a dependency manager integrated with the Swift build system. To learn how to use the Swift Package Manager for your project, please read the [official documentation](https://github.com/apple/swift-package-manager/blob/main/Documentation/Usage.md).
 
 Add BricBrac to the `dependencies` of your `Package.swift` file and refer to that dependency in your `target`.
 

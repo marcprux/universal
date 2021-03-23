@@ -6,6 +6,8 @@
 //  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
+import BricBrac
+
 /// A JSON Schema processor that emits Swift code using the Bric-a-Brac framework for marshalling and unmarshalling.
 ///
 /// Current shortcomings:

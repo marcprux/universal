@@ -68,6 +68,13 @@
 /* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
+		4939201426098D2000178BDB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7E7F9B1B1B3615850058706A;
+			remoteInfo = BricBrac;
+		};
 		49DB615D206342C100022D2C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7E7F9B131B3615850058706A /* Project object */;
@@ -365,14 +372,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7E28A5CD1B5AD5EE00A5F27F /* Build configuration list for PBXNativeTarget "Curio" */;
 			buildPhases = (
-				7E28A5BA1B5AD5EE00A5F27F /* Resources */,
 				7E28A5B91B5AD5EE00A5F27F /* Headers */,
+				7E28A5BA1B5AD5EE00A5F27F /* Resources */,
 				7E28A5B71B5AD5EE00A5F27F /* Sources */,
 				7E28A5B81B5AD5EE00A5F27F /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				4939201526098D2000178BDB /* PBXTargetDependency */,
 			);
 			name = Curio;
 			productName = BricBracSchema;
@@ -632,6 +640,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4939201526098D2000178BDB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7E7F9B1B1B3615850058706A /* BricBrac */;
+			targetProxy = 4939201426098D2000178BDB /* PBXContainerItemProxy */;
+		};
 		49DB615E206342C100022D2C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 7E8E74591B9F31E8004EA61F /* CurioTool */;

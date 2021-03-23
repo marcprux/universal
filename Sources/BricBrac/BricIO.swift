@@ -939,7 +939,8 @@ public extension KeyedDecodingContainerProtocol {
     }
 
     /// Pass-through to `decodeIfPresent`
-    @inlinable func decodeOptional<T>(_ type: T.Type, forKey key: Self.Key) throws -> T? where T : Decodable {        try decodeIfPresent(type, forKey: key)
+    @inlinable func decodeOptional<T>(_ type: T.Type, forKey key: Self.Key) throws -> T? where T : Decodable {
+        try decodeIfPresent(type, forKey: key)
     }
 
     /// Pass-through to `decode` if the `ExplicitNull` is present in the container; permits the distinction between `null` and `undefined`.

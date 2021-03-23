@@ -12,7 +12,7 @@ import Curio
 import CurioDemoModels
 
 class CurioTests: XCTestCase {
-    
+    /// This is a sample schema file
     func testSampleSchema() throws {
         let schemaBric: Bric = [
             "$schema": "http://json-schema.org/draft-04/schema#",
@@ -190,75 +190,64 @@ class CurioTests: XCTestCase {
         }
     }
 
-//    func testDerivedSchemas() {
-//        do {
-//            // Food-schema.json
-//            let x = Food(title: "gruel", calories: 120, type: .carbohydrate)
-//            XCTAssertEqual(x.bric(), ["title": "gruel", "type": "carbohydrate", "calories": 120])
-//        }
-//
-//        do {
-//            // Products-schema.json
-//            let x = ProductsItem(id: 10, name: "Stuff", price: 12.34, tags: ["thingy", "stuffy"], dimensions: ProductsItem.Dimensions(length: 11, width: 12, height: 13), warehouseLocation: nil)
-//            XCTAssertEqual(x.bric(), ["price":12.34,"dimensions":["length":11,"width":12,"height":13],"tags":["thingy","stuffy"],"id":10,"name":"Stuff"])
-//        }
-//    }
-
-    func testSchemaFiles() {
+    func testSchemaFiles() throws {
         let fm = FileManager.default
-        do {
-            guard let folder = CurioDemoModels.schemasFolder else { return XCTFail("no schemas folder") }
+        guard let folder = CurioDemoModels.schemasFolder else {
+            return XCTFail("no schemas folder")
+        }
 
-            for file in try fm.contentsOfDirectory(atPath: folder) {
-                do {
-                    if !file.hasSuffix(".jsonschema") && !file.hasSuffix(".json.schema") { continue }
+        for file in try fm.contentsOfDirectory(atPath: folder) {
+            do {
+                if !file.hasSuffix(".jsonschema") && !file.hasSuffix(".json.schema") {
+                    continue
+                }
 
-                    let fullPath = (folder as NSString).appendingPathComponent(file)
-                    let bric = try Bric.parse(String(contentsOfFile: fullPath))
+                let fullPath = (folder as NSString).appendingPathComponent(file)
+                let bric = try Bric.parse(String(contentsOfFile: fullPath))
 
-                    var curio = Curio()
-                    curio.accessor = { _ in .public }
-                    curio.renamer = { (_, id) in
-                        if id == "#" { return "JSONSchema" }
-                        return nil
-                    }
+                var curio = Curio()
+                curio.accessor = { _ in .public }
+                curio.renamer = { (_, id) in
+                    if id == "#" { return "JSONSchema" }
+                    return nil
+                }
 
-                    if file == "JSONSchema.jsonschema" || file == "JSONSchema.json.schema" {
-                        // no point in making the annoteted method, since the JSON Schema doesn't contains descriptions of properties
-                        curio.keyDescriptionMethod = false
-                        curio.anyOfAsOneOf = true
-                    }
+                if file == "JSONSchema.jsonschema" || file == "JSONSchema.json.schema" {
+                    // no point in making the annoteted method, since the JSON Schema doesn't contains descriptions of properties
+                    curio.keyDescriptionMethod = false
+                    curio.anyOfAsOneOf = true
+                }
 
-                    let module = CodeModule()
+                let module = CodeModule()
 
-                    var refschema : [String : Schema] = [:]
-                    for (key, value) in try bric.resolve() {
-                        var subschema = try Schema.bracDecoded(bric: value)
+                var refschema : [String : Schema] = [:]
+                for (key, value) in try bric.resolve() {
+                    var subschema = try Schema.bracDecoded(bric: value)
 
-                        if file == "JSONSchema.jsonschema" || file == "JSONSchema.json.schema" {
+                    if file == "JSONSchema.jsonschema" ||
+                        file == "JSONSchema.json.schema" {
+                        if key == "#" {
                             // hack in the proposed `propertyOrder` for JSON Schema until there is some native solution:
                             // see: https://github.com/json-schema/json-schema/issues/119
                             // other impl: https://github.com/quicktype/quicktype/pull/1340
-                            var propertyOrder = Schema(type: .array)
-                            propertyOrder.items = .init(.init(type: .string))
+                            var propertyOrder = Schema(type: .init(.array))
+                            propertyOrder.items = .init(.init(.init(type: .init(.string))))
                             subschema.properties.faulted["propertyOrder"] = .init(propertyOrder)
                         }
-
-                        refschema[key] = subschema
-                        let code = try curio.reify(subschema, id: key, parents: [])
-
-
-                        module.types.append(code)
                     }
 
-                    let id = (file as NSString).deletingPathExtension
-                    let _ = try curio.emit(module, name: id + ".swift", dir: (#file as NSString).deletingLastPathComponent)
-                } catch {
-                    XCTFail("schema «\(file)» failed: \(error)")
+                    refschema[key] = subschema
+                    let code = try curio.reify(subschema, id: key, parents: [])
+
+
+                    module.types.append(code)
                 }
+
+                let id = (file as NSString).deletingPathExtension
+                let _ = try curio.emit(module, name: id + ".swift", dir: (#file as NSString).deletingLastPathComponent)
+            } catch {
+                XCTFail("schema «\(file)» failed: \(error)")
             }
-        } catch {
-            XCTFail("unexpected error when loading schemas: \(error)")
         }
     }
 }

@@ -8,25 +8,26 @@
 
 import BricBrac
 
-//@available(*, deprecated, renamed: "JSONSchema")
-public typealias Schema = LegacySchema
-
-public extension LegacySchema {
-    init(type: LegacySchema.SimpleTypes?) {
-        var schema = Schema()
-        if let type = type {
-            schema.type = .init(type)
-        }
-        self = schema
-    }
-}
 
 
-//public typealias Schema = JSONSchemaRoot
+//public typealias Schema = LegacySchema
+//
+//public extension LegacySchema {
+//    init(type: LegacySchema.SimpleTypes?) {
+//        var schema = Schema()
+//        if let type = type {
+//            schema.type = .init(type)
+//        }
+//        self = schema
+//    }
+//}
+
+//
+public typealias Schema = JSONSchemaRoot
 //
 //
-//typealias TypeSimple = SimpleTypes
-//extension JSONSchemaRoot {
+//public typealias TypeSimple = SimpleTypes
+//public extension JSONSchemaRoot {
 //    /// Refactor shim
 //    @available(*, deprecated)
 //    typealias SimpleTypes = TypeSimple
@@ -35,6 +36,7 @@ public extension LegacySchema {
 
 
 /// A representation of a JSON Schema file.
+@available(*, deprecated, renamed: "JSONSchema")
 public struct LegacySchema : Codable, Equatable, Hashable {
     public var ref: String? = nil
     public var type: _Type? = nil
@@ -125,7 +127,7 @@ public struct LegacySchema : Codable, Equatable, Hashable {
     public typealias AdditionalProperties = OneOf2<Self, Bool>
     public typealias _Type = OneOf2<SimpleTypes, [SimpleTypes]>
     public typealias AdditionalItems = OneOf2<Self, Bool>
-    public typealias Items = OneOf3<Self, [Self], Bool>
+    public typealias Items = OneOrMany<OneOf2<Self, Bool>>
     public typealias Dependencies = OneOf2<Self, [String]>
 
     public enum SimpleTypes: String, Codable { // "enum": [ "array", "boolean", "integer", "null", "number", "object", "string" ]

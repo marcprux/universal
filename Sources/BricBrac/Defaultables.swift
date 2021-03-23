@@ -107,12 +107,7 @@ public extension Optional where Wrapped : Equatable {
     /// the value is set to the default value, the underlying optional is cleared to `.none`.
     @inlinable subscript(defaulting defaultValue: @autoclosure () -> Wrapped) -> Wrapped {
         get { self ?? defaultValue() }
-        _modify {
-            let def = defaultValue()
-            var x = self ?? def
-            yield &x
-            self = x == def ? .none : x
-        }
+        set { self = newValue == defaultValue() ? .none : newValue }
     }
 
     /// Returns the wrapped value or the defaulting value if the wrapped value if nil. This is a variant of the @autoclosure subscript,

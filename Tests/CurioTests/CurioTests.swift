@@ -9,7 +9,6 @@
 import XCTest
 import BricBrac
 import Curio
-import CurioDemoModels
 
 class CurioTests: XCTestCase {
     /// This is a sample schema file
@@ -181,7 +180,7 @@ class CurioTests: XCTestCase {
         ]
 
         do {
-            let schema = try JSONSchema.bracDecoded(bric: schemaBric)
+            let schema = try JSONSchema(bric: schemaBric)
             let gen = Curio()
             let code = try gen.reify(schema, id: "SampleModel", parents: [])
             let module = CodeModule()
@@ -192,23 +191,42 @@ class CurioTests: XCTestCase {
 
     func testSchemaFiles() throws {
         let fm = FileManager.default
-        guard let folder = CurioDemoModels.schemasFolder else {
-            return XCTFail("no schemas folder")
-        }
 
-        for file in try fm.contentsOfDirectory(atPath: folder) {
+        let baseDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+
+        let schemasFolder = baseDir // ROOT/Tests/CurioTests/
+            .appendingPathComponent("schemas") // ROOT/CurioDemoModels/schemas/
+
+        let files = try fm.contentsOfDirectory(at: schemasFolder, includingPropertiesForKeys: nil, options: [])
+
+        XCTAssertNotEqual(0, files.count)
+
+        for file in files {
             do {
-                if !file.hasSuffix(".jsonschema") && !file.hasSuffix(".json.schema") {
+                if !file.path.hasSuffix(".jsonschema") && !file.path.hasSuffix(".schema.json") {
                     continue
                 }
-
-                let fullPath = (folder as NSString).appendingPathComponent(file)
-                let bric = try Bric.parse(String(contentsOfFile: fullPath))
 
                 var curio = Curio()
                 curio.accessor = { _ in .public }
 
-                if file == "JSONSchema.jsonschema" || file == "JSONSchema.json.schema" {
+                var outputDir = baseDir
+
+                // the JSON schema is special: it will be the one that BricBrac includes
+                let isJSONSchema = [
+                    "JSONSchema.schema.json",
+                    "JSONSchema.jsonschema",
+                ].contains(file.lastPathComponent)
+
+                if isJSONSchema {
+                    // instead of putting the output in the CurioTests, put it directly in the BricBrac Sources
+                    outputDir = outputDir // ROOT/Tests/CurioTests/
+                        .deletingLastPathComponent() // ROOT/Tests/
+                        .deletingLastPathComponent() // ROOT/
+                        .appendingPathComponent("Sources") // ROOT/Sources/
+                        .appendingPathComponent("BricBrac") // ROOT/Sources/BricBrac/
+
                     // no point in making the annoteted method, since the JSON Schema doesn't contains descriptions of properties
                     curio.keyDescriptionMethod = false
                     curio.anyOfAsOneOf = true
@@ -227,13 +245,15 @@ class CurioTests: XCTestCase {
                 let module = CodeModule()
 
                 var refschema : [String : JSONSchema] = [:]
-                for (key, value) in try bric.resolve() {
-                    var subschema = try JSONSchema.bracDecoded(bric: value)
 
-                    if file == "JSONSchema.jsonschema" ||
-                        file == "JSONSchema.json.schema" {
+                let bric = try Bric.parse(String(contentsOf: file))
+
+                for (key, value) in try bric.resolve() {
+                    var subschema = try JSONSchema(bric: value)
+
+                    if isJSONSchema {
                         if key == "#" {
-                            // hack in the proposed `propertyOrder` for JSON Schema until there is some native solution:
+                            // insert the proposed `propertyOrder` for JSON Schema until there is some native solution:
                             // see: https://github.com/json-schema/json-schema/issues/119
                             // other impl: https://github.com/quicktype/quicktype/pull/1340
                             var propertyOrder = JSONSchema(type: .init(.array))
@@ -247,8 +267,12 @@ class CurioTests: XCTestCase {
                     module.types.append(code)
                 }
 
-                let id = (file as NSString).deletingPathExtension
-                let _ = try curio.emit(module, name: id + ".swift", dir: (#file as NSString).deletingLastPathComponent)
+                let id = file
+                    .deletingPathExtension()
+                    .deletingPathExtension() // twice to get rid of both `schema` and `json`
+                    .lastPathComponent
+
+                let _ = try curio.emit(module, name: id + ".swift", dir: outputDir.path)
             } catch {
                 XCTFail("schema «\(file)» failed: \(error)")
             }
@@ -261,7 +285,7 @@ public class TestSampleModel : XCTestCase {
     @discardableResult func assertBracable(bric: Bric, line: UInt = #line) -> Error? {
         do {
 //            let sample = try SampleModel.brac(bric: bric)
-            let sample = try SampleModel.bracDecoded(bric: bric)
+            let sample = try SampleModel(bric: bric)
             XCTAssertEqual(bric, try sample.bricEncoded(), line: line)
             return nil
         } catch {
@@ -272,7 +296,7 @@ public class TestSampleModel : XCTestCase {
 
     @discardableResult func assertNOTBracable(bric: Bric, line: UInt = #line) -> Error? {
         do {
-            _ = try SampleModel.bracDecoded(bric: bric)
+            _ = try SampleModel(bric: bric)
             XCTFail("should not have bracd", line: line)
             return nil
         } catch {
@@ -436,7 +460,7 @@ public class TestSampleModel : XCTestCase {
         ]
 
         do {
-            let sample = try SampleModel.bracDecoded(bric: bric)
+            let sample = try SampleModel(bric: bric)
 //            XCTAssertTrue(sample.allOfField.breq(sample.allOfField))
 //            XCTAssertTrue(sample.anyOfField.breq(sample.anyOfField))
 //            XCTAssertTrue(sample.oneOfField.breq(sample.oneOfField))
@@ -448,7 +472,7 @@ public class TestSampleModel : XCTestCase {
 //            let badbric = bric.alter { return $0 == ["allOfField", "a1"] ? "illegal" : $1 }
             if let badbric = bric.update("illegal", pointer: "allOfField", "a1") {
                 print(String(describing: badbric))
-                _ = try SampleModel.bracDecoded(bric: badbric)
+                _ = try SampleModel(bric: badbric)
                 XCTFail("should not have been able to parse invalid schema")
             }
         } catch {
@@ -458,7 +482,7 @@ public class TestSampleModel : XCTestCase {
 //        do {
 //            let badbric = bric.alter { return $0 == ["notField", "str"] ? "illegal" : $1 }
 //            print(String(describing: badbric))
-//            _ = try SampleModel.bracDecoded(bric: badbric)
+//            _ = try SampleModel(bric: badbric)
 //            XCTFail("should not have been able to parse invalid schema")
 //        } catch {
 //            // validation should fail

@@ -12,9 +12,9 @@ import Foundation
 import CoreFoundation
 
 extension Decodable {
-    /// Any decodable can be brac'd from a Bric via the built-in decoding
-    @inlinable public static func bracDecoded(bric: Bric, decoder: JSONDecoder = JSONDecoder(), encoder: JSONEncoder = JSONEncoder()) throws -> Self {
-        return try decoder.decode(Self.self, from: encoder.encode(bric))
+    /// Initializes the instance by de-serializeing the JSON from the in-memory `Bric` instance.
+    @inlinable public init(bric: Bric, decoder: JSONDecoder = JSONDecoder(), encoder: JSONEncoder = JSONEncoder()) throws {
+        self = try decoder.decode(Self.self, from: encoder.encode(bric))
     }
 
     /// Loads this `Decodable` from the JSON stored in the given URL.

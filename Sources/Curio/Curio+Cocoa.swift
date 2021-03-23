@@ -80,7 +80,11 @@ public extension Curio {
         if status == 0 {
             if loccode != code { // if the code has changed, then write it to the test
                 if FileManager.default.fileExists(atPath: locpath) {
-                    try! FileManager.default.trashItem(at: URL(fileURLWithPath: locpath), resultingItemURL: nil)
+                    #if os(macOS)
+                    try? FileManager.default.trashItem(at: URL(fileURLWithPath: locpath), resultingItemURL: nil)
+                    #else
+                    try? FileManager.default.removeItem(at: URL(fileURLWithPath: locpath))
+                    #endif
                 }
                 try code.write(toFile: locpath, atomically: true, encoding: String.Encoding.utf8)
             }

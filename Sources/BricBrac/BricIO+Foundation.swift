@@ -11,6 +11,11 @@
 import Foundation
 import CoreFoundation
 
+public extension JSONSchema {
+    /// We heard you liked `JSONSchema` so we put some `JSONSchema` in your `JSONSchema`.
+    static let schemaSchema = Result { try JSONSchema.parseJSON(JSONSchema.schemaSource) }
+}
+
 extension Decodable {
     /// Initializes the instance by de-serializeing the JSON from the in-memory `Bric` instance.
     @inlinable public init(bric: Bric, decoder: JSONDecoder = JSONDecoder(), encoder: JSONEncoder = JSONEncoder()) throws {

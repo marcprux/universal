@@ -21,8 +21,8 @@ public struct JSONSchemaRoot : Equatable, Hashable, Codable, KeyedCodable {
     public var dependencies: Dependencies?
     public var description: String?
     public var `else`: JSONSchema?
-    public var `enum`: [Bric]?
-    public var examples: [Bric]?
+    public var `enum`: [EnumItem]?
+    public var examples: [ExamplesItem]?
     public var exclusiveMaximum: Double?
     public var exclusiveMinimum: Double?
     public var format: String?
@@ -54,7 +54,7 @@ public struct JSONSchemaRoot : Equatable, Hashable, Codable, KeyedCodable {
     public static let codingKeyPaths = (\Self.comment as KeyPath, \Self.id as KeyPath, \Self.ref as KeyPath, \Self.schema as KeyPath, \Self.additionalItems as KeyPath, \Self.additionalProperties as KeyPath, \Self.allOf as KeyPath, \Self.anyOf as KeyPath, \Self.const as KeyPath, \Self.contains as KeyPath, \Self.contentEncoding as KeyPath, \Self.contentMediaType as KeyPath, \Self.`default` as KeyPath, \Self.definitions as KeyPath, \Self.dependencies as KeyPath, \Self.description as KeyPath, \Self.`else` as KeyPath, \Self.`enum` as KeyPath, \Self.examples as KeyPath, \Self.exclusiveMaximum as KeyPath, \Self.exclusiveMinimum as KeyPath, \Self.format as KeyPath, \Self.`if` as KeyPath, \Self.items as KeyPath, \Self.maxItems as KeyPath, \Self.maxLength as KeyPath, \Self.maxProperties as KeyPath, \Self.maximum as KeyPath, \Self.minItems as KeyPath, \Self.minLength as KeyPath, \Self.minProperties as KeyPath, \Self.minimum as KeyPath, \Self.multipleOf as KeyPath, \Self.not as KeyPath, \Self.oneOf as KeyPath, \Self.pattern as KeyPath, \Self.patternProperties as KeyPath, \Self.properties as KeyPath, \Self.propertyNames as KeyPath, \Self.propertyOrder as KeyPath, \Self.readOnly as KeyPath, \Self.`required` as KeyPath, \Self.then as KeyPath, \Self.title as KeyPath, \Self.type as KeyPath, \Self.uniqueItems as KeyPath, \Self.writeOnly as KeyPath)
     public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.comment as KeyPath : CodingKeys.comment, \Self.id as KeyPath : CodingKeys.id, \Self.ref as KeyPath : CodingKeys.ref, \Self.schema as KeyPath : CodingKeys.schema, \Self.additionalItems as KeyPath : CodingKeys.additionalItems, \Self.additionalProperties as KeyPath : CodingKeys.additionalProperties, \Self.allOf as KeyPath : CodingKeys.allOf, \Self.anyOf as KeyPath : CodingKeys.anyOf, \Self.const as KeyPath : CodingKeys.const, \Self.contains as KeyPath : CodingKeys.contains, \Self.contentEncoding as KeyPath : CodingKeys.contentEncoding, \Self.contentMediaType as KeyPath : CodingKeys.contentMediaType, \Self.`default` as KeyPath : CodingKeys.`default`, \Self.definitions as KeyPath : CodingKeys.definitions, \Self.dependencies as KeyPath : CodingKeys.dependencies, \Self.description as KeyPath : CodingKeys.description, \Self.`else` as KeyPath : CodingKeys.`else`, \Self.`enum` as KeyPath : CodingKeys.`enum`, \Self.examples as KeyPath : CodingKeys.examples, \Self.exclusiveMaximum as KeyPath : CodingKeys.exclusiveMaximum, \Self.exclusiveMinimum as KeyPath : CodingKeys.exclusiveMinimum, \Self.format as KeyPath : CodingKeys.format, \Self.`if` as KeyPath : CodingKeys.`if`, \Self.items as KeyPath : CodingKeys.items, \Self.maxItems as KeyPath : CodingKeys.maxItems, \Self.maxLength as KeyPath : CodingKeys.maxLength, \Self.maxProperties as KeyPath : CodingKeys.maxProperties, \Self.maximum as KeyPath : CodingKeys.maximum, \Self.minItems as KeyPath : CodingKeys.minItems, \Self.minLength as KeyPath : CodingKeys.minLength, \Self.minProperties as KeyPath : CodingKeys.minProperties, \Self.minimum as KeyPath : CodingKeys.minimum, \Self.multipleOf as KeyPath : CodingKeys.multipleOf, \Self.not as KeyPath : CodingKeys.not, \Self.oneOf as KeyPath : CodingKeys.oneOf, \Self.pattern as KeyPath : CodingKeys.pattern, \Self.patternProperties as KeyPath : CodingKeys.patternProperties, \Self.properties as KeyPath : CodingKeys.properties, \Self.propertyNames as KeyPath : CodingKeys.propertyNames, \Self.propertyOrder as KeyPath : CodingKeys.propertyOrder, \Self.readOnly as KeyPath : CodingKeys.readOnly, \Self.`required` as KeyPath : CodingKeys.`required`, \Self.then as KeyPath : CodingKeys.then, \Self.title as KeyPath : CodingKeys.title, \Self.type as KeyPath : CodingKeys.type, \Self.uniqueItems as KeyPath : CodingKeys.uniqueItems, \Self.writeOnly as KeyPath : CodingKeys.writeOnly]
 
-    public init(comment: String? = nil, id: String? = nil, ref: String? = nil, schema: String? = nil, additionalItems: JSONSchema? = nil, additionalProperties: JSONSchema? = nil, allOf: SchemaArray? = nil, anyOf: SchemaArray? = nil, const: Const? = nil, contains: JSONSchema? = nil, contentEncoding: String? = nil, contentMediaType: String? = nil, `default`: Default? = nil, definitions: Definitions? = nil, dependencies: Dependencies? = nil, description: String? = nil, `else`: JSONSchema? = nil, `enum`: [Bric]? = nil, examples: [Bric]? = nil, exclusiveMaximum: Double? = nil, exclusiveMinimum: Double? = nil, format: String? = nil, `if`: JSONSchema? = nil, items: ItemsChoice? = nil, maxItems: NonNegativeInteger? = nil, maxLength: NonNegativeInteger? = nil, maxProperties: NonNegativeInteger? = nil, maximum: Double? = nil, minItems: NonNegativeIntegerDefault0? = nil, minLength: NonNegativeIntegerDefault0? = nil, minProperties: NonNegativeIntegerDefault0? = nil, minimum: Double? = nil, multipleOf: Double? = nil, not: JSONSchema? = nil, oneOf: SchemaArray? = nil, pattern: String? = nil, patternProperties: PatternProperties? = nil, properties: Properties? = nil, propertyNames: JSONSchema? = nil, propertyOrder: [PropertyOrderItem]? = nil, readOnly: Bool? = nil, `required`: StringArray? = nil, then: JSONSchema? = nil, title: String? = nil, type: TypeChoice? = nil, uniqueItems: Bool? = nil, writeOnly: Bool? = nil) {
+    public init(comment: String? = nil, id: String? = nil, ref: String? = nil, schema: String? = nil, additionalItems: JSONSchema? = nil, additionalProperties: JSONSchema? = nil, allOf: SchemaArray? = nil, anyOf: SchemaArray? = nil, const: Const? = nil, contains: JSONSchema? = nil, contentEncoding: String? = nil, contentMediaType: String? = nil, `default`: Default? = nil, definitions: Definitions? = nil, dependencies: Dependencies? = nil, description: String? = nil, `else`: JSONSchema? = nil, `enum`: [EnumItem]? = nil, examples: [ExamplesItem]? = nil, exclusiveMaximum: Double? = nil, exclusiveMinimum: Double? = nil, format: String? = nil, `if`: JSONSchema? = nil, items: ItemsChoice? = nil, maxItems: NonNegativeInteger? = nil, maxLength: NonNegativeInteger? = nil, maxProperties: NonNegativeInteger? = nil, maximum: Double? = nil, minItems: NonNegativeIntegerDefault0? = nil, minLength: NonNegativeIntegerDefault0? = nil, minProperties: NonNegativeIntegerDefault0? = nil, minimum: Double? = nil, multipleOf: Double? = nil, not: JSONSchema? = nil, oneOf: SchemaArray? = nil, pattern: String? = nil, patternProperties: PatternProperties? = nil, properties: Properties? = nil, propertyNames: JSONSchema? = nil, propertyOrder: [PropertyOrderItem]? = nil, readOnly: Bool? = nil, `required`: StringArray? = nil, then: JSONSchema? = nil, title: String? = nil, type: TypeChoice? = nil, uniqueItems: Bool? = nil, writeOnly: Bool? = nil) {
         self.comment = comment
         self.id = id
         self.ref = ref
@@ -124,8 +124,8 @@ public struct JSONSchemaRoot : Equatable, Hashable, Codable, KeyedCodable {
         self.dependencies = try values.decodeOptional(Dependencies.self, forKey: .dependencies)
         self.description = try values.decodeOptional(String.self, forKey: .description)
         self.`else` = try values.decodeOptional(JSONSchema.self, forKey: .`else`)
-        self.`enum` = try values.decodeOptional([Bric].self, forKey: .`enum`)
-        self.examples = try values.decodeOptional([Bric].self, forKey: .examples)
+        self.`enum` = try values.decodeOptional([EnumItem].self, forKey: .`enum`)
+        self.examples = try values.decodeOptional([ExamplesItem].self, forKey: .examples)
         self.exclusiveMaximum = try values.decodeOptional(Double.self, forKey: .exclusiveMaximum)
         self.exclusiveMinimum = try values.decodeOptional(Double.self, forKey: .exclusiveMinimum)
         self.format = try values.decodeOptional(String.self, forKey: .format)
@@ -165,6 +165,10 @@ public struct JSONSchemaRoot : Equatable, Hashable, Codable, KeyedCodable {
 
     public typealias Dependencies = Dictionary<String, DependenciesValueChoice>
     public typealias DependenciesValueChoice = OneOf<JSONSchema>.Or<StringArray>
+
+    public typealias EnumItem = Bric
+
+    public typealias ExamplesItem = Bric
 
     public typealias ItemsChoice = OneOf<JSONSchema>.Or<SchemaArray>
 
@@ -233,6 +237,14 @@ public struct JSONSchemaRoot : Equatable, Hashable, Codable, KeyedCodable {
 
 public typealias NonNegativeInteger = Int
 
+public typealias NonNegativeIntegerDefault0 = NonNegativeIntegerDefault0Types.Sum
+public enum NonNegativeIntegerDefault0Types {
+
+    public typealias P1 = Bric
+
+    public typealias Sum = AllOf2<NonNegativeInteger, P1>
+}
+
 public typealias SchemaArray = [JSONSchema]
 
 public typealias StringArray = [String]
@@ -245,28 +257,4 @@ public enum SimpleTypes : String, Equatable, Hashable, Codable, CaseIterable {
     case number
     case object
     case string
-}
-
-public struct NonNegativeIntegerDefault0 : Equatable, Hashable, Codable, KeyedCodable {
-    public var propertyOrder: [PropertyOrderItem]?
-    public static let codingKeyPaths = (\Self.propertyOrder as KeyPath)
-    public static let codableKeys: Dictionary<PartialKeyPath<Self>, CodingKeys> = [\Self.propertyOrder as KeyPath : CodingKeys.propertyOrder]
-
-    public init(propertyOrder: [PropertyOrderItem]? = nil) {
-        self.propertyOrder = propertyOrder
-    }
-
-    public init(from decoder: Decoder) throws {
-        try decoder.forbidAdditionalProperties(notContainedIn: CodingKeys.allCases)
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        self.propertyOrder = try values.decodeOptional([PropertyOrderItem].self, forKey: .propertyOrder)
-    }
-
-    public typealias PropertyOrderItem = String
-
-    public enum CodingKeys : String, CodingKey, Hashable, Codable, CaseIterable {
-        case propertyOrder
-
-        public typealias CodingOwner = NonNegativeIntegerDefault0
-    }
 }

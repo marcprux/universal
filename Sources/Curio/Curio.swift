@@ -53,6 +53,9 @@ public struct Curio {
     /// Whether AnyOf elements should be treated as OneOf elements
     public var anyOfAsOneOf = true
 
+    /// Whether AllOf elements should just use the first item
+    public var allOfAsFirst = false
+
     /// Whether to generate `KeyedCodable` conformance
     public var generateKeyedCodable = true
 
@@ -632,7 +635,7 @@ public struct Curio {
             return code
         }
 
-        func createSimpleEnumeration(_ typename: CodeTypeName, name: String, types: [Schema.SimpleTypes]) -> CodeNamedType {
+        func createSimpleEnumeration(_ typename: CodeTypeName, name: String, types: [SimpleTypes]) -> CodeNamedType {
             var assoc = CodeEnum(name: typeName(parents, name), access: accessor(parents + [typeName(parents, name)]))
 
             var subTypes: [CodeType] = []
@@ -822,13 +825,13 @@ public struct Curio {
 
                     case .some(.v1(.array)):
                         // a set of all the items, eliminating duplicates; this eliminated redundant schema declarations in the items list
-                        let items: Set<Schema> = Set(schema.items?.v2 ?? schema.items?.v1.flatMap({ [$0] }) ?? [])
+                        let items = schema.items?.v2 ?? schema.items?.v1.flatMap({ [$0] }) ?? []
 
                         switch items.count {
                         case 0:
                             proptype = arrayType(CodeExternalType.bric)
                         case 1:
-                            let item = items.first!
+                            let item = items.first?.v1 ?? Schema()
                             if let ref = item.ref {
                                 proptype = arrayType(CodeExternalType(typeName(parents, ref), access: accessor(parents)))
                             } else {
@@ -849,7 +852,7 @@ public struct Curio {
 
                 if !required {
                     let structProps = props.filter({ prop in
-                        let types: [Schema.SimpleTypes]
+                        let types: [SimpleTypes]
                         switch prop.schema.type {
                         case .none: types = []
                         case .v1(let typ): types = [typ]
@@ -1155,13 +1158,13 @@ public struct Curio {
 
         func createArray(_ typename: CodeTypeName) throws -> CodeNamedType {
             // when a top-level type is an array, we make it a typealias with a type for the individual elements
-            let items: Set<Schema>
+            let items: Array<Schema>
             switch schema.items {
             case .none: items = []
-            case .some(.v1(let value)): items = [value]
-            case .some(.v2(let values)): items = .init(values)
-            case .some(.v3(true)): items = [Schema()]
-            case .some(.v3(false)): items = []
+            case .some(.v1(.v1(let value))): items = [value]
+            case .some(.v1(.v2(true))): items = [Schema()]
+            case .some(.v1(.v2(false))): items = []
+            case .some(.v2(let values)): items = values.compactMap(\.v1)
             }
 
             if items.isEmpty {
@@ -1312,31 +1315,40 @@ public struct Curio {
 //                    props.appendContentsOf(getPropInfo(subProps))
 //                    // TODO: sub-schema "required" array
 //                } else {
-                props.append(PropInfo(name: nil, required: true, schema: propSchema))
+                if let propSchema = propSchema.v1 {
+                    if allOfAsFirst {
+                        let props = getPropInfo(propSchema, id: id, parents: parents)
+                        return try createObject(typename, properties: props, mode: .standard)
+                    }
+                    let pinfo = PropInfo(name: nil, required: true, schema: propSchema)
+                    props.append(pinfo)
+                }
 //                }
             }
             return try createObject(typename, properties: props, mode: .allOf)
         } else if let anyOf = schema.anyOf {
             if anyOfAsOneOf {
                 // some schemas mis-interpret anyOf to mean oneOf, so redirect them to oneOfs
-                return try createOneOf(anyOf)
+                return try createOneOf(anyOf.compactMap(\.v1))
             }
             var props: [PropInfo] = []
             for propSchema in anyOf {
                 // if !isBricType(propSchema) { continue } // anyOfs disallow misc Bric types // disabled because this is sometimes used in an allOf to validate peer properties
-                props.append(PropInfo(name: nil, required: false, schema: propSchema))
+                if let propSchema = propSchema.v1 {
+                    props.append(PropInfo(name: nil, required: false, schema: propSchema))
+                }
             }
             if props.count == 1 { props[0].required = true }
 
             // AnyOfs with only 1 property are AllOf
             return try createObject(typename, properties: props, mode: props.count > 1 ? .anyOf : .allOf)
         } else if let oneOf = schema.oneOf { // TODO: allows properties in addition to oneOf
-            return try createOneOf(oneOf)
+            return try createOneOf(oneOf.compactMap(\.v1))
         } else if let ref = schema.ref { // create a typealias to the reference
             let tname = typeName(parents, ref)
             let extern = CodeExternalType(tname)
             return CodeTypeAlias(name: typename == tname ? typename + "Type" : typename, type: extern, access: accessor(parents))
-        } else if let not = schema.not?.wrappedValue, not != Schema() { // a "not" generates a validator against an inverse schema, but only if it isn't empty
+        } else if let not = schema.not?.v1, not != Schema() { // a "not" generates a validator against an inverse schema, but only if it isn't empty
             let inverseId = "Not" + typename
             let inverseSchema = try reify(not, id: inverseId, parents: parents)
             return CodeTypeAlias(name: typename, type: notBracType(inverseSchema), access: accessor(parents), peerTypes: [inverseSchema])
@@ -1525,23 +1537,23 @@ public extension Schema {
     }
 
     /// Support for JSON $ref <http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03>
-    func resolve(_ path: String) throws -> Schema {
-        var parts = path.split(whereSeparator: { $0 == "/" }).map { String($0) }
-//        print("parts: \(parts)")
-        if parts.isEmpty { throw BracReferenceError.referenceRequiredRoot(path) }
-        let first = parts.remove(at: 0)
-        if first != "#" {  throw BracReferenceError.referenceMustBeRelativeToCurrentDocument(path) }
-        if parts.isEmpty { throw BracReferenceError.referenceRequiredRoot(path) }
-        let root = parts.remove(at: 0)
-        if _additionalProperties.isEmpty { throw BracReferenceError.refWithoutAdditionalProperties(path) }
-        guard var json = _additionalProperties[root] else { throw BracReferenceError.referenceNotFound(path) }
-        for part in parts {
-            guard let next: Bric = json[part] else { throw BracReferenceError.referenceNotFound(path) }
-            json = next
-        }
-
-        return try Schema.bracDecoded(bric: json)
-    }
+//    func resolve(_ path: String) throws -> Schema {
+//        var parts = path.split(whereSeparator: { $0 == "/" }).map { String($0) }
+////        print("parts: \(parts)")
+//        if parts.isEmpty { throw BracReferenceError.referenceRequiredRoot(path) }
+//        let first = parts.remove(at: 0)
+//        if first != "#" {  throw BracReferenceError.referenceMustBeRelativeToCurrentDocument(path) }
+//        if parts.isEmpty { throw BracReferenceError.referenceRequiredRoot(path) }
+//        let root = parts.remove(at: 0)
+//        if additionalProperties.isEmpty { throw BracReferenceError.refWithoutAdditionalProperties(path) }
+//        guard var json = additionalProperties[root] else { throw BracReferenceError.referenceNotFound(path) }
+//        for part in parts {
+//            guard let next: Bric = json[part] else { throw BracReferenceError.referenceNotFound(path) }
+//            json = next
+//        }
+//
+//        return try Schema.bracDecoded(bric: json)
+//    }
 
     /// Parse the given JSON info an array of resolved schema references, maintaining property order from the source JSON
     static func parse(_ source: String, rootName: String?) throws -> [(String, Schema)] {

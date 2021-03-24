@@ -15,20 +15,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Run tests
-        run: swift test --enable-test-discovery
+      - run: swift test --enable-test-discovery
 
   iOS:
     runs-on: macos-latest
     needs: [Linux] # Linux must pass first
-    strategy:
-      matrix:
-        destination: ['platform=macOS', 'platform=iOS Simulator,name=iPod touch (7th generation)', 'platform=tvOS Simulator,name=Apple TV 4K']
 
     steps:
       - uses: actions/checkout@v2
-      - name: Apple - ${{ matrix.destination }}
-        run: xcodebuild -scheme "BricBrac" -destination "${{ matrix.destination }}" clean test
+      - run: |
+            xcodebuild clean test \
+              -scheme "BricBrac" \
+              -sdk "iphonesimulator14.4" \
+              -destination "OS=14.4,name=iPhone 12 Mini" \
+              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
+
+  tvOS:
+    runs-on: macos-latest
+    needs: [iOS] # iOS must pass first
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+            xcodebuild clean test \
+              -scheme "BricBrac" \
+              -sdk "appletvsimulator14.3" \
+              -destination "OS=14.3,name=Apple TV" \
+              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
+
+  watchOS:
+    runs-on: macos-latest
+    needs: [tvOS] # tvOS must pass first
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+            xcodebuild clean test \
+              -scheme "BricBrac" \
+              -sdk "watchsimulator7.2" \
+              -destination "OS=7.2,name=Apple Watch Series 6 - 44mm" \
+              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
 
   macOS10:
     runs-on: macos-10.15
@@ -54,7 +80,7 @@ jobs:
 
       - name: Install swift-5.3.3
         run: |
-          Install-Binary -Url "https://swift.org/builds/swift-5.3.3-release/windows10/swift-5.3.3-RELEASE/swift-5.3.3-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+          Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-2020-11-26-a/swift-DEVELOPMENT-SNAPSHOT-2020-11-26-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
 
       - name: Set Environment Variables
         run: |
@@ -87,7 +113,7 @@ jobs:
 
   Release:
     runs-on: ubuntu-latest
-    needs: [Linux, macOS10, macOS11, iOS, Windows10]
+    needs: [Linux, macOS10, macOS11, iOS, watchOS, tvOS, Windows10]
 
     steps:
       - name: Release

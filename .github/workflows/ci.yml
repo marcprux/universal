@@ -23,7 +23,7 @@ jobs:
     needs: [Linux] # Linux must pass first
     strategy:
       matrix:
-        destination: ['platform=macOS', 'platform=iOS Simulator,name=iPod touch (7th generation)', 'OS=7.2,name=Apple Watch Series 6 - 44mm']
+        destination: ['platform=macOS', 'platform=iOS Simulator,name=iPod touch (7th generation)', 'platform=watchOS,name=Apple Watch Series 6 - 44mm']
 
     steps:
       - uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
 
   macOS11:
     runs-on: macos-11.0
-    needs: [iOS] # iOS must pass first
+    needs: [macOS10] # macOS10 must pass first
     steps:
       - uses: actions/checkout@v2
       - name: Run tests

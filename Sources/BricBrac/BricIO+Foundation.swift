@@ -558,8 +558,8 @@ extension FoundationBricolage : Bricable, Bracable {
     }
 }
 
-#if canImport(CoreFoundation) // e.g., not Windows or Linux
-
+#if canImport(CoreFoundation) // not Windows
+#if !os(Linux) // Linux's CoreFoundation doesn't expose `CFNull`, etc.
 /// Bricolage that represents the elements as Core Foundation types with reference semantics
 public final class CoreFoundationBricolage: Bricolage {
     public typealias NulType = CFNull
@@ -629,6 +629,7 @@ public final class CoreFoundationBricolage: Bricolage {
         return arr
     }
 }
+#endif
 #endif
 
 #endif

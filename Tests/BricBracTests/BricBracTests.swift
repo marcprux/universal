@@ -40,6 +40,7 @@ class BricBracTests : XCTestCase {
     }
 #endif
 
+#if canImport(CoreFoundation) // not Windows
 #if !os(Linux)
 
     func testAllocatonProfiling() throws {
@@ -69,6 +70,7 @@ class BricBracTests : XCTestCase {
             }
         }
     }
+#endif
 #endif
 
     func testEscaping() throws {
@@ -698,6 +700,7 @@ class BricBracTests : XCTestCase {
             compareCocoaParsing("1.2345678\n\n", msg: "fraction with trailing newlines")
         #endif
 
+        #if canImport(CoreFoundation) // not Windows
         #if !os(Linux)
             compareCocoaParsing("1", msg: "number with no newline")
             compareCocoaParsing("1 ", msg: "number with trailing space")
@@ -706,6 +709,7 @@ class BricBracTests : XCTestCase {
 
             compareCocoaParsing("0.1", msg: "fractional number with leading zero")
             compareCocoaParsing("0.1", msg: "preceeding zero OK")
+        #endif
         #endif
 
 //        compareCocoaParsing("1.234567890E+34", msg: "number with upper-case exponent")
@@ -720,6 +724,7 @@ class BricBracTests : XCTestCase {
         compareCocoaParsing("01.0", msg: "preceeding zero should fail")
     }
 
+    #if canImport(CoreFoundation) // not Windows
     #if !os(Linux)
     func profileJSON(_ str: String, count: Int, validate: Bool, cocoa: Bool, cf: Bool) throws {
         let scalars = Array((str as String).unicodeScalars)
@@ -750,6 +755,7 @@ class BricBracTests : XCTestCase {
             print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": BricBrac: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
         }
     }
+    #endif
     #endif
 
     #if canImport(JavaScriptCore)
@@ -2105,6 +2111,7 @@ extension BricBracTests {
         // XCTAssertEqual failed: ("Optional("{\"az\":\"A\",\"cx\":false,\"by\":1}")") is not equal to ("Optional("{\"az\":\"A\",\"by\":1,\"cx\":false}")")
 
         if #available(macOS 10.15, *) {
+        #if canImport(CoreFoundation) // not Windows
         #if !os(Linux)
             XCTAssertEqual(try obj.encodedStringSorted(), """
             {"az":"A","by":1,"cx":false,"qq":"Q"}
@@ -2118,6 +2125,7 @@ extension BricBracTests {
             XCTAssertEqual(try obj.encodedStringOrdered(format: []), """
             {"by":1,"az":"A","cx":false,"qq":"Q"}
             """)
+        #endif
         #endif
         }
     }

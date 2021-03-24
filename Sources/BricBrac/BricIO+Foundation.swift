@@ -558,7 +558,7 @@ extension FoundationBricolage : Bricable, Bracable {
     }
 }
 
-#if !os(Linux)
+#if canImport(CoreFoundation) // e.g., not Windows or Linux
 
 /// Bricolage that represents the elements as Core Foundation types with reference semantics
 public final class CoreFoundationBricolage: Bricolage {
@@ -632,4 +632,3 @@ public final class CoreFoundationBricolage: Bricolage {
 #endif
 
 #endif
-

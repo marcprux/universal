@@ -18,6 +18,7 @@ class CurioTests: XCTestCase {
         XCTAssertEqual("Core schema meta-schema", schema.title)
     }
 
+    #if !os(Windows) // “D:\a\1\s\swift-corelibs-foundation\Sources\Foundation\Bundle.swift:113: Fatal error: init(for:) is not yet implemented”
     /// This is a sample schema file
     func testSampleSchema() throws {
         let schemaBric: Bric = [
@@ -195,6 +196,7 @@ class CurioTests: XCTestCase {
             let _ = try gen.emit(module, name: "SampleModel.swift", dir: (#file as NSString).deletingLastPathComponent)
         }
     }
+    #endif // !os(Windows)
 
     func testSchemaFiles() throws {
         let fm = FileManager.default

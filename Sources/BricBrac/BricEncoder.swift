@@ -11,6 +11,31 @@ import Foundation
 /// `BricEncoder` facilitates the encoding of `Encodable` values into `Bric`.
 public typealias BricEncoder = BricolageEncoder<Bric>
 
+/// A general coding key implementation.
+public struct AnyCodingKey : CodingKey {
+    public var stringValue: String
+    public var intValue: Int?
+
+    public init(stringValue: String) {
+        self.init(stringValue: stringValue, intValue: nil)
+    }
+
+    public init(intValue: Int) {
+        self.init(stringValue: "\(intValue)", intValue: intValue)
+    }
+
+    init(stringValue: String, intValue: Int?) {
+        self.stringValue = stringValue
+        self.intValue = intValue
+    }
+
+    init(index: Int) {
+        self.stringValue = "Index \(index)"
+        self.intValue = index
+    }
+}
+
+
 /// `BricolageEncoder` facilitates the encoding of `Encodable` values into a specific `Bricolage` implementation.
 open class BricolageEncoder<B: Bricolage> { // TODO: : TopLevelEncoder
     // MARK: Options

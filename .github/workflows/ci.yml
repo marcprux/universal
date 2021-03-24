@@ -49,8 +49,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      # note that we just build rather than test because:
+      # “XCTest is not available when building for watchOS Simulator”
       - run: |
-            xcodebuild clean test \
+            xcodebuild clean build \
               -scheme "BricBrac" \
               -sdk "watchsimulator7.2" \
               -destination "OS=7.2,name=Apple Watch Series 6 - 44mm" \

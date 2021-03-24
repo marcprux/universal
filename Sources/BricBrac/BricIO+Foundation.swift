@@ -6,10 +6,9 @@
 //  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
-#if canImport(CoreFoundation)
+#if canImport(Foundation)
 
 import Foundation
-import CoreFoundation
 
 public extension JSONSchema {
     /// We heard you liked `JSONSchema` so we put some `JSONSchema` in your `JSONSchema`.
@@ -268,30 +267,6 @@ public extension JSONEncoder {
         }
 
         return data
-    }
-}
-
-/// A general coding key implementation.
-public struct AnyCodingKey : CodingKey {
-    public var stringValue: String
-    public var intValue: Int?
-
-    public init(stringValue: String) {
-        self.init(stringValue: stringValue, intValue: nil)
-    }
-
-    public init(intValue: Int) {
-        self.init(stringValue: "\(intValue)", intValue: intValue)
-    }
-
-    init(stringValue: String, intValue: Int?) {
-        self.stringValue = stringValue
-        self.intValue = intValue
-    }
-
-    init(index: Int) {
-        self.stringValue = "Index \(index)"
-        self.intValue = index
     }
 }
 

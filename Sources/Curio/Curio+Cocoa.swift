@@ -41,8 +41,9 @@ public extension Curio {
                 code += "public var \(includeSchemaSourceVar) = \"\"\"\n\(source)\n\"\"\""
             }
         }
-        let tmppath = (NSTemporaryDirectory() as NSString).appendingPathComponent(name)
-        try code.write(toFile: tmppath, atomically: true, encoding: String.Encoding.utf8)
+        let tmppath = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent(name)
+        try code.write(toFile: tmppath.path, atomically: true, encoding: String.Encoding.utf8)
 
         let loccode: String
         do {
@@ -55,35 +56,41 @@ public extension Curio {
             return false // contents are unchanged from local version; skip compiling
         }
 
-        let bundle = Bundle(for: JSONParser.self).executablePath!
-        let frameworkDir = ((bundle as NSString).deletingLastPathComponent as NSString).deletingLastPathComponent
+        var status: Int32 = 0
 
-        let args = [
-            "/usr/bin/xcrun",
-            "swiftc",
-//            "-target", "macosx",
-//            "-sdk", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk",
-            "-F", frameworkDir,
-            "-o", (tmppath as NSString).deletingPathExtension,
-            tmppath,
-        ]
+        // If we can access the URL then try to compile the file
+        if let bundle = Bundle(for: JSONParser.self).executableURL,
+           false { // disabled until we can get swiftc working on Linux
+            let frameworkDir = bundle
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
 
-        print(args.joined(separator: " "))
+            let args = [
+                "/usr/bin/xcrun",
+                "swiftc",
+                "-framework", "BricBrac",
+                "-F", frameworkDir.path,
+                "-o", tmppath.path,
+                tmppath.path,
+            ]
 
-        let task = Process.launchedProcess(launchPath: args[0], arguments: Array(args.dropFirst()))
-        task.waitUntilExit()
-        let status = task.terminationStatus
-        if status != 0 {
-            throw CodegenErrors.compileError("Could not compile \(tmppath)")
+            print(args.joined(separator: " "))
+
+            let task = Process.launchedProcess(launchPath: args[0], arguments: Array(args.dropFirst()))
+            task.waitUntilExit()
+            status = task.terminationStatus
+            if status != 0 {
+                throw CodegenErrors.compileError("Could not compile \(tmppath)")
+            }
         }
 
         if status == 0 {
             if loccode != code { // if the code has changed, then write it to the test
                 if FileManager.default.fileExists(atPath: locpath) {
                     #if os(macOS)
-                    try? FileManager.default.trashItem(at: URL(fileURLWithPath: locpath), resultingItemURL: nil)
+                    try FileManager.default.trashItem(at: URL(fileURLWithPath: locpath), resultingItemURL: nil)
                     #else
-                    try? FileManager.default.removeItem(at: URL(fileURLWithPath: locpath))
+                    try FileManager.default.removeItem(at: URL(fileURLWithPath: locpath))
                     #endif
                 }
                 try code.write(toFile: locpath, atomically: true, encoding: String.Encoding.utf8)

@@ -85,6 +85,7 @@
 		49391FCA2609237C00178BDB /* JSONSchema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
 		494DEA80200E94C800D81AAF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		494E3F452603EAB9009D3CF8 /* Defaultables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaultables.swift; sourceTree = "<group>"; };
+		496469DB260B8ED900757D6A /* ci.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = ci.yml; sourceTree = "<group>"; };
 		7E10201F1B858F6000171AFE /* JSONParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONParser.swift; sourceTree = "<group>"; };
 		7E28A5B51B5ACA9B00A5F27F /* BricBrac.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BricBrac.swift; sourceTree = "<group>"; };
 		7E28A5BC1B5AD5EE00A5F27F /* Curio.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Curio.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -156,6 +157,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		496469D9260B8ED900757D6A /* .github */ = {
+			isa = PBXGroup;
+			children = (
+				496469DA260B8ED900757D6A /* workflows */,
+			);
+			path = .github;
+			sourceTree = "<group>";
+		};
+		496469DA260B8ED900757D6A /* workflows */ = {
+			isa = PBXGroup;
+			children = (
+				496469DB260B8ED900757D6A /* ci.yml */,
+			);
+			path = workflows;
+			sourceTree = "<group>";
+		};
 		49DB6128206338D900022D2C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -190,6 +207,7 @@
 		7E7F9B121B3615850058706A = {
 			isa = PBXGroup;
 			children = (
+				496469D9260B8ED900757D6A /* .github */,
 				7E5DA2D11B9F5F1E0013FCB9 /* README.md */,
 				494DEA80200E94C800D81AAF /* Package.swift */,
 				7E7F9B1E1B3615850058706A /* BricBrac */,

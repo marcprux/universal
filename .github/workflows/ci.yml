@@ -17,9 +17,24 @@ jobs:
       - uses: actions/checkout@v2
       - run: swift test --enable-test-discovery
 
-  iOS:
+  watchOS:
     runs-on: macos-latest
     needs: [Linux] # Linux must pass first
+
+    steps:
+      - uses: actions/checkout@v2
+      # note that we just build rather than test because:
+      # “XCTest is not available when building for watchOS Simulator”
+      - run: |
+            xcodebuild clean build \
+              -scheme "BricBrac" \
+              -sdk "watchsimulator7.2" \
+              -destination "OS=7.2,name=Apple Watch Series 6 - 44mm" \
+              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
+
+  iOS:
+    runs-on: macos-latest
+    needs: [watchOS] # watchOS must pass first
 
     steps:
       - uses: actions/checkout@v2
@@ -41,21 +56,6 @@ jobs:
               -scheme "BricBrac" \
               -sdk "appletvsimulator14.3" \
               -destination "OS=14.3,name=Apple TV" \
-              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
-
-  watchOS:
-    runs-on: macos-latest
-    needs: [tvOS] # tvOS must pass first
-
-    steps:
-      - uses: actions/checkout@v2
-      # note that we just build rather than test because:
-      # “XCTest is not available when building for watchOS Simulator”
-      - run: |
-            xcodebuild clean build \
-              -scheme "BricBrac" \
-              -sdk "watchsimulator7.2" \
-              -destination "OS=7.2,name=Apple Watch Series 6 - 44mm" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
 
   macOS10:

@@ -5,18 +5,21 @@ Bric-à-brac
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
 [![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20iOS%20|%20tvOS%20|%20watchOS%20|%20Linux-lightgrey.svg)](https://github.com/glimpseio/MisMisc)
 
-**Bric-à-brac** Data structures and JSON utilities for Swift.
+**Bric-à-brac** is a Swift toolkit for JSON. It includes facilites for working with JSON Schema (Draft 7), and has utilities for parsing and validating generated schema, as well as data structures to support common schema idioms (such as "oneOf" types).
 
 ## Features
 
-- [x] Integrates with Swift 4's built-in Codable features
+- [x] Integrates with Swift's built-in Codable features
 - [x] Generate Swift value types from JSON Schema (Draft 7)
 - [x] A simple immutable model for JSON language elements
-- [x] An efficient streaming JSON parser (optional)
+- [x] A efficient streaming & key-order-preserving JSON parser (optional)
 - [x] Type-based (de)serialization of custom objects (no reflection, no intrusion)
-- [x] No dependencies on `Foundation` or any other external framework
+- [x] No dependencies other than `Foundation` 
+- [x] Supported and [tested](https://github.com/glimpseio/BricBrac/actions) on macOS, Linux, Windows, iOS, tvOS, and watchOS. 
 
-**Bric-à-brac** consists of two separate components: the `BricBrac` runtime library and the **Curio** Schema-to-Swift generation tool.
+## Modules
+
+**Bric-à-brac** consists of two separate components: the `BricBrac` runtime library and the `Curio` JSON Schema-to-Swift generation tool.
 
 ## BricBrac
 

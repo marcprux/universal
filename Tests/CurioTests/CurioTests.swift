@@ -196,7 +196,6 @@ class CurioTests: XCTestCase {
             let _ = try gen.emit(module, name: "SampleModel.swift", dir: (#file as NSString).deletingLastPathComponent)
         }
     }
-    #endif // !os(Windows)
 
     func testSchemaFiles() throws {
         let fm = FileManager.default
@@ -287,6 +286,7 @@ class CurioTests: XCTestCase {
             }
         }
     }
+    #endif // !os(Windows)
 }
 
 public class TestSampleModel : XCTestCase {

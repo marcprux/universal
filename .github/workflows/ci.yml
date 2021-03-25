@@ -10,6 +10,8 @@ on:
     # run at 6AM & 6PM UTC
     - cron:  '0 6,18 * * *'
 
+# construct CI latticeflow with cheaper platforms first: Linux & Windows then macOS10, macOS11, iOS, tvOS, watchOS
+
 jobs:
   Linux:
     runs-on: ubuntu-latest

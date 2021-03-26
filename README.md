@@ -5,17 +5,17 @@ Bric-à-brac
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
 [![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20iOS%20|%20Windows%20|%20tvOS%20|%20watchOS%20|%20Linux-lightgrey.svg)](https://github.com/glimpseio/MisMisc)
 
-**Bric-à-brac** is a Swift toolkit for JSON. It includes facilites for working with JSON Schema (Draft 7), and has utilities for parsing and validating generated schema, as well as data structures to support common schema idioms (such as "oneOf" types).
+**Bric-à-brac** is a Swift toolkit for JSON. It facilitates working with efficient in-memory representations of JSON types and includes features for working with JSON Schema (Draft 7): utilities for parsing and validating generated ".schema.json" files, as well as data structures to support common schema idioms (such as "oneOf"/"anyOf"/"allOf" types).
 
 ## Features
 
-- [x] Integrates with Swift's built-in Codable features
-- [x] Generate Swift value types from JSON Schema (Draft 7)
-- [x] A simple immutable model for JSON language elements
-- [x] A efficient streaming & key-order-preserving JSON parser (optional)
-- [x] Type-based (de)serialization of custom objects (no reflection, no intrusion)
-- [x] No dependencies other than `Foundation` 
-- [x] Supported and [tested](https://github.com/glimpseio/BricBrac/actions) on macOS, Linux, Windows, iOS, tvOS, and watchOS. 
+- Integrates with Swift's built-in Codable features
+- Generate Swift value types from JSON Schema (Draft 7)
+- A simple immutable value model for JSON language elements
+- Type-based (de)serialization of custom objects (no reflection, no intrusion)
+- No dependencies other than `Foundation` 
+- A efficient streaming & key-order-preserving JSON parser (optional)
+- Supported and [tested](https://github.com/glimpseio/BricBrac/actions) on Linux, Windows, and Apple Platforms.
 
 ## Modules
 
@@ -23,7 +23,7 @@ Bric-à-brac
 
 ## BricBrac
 
-BricBrac is a support library that contains convenience feautres for serializing instances to an intermediate JSON `Bric` type. Swift's `Codable` feature supports serializing and de-serializing instances to JSON Data, **BricBrac** allows these types to be represented in an intermeidate form so they can be examined and manipulated.
+BricBrac is a support library that contains convenience features for serializing instances to an intermediate JSON `Bric` type. Swift's `Codable` feature supports serializing and de-serializing instances to JSON Data, **BricBrac** allows these types to be represented in an intermediate form so they can be examined and manipulated.
 
 ### BricBrac API
 
@@ -58,7 +58,6 @@ Any instance that supports `Encodable` automatically has a `bricEncoded()` funct
 ````
 
 ### Bricolage
-
 
 ## Curio
 
@@ -116,6 +115,11 @@ public struct Food : Equatable, Hashable, Codable {
 }
 ````
 
+### Real-world example
+
+A very large (5MB, ~50K SLOC) real-world example of a generated schema can be seen at (https://raw.githubusercontent.com/glimpseio/GGSpec/main/Sources/GGSpec/GGSchema.swift). It is generated from (https://vega.github.io/schema/vega-lite/v5.json)
+ using the `generateGGSchema` at (https://github.com/glimpseio/GGSpec/blob/main/Tests/GGSpecTests/GGSpecTests.swift). Since that project is the *raison d'être* for Curio, it can be used as a fairly complete guide to what sorts of customizations of the schema are possible: conditional renaming, selective boxing, injection of additional properties, optional conformance to `Identifiable`, etc.
+
 ## BricBrac & Curio Additions
 
 In addition to providing the core `Bric` functionality.
@@ -124,7 +128,15 @@ In addition to providing the core `Bric` functionality.
 
 A `JSONSchema` struct is included, which permits the parsing of JSON Schema (Draft 7) instances. This is used by Curio for generating Swift Codable structs from JSON Schema definitions, and can also be used at runtime by clients who need to support JSON Schema.
 
-### `BricBrac.OneOfX`
+### oneOf
+
+JSON APIs (especially ones based on JSON Schema) frequently permit a property to be one of a list of types. For example, a property might contain either a `string` or a `number`. This works well in JavaScript's untyped environment, but can be challenging to represent in a strongly typed language like Swift. 
+
+Since Swift does not include a generic `Either` type, `BricBrac.OneOf<A>.Or<B>` (which is an alias to `BricBrac.OneOf2<A, B>`) can be used to represent either of two types. Similarly, `BricBrac.OneOf<A>.Or<B>.Or<C>` (which is an alias to `BricBrac.OneOf3<A, B, C>`) can be used to represent either of three types. The types go all the way to `OneOf10<A, B, …, ∆>`.
+
+Since there is no notion of a type discriminator in JSON Schema (or JSON itself), decoding of the `OneOfX<…>` types is done via brute-force: it first tries to decode `A` from the data, and if it fails, tries to decode `B`, then `C`, etc. Since Swift's error throwing mechanism is lighter-weight than in other high-level languages, this tends to not impact performance considerably, but custom decoding logic can be mixed in when needed.
+
+Note: A more pernicious issue can arise from ambiguously-encoded types. For example, `OneOf2<Int, Double>(1.0)` will encode the `Double` to JSON as "1.0", but when decoded, it will be decoded in the `Int` side. Care must be taken to ensure that types in a `oneOf` cannot be encoded in an ambiguous way. Using a discriminator enum value for each possible complex type is the standard way of dealing with this issue.
 
 
 ### Recursive Types & `BricBrac.Indirect`
@@ -171,7 +183,7 @@ The `Brac` type enables custom creation of `Bric` instances from a network of ty
 
 ### Curio Build Integration
 
-You can automaticvally generate `Codable` swift structs from your JSON schema files at build time, which is useful when you are frequently changing you schema and need to have an up-to-date serialization-compatable represenation in swift.
+You can automatically generate `Codable` swift structs from your JSON schema files at build time, which is useful when you are frequently changing you schema and need to have an up-to-date serialization-compatable represenation in swift.
 
 Steps:
 
@@ -187,7 +199,7 @@ cat ${INPUT_FILE_PATH} | ${BUILT_PRODUCTS_DIR}/curio -name ${INPUT_FILE_BASE} > 
 
  * Under the "Output Files" section, click the plus sign to add a new output file, and then enter: `$(BUILT_PRODUCTS_DIR)/$(INPUT_FILE_BASE).swift`
 
-Now any file with the suffix ".jsonschema" will automatiucally have a Swift file generated in the ${SRCDIR}. After the first time this is run you will need to manually add the subsequently generated files to your project's source files, but any changes to the JSON Schema files will then be reflected in the generated sources as part of the build process.
+Now any file with the suffix ".jsonschema" will automatically have a Swift file generated in the ${SRCDIR}. After the first time this is run you will need to manually add the subsequently generated files to your project's source files, but any changes to the JSON Schema files will then be reflected in the generated sources as part of the build process.
 
 
 
@@ -213,3 +225,11 @@ let package = Package(
 )
 ```
 
+## Alternatives
+
+There are many libraries in Swift for working with JSON. Most of them were obsolesced by the introduction of Swift 4's `Codable` protocol, and persist in a moribund state. 
+
+Since Bric-à-Brac aims to augment Swift's `Codable` features rather than re-implement them, it can be interoperate seamlessly with other popular frameworks, such as:
+
+• (https://github.com/SwiftyJSON/SwiftyJSON)
+• (https://github.com/thoughtbot/Argo)

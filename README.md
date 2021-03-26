@@ -139,9 +139,9 @@ Since there is no notion of a type discriminator in JSON Schema (or JSON itself)
 Note: A more pernicious issue can arise from ambiguously-encoded types. For example, `OneOf2<Int, Double>(1.0)` will encode the `Double` to JSON as "1.0", but when decoded, it will be decoded in the `Int` side. Care must be taken to ensure that types in a `oneOf` cannot be encoded in an ambiguous way. Using a discriminator enum value for each possible complex type is the standard way of dealing with this issue.
 
 
-### Recursive Types & `BricBrac.Indirect`
+### Indirect Recursive Types 
 
-JSON schemas can have properties that optionally contain themselves, which is not permitted with Swift `Optional`s.  **Curio** handles this by permitting the declaration of fields that should be wrapped by an `Indirect`, which is simply defined as:
+JSON schemas can have properties that optionally contain themselves, which is not permitted with Swift `Optional`s.  **Curio** handles this by permitting the declaration of fields that should be wrapped by an `BricBrac.Indirect`, which is simply defined as:
 
 ```swift
 @propertyWrapper public indirect enum Indirect<Wrapped> : WrapperType, RawIsomorphism {
@@ -170,6 +170,12 @@ public struct MyCurioGeneratedStruct : Codable {
     }
 }
 ```
+
+#### Stack Limits
+
+Indirect can also be conditionally opted-into on a per-property basis. This can be useful for keeping down the stack size of a large network of structs so they can be loaded in environments with small stack capacity. 
+
+This is specifically useful for loading from JSON on background queues on Apple platforms that have a fixed 512K stack size (as opposed to the main thread's 8MB of stack size). If your code runs fine on the main thread but is crashing on background queues, marking some of your heavier properties as `Indirect` may help work around the issue. See https://developer.apple.com/forums/thread/111128.
 
 
 ### Identifiable
@@ -229,7 +235,9 @@ let package = Package(
 
 There are many libraries in Swift for working with JSON. Most of them were obsolesced by the introduction of Swift 4's `Codable` protocol, and persist in a moribund state. 
 
-Since Bric-à-Brac aims to augment Swift's `Codable` features rather than re-implement them, it can be interoperate seamlessly with other popular frameworks, such as:
+Since Bric-à-Brac aims to augment Swift's `Codable` features rather than re-implement them, it generally inter-operates seamlessly with other popular frameworks, such as:
 
-• (https://github.com/SwiftyJSON/SwiftyJSON)
-• (https://github.com/thoughtbot/Argo)
+• https://github.com/SwiftyJSON/SwiftyJSON
+• https://github.com/thoughtbot/Argo
+
+

@@ -15,7 +15,7 @@ Bric-à-brac
 - Type-based (de)serialization of custom objects (no reflection, no intrusion)
 - No dependencies other than `Foundation` 
 - A efficient streaming & key-order-preserving JSON parser (optional)
-- Supported and [tested](https://github.com/glimpseio/BricBrac/actions) on Linux, Windows, and Apple Platforms.
+- [Supported and tested](https://github.com/glimpseio/BricBrac/actions) on Linux, Windows, and Apple Platforms.
 
 ## Modules
 
@@ -27,7 +27,7 @@ BricBrac is a support library that contains convenience features for serializing
 
 ### BricBrac API
 
-A `Bric` acts as a fluent API for creating JSON instances using very similar syntax. It is implemented using an enum with cases for each of JSONs types:
+A `Bric` acts as a fluent API for creating JSON instances using very similar syntax. It is implemented using an enum with cases for each of JSON's basic types:
 
 ```swift
 public enum Bric {
@@ -40,7 +40,7 @@ public enum Bric {
 }
 ```
 
-`Bric` includes extensions to permit the creation of instances using the various `ExpressibleBy*Literal` protocols:
+`Bric` includes extensions to permit the creation of instances using the various `ExpressibleBy*Literal` protocol implementations of `String`, `Double`, `Array`, and `Dictionary`:
 
 ```swift
 let num: Bric = 1 // or: let num = Bric.num(1)

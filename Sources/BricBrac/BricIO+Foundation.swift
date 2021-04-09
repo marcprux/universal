@@ -86,11 +86,11 @@ private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting,
     let encoder = JSONEncoder()
     var fmt = outputFormatting
 
-    if sortedKeys, #available(macOS 10.13, *) {
+    if sortedKeys, #available(macOS 10.13, iOS 13.0, *) {
         fmt = fmt.union(.sortedKeys)
     }
 
-    if withoutEscapingSlashes, #available(macOS 10.15, *) {
+    if withoutEscapingSlashes, #available(macOS 10.15, iOS 13.0, *) {
         fmt = fmt.union(.withoutEscapingSlashes)
     }
 
@@ -209,7 +209,7 @@ public extension JSONEncoder {
     /// - See Also: `OrderedCodingKey`
     /// - Note: Unlike `JSONEncoder.encode`, this function is not thread-safe due to needing to modify internal properties of the `JSONEncoder`.
     /// - Note: The underlying impementation is a *total* hack – it swaps out key names with a prefix that can be lexically sorted by the built in `sortedKeys` key, and then post-processes the underlying raw data to get rid of the key prefixes (thus restoring the original key names)
-    @available(macOS 10.13, *)
+    @available(macOS 10.13, iOS 13.0, *)
     func encodeOrdered<T: Encodable>(_ value: T) throws -> Data {
         // we need to sort the keys in order for our replacement scheme to work
         let hadSorted = self.outputFormatting.contains(.sortedKeys)
@@ -273,7 +273,7 @@ public extension JSONEncoder {
 public extension Encodable {
     /// Returns an encoded string for the encodable with a custom key ordering for types whose `CodingKey` conforms to `OrderedCodingKey`
     /// This function will return any `OrderedCodingKey` instances in the order they are declared (at the cost of some expensive post-processing on the data)
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13.0, *)
     func encodedStringOrdered(format: JSONEncoder.OutputFormatting = [.prettyPrinted, .withoutEscapingSlashes]) throws -> String {
         let encoder = JSONEncoder()
         return String(data: try encoder.encodeOrdered(self), encoding: .utf8) ?? "{}"

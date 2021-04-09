@@ -2110,7 +2110,7 @@ extension BricBracTests {
         // JSON output:              az, cx, by
         // XCTAssertEqual failed: ("Optional("{\"az\":\"A\",\"cx\":false,\"by\":1}")") is not equal to ("Optional("{\"az\":\"A\",\"by\":1,\"cx\":false}")")
 
-        if #available(macOS 10.15, *) {
+        if #available(macOS 10.15, iOS 13.0, *) {
         #if canImport(CoreFoundation) // not Windows
         #if !os(Linux)
             XCTAssertEqual(try obj.encodedStringSorted(), """

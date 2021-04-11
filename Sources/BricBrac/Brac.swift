@@ -6,7 +6,6 @@
 //  Copyright © 2010-2020 io.glimpse. All rights reserved.
 //
 
-
 /// Adoption of Bracable signals that the type can be instantiated from some Bric
 public protocol Bracable {
     /// Try to construct an instance of the type from the `Bric` parameter

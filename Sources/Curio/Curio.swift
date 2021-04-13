@@ -588,7 +588,7 @@ public struct Curio {
                 if casetype.identifier == "Void" {
                     // Void can't be extended, so we need to special-case it to avoid calling methods on the type
                     encodebody.append("case .\(casename): try NSNull().encode(to: encoder)")
-                    decodebody.append("do { try let _ = NSNull(from: decoder); self = .\(casename); return } catch { errors.append(error) }")
+                    decodebody.append("do { try _ = NSNull(from: decoder); self = .\(casename); return } catch { errors.append(error) }")
                 } else {
                     encodebody.append("case .\(casename)(let x): try x.encode(to: encoder)")
                     decodebody.append("do { self = try .\(casename)(\(casetype.identifier)(from: decoder)); return } catch { errors.append(error) }")

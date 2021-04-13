@@ -771,7 +771,7 @@ extension _BricolageEncoder {
             } catch {
                 // If the value pushed a container before throwing, pop it back off to restore state.
                 if self.storage.count > depth {
-                    let _ = self.storage.popContainer()
+                    _ = self.storage.popContainer()
                 }
                 
                 throw error
@@ -798,7 +798,7 @@ extension _BricolageEncoder {
                 // If the value pushed a container before throwing, pop it back off to restore state.
                 // This shouldn't be possible for Data (which encodes as an array of bytes), but it can't hurt to catch a failure.
                 if self.storage.count > depth {
-                    let _ = self.storage.popContainer()
+                    _ = self.storage.popContainer()
                 }
                 
                 throw error
@@ -816,7 +816,7 @@ extension _BricolageEncoder {
             } catch {
                 // If the value pushed a container before throwing, pop it back off to restore state.
                 if self.storage.count > depth {
-                    let _ = self.storage.popContainer()
+                    _ = self.storage.popContainer()
                 }
                 
                 throw error
@@ -858,7 +858,7 @@ extension _BricolageEncoder {
         } catch {
             // If the value pushed a container before throwing, pop it back off to restore state.
             if self.storage.count > depth {
-                let _ = self.storage.popContainer()
+                _ = self.storage.popContainer()
             }
             
             throw error

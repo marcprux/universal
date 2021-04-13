@@ -135,7 +135,7 @@ open class CodeModule : CodeImplementationType {
 
     open func emit(_ emitter: CodeEmitterType) {
         for i in Set(imports + ["BricBrac"]).sorted() {
-            emitter.emit("import", i)
+            emitter.emit("@_exported import", i)
         }
 
         if !imports.isEmpty {

@@ -1,1 +1,1 @@
-import BricBrac
+@_exported import BricBrac

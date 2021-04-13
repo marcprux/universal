@@ -225,12 +225,6 @@ class CurioTests: XCTestCase {
                 let isJSONSchema = file.lastPathComponent == "JSONSchema.schema.json"
 
                 if isJSONSchema {
-                    // instead of putting the output in the CurioTests, put it directly in the BricBrac Sources
-                    outputDir = outputDir // ROOT/Tests/CurioTests/
-                        .deletingLastPathComponent() // ROOT/Tests/
-                        .deletingLastPathComponent() // ROOT/
-                        .appendingPathComponent("Sources") // ROOT/Sources/
-                        .appendingPathComponent("BricBrac") // ROOT/Sources/BricBrac/
 
                     // no point in making the annoteted method, since the JSON Schema doesn't contains descriptions of properties
                     curio.keyDescriptionMethod = false
@@ -280,7 +274,17 @@ class CurioTests: XCTestCase {
                     .deletingPathExtension() // twice to get rid of both `schema` and `json`
                     .lastPathComponent
 
-                _ = try curio.emit(module, name: id + ".swift", dir: outputDir.path, source: source)
+                // instead of putting the output in the CurioTests, put it directly in the BricBrac Sources
+                outputDir = outputDir // ROOT/Tests/CurioTests/
+                    .deletingLastPathComponent() // ROOT/Tests/
+                    .deletingLastPathComponent() // ROOT/
+                    .appendingPathComponent("Sources") // ROOT/Sources/
+                    .appendingPathComponent("BricBrac") // ROOT/Sources/BricBrac/
+
+                let saveToTemp = true // we don't want to overwrite the current schema
+
+                let tmppath = "/tmp/"
+                _ = try curio.emit(module, name: id + ".swift", dir: saveToTemp ? tmppath : outputDir.path, source: source)
             } catch {
                 XCTFail("schema «\(file)» failed: \(error)")
             }

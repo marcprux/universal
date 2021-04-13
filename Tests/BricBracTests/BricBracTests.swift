@@ -45,7 +45,7 @@ class BricBracTests : XCTestCase {
 
     func testAllocatonProfiling() throws {
         // json with unicode escapes
-        // let path: String! = NSBundle(forClass: Self.self).pathForResource("test/profile/caliper.json", ofType: "")!
+        // let path: String! = NSBundle(forClass: Self.self).pathForResource("testdata/profile/caliper.json", ofType: "")!
 
         // json no with escapes
         let path = testResourcePath() + "/profile/rap.json"
@@ -1368,7 +1368,7 @@ class BricBracTests : XCTestCase {
 
     /// Returns the path of the folder containing test resources
     private func testResourcePath() -> String {
-        return String(#file.reversed().drop(while: { $0 != "/" }).reversed()) + "test/"
+        return String(#file.reversed().drop(while: { $0 != "/" }).reversed()) + "testdata/"
     }
     
     #if canImport(JavaScriptCore)

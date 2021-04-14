@@ -3,7 +3,7 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 7/6/15.
-//  Copyright © 2010-2020 io.glimpse. All rights reserved.
+//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
 
 /// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks

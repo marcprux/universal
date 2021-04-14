@@ -3,7 +3,7 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 6/30/15.
-//  Copyright © 2010-2020 io.glimpse. All rights reserved.
+//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
 
 import BricBrac

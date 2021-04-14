@@ -3,7 +3,7 @@
 //  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 9/8/15.
-//  Copyright © 2010-2020 io.glimpse. All rights reserved.
+//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
 
 #ifndef Curio_h

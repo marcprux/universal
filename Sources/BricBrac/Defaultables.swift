@@ -3,7 +3,7 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 7/12/19.
-//  Copyright © 2010-2020 io.glimpse. All rights reserved.
+//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
 
 /// A defaultable type is a type that can be initialized with no arguments and a default value.

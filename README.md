@@ -88,7 +88,7 @@ For the following `Food.jsonschema` file:
 ````
 
 Curio will generate the following `Food.swift` code:
-    
+
 ````swift
 public struct Food : Equatable, Hashable, Codable {
     public var title: String

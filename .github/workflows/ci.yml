@@ -28,6 +28,7 @@ jobs:
       # note that we just build rather than test because:
       # “XCTest is not available when building for watchOS Simulator”
       - run: |
+            swift package generate-xcodeproj
             xcodebuild clean build \
               -scheme "BricBrac" \
               -sdk "watchsimulator7.2" \
@@ -41,6 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
+            swift package generate-xcodeproj
             xcodebuild clean build \
               -scheme "BricBrac" \
               -sdk "iphonesimulator14.4" \
@@ -54,6 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
+            swift package generate-xcodeproj
             xcodebuild clean build \
               -scheme "BricBrac" \
               -sdk "appletvsimulator14.3" \

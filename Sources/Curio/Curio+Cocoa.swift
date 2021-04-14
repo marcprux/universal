@@ -23,6 +23,9 @@ public extension Curio {
     ///   - dir: the folder
     ///   - source: the schema source file (optional: to be included with `includeSchemaSourceVar`)
     /// - Returns: true if the schema was output successfully *and* it was different than any pre-existing file that is present
+    @available(iOS, unavailable)
+    @available(tvOS, unavailable)
+    @available(watchOS, unavailable)
     func emit(_ module: CodeModule, name: String, dir: String, source: String? = nil) throws -> Bool {
         let locpath = (dir as NSString).appendingPathComponent(name)
 
@@ -58,9 +61,9 @@ public extension Curio {
 
         var status: Int32 = 0
 
+        #if os(macOS) // only on macOS until we can get swiftc working on Linux
         // If we can access the URL then try to compile the file
-        if let bundle = Bundle(for: JSONParser.self).executableURL,
-           false { // disabled until we can get swiftc working on Linux
+        if let bundle = Bundle(for: JSONParser.self).executableURL {
             let frameworkDir = bundle
                 .deletingLastPathComponent()
                 .deletingLastPathComponent()
@@ -83,6 +86,7 @@ public extension Curio {
                 throw CodegenErrors.compileError("Could not compile \(tmppath)")
             }
         }
+        #endif
 
         if status == 0 {
             if loccode != code { // if the code has changed, then write it to the test

@@ -61,7 +61,7 @@ public extension Curio {
 
         var status: Int32 = 0
 
-        #if os(macOS) // only on macOS until we can get swiftc working on Linux
+        #if false // os(macOS) // only on macOS until we can get swiftc working on Linux
         // If we can access the URL then try to compile the file
         if let bundle = Bundle(for: JSONParser.self).executableURL {
             let frameworkDir = bundle

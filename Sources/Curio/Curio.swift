@@ -22,6 +22,9 @@ public struct Curio {
     /// whether to generate codable implementations for each type
     public var generateCodable = true
 
+    /// The default imports that will be emitted
+    public var imports = ["BricBrac"]
+
     /// whether to cause `CodingKeys` to conform to `Identifiable`
     public var generateIdentifiable = false // note that this conflicts with an "id" field name
 
@@ -1397,6 +1400,7 @@ public struct Curio {
 
         let rootSchema = schemas.filter({ $0.0 == rootName }).first?.1
         let module = CodeModule()
+        module.imports.append(contentsOf: self.imports)
 
         // next, promote all of the types for promoteIdenticalTypes
         if promoteIdenticalTypes {
@@ -1735,8 +1739,8 @@ extension Curio {
                 let key = (parents + [id]).joined(separator: ".")
                 return renames[id] ?? renames[key]
             }
-            
-            
+            curio.imports = imports
+
             //debugPrint("Reading schema file from standard input")
             var src: String = ""
             while let line = readLine(strippingNewline: false) {
@@ -1745,8 +1749,6 @@ extension Curio {
             
             let schemas = try JSONSchema.parse(src, rootName: modelName)
             let module = try curio.assemble(schemas)
-
-            module.imports = imports
 
             let emitter = CodeEmitter(stream: "")
             module.emit(emitter)

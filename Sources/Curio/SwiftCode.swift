@@ -124,7 +124,7 @@ open class CodeModule : CodeImplementationType {
 
     open var nestedTypes: [CodeNamedType] = []
     open var comments: [String] = []
-    open var imports: [String] = []
+    open var imports: [String] = ["BricBrac"]
     /// Global functions in this module
     open var funcs: [CodeFunction.Implementation] = []
     /// No-op at the module level (needed for CodeImplementationType : CodeConformantType)
@@ -134,8 +134,8 @@ open class CodeModule : CodeImplementationType {
     }
 
     open func emit(_ emitter: CodeEmitterType) {
-        for i in Set(imports + ["BricBrac"]).sorted() {
-            emitter.emit("@_exported import", i)
+        for i in Set(imports).sorted() {
+            emitter.emit("import", i)
         }
 
         if !imports.isEmpty {

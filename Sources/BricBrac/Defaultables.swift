@@ -62,12 +62,13 @@ public extension _WrapperType {
     /// Returns the wrapped value or the defaulting value if the wrapped value if nil
     @inlinable subscript(faulting defaultValue: @autoclosure () -> Wrapped) -> Wrapped {
         get { asOptional ?? defaultValue() }
-//        set { self = Self(newValue) }
-        _modify {
-            var x = asOptional ?? defaultValue()
-            yield &x
-            self = Self(x)
-        }
+        set { self = Self(newValue) }
+        // Thread 1: EXC_BAD_INSTRUCTION (code=EXC_I386_INVOP, subcode=0x0)
+//        _modify {
+//            var x = asOptional ?? defaultValue()
+//            yield &x
+//            self = Self(x)
+//        }
     }
 
     /// Returns the wrapped value or the defaulting value if the wrapped value if nil. This is a variant of the @autoclosure subscript,
@@ -75,12 +76,14 @@ public extension _WrapperType {
     /// The `@autoclosure` form of `subscript(faulting:)` should be used when possible as it can be faster.
     @inlinable subscript(faultingValue defaultValue: Wrapped) -> Wrapped {
         get { asOptional ?? defaultValue }
-//        set { self = Self(newValue) }
-        _modify {
-            var x = asOptional ?? defaultValue
-            yield &x
-            self = Self(x)
-        }
+        set { self = Self(newValue) }
+
+        // Thread 1: EXC_BAD_INSTRUCTION (code=EXC_I386_INVOP, subcode=0x0)
+//        _modify {
+//            var x = asOptional ?? defaultValue
+//            yield &x
+//            self = Self(x)
+//        }
     }
 
 }
@@ -92,12 +95,13 @@ public extension _WrapperType where Wrapped : Defaultable {
     /// See also: `faulted`
     @inlinable var faulted: Wrapped {
         get { return self[faulting: .defaultValue] }
-//        set { self = Self(newValue) }
-        _modify {
-            var x = self[faulting: .defaultValue]
-            yield &x
-            self = Self(x)
-        }
+        set { self = Self(newValue) }
+        // Thread 1: EXC_BAD_INSTRUCTION (code=EXC_I386_INVOP, subcode=0x0)
+//        _modify {
+//            var x = self[faulting: .defaultValue]
+//            yield &x
+//            self = Self(x)
+//        }
     }
 }
 
@@ -130,12 +134,13 @@ public extension Optional where Wrapped : Defaultable & Equatable {
     /// See also: `defaulted`
     @inlinable var defaulted: Wrapped {
         get { self ?? Wrapped.defaultValue }
-//        set { self[defaulting: .defaultValue] = newValue }
-        _modify {
-            var x = self ?? Wrapped.defaultValue
-            yield &x
-            self = x == Wrapped.defaultValue ? .none : x
-        }
+        set { self[defaulting: .defaultValue] = newValue }
+        // Thread 1: EXC_BAD_INSTRUCTION (code=EXC_I386_INVOP, subcode=0x0)
+//        _modify {
+//            var x = self ?? Wrapped.defaultValue
+//            yield &x
+//            self = x == Wrapped.defaultValue ? .none : x
+//        }
     }
 }
 

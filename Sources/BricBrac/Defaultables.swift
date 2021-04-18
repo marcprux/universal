@@ -119,11 +119,13 @@ public extension Optional where Wrapped : Equatable {
     /// The `@autoclosure` form of `subscript(defaulting:)` should be used when possible as it can be faster.
     @inlinable subscript(defaultingValue defaultValue: Wrapped) -> Wrapped {
         get { self ?? defaultValue }
-        _modify {
-            var x = self ?? defaultValue
-            yield &x
-            self = x == defaultValue ? .none : x
-        }
+        set { self = Self(newValue) }
+        // Thread 1: EXC_BAD_INSTRUCTION (code=EXC_I386_INVOP, subcode=0x0)
+//        _modify {
+//            var x = self ?? defaultValue
+//            yield &x
+//            self = x == defaultValue ? .none : x
+//        }
     }
 
 }

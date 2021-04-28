@@ -4977,6 +4977,7 @@ public extension ISO8601DateTime {
 //}
 
 /// An `Identifiable` that is represented by a wrapped identity type that can be generated on-demand.
+@available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
 public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable {
     /// The mutable identity
     var id: ID { get set }
@@ -5002,6 +5003,7 @@ public protocol IdentifierString where Self : Hashable {
 }
 
 
+@available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
 extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue : IdentifierString {
     /// Assigns an ID to the element if one was not already assigned, returning any newly assigned ID.
     @discardableResult @inlinable public mutating func actualize(with id: () -> ID.Wrapped.RawValue = { .init() }) -> ID.Wrapped {

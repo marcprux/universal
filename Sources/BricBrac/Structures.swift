@@ -4984,6 +4984,19 @@ public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped :
 
     /// Returns this instance with a guaranteed assigned identity
     var actual: Self { get set }
+
+    /// Returns this instance with an absent identity
+    var ideal: Self { get }
+}
+
+
+/// Compare two Actualizables to equivalence without their identifies
+infix operator ~==~ : ComparisonPrecedence
+
+/// Compare two Actualizables to equivalence without their identifies
+@available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
+@inlinable public func ~==~<T: Actualizable & Equatable>(lhs: T, rhs: T) -> Bool {
+    lhs.ideal == rhs.ideal
 }
 
 /// A generalization of a unique identifier.
@@ -5028,6 +5041,19 @@ extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue 
             var value = newValue
             value.actualize()
             self = value
+        }
+    }
+}
+
+@available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
+extension Actualizable where ID.Wrapped : RawInitializable, ID : ExpressibleByNilLiteral {
+
+    /// Accesses the ideal, identity-less instance; can be used on any `Identifiable` type whose `ID` can be initialized from `nil`
+    @inlinable public var ideal: Self {
+        get {
+            var this = self
+            this.id = nil
+            return this
         }
     }
 }

@@ -4999,15 +4999,17 @@ infix operator ~==~ : ComparisonPrecedence
     lhs.ideal == rhs.ideal
 }
 
+
+/// A type that can generate a new globally unique instance of itself
+public protocol GloballyUnique {
+    /// A new unique instance of this type
+    static func uiqueValue() -> Self
+}
+
 /// A generalization of a unique identifier.
 ///
 /// Implemented in `Foundation.UUID`
 public protocol IdentifierString where Self : Hashable {
-    /// Initializes a random value.
-    init()
-
-    /// Create from a unique identifier string
-    ///
     /// Returns nil for invalid strings.
     init?(identifierString string: String)
 
@@ -5015,11 +5017,31 @@ public protocol IdentifierString where Self : Hashable {
     var identifierString: String { get }
 }
 
+@available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
+extension Actualizable {
+    /// Clears the ID and re-assigns it to a new globally-uniqued value
+    @inlinable public var reactualized: Self {
+        ideal.actual
+    }
+}
 
 @available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
-extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue : IdentifierString {
+extension Actualizable where ID.Wrapped : RawInitializable, ID : ExpressibleByNilLiteral {
+
+    /// Accesses the ideal, identity-less instance; can be used on any `Identifiable` type whose `ID` can be initialized from `nil`
+    @inlinable public var ideal: Self {
+        get {
+            var this = self
+            this.id = nil
+            return this
+        }
+    }
+}
+
+@available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
+extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue : GloballyUnique {
     /// Assigns an ID to the element if one was not already assigned, returning any newly assigned ID.
-    @discardableResult @inlinable public mutating func actualize(with id: () -> ID.Wrapped.RawValue = { .init() }) -> ID.Wrapped {
+    @discardableResult @inlinable public mutating func actualize(with id: () -> ID.Wrapped.RawValue = ID.Wrapped.RawValue.uiqueValue) -> ID.Wrapped {
         if let existingID = self.id.flatMap({ a in a }) { // already has an ID
             return existingID
         } else {
@@ -5044,20 +5066,6 @@ extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue 
         }
     }
 }
-
-@available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
-extension Actualizable where ID.Wrapped : RawInitializable, ID : ExpressibleByNilLiteral {
-
-    /// Accesses the ideal, identity-less instance; can be used on any `Identifiable` type whose `ID` can be initialized from `nil`
-    @inlinable public var ideal: Self {
-        get {
-            var this = self
-            this.id = nil
-            return this
-        }
-    }
-}
-
 
 /// An `IdMap` enables dictionaries keyed by non-String/Int values to be encoded & decoded via JSON Objects (rather than the default behavior of encoding to an array of alternating keys & values)
 ///

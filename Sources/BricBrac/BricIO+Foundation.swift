@@ -37,6 +37,11 @@ extension Decodable {
     }
 }
 
+extension UUID : GloballyUnique {
+    /// A random (and hopefully unique) UUID
+    public static func uiqueValue() -> UUID { UUID() }
+}
+
 extension UUID : IdentifierString {
     public init?(identifierString string: String) { self.init(uuidString: string) }
     public var identifierString: String { uuidString }

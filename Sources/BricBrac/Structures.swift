@@ -4978,12 +4978,12 @@ public extension ISO8601DateTime {
 
 /// An `Identifiable` that is represented by a wrapped identity type that can be generated on-demand.
 @available(macOS 10.15, iOS 12.0, watchOS 5.0, tvOS 12.0, *)
-public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable {
+public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable & Hashable {
     /// The mutable identity
     var id: ID { get set }
 
     /// Returns this instance with a guaranteed assigned identity
-    var actual: Self { get set }
+    var actual: (id: ID.Wrapped, instance: Self) { get set }
 
     /// Returns this instance with an absent identity
     var ideal: Self { get }
@@ -5021,7 +5021,7 @@ public protocol IdentifierString where Self : Hashable {
 extension Actualizable {
     /// Clears the ID and re-assigns it to a new globally-uniqued value
     @inlinable public var reactualized: Self {
-        ideal.actual
+        ideal.actual.instance
     }
 }
 
@@ -5052,17 +5052,17 @@ extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue 
     }
 
     /// Accesses the guaranteed actualized (i.e., assigned id) instance
-    @inlinable public var actual: Self {
+    @inlinable public var actual: (id: ID.Wrapped, instance: Self) {
         get {
             var this = self
-            this.actualize()
-            return this
+            let id = this.actualize()
+            return (id, this)
         }
 
         set {
-            var value = newValue
-            value.actualize()
-            self = value
+            var (id, instance) = newValue
+            instance.id = .init(id)
+            self = instance
         }
     }
 }

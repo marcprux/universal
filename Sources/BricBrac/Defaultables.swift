@@ -164,6 +164,7 @@ extension ExpressibleByDictionaryLiteral {
 //extension Optional : Defaultable { } // conflicts with conditional `Wrapped : Defaultable` below
 extension Set : Defaultable { } // inherits initializer from ExpressibleByArrayLiteral
 extension Array : Defaultable { } // inherits initializer from ExpressibleByArrayLiteral
+extension ArraySlice : Defaultable { } // inherits initializer from ExpressibleByArrayLiteral
 extension ContiguousArray : Defaultable { } // inherits initializer from ExpressibleByArrayLiteral
 extension Dictionary : Defaultable { } // inherit initializer from ExpressibleByDictionaryLiteral
 

@@ -334,10 +334,10 @@ extension Bric : Decodable {
                         self = try .str(decode())
                     } catch DecodingError.typeMismatch {
                         do {
-                            self = try .obj(decode())
+                            self = try .arr(decode())
                         } catch DecodingError.typeMismatch {
                             do {
-                                self = try .arr(decode())
+                                self = try .obj(decode())
                             } catch DecodingError.typeMismatch {
                                 throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
                             }

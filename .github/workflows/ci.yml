@@ -42,10 +42,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
+            xcodebuild -showsdks
             xcodebuild clean test \
               -scheme "BricBrac-Package" \
-              -sdk "iphonesimulator14.5" \
-              -destination "OS=14.5,name=iPhone 12" \
+              -sdk "iphonesimulator14.2" \
+              -destination "OS=14.2,name=iPhone 12" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
 
   tvOS:

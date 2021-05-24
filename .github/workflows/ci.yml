@@ -25,12 +25,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      # note that we just build rather than test because:
-      # “XCTest is not available when building for watchOS Simulator”
       - run: |
-            swift package generate-xcodeproj
             xcodebuild clean build \
-              -scheme "BricBrac-Package" \
+              -scheme "BricBrac" \
               -sdk "watchsimulator7.2" \
               -destination "OS=7.2,name=Apple Watch Series 6 - 44mm" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
@@ -42,9 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-            swift package generate-xcodeproj
-            xcodebuild clean build \
-              -scheme "BricBrac-Package" \
+            xcodebuild clean test \
+              -scheme "BricBrac" \
               -sdk "iphonesimulator14.4" \
               -destination "OS=14.4,name=iPhone 12 Mini" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
@@ -56,8 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-            swift package generate-xcodeproj
-            xcodebuild clean build \
+            xcodebuild clean test \
               -scheme "BricBrac-Package" \
               -sdk "appletvsimulator14.3" \
               -destination "OS=14.3,name=Apple TV" \

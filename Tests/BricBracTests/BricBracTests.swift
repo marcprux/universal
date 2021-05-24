@@ -1965,7 +1965,7 @@ extension BricBracTests {
         }
 
         let encoder = JSONEncoder()
-        if #available(macOS 10.13, iOS 11.0, watchOS 5.0, tvOS 12.0, *) {
+        if #available(macOS 10.13, iOS 11.0, watchOS 5.0, tvOS 13.0, *) {
             encoder.outputFormatting = .sortedKeys
         }
 
@@ -2012,7 +2012,7 @@ extension BricBracTests {
         }
 
         let encoder = JSONEncoder()
-        if #available(macOS 10.13, iOS 11.0, watchOS 5.0, tvOS 12.0, *) {
+        if #available(macOS 10.13, iOS 11.0, watchOS 5.0, tvOS 13.0, *) {
             encoder.outputFormatting = .sortedKeys // we want consistent key ordering
         }
 
@@ -2112,7 +2112,7 @@ extension BricBracTests {
         // JSON output:              az, cx, by
         // XCTAssertEqual failed: ("Optional("{\"az\":\"A\",\"cx\":false,\"by\":1}")") is not equal to ("Optional("{\"az\":\"A\",\"by\":1,\"cx\":false}")")
 
-        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 12.0, *) {
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
         #if canImport(CoreFoundation) // not Windows
         #if !os(Linux)
             XCTAssertEqual(try obj.encodedStringSorted(), """

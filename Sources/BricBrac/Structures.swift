@@ -4977,7 +4977,7 @@ public extension ISO8601DateTime {
 //}
 
 /// An `Identifiable` that is represented by a wrapped identity type that can be generated on-demand.
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 12.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable & Hashable {
     /// The mutable identity
     var id: ID { get set }
@@ -4994,7 +4994,7 @@ public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped :
 infix operator ~==~ : ComparisonPrecedence
 
 /// Compare two Actualizables to equivalence without their identifies
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 12.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 @inlinable public func ~==~<T: Actualizable & Equatable>(lhs: T, rhs: T) -> Bool {
     lhs.ideal == rhs.ideal
 }
@@ -5017,7 +5017,7 @@ public protocol IdentifierString where Self : Hashable {
     var identifierString: String { get }
 }
 
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 12.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Actualizable {
     /// Clears the ID and re-assigns it to a new globally-uniqued value
     @inlinable public var reactualized: Self {
@@ -5025,7 +5025,7 @@ extension Actualizable {
     }
 }
 
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 12.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Actualizable where ID.Wrapped : RawInitializable, ID : ExpressibleByNilLiteral {
 
     /// Accesses the ideal, identity-less instance; can be used on any `Identifiable` type whose `ID` can be initialized from `nil`
@@ -5038,7 +5038,7 @@ extension Actualizable where ID.Wrapped : RawInitializable, ID : ExpressibleByNi
     }
 }
 
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 12.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue : GloballyUnique {
     /// Assigns an ID to the element if one was not already assigned, returning any newly assigned ID.
     @discardableResult @inlinable public mutating func actualize(with id: () -> ID.Wrapped.RawValue = ID.Wrapped.RawValue.uiqueValue) -> ID.Wrapped {

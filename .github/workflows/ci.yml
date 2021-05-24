@@ -31,8 +31,8 @@ jobs:
       - run: |
             xcodebuild clean test \
               -scheme "BricBrac" \
-              -sdk "watchsimulator7.2" \
-              -destination "OS=7.2,name=Apple Watch Series 6 - 44mm" \
+              -sdk "watchsimulator7.4" \
+              -destination "OS=7.4,name=Apple Watch Series 6 - 44mm" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO
 
   iOS:

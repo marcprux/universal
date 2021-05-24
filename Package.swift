@@ -4,8 +4,8 @@ import PackageDescription
 let package = Package(
     name: "BricBrac",
     products: [
-        .library(name: "BricBrac", type: .dynamic, targets: ["BricBrac"]),
-        .library(name: "Curio", type: .dynamic, targets: ["Curio"]),
+        .library(name: "BricBrac", targets: ["BricBrac"]),
+        .library(name: "Curio", targets: ["Curio"]),
         //.executable(name: "CurioTool", targets: ["CurioTool"]),
         ],
     targets: [

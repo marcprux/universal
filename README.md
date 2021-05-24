@@ -3,7 +3,7 @@ Bric-à-brac
 
 [![Build Status](https://github.com/glimpseio/BricBrac/workflows/BricBrac%20CI/badge.svg?branch=main)](https://github.com/glimpseio/BricBrac/actions)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
-[![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20Linux-lightgrey.svg|%20Windows%20|%20iOS%20|%20tvOS%20|%20watchOS%20)](https://github.com/glimpseio/MisMisc)
+[![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20Linux-lightgrey%20|%20Windows%20|%20iOS%20|%20tvOS%20|%20watchOS.svg)](https://github.com/glimpseio/MisMisc)
 
 **Bric-à-brac** is a Swift toolkit for JSON. It facilitates working with efficient in-memory representations of JSON types and includes features for working with JSON Schema (Draft 7): utilities for parsing and validating generated ".schema.json" files, as well as data structures to support common schema idioms (such as "oneOf"/"anyOf"/"allOf" types).
 

@@ -325,13 +325,13 @@ extension Bric : Decodable {
             self = .nul
         }  else {
             do {
-                self = try .bol(decode())
+                self = try .bol(container.decode(Bool.self))
             } catch DecodingError.typeMismatch {
                 do {
-                    self = try .num(decode())
+                    self = try .num(container.decode(Double.self))
                 } catch DecodingError.typeMismatch {
                     do {
-                        self = try .str(decode())
+                        self = try .str(container.decode(String.self))
                     } catch DecodingError.typeMismatch {
                         do {
                             self = try .arr(decode())

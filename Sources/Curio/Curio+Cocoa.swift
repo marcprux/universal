@@ -7,8 +7,6 @@
 //
 
 /// NOTE: do not import any BricBrac framework headers; curiotool needs to be compiled as one big lump of source with no external frameworks
-
-#if canImport(Foundation)
 import Foundation
 import BricBrac
 
@@ -23,9 +21,6 @@ public extension Curio {
     ///   - dir: the folder
     ///   - source: the schema source file (optional: to be included with `includeSchemaSourceVar`)
     /// - Returns: true if the schema was output successfully *and* it was different than any pre-existing file that is present
-    @available(iOS, unavailable)
-    @available(tvOS, unavailable)
-    @available(watchOS, unavailable)
     func emit(_ module: CodeModule, name: String, dir: String, source: String? = nil) throws -> Bool {
         let locpath = (dir as NSString).appendingPathComponent(name)
 
@@ -104,5 +99,4 @@ public extension Curio {
         return true
     }
 }
-#endif
 

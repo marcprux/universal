@@ -91,7 +91,7 @@ private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting,
     let encoder = JSONEncoder()
     var fmt = outputFormatting
 
-    if sortedKeys, #available(macOS 10.13, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+    if sortedKeys, #available(macOS 10.13, iOS 13.0, watchOS 6.0, tvOS 11.0, *) {
         fmt = fmt.union(.sortedKeys)
     }
 
@@ -275,10 +275,10 @@ public extension JSONEncoder {
     }
 }
 
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 public extension Encodable {
     /// Returns an encoded string for the encodable with a custom key ordering for types whose `CodingKey` conforms to `OrderedCodingKey`
     /// This function will return any `OrderedCodingKey` instances in the order they are declared (at the cost of some expensive post-processing on the data)
-    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
     func encodedStringOrdered(format: JSONEncoder.OutputFormatting = [.prettyPrinted, .withoutEscapingSlashes]) throws -> String {
         let encoder = JSONEncoder()
         return String(data: try encoder.encodeOrdered(self), encoding: .utf8) ?? "{}"

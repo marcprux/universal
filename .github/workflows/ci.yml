@@ -20,7 +20,7 @@ jobs:
       - run: swift test --enable-test-discovery
 
   watchOS:
-    runs-on: firebreak
+    runs-on: macos-11.0 # macOS 11 needed for Xcode_12.5
     needs: [Linux] # Linux must pass first
 
     env:
@@ -85,9 +85,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
-      - name: Install swift-DEVELOPMENT-SNAPSHOT-2021-02-18-a
+      # Install https://swift.org/builds/swift-5.4-release/windows10/swift-5.4-RELEASE/swift-5.4-RELEASE-windows10.exe
+      - name: Install swift-5.4-RELEASE
         run: |
-          Install-Binary -Url "https://swift.org/builds/development/windows10/swift-DEVELOPMENT-SNAPSHOT-2021-02-18-a/swift-DEVELOPMENT-SNAPSHOT-2021-02-18-a-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
+          Install-Binary -Url "https://swift.org/builds/swift-5.4-release/windows10/swift-5.4-RELEASE/swift-5.4-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
       - name: Set Environment Variables
         run: |
           echo "SDKROOT=C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append

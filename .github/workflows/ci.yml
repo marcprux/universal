@@ -28,6 +28,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - run: xcodebuild -showsdks
       - run: |
             xcodebuild clean test \
               -scheme "BricBrac" \

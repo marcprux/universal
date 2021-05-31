@@ -39,6 +39,33 @@ public extension Optional {
         return self.flatMap(Indirect.init(rawValue:))
     }
 }
+
+
+/// Useful extension for when a `OneOfX<A, B, …, Never>` wants to be treated as `Codable`
+extension Never : Decodable {
+    /// Throws an error, since it should never be decodable
+    public init(from decoder: Decoder) throws {
+        throw NeverCodableError.decodableNever
+    }
+}
+
+/// Useful extension for when a `OneOfX<A, B, …, Never>` wants to be treated as `Codable`
+extension Never : Encodable {
+    /// Throws an error, since it should never be encodable
+    public func encode(to encoder: Encoder) throws {
+        throw NeverCodableError.encodableNever
+    }
+}
+
+
+/// The error that is thrown when a `Never` type is encoded or decoded
+enum NeverCodableError : Error {
+    /// The error that is thrown when a `Never` type is encoded
+    case encodableNever
+    /// The error that is thrown when a `Never` type is decoded
+    case decodableNever
+}
+
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
 @propertyWrapper public indirect enum Indirect<Wrapped> : WrapperType, RawIsomorphism {
     case some(Wrapped)

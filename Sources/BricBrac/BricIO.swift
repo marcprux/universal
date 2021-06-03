@@ -841,16 +841,20 @@ public extension Encodable {
 
 public extension Decoder {
     /// Throw an error if any unrecognized properties are present.
-    @inlinable func forbidAdditionalProperties<S: Sequence, Key: CodingKey>(notContainedIn keys: S) throws where S.Element == Key {
+    /// - Parameters:
+    ///   - keys: The list of keys to permit
+    ///   - keySet: any additional keys to allow
+    ///   - handler: the handler for missing keys; this defaults to throwing a `DecodingError.dataCorrupted`, but it could be changed to instead log a warning or attempt an alternate decoding method
+    /// - Throws: an error if any keys exist that are not in the properties list
+    @inlinable func forbidAdditionalProperties<S: Sequence, Key: CodingKey>(notContainedIn keys: S, or keySet: Set<String> = [], handler: (Decoder, [String]) throws -> () = { throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: $0.codingPath, debugDescription: "Additional properties forbidden: \($1)")) }) throws where S.Element == Key {
         let unkeyed = try self.singleValueContainer()
         let raw = try unkeyed.decode([String: AnyDecodable].self)
 
-        let keyStrings = Set(keys.map(\.stringValue))
-        for key in raw.keys {
-            if !keyStrings.contains(key) {
-                // TODO: custom error when we forbid additional keys
-                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Additional property \"\(key)\" is forbidden"))
-            }
+        let keyStrings = keySet.union(keys.map(\.stringValue))
+
+        let missingKeys = raw.keys.filter({ !keyStrings.contains($0) })
+        if missingKeys.isEmpty == false {
+            try handler(self, missingKeys)
         }
     }
 }

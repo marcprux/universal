@@ -1564,8 +1564,8 @@ class BricBracTests : XCTestCase {
         struct Things {
             var thing: OneOf<Thing1>.Or<Thing2>
             var name: String? {
-                get { return thing[routing: (\.name, \.name)] }
-                set { thing[routing: (\.name, \.name)] = newValue }
+                get { return thing[routing: \.name, \.name] }
+                set { thing[routing: \.name, \.name] = newValue }
             }
         }
 

@@ -1201,18 +1201,18 @@ public extension OneOf2 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
             }
         }
     }
@@ -1534,20 +1534,20 @@ public extension OneOf3 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
             }
         }
     }
@@ -1860,22 +1860,22 @@ public extension OneOf4 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>, _ kp4: WritableKeyPath<T4, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
+            case .v4(let x4): return x4[keyPath: kp4]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: kp4] = newValue; self = Self(x4)
             }
         }
     }
@@ -2174,24 +2174,24 @@ public extension OneOf5 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>, _ kp4: WritableKeyPath<T4, T>, _ kp5: WritableKeyPath<T5, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
+            case .v4(let x4): return x4[keyPath: kp4]
+            case .v5(let x5): return x5[keyPath: kp5]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: kp5] = newValue; self = Self(x5)
             }
         }
     }
@@ -2505,26 +2505,26 @@ public extension OneOf6 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>, _ kp4: WritableKeyPath<T4, T>, _ kp5: WritableKeyPath<T5, T>, _ kp6: WritableKeyPath<T6, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
+            case .v4(let x4): return x4[keyPath: kp4]
+            case .v5(let x5): return x5[keyPath: kp5]
+            case .v6(let x6): return x6[keyPath: kp6]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: kp6] = newValue; self = Self(x6)
             }
         }
     }
@@ -2799,28 +2799,28 @@ public extension OneOf7 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>, _ kp4: WritableKeyPath<T4, T>, _ kp5: WritableKeyPath<T5, T>, _ kp6: WritableKeyPath<T6, T>, _ kp7: WritableKeyPath<T7, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
+            case .v4(let x4): return x4[keyPath: kp4]
+            case .v5(let x5): return x5[keyPath: kp5]
+            case .v6(let x6): return x6[keyPath: kp6]
+            case .v7(let x7): return x7[keyPath: kp7]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: kp7] = newValue; self = Self(x7)
             }
         }
     }
@@ -3113,30 +3113,30 @@ public extension OneOf8 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>, _ kp4: WritableKeyPath<T4, T>, _ kp5: WritableKeyPath<T5, T>, _ kp6: WritableKeyPath<T6, T>, _ kp7: WritableKeyPath<T7, T>, _ kp8: WritableKeyPath<T8, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
-            case .v8(let x8): return x8[keyPath: keys.kp8]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
+            case .v4(let x4): return x4[keyPath: kp4]
+            case .v5(let x5): return x5[keyPath: kp5]
+            case .v6(let x6): return x6[keyPath: kp6]
+            case .v7(let x7): return x7[keyPath: kp7]
+            case .v8(let x8): return x8[keyPath: kp8]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
-            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = Self(x8)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: kp7] = newValue; self = Self(x7)
+            case .v8(var x8): x8[keyPath: kp8] = newValue; self = Self(x8)
             }
         }
     }
@@ -3448,32 +3448,32 @@ public extension OneOf9 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>, _ kp4: WritableKeyPath<T4, T>, _ kp5: WritableKeyPath<T5, T>, _ kp6: WritableKeyPath<T6, T>, _ kp7: WritableKeyPath<T7, T>, _ kp8: WritableKeyPath<T8, T>, _ kp9: WritableKeyPath<T9, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
-            case .v8(let x8): return x8[keyPath: keys.kp8]
-            case .v9(let x9): return x9[keyPath: keys.kp9]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
+            case .v4(let x4): return x4[keyPath: kp4]
+            case .v5(let x5): return x5[keyPath: kp5]
+            case .v6(let x6): return x6[keyPath: kp6]
+            case .v7(let x7): return x7[keyPath: kp7]
+            case .v8(let x8): return x8[keyPath: kp8]
+            case .v9(let x9): return x9[keyPath: kp9]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
-            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = Self(x8)
-            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = Self(x9)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: kp7] = newValue; self = Self(x7)
+            case .v8(var x8): x8[keyPath: kp8] = newValue; self = Self(x8)
+            case .v9(var x9): x9[keyPath: kp9] = newValue; self = Self(x9)
             }
         }
     }
@@ -3804,34 +3804,34 @@ public extension OneOf10 {
     }
 
     /// Enables reading & writing multiple different keyPaths that lead to the same type
-    @inlinable subscript<T>(routing keys: (kp1: WritableKeyPath<T1, T>, kp2: WritableKeyPath<T2, T>, kp3: WritableKeyPath<T3, T>, kp4: WritableKeyPath<T4, T>, kp5: WritableKeyPath<T5, T>, kp6: WritableKeyPath<T6, T>, kp7: WritableKeyPath<T7, T>, kp8: WritableKeyPath<T8, T>, kp9: WritableKeyPath<T9, T>, kp10: WritableKeyPath<T10, T>)) -> T {
+    @inlinable subscript<T>(routing kp1: WritableKeyPath<T1, T>, _ kp2: WritableKeyPath<T2, T>, _ kp3: WritableKeyPath<T3, T>, _ kp4: WritableKeyPath<T4, T>, _ kp5: WritableKeyPath<T5, T>, _ kp6: WritableKeyPath<T6, T>, _ kp7: WritableKeyPath<T7, T>, _ kp8: WritableKeyPath<T8, T>, _ kp9: WritableKeyPath<T9, T>, _ kp10: WritableKeyPath<T10, T>) -> T {
         get {
             switch self {
-            case .v1(let x1): return x1[keyPath: keys.kp1]
-            case .v2(let x2): return x2[keyPath: keys.kp2]
-            case .v3(let x3): return x3[keyPath: keys.kp3]
-            case .v4(let x4): return x4[keyPath: keys.kp4]
-            case .v5(let x5): return x5[keyPath: keys.kp5]
-            case .v6(let x6): return x6[keyPath: keys.kp6]
-            case .v7(let x7): return x7[keyPath: keys.kp7]
-            case .v8(let x8): return x8[keyPath: keys.kp8]
-            case .v9(let x9): return x9[keyPath: keys.kp9]
-            case .v10(let x10): return x10[keyPath: keys.kp10]
+            case .v1(let x1): return x1[keyPath: kp1]
+            case .v2(let x2): return x2[keyPath: kp2]
+            case .v3(let x3): return x3[keyPath: kp3]
+            case .v4(let x4): return x4[keyPath: kp4]
+            case .v5(let x5): return x5[keyPath: kp5]
+            case .v6(let x6): return x6[keyPath: kp6]
+            case .v7(let x7): return x7[keyPath: kp7]
+            case .v8(let x8): return x8[keyPath: kp8]
+            case .v9(let x9): return x9[keyPath: kp9]
+            case .v10(let x10): return x10[keyPath: kp10]
             }
         }
 
         set {
             switch self {
-            case .v1(var x1): x1[keyPath: keys.kp1] = newValue; self = Self(x1)
-            case .v2(var x2): x2[keyPath: keys.kp2] = newValue; self = Self(x2)
-            case .v3(var x3): x3[keyPath: keys.kp3] = newValue; self = Self(x3)
-            case .v4(var x4): x4[keyPath: keys.kp4] = newValue; self = Self(x4)
-            case .v5(var x5): x5[keyPath: keys.kp5] = newValue; self = Self(x5)
-            case .v6(var x6): x6[keyPath: keys.kp6] = newValue; self = Self(x6)
-            case .v7(var x7): x7[keyPath: keys.kp7] = newValue; self = Self(x7)
-            case .v8(var x8): x8[keyPath: keys.kp8] = newValue; self = Self(x8)
-            case .v9(var x9): x9[keyPath: keys.kp9] = newValue; self = Self(x9)
-            case .v10(var x10): x10[keyPath: keys.kp10] = newValue; self = Self(x10)
+            case .v1(var x1): x1[keyPath: kp1] = newValue; self = Self(x1)
+            case .v2(var x2): x2[keyPath: kp2] = newValue; self = Self(x2)
+            case .v3(var x3): x3[keyPath: kp3] = newValue; self = Self(x3)
+            case .v4(var x4): x4[keyPath: kp4] = newValue; self = Self(x4)
+            case .v5(var x5): x5[keyPath: kp5] = newValue; self = Self(x5)
+            case .v6(var x6): x6[keyPath: kp6] = newValue; self = Self(x6)
+            case .v7(var x7): x7[keyPath: kp7] = newValue; self = Self(x7)
+            case .v8(var x8): x8[keyPath: kp8] = newValue; self = Self(x8)
+            case .v9(var x9): x9[keyPath: kp9] = newValue; self = Self(x9)
+            case .v10(var x10): x10[keyPath: kp10] = newValue; self = Self(x10)
             }
         }
     }

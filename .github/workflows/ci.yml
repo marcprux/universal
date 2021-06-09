@@ -17,7 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: swift test --enable-test-discovery
+      - name: Test (Debug)
+        run: swift test -v --configuration debug
+      - name: Test (Release)
+        run: swift test -v --configuration release -Xswiftc -enable-testing
 
   watchOS:
     runs-on: macos-11.0 # macOS 11 needed for Xcode_12.5
@@ -68,16 +71,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Run tests
-        run: swift test
+      - name: Test (Debug)
+        run: swift test -v --configuration debug
+      - name: Test (Release)
+        run: swift test -v --configuration release -Xswiftc -enable-testing
 
   macOS11:
     runs-on: macos-11.0
     needs: [macOS10] # macOS10 must pass first
     steps:
       - uses: actions/checkout@v2
-      - name: Run tests
-        run: swift test
+      - name: Test (Debug)
+        run: swift test -v --configuration debug
+      - name: Test (Release)
+        run: swift test -v --configuration release -Xswiftc -enable-testing
 
   Windows10:
     runs-on: windows-latest
@@ -112,9 +119,9 @@ jobs:
       - name: Build (Release)
         run: swift build -v -c release
       - name: Test (Debug)
-        run: swift test -v --configuration debug --enable-test-discovery
+        run: swift test -v --configuration debug
       - name: Test (Release)
-        run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
+        run: swift test -v --configuration release -Xswiftc -enable-testing
 
   Release:
     runs-on: ubuntu-latest

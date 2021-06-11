@@ -23,8 +23,9 @@ jobs:
       matrix:
         os: ["ubuntu-20.04"] # ubuntu-latest
         image: ["swift:5.4.1-focal", "swiftlang/swift:nightly-focal"]
-      container:
-        image: ${{ matrix.image }}
+    container:
+      image: ${{ matrix.image }}
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v2

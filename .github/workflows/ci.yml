@@ -26,8 +26,6 @@ jobs:
       container:
         image: ${{ matrix.image }}
 
-      timeout-minutes: 10
-
     steps:
       - uses: actions/checkout@v2
       - name: Check swift version

@@ -5175,3 +5175,42 @@ extension IdMap : Hashable where Value : Hashable { }
 extension KeyMap : Equatable where Value : Equatable { }
 extension KeyMap : Hashable where Value : Hashable { }
 
+
+// MARK: Concurrency
+
+#if canImport(Concurrency)
+import Concurrency
+
+// OneOf types are Sendable when their wrapped types are all Sendable
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable { }
+
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable { }
+
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable { }
+
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf10 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable, T10 : Equatable { }
+
+#endif

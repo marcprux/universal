@@ -5179,38 +5179,84 @@ extension KeyMap : Hashable where Value : Hashable { }
 // MARK: Concurrency
 
 #if canImport(Concurrency)
-import Concurrency
+import _Concurrency
 
-// OneOf types are Sendable when their wrapped types are all Sendable
+/// A pure type is a marker for an immutable value that can be used safely from multiple threads.
+///
+/// This conforms to `Concurrency.Sendable` in Swift 5.5.
+public protocol Pure : Concurrency.Sendable {
+}
 
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf2 : Equatable where T1 : Equatable, T2 : Equatable { }
+#else
 
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf3 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf4 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf5 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf6 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf7 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable { }
-
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf8 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable { }
-
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf9 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable { }
-
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension OneOf10 : Equatable where T1 : Equatable, T2 : Equatable, T3 : Equatable, T4 : Equatable, T5 : Equatable, T6 : Equatable, T7 : Equatable, T8 : Equatable, T9 : Equatable, T10 : Equatable { }
+/// A pure type is a marker for an immutable value that can be used safely from multiple threads.
+///
+/// This will conform to `Concurrency.Sendable` in Swift 5.5.
+public protocol Pure { }
 
 #endif
+
+extension String : Pure { }
+extension Double : Pure { }
+extension Float : Pure { }
+extension Int : Pure { }
+extension Int8 : Pure { }
+extension Int16 : Pure { }
+extension Int32 : Pure { }
+extension Int64 : Pure { }
+extension UInt : Pure { }
+extension UInt8 : Pure { }
+extension UInt16 : Pure { }
+extension UInt32 : Pure { }
+extension UInt64 : Pure { }
+
+// Collection & OneOf types are Sendable when their wrapped types are all Sendable
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension Optional : Pure where Wrapped : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension Indirect : Pure where Wrapped : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension Array : Pure where Element : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension ArraySlice : Pure where Element : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension ContiguousArray : Pure where Element : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension Set : Pure where Element : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension CollectionOfOne : Pure where Element : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension EmptyCollection : Pure where Element : Pure { }
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension Dictionary : Pure where Key : Pure, Value : Pure { }
+
+
+// OneOf types are Sendable when their wrapped types are all Sendable
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf2 : Pure where T1 : Pure, T2 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf3 : Pure where T1 : Pure, T2 : Pure, T3 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf4 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf5 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf6 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf7 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf8 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure, T8 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf9 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure, T8 : Pure, T9 : Pure { }
+
+@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+extension OneOf10 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure, T8 : Pure, T9 : Pure, T10 : Pure { }
+

@@ -46,6 +46,9 @@ public struct Curio {
     /// whether to generate hashable functions for each type
     public var generateHashable = true
 
+    /// whether to generate Pure (Sendable) protocol implementations
+    public var generatePure = true
+
     /// Whether to output union types as a typealias to a BricBrac.OneOf<T1, T2, ...> enum
     public var useOneOfEnums = true
 
@@ -148,6 +151,7 @@ public struct Curio {
     /// The protocols all our types will adopt
     var standardAdoptions: [CodeProtocol] {
         var protos: [CodeProtocol] = []
+        if generatePure { protos.append(.pure) }
         if generateEquals { protos.append(.equatable) }
         if generateHashable { protos.append(.hashable) }
         if generateCodable { protos.append(.codable) }
@@ -1651,6 +1655,7 @@ extension Curio {
         var useAllOfEnums: Bool?
         var useAnyOfEnums: Bool?
         var anyOfAsOneOf: Bool?
+        var generatePure: Bool?
         var generateEquals: Bool?
         var generateHashable: Bool?
         var generateCodable: Bool?
@@ -1685,6 +1690,8 @@ extension Curio {
                 anyOfAsOneOf = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-generateEquals":
                 generateEquals = (args.next() ?? "true").hasPrefix("t") == true ? true : false
+            case "-generatePure":
+                generatePure = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-generateHashable":
                 generateHashable = (args.next() ?? "true").hasPrefix("t") == true ? true : false
             case "-generateCodable":
@@ -1721,6 +1728,7 @@ extension Curio {
             if let useAllOfEnums = useAllOfEnums { curio.useAllOfEnums = useAllOfEnums }
             if let useAnyOfEnums = useAnyOfEnums { curio.useAnyOfEnums = useAnyOfEnums }
             if let anyOfAsOneOf = anyOfAsOneOf { curio.anyOfAsOneOf = anyOfAsOneOf }
+            if let generatePure = generatePure { curio.generatePure = generatePure }
             if let generateEquals = generateEquals { curio.generateEquals = generateEquals }
             if let generateHashable = generateHashable { curio.generateHashable = generateHashable }
             if let generateCodable = generateCodable { curio.generateCodable = generateCodable }
@@ -1782,6 +1790,7 @@ extension CodeExternalType {
 
 /// Standard protocols
 extension CodeProtocol {
+    static let pure = CodeProtocol(name: "Pure")
     static let codable = CodeProtocol(name: "Codable")
     static let keyedCodable = CodeProtocol(name: "KeyedCodable")
     static let codingKey = CodeProtocol(name: "CodingKey")

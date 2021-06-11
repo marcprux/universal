@@ -14,13 +14,36 @@ on:
 
 jobs:
   Linux:
-    runs-on: ubuntu-latest
+    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04] # ubuntu-latest
+        container: ["swift:5.4.1-focal", "swiftlang/swift:nightly-focal"]
+      container:
+        image: ${{ matrix.container }}
+
+      timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
+      - name: Check swift version
+        run: swift --version
       - name: Test (Debug)
         run: swift test -v --configuration debug --enable-test-discovery
       - name: Test (Release)
         run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
+
+  SPM:
+    name: Firebreak SPM
+    runs-on: firebreak
+    needs: [Linux] # Linux must pass first
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_12.5.app/Contents/Developer
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - name: SPM Test
+        run: arch -arch arm64e swift test -c debug
 
   watchOS:
     runs-on: macos-11.0 # macOS 11 needed for Xcode_12.5

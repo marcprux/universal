@@ -37,13 +37,13 @@ jobs:
       - name: Test (Release)
         run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
 
-  SPM:
+  macOS12:
     if: false # not yet available
-    name: Firebreak SPM
     runs-on: firebreak
-    needs: [Linux] # Linux must pass first
+    #runs-on: macos-12.0
+    needs: [macOS11] # macOS11 must pass first
     env:
-      DEVELOPER_DIR: /Applications/Xcode_12.5.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_13.app/Contents/Developer
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2

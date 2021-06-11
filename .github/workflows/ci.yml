@@ -11,6 +11,9 @@ on:
     - cron:  '0 6,18 * * *'
 
 # construct CI latticeflow with cheaper platforms first: Linux & Windows then macOS10, macOS11, iOS, tvOS, watchOS
+concurrency: 
+  group: ci
+  cancel-in-progress: true
 
 jobs:
   Linux:
@@ -18,12 +21,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04] # ubuntu-latest
-        container: ["swift:5.4.1-focal", "swiftlang/swift:nightly-focal"]
+        os: ["ubuntu-20.04"] # ubuntu-latest
+        image: ["swift:5.4.1-focal", "swiftlang/swift:nightly-focal"]
       container:
-        image: ${{ matrix.container }}
+        image: ${{ matrix.image }}
 
       timeout-minutes: 10
+
     steps:
       - uses: actions/checkout@v2
       - name: Check swift version

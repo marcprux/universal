@@ -12,6 +12,11 @@ import BricBrac
 import JavaScriptCore
 #endif
 
+extension Pure {
+    /// Verify purity
+    var isPure: Bool { true }
+}
+
 class BricBracTests : XCTestCase {
 
 #if canImport(Foundation)
@@ -1552,16 +1557,16 @@ class BricBracTests : XCTestCase {
     }
 
     func testKeyRouting() {
-        struct Thing1 {
+        struct Thing1 : Pure {
             var thing1: Int
             var name: String?
         }
-        struct Thing2 {
+        struct Thing2 : Pure {
             var thing2: Double
             var name: String?
         }
 
-        struct Things {
+        struct Things : Pure {
             var thing: OneOf<Thing1>.Or<Thing2>
             var name: String? {
                 get { return thing[routing: \.name, \.name] }
@@ -1579,6 +1584,10 @@ class BricBracTests : XCTestCase {
         var things = [thing1, thing2]
         things[walking: \.name] = ["ABC", "ABC"]
         XCTAssertEqual(things[walking: \.name], ["ABC", "ABC"])
+
+        XCTAssertTrue(thing1.isPure)
+        XCTAssertTrue(thing2.isPure)
+        XCTAssertTrue(things.isPure)
     }
 
     let RefPerformanceCount = 100000

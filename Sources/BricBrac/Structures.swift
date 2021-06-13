@@ -5181,20 +5181,21 @@ extension KeyMap : Hashable where Value : Hashable { }
 #if canImport(Concurrency)
 import _Concurrency
 
-/// A pure type is a marker for an immutable value that can be used safely from multiple threads.
+/// A pure type is a marker for value that can be shared between states. It is `Hashable` and `Codable`.
 ///
 /// This conforms to `Concurrency.Sendable` in Swift 5.5.
-public protocol Pure : Concurrency.Sendable {
-}
+public protocol Pure : Hashable, Codable, Sendable { }
 
 #else
 
-/// A pure type is a marker for an immutable value that can be used safely from multiple threads.
+/// A pure type is a marker for value that can be shared between states.
 ///
 /// This will conform to `Concurrency.Sendable` in Swift 5.5.
-public protocol Pure { }
+public protocol Pure : Hashable, Codable { }
 
 #endif
+
+extension Bric : Pure { }
 
 extension String : Pure { }
 extension Double : Pure { }
@@ -5210,7 +5211,7 @@ extension UInt16 : Pure { }
 extension UInt32 : Pure { }
 extension UInt64 : Pure { }
 
-// Collection & OneOf types are Sendable when their wrapped types are all Sendable
+// Collection & OneOf types are Pure when their wrapped types are all Pure
 
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Optional : Pure where Wrapped : Pure { }
@@ -5218,16 +5219,16 @@ extension Optional : Pure where Wrapped : Pure { }
 extension Indirect : Pure where Wrapped : Pure { }
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Array : Pure where Element : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension ArraySlice : Pure where Element : Pure { }
+//@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+//extension ArraySlice : Pure where Element : Pure { }
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension ContiguousArray : Pure where Element : Pure { }
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Set : Pure where Element : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension CollectionOfOne : Pure where Element : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
-extension EmptyCollection : Pure where Element : Pure { }
+//@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+//extension CollectionOfOne : Pure where Element : Pure { }
+//@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+//extension EmptyCollection : Pure where Element : Pure { }
 @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Dictionary : Pure where Key : Pure, Value : Pure { }
 

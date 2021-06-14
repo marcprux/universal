@@ -5181,14 +5181,14 @@ extension KeyMap : Hashable where Value : Hashable { }
 #if canImport(Concurrency)
 import _Concurrency
 
-/// A pure type is a marker for value that can be shared between states. It is `Hashable` and `Codable`.
+/// A pure type is a marker for value that can be shared safely between threads. It is `Hashable` and `Codable`.
 ///
 /// This conforms to `Concurrency.Sendable` in Swift 5.5.
 public protocol Pure : Hashable, Codable, Sendable { }
 
 #else
 
-/// A pure type is a marker for value that can be shared between states.
+/// A pure type is a marker for value that can be shared safely between threads.
 ///
 /// This will conform to `Concurrency.Sendable` in Swift 5.5.
 public protocol Pure : Hashable, Codable { }
@@ -5213,51 +5213,25 @@ extension UInt64 : Pure { }
 
 // Collection & OneOf types are Pure when their wrapped types are all Pure
 
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Optional : Pure where Wrapped : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Indirect : Pure where Wrapped : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Array : Pure where Element : Pure { }
-//@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 //extension ArraySlice : Pure where Element : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension ContiguousArray : Pure where Element : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Set : Pure where Element : Pure { }
-//@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 //extension CollectionOfOne : Pure where Element : Pure { }
-//@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 //extension EmptyCollection : Pure where Element : Pure { }
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension Dictionary : Pure where Key : Pure, Value : Pure { }
 
 
 // OneOf types are Sendable when their wrapped types are all Sendable
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf2 : Pure where T1 : Pure, T2 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf3 : Pure where T1 : Pure, T2 : Pure, T3 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf4 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf5 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf6 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf7 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf8 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure, T8 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf9 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure, T8 : Pure, T9 : Pure { }
-
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
 extension OneOf10 : Pure where T1 : Pure, T2 : Pure, T3 : Pure, T4 : Pure, T5 : Pure, T6 : Pure, T7 : Pure, T8 : Pure, T9 : Pure, T10 : Pure { }
 

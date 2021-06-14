@@ -117,6 +117,8 @@ public extension Bric {
 
 public extension Encodable {
     /// Returns a simple debug description of the JSON encoding of the given `Encodable`.
+    /// 
+    /// The returned string will be formatted with `JSONEncoder.OutputFormatting.sortedKeys` on platforms where it is available.
     var jsonDebugDescription: String { (try? encodedStringSorted()) ?? "{}" }
 }
 

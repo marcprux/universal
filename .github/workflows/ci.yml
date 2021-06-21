@@ -51,7 +51,7 @@ jobs:
         run: arch -arch arm64e swift test -c debug
 
   watchOS:
-    runs-on: macos-11.0 # macOS 11 needed for Xcode_12.5
+    runs-on: macos-11 # macOS 11 needed for Xcode_12.5
     needs: [Linux] # Linux must pass first
 
     env:
@@ -105,7 +105,7 @@ jobs:
         run: swift test -v --configuration release -Xswiftc -enable-testing
 
   macOS11:
-    runs-on: macos-11.0
+    runs-on: macos-11
     needs: [macOS10] # macOS10 must pass first
     steps:
       - uses: actions/checkout@v2

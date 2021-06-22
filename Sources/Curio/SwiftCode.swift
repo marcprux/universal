@@ -123,6 +123,8 @@ open class CodeModule : CodeImplementationType {
     }
 
     open var nestedTypes: [CodeNamedType] = []
+    /// The name of the encosing enum type, if any
+    open var namespace: String? = nil
     open var comments: [String] = []
     open var imports: [String] = ["BricBrac"]
     /// Global functions in this module
@@ -142,14 +144,30 @@ open class CodeModule : CodeImplementationType {
             emitter.emit()
         }
 
+        let protocolTypes = nestedTypes.sorted(by: typeOrdering).filter({ ($0 is CodeProtocol) })
+        let moduleTypes = nestedTypes.sorted(by: typeOrdering).filter({ !($0 is CodeProtocol) })
+
+        for inner in protocolTypes {
+            emitter.emit("")
+            inner.emit(emitter)
+        }
+
+        if let namespace = namespace {
+            emitter.emit("public", "enum", namespace, "{")
+        }
+
         for f in funcs {
             emitter.emit("")
             f.emit(emitter)
         }
 
-        for inner in nestedTypes.sorted(by: typeOrdering) {
+        for inner in moduleTypes {
             emitter.emit("")
             inner.emit(emitter)
+        }
+
+        if namespace != nil {
+            emitter.emit("}")
         }
     }
 }

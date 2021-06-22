@@ -22,8 +22,8 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-20.04"] # ubuntu-latest
-        image: ["swift:5.4.1-focal", "swiftlang/swift:nightly-focal"] # crashes on nightly
-        #image: ["swift:5.4.1-focal"]
+        #image: ["swift:5.4.1-focal", "swiftlang/swift:nightly-focal"] # crashes on nightly
+        image: ["swift:5.4.1-focal"]
     container:
       image: ${{ matrix.image }}
     timeout-minutes: 10
@@ -77,7 +77,7 @@ jobs:
             xcodebuild clean test \
               -scheme "BricBrac-Package" \
               -sdk "iphonesimulator14.5" \
-              -destination "OS=14.5,name=iPhone 12" \
+              -destination "OS=14.5,name=iPod Touch (7th generation)" \
               ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
   tvOS:

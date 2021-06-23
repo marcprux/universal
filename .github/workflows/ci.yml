@@ -59,8 +59,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Remove Tool from Package.swift (SR-1954)
+        run: sed -i'.bk' 's;.*// SR-1954$;;g' Package.swift
       - run: |
-            sed -i'.bk' 's;.*// SR-1954$;;g' Package.swift # strip tool for sim builds
             xcodebuild clean test \
               -scheme "BricBrac-Package" \
               -sdk "watchsimulator" \
@@ -73,8 +74,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Remove Tool from Package.swift (SR-1954)
+        run: sed -i'.bk' 's;\(.*\)// SR-1954$;// SR-1954 \1;g' Package.swift
       - run: |
-            sed -i'.bk' 's;.*// SR-1954$;;g' Package.swift # strip tool for sim builds
             xcodebuild clean test \
               -scheme "BricBrac-Package" \
               -sdk "iphonesimulator" \
@@ -87,8 +89,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Remove Tool from Package.swift (SR-1954)
+        run: sed -i'.bk' 's;\(.*\)// SR-1954$;// SR-1954 \1;g' Package.swift
       - run: |
-            sed -i'.bk' 's;.*// SR-1954$;;g' Package.swift # strip tool for sim builds
             xcodebuild clean test \
               -scheme "BricBrac-Package" \
               -sdk "appletvsimulator" \

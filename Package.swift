@@ -11,9 +11,9 @@ let package = Package(
         ],
     targets: [
         .target(name: "BricBrac"),
-        .testTarget(name: "BricBracTests", dependencies: ["BricBrac"]),
+        .testTarget(name: "BricBracTests", dependencies: ["BricBrac"], resources: [.copy("testdata/")]),
         .target(name: "Curio", dependencies: ["BricBrac"]),
-        .testTarget(name: "CurioTests", dependencies: ["BricBrac", "Curio"]),
+        .testTarget(name: "CurioTests", dependencies: ["BricBrac", "Curio"], resources: [.copy("schemas/")]),
         //.target(name: "CurioTool", dependencies: ["Curio"]),
         ]
 )

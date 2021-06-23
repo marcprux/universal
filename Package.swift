@@ -6,14 +6,14 @@ let package = Package(
     products: [
         .library(name: "BricBrac", targets: ["BricBrac"]),
         .library(name: "Curio", targets: ["Curio"]),
-        //.executable(name: "CurioTool", targets: ["CurioTool"]),
+        .executable(name: "CurioTool", targets: ["CurioTool"]), // SR-1954
         ],
     targets: [
         .target(name: "BricBrac"),
         .testTarget(name: "BricBracTests", dependencies: ["BricBrac"], resources: [.copy("testdata/")]),
         .target(name: "Curio", dependencies: ["BricBrac"]),
         .testTarget(name: "CurioTests", dependencies: ["BricBrac", "Curio"], resources: [.copy("schemas/")]),
-        //.target(name: "CurioTool", dependencies: ["Curio"]),
+        .target(name: "CurioTool", dependencies: ["Curio"]), // SR-1954
         ]
 )
 

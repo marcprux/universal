@@ -13,7 +13,7 @@
 /// A Bric is a bit of JSON encoded as an enumeration; it can represent a `Bool` (`Bric.bol`),
 /// `String` (`Bric.str`), `Double` (`Bric.num`), `Array` (`Bric.arr`), `Dictionary` (`Bric.obj`),
 /// or `nil` (`Bric.nul`)
-public enum Bric {
+@frozen public enum Bric {
     case arr([Bric]) // Array
     case obj([String: Bric]) // Dictionary
     case str(String) // String

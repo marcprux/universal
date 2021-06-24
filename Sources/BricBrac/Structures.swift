@@ -162,89 +162,10 @@ public extension RawInitializable {
     }
 }
 
-/// A `RawRepresentable` and `RawInitializable` that guarantees that the contents of `rawValue` are fully equivalent to the wrapper itself, thereby enabling isomorphic behaviors such as encoding & decoding itself as it's underlying value.
+/// A `RawRepresentable` and `RawInitializable` that guarantees that the contents of `rawValue` are fully equivalent to the wrapper itself, thereby enabling isomorphic behaviors such as encoding & decoding itself as it's underlying value or converting between separate `RawIsomorphism` with the same underlying `RawValue` .
 public protocol RawIsomorphism : RawInitializable {
 }
 
-//extension Result : Either2Type {
-//    public typealias T1 = Failure
-//    public typealias T2 = Success
-//    public typealias TN = T2
-//    public typealias Or<X> = OneOf3<T1, T2, X>
-//    public typealias OneOfNext = Or<Never>
-//
-//
-//    public func map2<U1, U2>(_ f1: (Failure) throws -> (U1), _ f2: (Success) throws -> (U2)) rethrows -> This<U1>.Or<U2> {
-//        switch self {
-//        case .failure(let x): return try .init(f1(x))
-//        case .success(let x): return try .init(f2(x))
-//        }
-//    }
-//
-//    public init(t2: Success) {
-//        self = .success(t2)
-//    }
-//
-//    public init(_ t2: Success) {
-//        self = .success(t2)
-//    }
-//
-//    public func infer() -> Success? {
-//        oneOf2.infer()
-//    }
-//
-//    public init(t1: Failure) {
-//        self = .failure(t1)
-//    }
-//
-//    public init(_ t1: Failure) {
-//        self = .failure(t1)
-//    }
-//
-//    public func infer() -> Failure? {
-//        oneOf2.infer()
-//    }
-//}
-
-//extension Optional : Either2Type {
-//    public typealias T1 = Void
-//    public typealias T2 = T
-//    public typealias TN = T2
-//    public typealias Or<X> = OneOf3<T1, T2, X>
-//    public typealias OneOfNext = Or<Never>
-//
-//
-//    public func map2<U1, U2>(_ f1: (T1) throws -> (U1), _ f2: (T2) throws -> (U2)) rethrows -> This<U1>.Or<U2> {
-//        switch self {
-//        case .none(let x): return try .init(f1(x))
-//        case .some(let x): return try .init(f2(x))
-//        }
-//    }
-//
-//    public init(t2: Wrapped) {
-//        self = .success(t2)
-//    }
-//
-//    public init(_ t2: Wrapped) {
-//        self = .success(t2)
-//    }
-//
-//    public func infer() -> Wrapped? {
-//        oneOf2.infer()
-//    }
-//
-//    public init(t1: Void) {
-//        self = .failure(t1)
-//    }
-//
-//    public init(_ t1: Void) {
-//        self = .failure(t1)
-//    }
-//
-//    public func infer() -> Void? {
-//        oneOf2.infer()
-//    }
-//}
 
 /// A RawCodable is a simple `RawRepresentable` wrapper except its coding
 /// will store the underlying value directly rather than keyed as "rawValue",
@@ -462,10 +383,7 @@ public protocol SomeOf {
 ///
 /// `This<X>.And<Y>` is `AllOf2<X, Y>`, and
 /// `This<X>.And<Y>.And<Z>` is `AllOf2<X, AllOf2<Y, Z>>`
-@frozen public struct OneOf<T> : OneOfNType, RawIsomorphism {
-    public typealias T1 = T
-    public typealias TN = T1
-
+@frozen public struct OneOf<T> : RawIsomorphism {
     /// Turns a `OneOf` into a `OneOf2` with the given type at the end
     public typealias Or<X> = OneOf2<T, X>
     public typealias And<X> = AllOf2<T, X>
@@ -473,9 +391,13 @@ public protocol SomeOf {
 
     public var rawValue: T
     public init(rawValue: T) { self.rawValue = rawValue }
+}
+
+extension OneOf : OneOfNType {
+    public typealias T1 = T
+    public typealias TN = T1
     public init(t1: T) { self.rawValue = t1 }
     public init(_ t1: T) { self.rawValue = t1 }
-
     public func infer() -> T? { self.rawValue }
 }
 

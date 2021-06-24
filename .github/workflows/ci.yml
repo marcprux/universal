@@ -63,6 +63,7 @@ jobs:
         run: sed -i'.bk' 's;.*// SR-1954$;;g' Package.swift
       - run: |
             xcodebuild clean test \
+              -configuration Release \
               -scheme "BricBrac-Package" \
               -sdk "watchsimulator" \
               -destination "platform=watchOS Simulator,name=Apple Watch Series 6 - 44mm" \
@@ -78,6 +79,7 @@ jobs:
         run: sed -i'.bk' 's;\(.*\)// SR-1954$;// SR-1954 \1;g' Package.swift
       - run: |
             xcodebuild clean test \
+              -configuration Release \
               -scheme "BricBrac-Package" \
               -sdk "iphonesimulator" \
               -destination "platform=iOS Simulator,name=iPod touch (7th generation)" \
@@ -93,6 +95,7 @@ jobs:
         run: sed -i'.bk' 's;\(.*\)// SR-1954$;// SR-1954 \1;g' Package.swift
       - run: |
             xcodebuild clean test \
+              -configuration Release \
               -scheme "BricBrac-Package" \
               -sdk "appletvsimulator" \
               -destination "platform=tvOS Simulator,name=Apple TV" \

@@ -393,6 +393,7 @@ public protocol SomeOf {
     public init(rawValue: T) { self.rawValue = rawValue }
 }
 
+#if swift(>=5.4) // causes compile error on macOS10: "Structures.swift:921:20: note: multiple matching types named 'TN'"
 extension OneOf : OneOfNType {
     public typealias T1 = T
     public typealias TN = T1
@@ -400,6 +401,7 @@ extension OneOf : OneOfNType {
     public init(_ t1: T) { self.rawValue = t1 }
     public func infer() -> T? { self.rawValue }
 }
+#endif
 
 public protocol EitherType : OneOfMorphable {
     /// The type with increased arity by tacking `Never` on to the end of the type list (e.g., `OneOf2<X, Y>` becomes `OneOf3<X, Y, Never>`)

@@ -67,7 +67,7 @@ enum NeverCodableError : Error {
 }
 
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
-@propertyWrapper public indirect enum Indirect<Wrapped> : WrapperType, RawIsomorphism {
+@propertyWrapper @frozen public indirect enum Indirect<Wrapped> : WrapperType, RawIsomorphism {
     case some(Wrapped)
 
     /// Construct a non-`nil` instance that stores `some`.
@@ -129,7 +129,7 @@ extension Indirect : Hashable where Wrapped : Hashable { }
 
 
 /// An single-element enumeration that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
-public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseIterable {
+@frozen public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseIterable {
     case null
 
     public init(nilLiteral: ()) { self = .null }
@@ -429,7 +429,7 @@ public extension Nullable {
 }
 
 /// An Object Bric type that cannot contain anything
-public struct HollowBric : Bricable, Bracable {
+@frozen public struct HollowBric : Bricable, Bracable {
     public init() {
     }
 
@@ -462,9 +462,21 @@ public protocol SomeOf {
 ///
 /// `This<X>.And<Y>` is `AllOf2<X, Y>`, and
 /// `This<X>.And<Y>.And<Z>` is `AllOf2<X, AllOf2<Y, Z>>`
-public enum OneOf<T> {
+@frozen public struct OneOf<T> : OneOfNType, RawIsomorphism {
+    public typealias T1 = T
+    public typealias TN = T1
+
+    /// Turns a `OneOf` into a `OneOf2` with the given type at the end
     public typealias Or<X> = OneOf2<T, X>
     public typealias And<X> = AllOf2<T, X>
+    public typealias OneOfNext = Or<Never>
+
+    public var rawValue: T
+    public init(rawValue: T) { self.rawValue = rawValue }
+    public init(t1: T) { self.rawValue = t1 }
+    public init(_ t1: T) { self.rawValue = t1 }
+
+    public func infer() -> T? { self.rawValue }
 }
 
 public protocol EitherType : OneOfMorphable {
@@ -1088,7 +1100,7 @@ public extension OneOf2Type {
 // MARK: OneOf2
 
 /// A simple union type that can be one of either T1 or T2
-public indirect enum OneOf2<T1, T2> : Either2Type {
+@frozen public indirect enum OneOf2<T1, T2> : Either2Type {
     public typealias TN = T2
     /// Turns a `OneOf2` into a `OneOf3` with the given type at the end
     public typealias Or<X> = OneOf3<T1, T2, X>
@@ -1413,7 +1425,7 @@ public extension OneOf3Type {
 // MARK: OneOf3
 
 /// A simple union type that can be one of either T1 or T2 or T3
-public indirect enum OneOf3<T1, T2, T3> : Either3Type {
+@frozen public indirect enum OneOf3<T1, T2, T3> : Either3Type {
     public typealias TN = T3
     /// Turns a `OneOf3` into a `OneOf4` with the given type at the end
     public typealias Or<X> = OneOf4<T1, T2, T3, X>
@@ -1726,7 +1738,7 @@ public extension OneOf4Type {
 // MARK: OneOf4
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4
-public indirect enum OneOf4<T1, T2, T3, T4> : Either4Type {
+@frozen public indirect enum OneOf4<T1, T2, T3, T4> : Either4Type {
     public typealias TN = T4
     /// Turns a `OneOf4` into a `OneOf5` with the given type at the end
     public typealias Or<X> = OneOf5<T1, T2, T3, T4, X>
@@ -2029,7 +2041,7 @@ public extension OneOf5Type {
 // MARK: OneOf5
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5
-public indirect enum OneOf5<T1, T2, T3, T4, T5> : Either5Type {
+@frozen public indirect enum OneOf5<T1, T2, T3, T4, T5> : Either5Type {
     public typealias TN = T5
     /// Turns a `OneOf5` into a `OneOf6` with the given type at the end
     public typealias Or<X> = OneOf6<T1, T2, T3, T4, T5, X>
@@ -2366,7 +2378,7 @@ public extension OneOf6Type {
 // MARK: OneOf6
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : Either6Type {
+@frozen public indirect enum OneOf6<T1, T2, T3, T4, T5, T6> : Either6Type {
     public typealias TN = T6
     /// Turns a `OneOf6` into a `OneOf7` with the given type at the end
     public typealias Or<X> = OneOf7<T1, T2, T3, T4, T5, T6, X>
@@ -2649,7 +2661,7 @@ public extension OneOf7Type {
 // MARK: OneOf7
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : Either7Type {
+@frozen public indirect enum OneOf7<T1, T2, T3, T4, T5, T6, T7> : Either7Type {
     public typealias TN = T7
     /// Turns a `OneOf7` into a `OneOf8` with the given type at the end
     public typealias Or<X> = OneOf8<T1, T2, T3, T4, T5, T6, T7, X>
@@ -2952,7 +2964,7 @@ public extension OneOf8Type {
 // MARK: OneOf8
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : Either8Type {
+@frozen public indirect enum OneOf8<T1, T2, T3, T4, T5, T6, T7, T8> : Either8Type {
     public typealias TN = T8
     /// Turns a `OneOf8` into a `OneOf9` with the given type at the end
     public typealias Or<X> = OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, X>
@@ -3276,7 +3288,7 @@ public extension OneOf9Type {
 // MARK: OneOf9
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9
-public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Either9Type {
+@frozen public indirect enum OneOf9<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Either9Type {
     public typealias TN = T9
     /// Turns a `OneOf9` into a `OneOf10` with the given type at the end
     public typealias Or<X> = OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, X>
@@ -3619,7 +3631,7 @@ public extension OneOf10Type {
 // MARK: OneOf10
 
 /// A simple union type that can be one of either T1 or T2 or T3 or T4 or T5 or T6 or T7 or T8 or T9 or T10
-public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either10Type {
+@frozen public indirect enum OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : Either10Type {
     public typealias TN = T10
     /// `OneOf10.Or<X>` expands the tuples by converting the final element to a `OneOf2<T10, X>`
     public typealias Or<X> = OneOf10<T1, T2, T3, T4, T5, T6, T7, T8, T9, OneOf2<T10, X>>
@@ -4634,7 +4646,7 @@ public protocol AllOf : SomeOf {
 }
 
 /// A simple sum type that must conform to both v1 and v2
-public struct AllOf2<T1, T2> : AllOf {
+@frozen public struct AllOf2<T1, T2> : AllOf {
     public typealias And<X> = AllOf3<T1, T2, X>
     public typealias Or<X> = OneOf2<Self, X>
 
@@ -4719,7 +4731,7 @@ public protocol AnyOf : SomeOf {
 }
 
 /// A simple sum type that must conform to either v1 or v2
-public struct AnyOf2<T1, T2> : AnyOf {
+@frozen public struct AnyOf2<T1, T2> : AnyOf {
     public var v1: T1?
     public var v2: T2?
 

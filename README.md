@@ -118,8 +118,8 @@ public struct Food : Equatable, Hashable, Codable {
 
 ### Real-world example
 
-A very large (5MB, ~50K SLOC) real-world example of a generated schema can be seen at (https://raw.githubusercontent.com/glimpseio/GGSpec/main/Sources/GGSpec/GGSchema.swift). It is generated from (https://vega.github.io/schema/vega-lite/v5.json)
- using the `generateGGSchema` at (https://github.com/glimpseio/GGSpec/blob/main/Tests/GGSpecTests/GGSpecTests.swift). Since that project is the *raison d'être* for Curio, it can be used as a fairly complete guide to what sorts of customizations of the schema are possible: conditional renaming, selective boxing, injection of additional properties, optional conformance to `Identifiable`, etc.
+A very large (5MB, ~50K SLOC) real-world example of a generated schema can be seen at (https://raw.githubusercontent.com/glimpseio/GGSpec/main/Sources/GGSchema/GGSchema.swift). It is generated from (https://vega.github.io/schema/vega-lite/v5.json)
+ using the `generateGGSchema` at (https://github.com/glimpseio/GGGrammar/blob/main/Tests/GGSchemaTests/GGSchemaTests.swift). Since that project is the *raison d'être* for Curio, it can be used as a fairly complete guide to what sorts of customizations of the schema are possible: conditional renaming, selective boxing, injection of additional properties, optional conformance to `Identifiable`, etc.
 
 ## BricBrac & Curio Additions
 

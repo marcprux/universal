@@ -1,651 +1,663 @@
-//
-//  Bric.swift
-//  Bric-à-brac
-//
-//  Created by Marc Prud'hommeaux on 3/12/15.
-//  Copyright (c) 2015 glimpse.io. All rights reserved.
-//
-//  License: Apache
-//
+import JSum
+import Bricolage
+import JSON
 
-// MARK: Bric
+public typealias Bricable = Encodable
 
-/// A Bric is a bit of JSON encoded as an enumeration; it can represent a `Bool` (`Bric.bol`),
-/// `String` (`Bric.str`), `Double` (`Bric.num`), `Array` (`Bric.arr`), `Dictionary` (`Bric.obj`),
-/// or `nil` (`Bric.nul`)
-@frozen public enum Bric {
-    case arr([Bric]) // Array
-    case obj([String: Bric]) // Dictionary
-    case str(String) // String
-    case num(Double) // Number
-    case bol(Bool) // Boolean
-    case nul // Null
-}
-
-extension Bric {
-    /// Returns the underlying `Void` for `Bric.nul` cases, else nil
-    @inlinable public var nul: Void? {
-        get { if case .nul = self { return Void() } else { return nil } }
-        set { self = .nul }
+extension Bricolage {
+    /// Validates the given JSON string and throws an error if there was a problem
+    public static func validate(_ string: String, options: JSONParser.Options) throws {
+        try JSONParser(options: options).parse(Array(string.unicodeScalars), complete: true)
     }
 
-    /// Returns the underlying `String` for `Bric.str` cases, else nil
-    @inlinable public var str: String? {
-        get { if case .str(let x) = self { return x } else { return nil } }
-//        set { self = newValue.flatMap(Bric.str) ?? .nul }
-        _modify {
-            var tmp: Optional<String>
-            if case .str(let x) = self {
-                tmp = x
-                yield &tmp
-                if let newValue = tmp {
-                    self = .str(newValue)
-                } else {
-                    self = .nul
-                }
-            } else {
-                tmp = nil
-                yield &tmp
-                if let newValue = tmp {
-                    self = .str(newValue)
-                } else {
-                    self = .nul
-                }
-            }
-        }
-    }
-
-    /// Returns the underlying `Double` for `Bric.num` cases, else nil
-    @inlinable public var num: Double? {
-        get { if case .num(let x) = self { return x } else { return nil } }
-//        set { self = newValue.flatMap(Bric.num) ?? .nul }
-        _modify {
-            var tmp: Optional<Double>
-            if case .num(let x) = self {
-                tmp = x
-                yield &tmp
-                if let newValue = tmp {
-                    self = .num(newValue)
-                } else {
-                    self = .nul
-                }
-            } else {
-                tmp = nil
-                yield &tmp
-                if let newValue = tmp {
-                    self = .num(newValue)
-                } else {
-                    self = .nul
-                }
-            }
-        }
-    }
-
-    /// Returns the underlying `Bool` for `Bric.bol` cases, else nil
-    @inlinable public var bol: Bool? {
-        get { if case .bol(let x) = self { return x } else { return nil } }
-//        set { self = newValue.flatMap(Bric.bol) ?? .nul }
-        _modify {
-            var tmp: Optional<Bool>
-            if case .bol(let x) = self {
-                tmp = x
-                yield &tmp
-                if let newValue = tmp {
-                    self = .bol(newValue)
-                } else {
-                    self = .nul
-                }
-            } else {
-                tmp = nil
-                yield &tmp
-                if let newValue = tmp {
-                    self = .bol(newValue)
-                } else {
-                    self = .nul
-                }
-            }
-        }
-    }
-
-    /// Returns the underlying `Array<Bric>` for `Bric.arr` cases, else nil
-    @inlinable public var arr: [Bric]? {
-        get { if case .arr(let x) = self { return x } else { return nil } }
-//        set { self = newValue.flatMap(Bric.arr) ?? .nul }
-        _modify {
-            var tmp: Optional<[Bric]>
-            if case .arr(let x) = self {
-                tmp = x
-                yield &tmp
-                if let newValue = tmp {
-                    self = .arr(newValue)
-                } else {
-                    self = .nul
-                }
-            } else {
-                tmp = nil
-                yield &tmp
-                if let newValue = tmp {
-                    self = .arr(newValue)
-                } else {
-                    self = .nul
-                }
-            }
-        }
-    }
-
-    /// Returns the underlying `Dictionary<String,Bric>` for `Bric.obj` cases, else nil
-    @inlinable public var obj: [String : Bric]? {
-        get { if case .obj(let x) = self { return x } else { return nil } }
-//        set { self = newValue.flatMap(Bric.obj) ?? .nul }
-        _modify {
-            var tmp: Optional<[String : Bric]>
-            if case .obj(let x) = self {
-                tmp = x
-                yield &tmp
-                if let newValue = tmp {
-                    self = .obj(newValue)
-                } else {
-                    self = .nul
-                }
-            } else {
-                tmp = nil
-                yield &tmp
-                if let newValue = tmp {
-                    self = .obj(newValue)
-                } else {
-                    self = .nul
-                }
-            }
-        }
-    }
-
-}
-
-extension Bric : Equatable { }
-extension Bric : Hashable { }
-
-extension Bric {
-    /// The count of Bric is either the number of properties (for an object), number of elements (for an array), 0 for null, or 1 for string & number
-    @inlinable public var count: Int {
-        switch self {
-        case .obj(let ob): return ob.count
-        case .arr(let arr): return arr.count
-        case .nul: return 0
-        default: return 1
-        }
-    }
-
-    /// Appending elements of two Brics has different meanings depending on the underlying types:
-    ///
-    /// * Obj + Obj returns an Obj with the unified key-value pairs
-    /// * Arr + Arr returns an Arr with all the elements of the two array
-    /// * Arr + Bric returns an Arr with the bric appended to the end
-    /// * Bric + Arr returns an Arr with the bric prepended at the beginning
-    /// * Bric + Bric returns an Arr of the two brics
-    ///
-    /// - Warning: note that value types are always added as collections,
-    ///   such that 1 + 1 yields [1, 1] and "foo" + "bar" yields ["foo", "bar"]
-    public mutating func append(contentsOf bric: Bric) {
-        switch (self, bric) {
-        case (.obj(var obj1), .obj(let obj2)):
-            for (k, v) in obj2 { obj1[k] = v }
-            self = .obj(obj1)
-        case (.arr(let arr1), .arr(let arr2)):
-            self = .arr(arr1 + arr2)
-        case (.arr(let arr1), _):
-            self = .arr(arr1 + [bric])
-        case (_, .arr(let arr2)):
-            self = .arr([self] + arr2)
-        default:
-            self = .arr([self, bric])
-        }
+    /// Validates the given array of JSON unicode scalars and throws an error if there was a problem
+    public static func validate(_ scalars: [UnicodeScalar], options: JSONParser.Options) throws {
+        try JSONParser(options: options).parse(scalars, complete: true)
     }
 }
-
-public extension Bric {
-    /// Copy the values of all enumerable own properties from one or more source objects to a target object,
-    /// returning the union of the objects
-    ///
-    /// - See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-    
-    func assign(bric: Bric) -> Bric {
-        return merge(bric: bric, depth: 1)
-    }
-
-    /// Performs a deep merge of all the object & array elements of the given Bric
-    
-    func merge(bric: Bric, depth: Int = Int.max) -> Bric {
-        if depth <= 0 { return self }
-
-        if case .arr(var a1) = self, case .arr(let a2) = bric {
-            for (i, (e1, e2)) in zip(a1, a2).enumerated() {
-                a1[i] = e1.merge(bric: e2, depth: depth - 1)
-            }
-            return .arr(a1)
-        }
-
-        guard case .obj(var dest) = self, case .obj(let src) = bric else { return self }
-        for (srckey, srcval) in src {
-            if let destval = dest[srckey] {
-                dest[srckey] = destval.merge(bric: srcval, depth: depth - 1)
-            } else {
-                dest[srckey] = srcval
-            }
-        }
-        return .obj(dest)
-    }
-}
-
-
-/// Array indexed subscription helpers for fluent dictionary-like access to Bric
-public extension Bric {
-
-    /// Bric has an int subscript when it is an array type; safe indexing is used
-    subscript(index: Int)->Bric? {
-        get {
-            switch self {
-            case .arr(let arr):
-                return index < 0 || index >= arr.count ? .none : arr[index]
-            default:
-                return .none
-            }
-        }
-
-        set {
-            switch self {
-            case .arr(var arr):
-                if index < 0 || index >= arr.count {
-                    return
-                }
-                arr[index] = newValue ?? .nul
-                self = .arr(arr)
-            default:
-                break
-            }
-        }
-    }
-}
-
-extension Bric : ExpressibleByNilLiteral {
-    /// Creates some null Bric
-    public init(nilLiteral: ()) {
-        self = .nul
-    }
-}
-
-extension Bric : ExpressibleByBooleanLiteral {
-    /// Creates some boolean Bric
-    public init(booleanLiteral value: BooleanLiteralType) {
-        self = .bol(value)
-    }
-}
-
-extension Bric : ExpressibleByFloatLiteral {
-    /// Creates some numeric Bric
-    public init(floatLiteral value: FloatLiteralType) {
-        self = .num(value)
-    }
-}
-
-extension Bric : ExpressibleByIntegerLiteral {
-    /// Creates some numeric Bric
-    public init(integerLiteral value: IntegerLiteralType) {
-        self = .num(Double(value))
-    }
-}
-
-extension Bric : ExpressibleByArrayLiteral {
-    /// Creates an array of Bric
-    public init(arrayLiteral elements: Bric...) {
-        self = .arr(elements)
-    }
-}
-
-extension Bric : ExpressibleByStringLiteral {
-    /// Creates some String Bric
-    public init(stringLiteral value: String) {
-        self = .str(value)
-    }
-}
-
-extension Bric : ExpressibleByDictionaryLiteral {
-    /// Creates a dictonary of some Bric
-    public init(dictionaryLiteral elements: (String, Bric)...) {
-        var d: Dictionary<String, Bric> = [:]
-        for (k, v) in elements { d[k] = v }
-        self = .obj(d)
-    }
-
-
-    /// Creates a Bric.obj with the given key/value pairs
-    public init(object: [(String, Bric)]) {
-        var d: Dictionary<String, Bric> = [:]
-        for (k, v) in object {
-            if !k.rawValue.isEmpty {
-                switch (k, v) {
-                case (_, .nul):
-                    break // nil doens't get saved
-                case (let key, _):
-                    d[key] = v
-                }
-            } else {
-                // empty key name: merge the Bric dictionary into the given dictionary
-                if case .obj(let sub) = v {
-                    for (subk, subv) in sub {
-                        d[subk] = subv
-                    }
-                }
-            }
-        }
-        self = .obj(d)
-    }
-
-    /// Creates a Bric.obj by merging any sub-objects into a single Bric Object
-    public init(merge: [Bric]) {
-        var d: Dictionary<String, Bric> = [:]
-        for b in merge { // .reverse() { // reverse because initial elements take precedence
-            if case .obj(let dict) = b {
-                for (key, value) in dict {
-                    if let oldValue = d[key] , oldValue != value {
-                        print("warning: overwriting dictionary key «\(key)» value «\(oldValue)» with «\(value)»")
-                    }
-                    d[key] = value
-                }
-            }
-        }
-        self = .obj(d)
-    }
-
-    /// Returns a Bric Obj with the specified keys removed
-    public func disjoint(keys: [String]) -> Bric {
-        if case .obj(var dict) = self {
-            for key in keys {
-                dict.removeValue(forKey: key)
-            }
-            return .obj(dict)
-        } else {
-            return self
-        }
-    }
-}
-
-extension Bric {
-    public init<R: RawRepresentable>(elements: [R: Bric]) where R.RawValue == String {
-        var d: Dictionary<String, Bric> = [:]
-        for (k, v) in elements { d[k.rawValue] = v }
-        self = .obj(d)
-    }
-}
-
-extension Bric {
-    /// Construct a `Bric.num` from any supported numeric type
-    public init(num: BricableDoubleConvertible) {
-        self = .num(num.bricNum)
-    }
-}
-
-
-// MARK: Bricable
 
 /// A Bricable is a type that is able to serialize itself to Bric
-public protocol Bricable {
+public extension Bricable {
     /// Returns the Bric'd form of this instance
-    func bric() -> Bric
-}
-
-extension Bric : Bricable {
-    /// A `Bric` instance simply brics to itself
-    public func bric() -> Bric { return self }
-}
-
-extension String: Bricable {
-    /// A String brics to a `Bric.str`
-    public func bric() -> Bric { return .str(self) }
-}
-
-extension Bool: Bricable {
-    /// A Bool brics to a `Bric.bol`
-    public func bric() -> Bric { return .bol(self) }
-}
-
-extension WrapperType where Wrapped : Bricable {
-    /// Maps the underlying layer, or `Bric.nul` if it is nil
-    public func bric() -> Bric {
-        if let x = flatMap({$0}) {
-            return x.bric()
-        } else {
-            return Bric.nul
-        }
+//    @available(*, deprecated, renamed: "jsum")
+    func bric() -> Bric {
+        try! self.jsum()
     }
 }
 
-// this works, but it introduces a lot of ambiguous conflicts with WrapperType where Wrapped : Bricable
-//extension WrapperType where Wrapped : RawRepresentable, Wrapped.RawValue : Bricable {
-//    /// Maps the underlying layer, or `Bric.nul` if it is nil
-//    public func bric() -> Bric {
-//        if let x = flatMap({$0}) {
-//            return x.bric()
-//        } else {
-//            return Bric.nul
-//        }
+extension Bricolagable {
+    public func bric() -> Bric { return bricolage() }
+}
+
+/// Storage for JSON that is tailored for Swift-fluent access
+extension Bric: Bricolage {
+    public typealias Storage = Bric
+
+    public typealias NulType = Void
+    public typealias BolType = Bool
+    public typealias StrType = String
+    public typealias NumType = Double
+    public typealias ArrType = Array<Bric>
+    public typealias ObjType = Dictionary<StrType, Bric>
+
+    public init(nul: NulType) { self = .nul }
+    public init(bol: BolType) { self = .bol(bol) }
+    public init(str: StrType) { self = .str(str) }
+    public init(num: NumType) { self = .num(num) }
+    public init(arr: ArrType) { self = .arr(arr) }
+    public init(obj: ObjType) { self = .obj(obj) }
+    public init(encodable: BricolageEncodable) {
+        switch encodable {
+        case .null: self = .nul
+        case .bool(let x): self = .bol(x)
+        case .int(let x): self = .num(Double(x))
+        case .int8(let x): self = .num(Double(x))
+        case .int16(let x): self = .num(Double(x))
+        case .int32(let x): self = .num(Double(x))
+        case .int64(let x): self = .num(Double(x))
+        case .uint(let x): self = .num(Double(x))
+        case .uint8(let x): self = .num(Double(x))
+        case .uint16(let x): self = .num(Double(x))
+        case .uint32(let x): self = .num(Double(x))
+        case .uint64(let x): self = .num(Double(x))
+        case .string(let x): self = .str(x)
+        case .float(let x): self = .num(Double(x))
+        case .double(let x): self = .num(x)
+        }
+    }
+
+    public static func createNull() -> NulType { }
+    public static func createTrue() -> BolType { return true }
+    public static func createFalse() -> BolType { return false }
+    public static func createObject() -> ObjType { return ObjType() }
+    public static func createArray() -> ArrType { return ArrType() }
+    public static func createString(_ scalars: [UnicodeScalar]) -> StrType? { return String(scalars: scalars) }
+    public static func createNumber(_ scalars: [UnicodeScalar]) -> NumType? { return Double(String(scalars: scalars)) }
+    public static func putElement(_ arr: ArrType, element: Bric) -> ArrType { return arr + [element] }
+    public static func putKeyValue(_ object: ObjType, key: StrType, value: Bric) -> ObjType {
+        var obj = object
+        obj[key] = value
+        return obj
+    }
+}
+
+
+extension String {
+    /// Convenience for creating a string from an array of UnicodeScalars
+    init(scalars: [UnicodeScalar]) {
+        self = String(String.UnicodeScalarView() + scalars) // seems a tiny bit faster
+    }
+}
+
+
+/// An Object Bric type that cannot contain anything
+@frozen public struct HollowBric : Bricable, Bracable {
+    public init() {
+    }
+
+    public func bric() -> Bric {
+        return [:]
+    }
+
+    public static func brac(bric: Bric) throws -> HollowBric {
+        return HollowBric()
+    }
+}
+
+public func ==(lhs: HollowBric, rhs: HollowBric) -> Bool {
+    return true
+}
+
+
+//extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric)]()
 //    }
 //}
 
-extension Optional : Bricable where Wrapped : Bricable {
-}
-
-extension RawRepresentable where RawValue : Bricable {
-    public func bric() -> Bric {
-        return rawValue.bric()
+extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            ])
     }
 }
 
-extension Sequence where Element : Bricable {
-    /// All sequences bric to a `Bric.arr` array
-    public func bric() -> Bric {
-        return Bric.arr(map({ $0.bric() }))
+//extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric)]()
+//    }
+//}
+
+extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            ])
+    }
+}
+//extension OneOf4 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric)]()
+//    }
+//}
+
+extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            ])
     }
 }
 
-extension Array : Bricable where Element : Bricable {
+//extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric)]()
+//    }
+//}
+
+extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            ])
+    }
 }
 
-extension ArraySlice : Bricable where Element : Bricable {
+//extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric)]()
+//    }
+//}
+
+extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            ])
+    }
 }
 
-extension ContiguousArray : Bricable where Element : Bricable {
+//extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric)]()
+//    }
+//}
+
+extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
+            ])
+    }
 }
 
-extension Set : Bricable where Element : Bricable {
+//extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric)]()
+//    }
+//}
+
+extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
+            { try .v8(T8.brac(bric: bric)) },
+            ])
+    }
 }
 
-extension CollectionOfOne : Bricable where Element : Bricable {
+//extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric, T9.bric)]()
+//    }
+//}
+
+extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
+            { try .v8(T8.brac(bric: bric)) },
+            { try .v9(T9.brac(bric: bric)) },
+            ])
+    }
 }
 
-extension EmptyCollection : Bricable where Element : Bricable {
+//extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable, T10: Bricable {
+//    @inlinable public func bric() -> Bric {
+//        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric, T9.bric, T10.bric)]()
+//    }
+//}
+
+extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable, T10: Bracable {
+    @inlinable public static func brac(bric: Bric) throws -> Self {
+        return try bric.brac(oneOf: [
+            { try .v1(T1.brac(bric: bric)) },
+            { try .v2(T2.brac(bric: bric)) },
+            { try .v3(T3.brac(bric: bric)) },
+            { try .v4(T4.brac(bric: bric)) },
+            { try .v5(T5.brac(bric: bric)) },
+            { try .v6(T6.brac(bric: bric)) },
+            { try .v7(T7.brac(bric: bric)) },
+            { try .v8(T8.brac(bric: bric)) },
+            { try .v9(T9.brac(bric: bric)) },
+            { try .v10(T10.brac(bric: bric)) },
+            ])
+    }
 }
 
-extension Dictionary : Bricable where Key == String, Value : Bricable { // TODO: Swift 4: where Key == String
-    /// A Dictionary brics to a `Bric.obj` with stringifed keys
-    public func bric() -> Bric {
-        var dict: [String : Bric] = [:]
-        for keyValue in self {
-            // we manually stringify the keys since we aren't able to enforce string-key conformance via generics
-            dict[String(describing: keyValue.0)] = keyValue.1.bric()
+/// An ISO-8601 date-time structure, the common JSON format for dates and times
+/// - See: https://en.wikipedia.org/wiki/ISO_8601
+public protocol ISO8601DateTime {
+    var year: Int { get set }
+    var month: Int { get set }
+    var day: Int { get set }
+    var hour: Int { get set }
+    var minute: Int { get set }
+    var second: Double { get set }
+    var zone: BricZone { get set }
+}
+
+
+public extension Bric {
+    /// Returns the underlying `BricDateTime` for `Bric.str` cases that can be pased with `ISO8601FromString`, else nil
+    var dtm: BricDateTime? {
+        if let str = self.str {
+            return BricDateTime(str)
+        } else {
+            return nil
         }
-        return Bric.obj(dict)
     }
 }
 
+public struct BricZone : Equatable, Codable, Hashable {
+    public let hours: Int
+    public let minutes: Int
+}
 
-/// RawRepresentable Bric methods that enable a String enum to automatically bric & brac
-public extension RawRepresentable where Self.RawValue == String {
-    /// A String `RawRepresentable` brics to a `Bric.str` with the underlying `rawValue`
-    func bric() -> Bric {
-        return .str(rawValue)
+public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, CustomStringConvertible, Bracable {
+    public typealias BricDate = (year: Int, month: Int, day: Int)
+    public typealias BricTime = (hour: Int, minute: Int, second: Double)
+
+    public var year, month, day, hour, minute: Int
+    public var second: Double
+    public var zone: BricZone
+
+    public init(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Double, zone: (Int, Int)) {
+        self.year = year
+        self.month = month
+        self.day = day
+        self.hour = hour
+        self.minute = minute
+        self.second = second
+        self.zone = BricZone(hours: zone.0, minutes: zone.1)
     }
-}
 
+    /// Attempt to parse the given String as an ISO-8601 date-time structure
+    public init?(_ str: String) {
+        if let dtm = BricDateTime(year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, zone: (0, 0)).parseISO8601String(str) {
+            self = dtm
+        } else {
+            return nil
+        }
+    }
 
-// MARK: Numeric Bric
+    public var description: String { return toISO8601String() }
 
-/// A `BricableDoubleConvertible` is a type that can be converted to a Double for storage in a `Bric.num`
-public protocol BricableDoubleConvertible : Bricable {
-    var bricNum: Double { get }
-}
-
-extension BricableDoubleConvertible {
-    /// A number conforming to `BricableDoubleConvertible` brics to a `Bric.num` as a `Double`
+    /// BricDateTime instances are serialized to ISO-8601 strings
     public func bric() -> Bric {
-        return .num(bricNum)
+        return Bric.str(toISO8601String())
+    }
+
+    /// BricDateTime instances are serialized to ISO-8601 strings
+    public static func brac(bric: Bric) throws -> BricDateTime {
+        guard case .str(let str) = bric else { return try bric.invalidType() }
+        guard let dtm = BricDateTime(str) else { return try bric.invalidRawValue(str) }
+        return dtm
+    }
+
+}
+
+public extension ISO8601DateTime {
+
+    /// Converts this datetime to a formatted string with the given time separator and designator for UTC (Zulu) time
+    func toFormattedString(timesep: String = "T", utctz: String? = "Z", padsec: Int = 3) -> String {
+        func pad(_ num: Int, _ len: Int) -> String {
+            var str = String(num)
+            while str.count < len {
+                str = "0" + str
+            }
+            return str
+        }
+
+        /// Secs need to be padded to 2 at the beginning and 3 at the end, e.g.: 00.000
+        func sec(_ secs: Double) -> String {
+            var str = String(secs)
+            let chars = str
+            if padsec > 0 {
+                if chars.count >= 2 && chars.dropFirst().first == "." { str = "0" + str }
+                while str.count < (padsec + 3) { str += "0" }
+            }
+            return str
+        }
+
+        return pad(year, 4) + "-" + pad(month, 2) + "-" + pad(day, 2) + timesep + pad(hour, 2) + ":" + pad(minute, 2) + ":" + sec(second) + ((utctz != nil && zone.hours == 0 && zone.minutes == 0) ? utctz! : ((zone.hours >= 0 ? "+" : "") + pad(zone.hours, 2) + ":" + pad(zone.minutes, 2)))
+    }
+
+    /// Returns a string representation in accordance with ISO-8601
+    func toISO8601String() -> String {
+        return toFormattedString()
+    }
+
+    /// Attempt to parse the given String as an ISO-8601 date-time structure
+    func parseISO8601String(_ str: String) -> Self? {
+        var gen = str.makeIterator()
+
+        func scan(_ skip: Int = 0, _ until: Character...) -> (String, Character?)? {
+            var num = 0
+            var buf = ""
+            while let c = gen.next() {
+                if until.contains(c) && num >= skip {
+                    if buf.isEmpty { return nil }
+                    return (buf, c)
+                }
+                num += 1
+                buf.append(c)
+            }
+            if buf.isEmpty { return nil }
+            return (buf, nil)
+        }
+
+        func str2int(_ str: String, _ stop: Character?) -> Int? { return Int(str) }
+
+        guard let year = scan(1, "-").flatMap(str2int) else { return nil }
+        guard let month = scan(0, "-").flatMap(str2int) , month >= 1 && month <= 12 else { return nil }
+        guard let day = scan(0, "T").flatMap(str2int) , day >= 1 && day <= 31 else { return nil }
+
+        if day == 31 && (month == 4 || month == 6 || month == 9 || month == 11) { return nil }
+
+        // Feb leap year check
+        if day > 28 && month == 2 && !((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) { return nil }
+
+        guard let hour = scan(0, ":").flatMap(str2int) , hour >= 0 && hour <= 24 else { return nil }
+        guard let minute = scan(0, ":").flatMap(str2int) , minute >= 0 && minute <= 59 else { return nil }
+
+        // “ISO 8601 permits the hyphen (-) to be used as the minus (−) character when the character set is limited.”
+        guard let secstop = scan(0, "Z", "+", "-", "−") else { return nil }
+
+        guard let second = Double(secstop.0) , second >= 0.0 && second < 60.0 else { return nil }
+
+        if hour == 24 && (minute > 0 || second > 0.0) { return nil } // 24 is only valid as 24:00:00.0
+
+        let tzc = secstop.1
+        var tzh = 0, tzm = 0
+        if tzc != "Z" { // non-Zulu time
+            guard let h = scan(0, ":").flatMap(str2int) , h >= 0 && h <= 23 else { return nil }
+            tzh = h * (tzc == "-" || tzc == "−" ? -1 : +1)
+
+            guard let m = scan(0).flatMap(str2int) , m >= 0 && m <= 59 else { return nil }
+            tzm = m
+        }
+
+        if gen.next() != nil { return nil } // trailing characters
+
+        // fill in the fields
+        var dtm = self
+        dtm.year = year
+        dtm.month = month
+        dtm.day = day
+        dtm.hour = hour
+        dtm.minute = minute
+        dtm.second = second
+        dtm.zone = BricZone(hours: tzh, minutes: tzm)
+        return dtm
     }
 }
 
-/// RawRepresentable Bric methods that enable a numeric enum to automatically bric
-public extension RawRepresentable where Self.RawValue : BricableDoubleConvertible {
-    /// A numeric `RawRepresentabke` brics to a `Bric.num`
-    func bric() -> Bric {
-        return .num(rawValue.bricNum)
+
+//public enum Choose<A, B> : OneOf2Type, Either2Type, OneOfShapable {
+//    public typealias T1 = A
+//    public typealias T2 = B
+//    public typealias TN = B
+//    public typealias Swapped = Choose<B, A>
+//
+//    public typealias OneOfNext = Self // Or<Never>
+//
+//    case a(A)
+//    case b(B)
+//
+//    public init(t1: A) { self = .a(t1) }
+//    public init(_ t1: A) { self = .a(t1) }
+//    public init(t2: B) { self = .b(t2) }
+//    public init(_ t2: B) { self = .b(t2) }
+//
+//    public func infer() -> A? {
+//        if case .a(let x) = self { return x } else { return nil }
+//    }
+//
+//    public func infer() -> B? {
+//        if case .b(let x) = self { return x } else { return nil }
+//    }
+//
+//    public var swapped: Choose<B, A> {
+//        fatalError()
+//    }
+//
+//    public func map2<U1, U2>(_ f1: (A) throws -> (U1), _ f2: (B) throws -> (U2)) rethrows -> This<U1>.Or<U2> {
+//        switch self {
+//        case .a(let a): return .init(try f1(a))
+//        case .b(let b): return .init(try f2(b))
+//        }
+//    }
+//
+//
+////    public enum Or<C> : OneOf2Type, Either2Type, OneOfShapable {
+////
+////    }
+//}
+
+/// An `Identifiable` that is represented by a wrapped identity type that can be generated on-demand.
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+public protocol Actualizable : Identifiable where ID : WrapperType, ID.Wrapped : RawCodable & Hashable {
+    /// The mutable identity
+    var id: ID { get set }
+
+    /// Returns this instance with a guaranteed assigned identity
+    var actual: (id: ID.Wrapped, instance: Self) { get set }
+
+    /// Returns this instance with an absent identity
+    var ideal: Self { get }
+}
+
+
+/// Compare two Actualizables to equivalence without their identifies
+infix operator ~==~ : ComparisonPrecedence
+
+/// Compare two Actualizables to equivalence without their identifies
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+@inlinable public func ~==~<T: Actualizable & Equatable>(lhs: T, rhs: T) -> Bool {
+    lhs.ideal == rhs.ideal
+}
+
+
+/// A type that can generate a new globally unique instance of itself
+public protocol GloballyUnique {
+    /// A new unique instance of this type
+    static func uiqueValue() -> Self
+}
+
+/// A generalization of a unique identifier.
+///
+/// Implemented in `Foundation.UUID`
+public protocol IdentifierString where Self : Hashable {
+    /// Returns nil for invalid strings.
+    init?(identifierString string: String)
+
+    /// Returns a string created from the identifier
+    var identifierString: String { get }
+}
+
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+extension Actualizable {
+    /// Clears the ID and re-assigns it to a new globally-uniqued value
+    @inlinable public var reactualized: Self {
+        ideal.actual.instance
     }
 }
 
-/// BricableDoubleConvertible conformance that enables a Double to automatically bric & brac
-extension Double : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+extension Actualizable where ID.Wrapped : RawInitializable, ID : ExpressibleByNilLiteral {
 
-/// BricableDoubleConvertible conformance that enables a Float to automatically bric & brac
-extension Float : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables an Int to automatically bric & brac
-extension Int : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables an Int8 to automatically bric & brac
-extension Int8 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables an Int16 to automatically bric & brac
-extension Int16 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables an Int32 to automatically bric & brac
-extension Int32 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables an Int64 to automatically bric & brac
-extension Int64 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables a UInt to automatically bric & brac
-extension UInt : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables a UInt8 to automatically bric & brac
-extension UInt8 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables a UInt16 to automatically bric & brac
-extension UInt16 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables a UInt32 to automatically bric & brac
-extension UInt32 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-/// BricableDoubleConvertible conformance that enables a UInt64 to automatically bric & brac
-extension UInt64 : BricableDoubleConvertible {
-    public var bricNum: Double { return Double(self) }
-}
-
-extension Mirror : Bricable {
-    /// A mirror can bric using reflection on all the child structures; note that any reference cycles will cause a stack overflow
-    public func bric() -> Bric {
-        switch displayStyle {
-        case .none:
-            return Bric.nul
-        case .some(.collection), .some(.set), .some(.tuple):
-            var arr: [Bric] = []
-            for (_, value) in self.children {
-                if let bricable = value as? Bricable {
-                    arr.append(bricable.bric())
-                } else {
-                    arr.append(Mirror(reflecting: value).bric())
-                }
-            }
-            return Bric.arr(arr)
-        case .some(.optional):
-            assert(self.children.count <= 1)
-            if let (_, value) = self.children.first {
-                if let bricable = value as? Bricable {
-                    return bricable.bric()
-                } else {
-                    return Mirror(reflecting: value).bric()
-                }
-            } else {
-                return Bric.nul
-            }
-        case .some(.struct), .some(.class), .some(.enum), .some(.dictionary):
-            var dict: [String: Bric] = [:]
-            for (label, value) in self.children {
-                if let label = label {
-                    if let bricable = value as? Bricable {
-                        dict[label] = bricable.bric()
-                    } else {
-                        dict[label] = Mirror(reflecting: value).bric()
-                    }
-                }
-            }
-            return .obj(dict)
-        @unknown default:
-            return Bric.nul
+    /// Accesses the ideal, identity-less instance; can be used on any `Identifiable` type whose `ID` can be initialized from `nil`
+    @inlinable public var ideal: Self {
+        get {
+            var this = self
+            this.id = nil
+            return this
         }
     }
 }
 
-
-/// A type that is codable using its contained `CodingKeys` type.
-public protocol KeyedCodable : Codable {
-    associatedtype CodingKeyPaths
-
-    /// Tuple containing all the `WritableKeyPath`s for the type.
-    static var codingKeyPaths: CodingKeyPaths { get }
-
-    /// Map from the `PartialKeyPath` to the `CodingKey`
-    static var codableKeys: [PartialKeyPath<Self>: CodingKeys] { get }
-
-    /// The keys that will be associated with this type
-    associatedtype CodingKeys : CodingKey & Hashable
-}
-
-public protocol FixedCodingKeys : CaseIterable, CodingKey {
-
-}
-
-public extension FixedCodingKeys where Self : RawRepresentable, Self.RawValue == String {
-    func decode<T: Codable>(_ decoder: KeyedDecodingContainer<Self>) throws -> T {
-        return try decoder.decode(T.self, forKey: self)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+extension Actualizable where ID.Wrapped : RawInitializable, ID.Wrapped.RawValue : GloballyUnique {
+    /// Assigns an ID to the element if one was not already assigned, returning any newly assigned ID.
+    @discardableResult @inlinable public mutating func actualize(with id: () -> ID.Wrapped.RawValue = ID.Wrapped.RawValue.uiqueValue) -> ID.Wrapped {
+        if let existingID = self.id.flatMap({ a in a }) { // already has an ID
+            return existingID
+        } else {
+            let newID = ID.Wrapped(rawValue: id())
+            self.id = ID(newID)
+            return newID
+        }
     }
 
-    func decode<T: Codable>(_ decoder: KeyedDecodingContainer<Self>, defaultValue: T) throws -> T {
-        return try decoder.decodeIfPresent(T.self, forKey: self) ?? defaultValue
-    }
+    /// Accesses the guaranteed actualized (i.e., assigned id) instance
+    @inlinable public var actual: (id: ID.Wrapped, instance: Self) {
+        get {
+            var this = self
+            let id = this.actualize()
+            return (id, this)
+        }
 
-    /// Clear out all fixed properties from the given dynamic `Bric`
-    static func purgeKeys(from rawBric: Bric) -> Bric {
-        var bric = rawBric
-        for key in Self.allCases { bric[key.rawValue] = nil }
-        return bric
+        set {
+            var (id, instance) = newValue
+            instance.id = .init(id)
+            self = instance
+        }
     }
 }
+
+/// An `IdMap` enables dictionaries keyed by non-String/Int values to be encoded & decoded via JSON Objects (rather than the default behavior of encoding to an array of alternating keys & values)
+///
+/// - SeeAlso: `KeyMap`
+@propertyWrapper public struct IdMap<Key: RawRepresentable & Codable & Hashable, Value: Codable> : Codable where Key.RawValue : IdentifierString & Codable {
+    public var wrappedValue: [Key: Value]
+
+    public init() {
+        wrappedValue = [:]
+    }
+
+    public init(wrappedValue: [Key: Value]) {
+        self.wrappedValue = wrappedValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawKeyedDictionary = try container.decode([String: Value].self)
+
+        var map: [Key: Value] = [:]
+        for (rawKey, value) in rawKeyedDictionary {
+            guard let uuid = Key.RawValue(identifierString: rawKey),
+                  let key = Key(rawValue: uuid) else {
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "cannot create key '\(Key.self)' from invalid '\(Key.RawValue.self)' value '\(rawKey)'")
+            }
+            map[key] = value
+        }
+
+        self.wrappedValue = map
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        let rawKeyedDictionary: [String: Value] = Dictionary(uniqueKeysWithValues: wrappedValue.map { ($0.rawValue.identifierString, $1) })
+        var container = encoder.singleValueContainer()
+        try container.encode(rawKeyedDictionary)
+    }
+}
+
+extension IdMap : Equatable where Value : Equatable { }
+extension IdMap : Hashable where Value : Hashable { }
+
+/// A `KeyMap` enables dictionaries keyed by non-String/Int values to be encoded & decoded via JSON Objects (rather than the default behavior of encoding to an array of alternating keys & values)
+///
+/// Inspired by the sample from: https://fivestars.blog/swift/codable-swift-dictionaries.html
+///
+/// - SeeAlso: `IdMap`
+@propertyWrapper public struct KeyMap<Key: Hashable & RawRepresentable, Value: Codable>: Codable where Key.RawValue == String {
+    public var wrappedValue: [Key: Value]
+
+    public init() {
+        wrappedValue = [:]
+    }
+
+    public init(wrappedValue: [Key: Value]) {
+        self.wrappedValue = wrappedValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawKeyedDictionary = try container.decode([String: Value].self)
+
+        var map: [Key: Value] = [:]
+        for (rawKey, value) in rawKeyedDictionary {
+            guard let key = Key(rawValue: rawKey) else {
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "cannot create key '\(Key.self)' from invalid '\(Key.RawValue.self)' value '\(rawKey)'")
+            }
+            map[key] = value
+        }
+
+        self.wrappedValue = map
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        let rawKeyedDictionary = Dictionary(uniqueKeysWithValues: wrappedValue.map { ($0.rawValue, $1) })
+        var container = encoder.singleValueContainer()
+        try container.encode(rawKeyedDictionary)
+    }
+}
+
+extension KeyMap : Equatable where Value : Equatable { }
+extension KeyMap : Hashable where Value : Hashable { }
+

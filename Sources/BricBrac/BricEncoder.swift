@@ -3,10 +3,10 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 3/27/18.
-//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
 
 import Foundation
+import Bricolage
 
 /// `BricEncoder` facilitates the encoding of `Encodable` values into `Bric`.
 public typealias BricEncoder = BricolageEncoder<Bric>

@@ -3,9 +3,7 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 6/30/15.
-//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
-
 import BricBrac
 
 /// A JSON Schema processor that emits Swift code using the Bric-a-Brac framework for marshalling and unmarshalling.
@@ -47,7 +45,7 @@ public struct Curio {
     public var generateHashable = true
 
     /// whether to generate Pure (Sendable) protocol implementations
-    public var generatePure = true
+    public var generatePure = false
 
     /// Whether to output union types as a typealias to a BricBrac.OneOf<T1, T2, ...> enum
     public var useOneOfEnums = true
@@ -65,7 +63,7 @@ public struct Curio {
     public var allOfAsFirst = false
 
     /// Whether to generate `KeyedCodable` conformance
-    public var generateKeyedCodable = true
+    public var generateKeyedCodable = false
 
     /// the number of properties beyond which Optional types should instead be Indirect; this is needed beause
     /// a struct that contains many other stucts can make very large compilation units and take a very long
@@ -1208,7 +1206,7 @@ public struct Curio {
         func createLiteralEnum(_ name: CodeTypeName? = nil, values: [Bric]) throws -> CodeNamedType {
             // some languages (like Typescript) commonly have union types that are like: var intOrConstant: number | "someConst"
             // when a string enum has fewer values than constantPromotionThreshold, we promote the type to the top level to global use
-            let valueTypeNames = typeName(parents, "Literal" + values.map({ $0.stringify() }).joined(separator: "Or"), capitalize: true)
+            let valueTypeNames = typeName(parents, "Literal" + values.compactMap({ $0.str }).joined(separator: "Or"), capitalize: true)
 
             var stringEnum = CodeSimpleEnum<String>(name: name ?? valueTypeNames, access: accessor(parents))
             var numberEnum = CodeSimpleEnum<Double>(name: name ?? valueTypeNames, access: accessor(parents))
@@ -1580,9 +1578,12 @@ public extension JSONSchema {
 
     /// Parses the given JSON and injects the property ordering attribute based on the underlying source
     static func impute(_ source: String) throws -> Bric {
-        var fidelity = try FidelityBricolage.parse(source)
-        fidelity = imputePropertyOrdering(fidelity)
-        return fidelity.bric()
+        // TODO: re-implement
+        struct ReImplementFidelityBricolageError : Error { }
+        throw ReImplementFidelityBricolageError()
+        //var fidelity = try FidelityBricolage.parse(source)
+        //fidelity = imputePropertyOrdering(fidelity)
+        //return fidelity.bric()
     }
 
 
@@ -1601,10 +1602,10 @@ public extension JSONSchema {
                 if case .obj(let dict) = value, !dict.isEmpty && String(String.UnicodeScalarView() + key) == "properties" {
                     // ### FIXME: we hack in a check for "type" to determine if we are in a schema element and not,
                     //  e.g., another properties list, but this will fail if there is an actual property named "type"
-                    if bc.bric()["type"] == "object" {
-                        let ordering = dict.map(\.0)
-                        sub.append((FidelityBricolage.StrType("propertyOrder".unicodeScalars), FidelityBricolage.arr(ordering.map(FidelityBricolage.str))))
-                    }
+//                    if bc.bric()["type"] == "object" {
+//                        let ordering = dict.map(\.0)
+//                        sub.append((FidelityBricolage.StrType("propertyOrder".unicodeScalars), FidelityBricolage.arr(ordering.map(FidelityBricolage.str))))
+//                    }
                 }
             }
             return .obj(sub)

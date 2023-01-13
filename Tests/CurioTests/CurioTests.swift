@@ -3,7 +3,6 @@
 //  CurioTests
 //
 //  Created by Marc Prud'hommeaux on 7/18/15.
-//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
 
 import XCTest

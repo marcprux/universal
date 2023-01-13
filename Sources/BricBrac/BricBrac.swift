@@ -3,8 +3,14 @@
 //  BricBrac
 //
 //  Created by Marc Prud'hommeaux on 7/18/15.
-//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
+
+@_exported import XOr
+@_exported import JSum
+@_exported import XML
+@_exported import YAML
+@_exported import JSON
+@_exported import Bricolage
 
 /// A BricBrac is a user-defined type that can serialize/deserialize to/from some Bric
 /// In addition to conforming to Bricable and Bracable, it also provides Equatable implementations
@@ -49,10 +55,10 @@ extension NotBrac : Decodable where T : Decodable {
     }
 }
 
-extension NotBrac : Bricable where T : Bricable {
-    /// this type does not bric to anything
-    public func bric() -> Bric { return .nul }
-}
+//extension NotBrac : Bricable where T : Bricable {
+//    /// this type does not bric to anything
+//    public func bric() -> Bric { return .nul }
+//}
 
 extension NotBrac : Bracable where T : Bracable {
     public static func brac(bric: Bric) throws -> NotBrac {
@@ -70,3 +76,5 @@ extension NotBrac : Equatable where T : Equatable {
         return true // two Nots are always equal because their existance just signifies the absence of the underlying type to deserialize
     }
 }
+
+

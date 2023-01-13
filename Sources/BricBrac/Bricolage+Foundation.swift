@@ -3,12 +3,14 @@
 //  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 7/20/15.
-//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
 
 #if canImport(Foundation)
 
 import Foundation
+import Bricolage
+import JSum
+import JSON
 
 public extension JSONSchema {
     /// We heard you liked `JSONSchema` so we put some `JSONSchema` in your `JSONSchema`.
@@ -305,52 +307,6 @@ public extension OrderedCodingKey where Self : CaseIterable & Equatable {
     }
 }
 
-extension Bric : Encodable {
-    @inlinable public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case .nul: try container.encodeNil()
-        case .bol(let x): try container.encode(x)
-        case .num(let x): try container.encode(x)
-        case .str(let x): try container.encode(x)
-        case .obj(let x): try container.encode(x)
-        case .arr(let x): try container.encode(x)
-        }
-    }
-}
-
-extension Bric : Decodable {
-    @inlinable public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
-        if container.decodeNil() {
-            self = .nul
-        }  else {
-            do {
-                self = try .bol(container.decode(Bool.self))
-            } catch DecodingError.typeMismatch {
-                do {
-                    self = try .num(container.decode(Double.self))
-                } catch DecodingError.typeMismatch {
-                    do {
-                        self = try .str(container.decode(String.self))
-                    } catch DecodingError.typeMismatch {
-                        do {
-                            self = try .arr(decode())
-                        } catch DecodingError.typeMismatch {
-                            do {
-                                self = try .obj(decode())
-                            } catch DecodingError.typeMismatch {
-                                throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 public extension Bricable {
     /// Decode this bric into a decodable instance
     @inlinable func decode<T: Decodable>(_ type: T.Type, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> T {
@@ -501,7 +457,7 @@ public extension FoundationBricolage {
 
 }
 
-extension FoundationBricolage : Bricable, Bracable {
+extension FoundationBricolage : Bracable {
     @inlinable public func bric() -> Bric {
         return FoundationBricolage.toBric(object)
     }

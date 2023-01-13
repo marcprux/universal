@@ -7,175 +7,82 @@ on:
     branches:
       - '*'
   schedule:
-    # run at 6AM & 6PM UTC
-    - cron:  '0 6,18 * * *'
+    # run at 10:30AM & 10:30PM UTC
+    - cron:  '30 10,22 * * *'
 
-# construct CI latticeflow with cheaper platforms first: Linux & Windows then macOS10, macOS11, iOS, tvOS, watchOS
-concurrency: 
-  group: ci
-  cancel-in-progress: true
+env:
+  DEVELOPER_DIR: /Applications/Xcode_14.1.app/Contents/Developer
 
 jobs:
-  Linux:
-    name: Swift ${{ matrix.image }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ["ubuntu-20.04"] # ubuntu-latest
-        #image: ["swift:5.4.1-focal", "swiftlang/swift:nightly-focal"] # crashes on nightly
-        image: ["swift:5.4.1-focal"]
-    container:
-      image: ${{ matrix.image }}
-    timeout-minutes: 10
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Check swift version
-        run: swift --version
-      - name: Test (Debug)
-        run: swift test -v --configuration debug --enable-test-discovery
-      - name: Test (Release)
-        run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
-
-  macOS12:
-    if: false # not yet available
-    runs-on: firebreak
-    #runs-on: macos-12.0
-    needs: [macOS11] # macOS11 must pass first
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_13.app/Contents/Developer
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - name: SPM Test
-        run: arch -arch arm64e swift test -c debug
-
-  watchOS:
-    runs-on: macos-11 # macOS 11 needed for Xcode_12.5
-    needs: [Linux] # Linux must pass first
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_12.5.app/Contents/Developer
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Remove Tool from Package.swift (SR-1954)
-        run: sed -i'.bk' 's;.*// SR-1954$;;g' Package.swift
-      - run: |
-            xcodebuild clean test \
-              -disablePackageRepositoryCache \
-              -configuration Release \
-              -scheme "BricBrac-Package" \
-              -sdk "watchsimulator" \
-              -destination "platform=watchOS Simulator,name=Apple Watch Series 6 - 44mm" \
-              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-
-  iOS:
-    runs-on: macos-11
-    needs: [watchOS] # watchOS must pass first
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_12.5.app/Contents/Developer
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Remove Tool from Package.swift (SR-1954)
-        run: sed -i'.bk' 's;\(.*\)// SR-1954$;// SR-1954 \1;g' Package.swift
-      - run: |
-            xcodebuild clean test \
-              -disablePackageRepositoryCache \
-              -configuration Release \
-              -scheme "BricBrac-Package" \
-              -sdk "iphonesimulator" \
-              -destination "platform=iOS Simulator,name=iPod touch (7th generation)" \
-              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-
-  tvOS:
-    runs-on: macos-11
-    needs: [iOS] # iOS must pass first
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_12.5.app/Contents/Developer
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Remove Tool from Package.swift (SR-1954)
-        run: sed -i'.bk' 's;\(.*\)// SR-1954$;// SR-1954 \1;g' Package.swift
-      - run: |
-            xcodebuild clean test \
-              -disablePackageRepositoryCache \
-              -configuration Release \
-              -scheme "BricBrac-Package" \
-              -sdk "appletvsimulator" \
-              -destination "platform=tvOS Simulator,name=Apple TV" \
-              ONLY_ACTIVE_ARCH=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-
-  macOS10:
-    runs-on: macos-10.15
-    needs: [Linux] # Linux must pass first
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Test (Debug)
-        run: swift test -v --configuration debug
-      - name: Test (Release)
-        run: swift test -v --configuration release -Xswiftc -enable-testing
-
-  macOS11:
-    runs-on: macos-11
-    needs: [macOS10] # macOS10 must pass first
-    steps:
-      - uses: actions/checkout@v2
-      - name: Test (Debug)
-        run: swift test -v --configuration debug
-      - name: Test (Release)
-        run: swift test -v --configuration release -Xswiftc -enable-testing
-
-  Windows10:
-    runs-on: windows-latest
-    needs: [Linux] # Linux must pass first
-    steps:
-      - uses: actions/checkout@v2
-      - uses: seanmiddleditch/gha-setup-vsdevenv@master
-
-      # Install https://swift.org/builds/swift-5.4.1-release/windows10/swift-5.4.1-RELEASE/swift-5.4.1-RELEASE-windows10.exe
-      - name: Install swift-5.4.1-RELEASE
-        run: |
-          Install-Binary -Url "https://swift.org/builds/swift-5.4.1-release/windows10/swift-5.4.1-RELEASE/swift-5.4.1-RELEASE-windows10.exe" -Name "installer.exe" -ArgumentList ("-q")
-      - name: Set Environment Variables
-        run: |
-          echo "SDKROOT=C:\Library\Developer\Platforms\Windows.platform\Developer\SDKs\Windows.sdk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "DEVELOPER_DIR=C:\Library\Developer" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-      - name: Adjust Paths
-        run: |
-          echo "C:\Library\Swift-development\bin;C:\Library\icu-67\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          echo "C:\Library\Developer\Toolchains\unknown-Asserts-development.xctoolchain\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      - name: Install Supporting Files
-        run: |
-          Copy-Item "$env:SDKROOT\usr\share\ucrt.modulemap" -destination "$env:UniversalCRTSdkDir\Include\$env:UCRTVersion\ucrt\module.modulemap"
-          Copy-Item "$env:SDKROOT\usr\share\visualc.modulemap" -destination "$env:VCToolsInstallDir\include\module.modulemap"
-          Copy-Item "$env:SDKROOT\usr\share\visualc.apinotes" -destination "$env:VCToolsInstallDir\include\visualc.apinotes"
-          Copy-Item "$env:SDKROOT\usr\share\winsdk.modulemap" -destination "$env:UniversalCRTSdkDir\Include\$env:UCRTVersion\um\module.modulemap"
-
-      - name: Swift Version
-        run: swift --version
-      - name: Build (Debug)
-        run: swift build -v -c debug
-      - name: Build (Release)
-        run: swift build -v -c release
-      - name: Test (Debug)
-        run: swift test -v --configuration debug --enable-test-discovery
-      - name: Test (Release)
-        run: swift test -v --configuration release -Xswiftc -enable-testing --enable-test-discovery
-
-  Release:
+  linux:
     runs-on: ubuntu-latest
-    needs: [Linux, macOS10, macOS11, iOS, tvOS, watchOS, Windows10]
-
     steps:
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - run: sudo apt-get update
+      - name: Install dependencies
+        run: sudo apt-get install -y libjavascriptcoregtk-4.0-dev
+      - run: pkg-config --libs javascriptcoregtk-4.0
+      - uses: actions/checkout@v2
+      - name: Test (Debug)
+        run: swift test -v --configuration debug
+      - name: Test (Release)
+        run: swift test -v --configuration release -Xswiftc -enable-testing
+
+  ios:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test (Debug)
+        run: xcodebuild clean test -configuration Debug -scheme "BricBrac-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
+      - name: Test (Release)
+        run: xcodebuild clean test -configuration Release -scheme "BricBrac-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
+
+  tvos:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test (Debug)
+        run: xcodebuild clean test -configuration Debug -scheme "BricBrac-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+      - name: Test (Release)
+        run: xcodebuild clean test -configuration Release -scheme "BricBrac-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+
+  macos:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test (Debug)
+        run: swift test -v --configuration debug
+      - name: Test (Release)
+        run: swift test -v --configuration release -Xswiftc -enable-testing
+
+  api-doc:
+    if: false
+    runs-on: macos-12 # needed to be able to document SwiftUI
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build documentation
+        run: |
+          swift -version
+          export SWIFTPM_ENABLE_COMMAND_PLUGINS=1
+          export DOCC_JSON_PRETTYPRINT="YES"
+
+          # insert the docc dependency manually using sed to avoid
+          # polluting Package.swift with unnecessary dependencies
+          sed -I "" 's;^ *var dependencies: \[Package.Dependency] = \[$;    var dependencies: [Package.Dependency] = [ .package(name: "swift-docc-plugin", url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"), ;1' Package.swift
+
+          cat Package.swift
+
+          swift package --allow-writing-to-directory docs \
+            generate-documentation --target BricBrac \
+            --disable-indexing \
+            --transform-for-static-hosting \
+            --hosting-base-path BricBrac \
+            --output-path docs
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          files: |
-            CHANGELOG.md
-            RELEASE_NOTES.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: '.'
+
+

@@ -3,7 +3,6 @@
 //  BricBracSchema
 //
 //  Created by Marc Prud'hommeaux on 7/18/15.
-//  Copyright © 2015 io.glimpse. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>

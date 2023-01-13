@@ -3,10 +3,7 @@
 //  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 8/24/15.
-//  Copyright © 2010-2021 io.glimpse. All rights reserved.
 //
-
-
 
 /// Extension to Bric that supports JSON Pointers and JSON References
 public extension Bric {

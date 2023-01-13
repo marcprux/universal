@@ -927,7 +927,7 @@ public struct Curio {
             case .some(.v1(true)), .some(.v2):
                 hasAdditionalProps = nil // TODO: generate object types for B
                 //hasAdditionalProps = true
-                //addPropType = CodeExternalType.object // additionalProperties default to [String:Bric]
+                //addPropType = CodeExternalType.object // additionalProperties default to [String:JSum]
             }
 
             let addPropName = renamer(parents, "additionalProperties") ?? "additionalProperties"
@@ -1203,7 +1203,7 @@ public struct Curio {
             }
         }
 
-        func createLiteralEnum(_ name: CodeTypeName? = nil, values: [Bric]) throws -> CodeNamedType {
+        func createLiteralEnum(_ name: CodeTypeName? = nil, values: [JSum]) throws -> CodeNamedType {
             // some languages (like Typescript) commonly have union types that are like: var intOrConstant: number | "someConst"
             // when a string enum has fewer values than constantPromotionThreshold, we promote the type to the top level to global use
             let valueTypeNames = typeName(parents, "Literal" + values.compactMap({ $0.str }).joined(separator: "Or"), capitalize: true)
@@ -1372,14 +1372,14 @@ public struct Curio {
 //            let reqId = "Req" + typename
 //            let reqSchema = try reify(not, id: reqId, parents: parents)
 //            return CodeTypeAlias(name: typename, type: notBracType(reqSchema), access: accessor(parents), peerTypes: [reqSchema])
-        } else if isBricType(schema) { // an empty schema just generates pure Bric
+        } else if isBricType(schema) { // an empty schema just generates pure JSum
             return CodeTypeAlias(name: typename, type: CodeExternalType.bric, access: accessor(parents))
         } else if case .some(.v1(.object)) = type, case let .some(.v1(adp)) = schema.additionalProperties {
             // an empty schema with additionalProperties makes it a [String:Type]
             let adpType = try reify(adp, id: typename + "Value", parents: parents)
             return CodeTypeAlias(name: typename, type: dictionaryType(CodeExternalType.string, adpType), access: accessor(parents), peerTypes: [adpType])
         } else if case .some(.v1(.object)) = type, case .some(.v2(true)) = schema.additionalProperties {
-            // an empty schema with additionalProperties makes it a [String:Bric]
+            // an empty schema with additionalProperties makes it a [String:JSum]
             //print("warning: making Brictionary for code: \(schema.bric().stringify())")
             return CodeTypeAlias(name: typename, type: CodeExternalType.object, access: self.accessor(parents))
         } else {
@@ -1557,7 +1557,7 @@ public extension JSONSchema {
         return try generate(impute(source), rootName: rootName)
     }
 
-    static func generate(_ json: Bric, rootName: String?) throws -> [(String, JSONSchema)] {
+    static func generate(_ json: JSum, rootName: String?) throws -> [(String, JSONSchema)] {
         let refmap = try json.resolve()
 
         var refschema : [String : JSONSchema] = [:]
@@ -1577,7 +1577,7 @@ public extension JSONSchema {
     }
 
     /// Parses the given JSON and injects the property ordering attribute based on the underlying source
-    static func impute(_ source: String) throws -> Bric {
+    static func impute(_ source: String) throws -> JSum {
         // TODO: re-implement
         struct ReImplementFidelityBricolageError : Error { }
         throw ReImplementFidelityBricolageError()

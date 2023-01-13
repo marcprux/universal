@@ -127,27 +127,6 @@ extension Indirect : Equatable where Wrapped : Equatable { }
 extension Indirect : Hashable where Wrapped : Hashable { }
 
 
-/// An single-element enumeration that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
-@frozen public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseIterable {
-    case null
-
-    public init(nilLiteral: ()) { self = .null }
-    public init() { self = .null }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encodeNil()
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if !container.decodeNil() {
-            throw DecodingError.typeMismatch(ExplicitNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for ExplicitNull"))
-        }
-        self = .null
-    }
-}
-
 /// A type that permits items to be initialized non-optionally
 public protocol RawInitializable : RawRepresentable {
     init(rawValue: RawValue)
@@ -155,7 +134,6 @@ public protocol RawInitializable : RawRepresentable {
 
 public extension RawInitializable {
     /// Defer optional initializer to the guaranteed initializer.
-    /// - Parameter rawValue: <#rawValue description#>
     init?(rawValue: RawValue) {
         self.init(rawValue: rawValue)
     }
@@ -186,9 +164,6 @@ public extension RawCodable {
         try rawValue.encode(to: encoder)
     }
 }
-
-/// A Nullable is a type that can be either explicitly null or a given type.
-public typealias Nullable<T> = OneOf<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
 
 public extension OneOfNType where T1 == ExplicitNull /* e.g., Nullable */ {
     /// A nullable `.null`, similar to `Optional.none`
@@ -298,16 +273,16 @@ public extension Optional where Wrapped == ExplicitNull {
 }
 
 public extension WrapperType where Self : ExpressibleByNilLiteral {
-    /// Returns this wrapped instance as a `Nullablle`
-    var asNullable: Nullable<Wrapped> {
-        get { flatMap({ .init($0) }) ?? .null }
-        set { self = newValue.fullValue.flatMap({ .init($0) }) ?? nil }
-    }
+//    /// Returns this wrapped instance as a `Nullablle`
+//    var asNullable: Nullable<Wrapped> {
+//        get { flatMap({ .init($0) }) ?? .null }
+//        set { self = newValue.q.flatMap({ .init($0) }) ?? nil }
+//    }
 
     /// Returns this wrapped instance as an `Optional<Nullablle>`, where an underlying `null` is converted to `none`.
     var asNullableOptional: Nullable<Wrapped>? {
         get { flatMap({ .init($0) }) }
-        set { self = newValue?.fullValue.flatMap({ .init($0) }) ?? nil }
+        set { self = newValue?.q.flatMap({ .init($0) }) ?? nil }
     }
 }
 
@@ -345,7 +320,7 @@ public extension WrapperType where Wrapped : Equatable, Self : ExpressibleByNilL
 
 public extension Nullable {
     /// A nullable `.full`, similar to `Optional.some`
-    static func full(_ some: T2) -> Self { return .v2(some) }
+    static func full(_ some: Q) -> Self { return .q(some) }
 }
 
 // Swift 6+ TODO: Variadic Generics: https://github.com/apple/swift/blob/master/docs/GenericsManifesto.md#variadic-generics

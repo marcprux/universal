@@ -3,9 +3,6 @@
  */
 import Swift
 
-//@available(*, deprecated, renamed: "JSum")
-public typealias Bric = JSum
-
 /// A JSum is a Joint Sum type, which is an enumeration that can represent one of:
 ///
 /// - `JSum.bol`: `Bool`

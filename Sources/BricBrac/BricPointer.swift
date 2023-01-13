@@ -5,8 +5,8 @@
 //  Created by Marc Prud'hommeaux on 8/24/15.
 //
 
-/// Extension to Bric that supports JSON Pointers and JSON References
-public extension Bric {
+/// Extension to JSum that supports JSON Pointers and JSON References
+public extension JSum {
     enum BricReferenceError : Error, CustomDebugStringConvertible {
         case invalidReferenceURI(String)
         case unresolvableReferenceRoot(String)
@@ -25,7 +25,7 @@ public extension Bric {
         }
     }
 
-    typealias Pointer = Array<Bric.Ref>
+    typealias Pointer = Array<JSum.Ref>
 
 
     /// A reference in a JSON Pointer as per http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
@@ -53,16 +53,16 @@ public extension Bric {
         }
     }
 
-    func resolve() throws -> [String : Bric] {
+    func resolve() throws -> [String : JSum] {
         return try resolve([:], resolver: { ref in
             if ref == "" { return self }
             throw BricReferenceError.unresolvableReferenceRoot(ref)
         })
     }
 
-    /// Returns a map of all references in the Bric
+    /// Returns a map of all references in the JSum
     /// See: <http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03>
-    func resolve(_ obj: [String : Bric] = [:], resolver: (String) throws -> Bric) throws -> [String : Bric] {
+    func resolve(_ obj: [String : JSum] = [:], resolver: (String) throws -> JSum) throws -> [String : JSum] {
         var rmap = obj
         switch self {
         case .arr(let arr):
@@ -93,8 +93,8 @@ public extension Bric {
         }
     }
 
-    func find(_ pointer: Pointer) throws -> Bric {
-        var node: Bric = self
+    func find(_ pointer: Pointer) throws -> JSum {
+        var node: JSum = self
         for ref in pointer {
             if case .arr(let arr) = node {
                 if case .index(let index) = ref {
@@ -124,8 +124,8 @@ public extension Bric {
     }
 
     /// Resolve the relative part "/foo/bar" as per http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
-    func reference(_ pointer: String) throws -> Bric {
-        // Note: this logic is somewhat duplicated in find(), but when parsing a string we don't know if "1" means object key or array index until we resolve it against the Bric, so we cannot first parse it into a Bric.Pointer before we resolve it
+    func reference(_ pointer: String) throws -> JSum {
+        // Note: this logic is somewhat duplicated in find(), but when parsing a string we don't know if "1" means object key or array index until we resolve it against the Bric, so we cannot first parse it into a JSum.Pointer before we resolve it
         let frags = pointer.split(omittingEmptySubsequences: true, whereSeparator: { $0 == "/" }).map({ String($0) })
         var node = self
         for var frag in frags {
@@ -157,21 +157,21 @@ public extension Bric {
     }
 }
 
-extension Bric.Ref : Equatable { }
+extension JSum.Ref : Equatable { }
 
-extension Bric.Ref : ExpressibleByStringLiteral {
+extension JSum.Ref : ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = .key(value)
     }
 }
 
-extension Bric.Ref : ExpressibleByIntegerLiteral {
+extension JSum.Ref : ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         self = .index(value)
     }
 }
 
-public func == (br1: Bric.Ref, br2: Bric.Ref) -> Bool {
+public func == (br1: JSum.Ref, br2: JSum.Ref) -> Bool {
     switch (br1, br2) {
     case (.index(let i1), .index(let i2)): return i1 == i2
     case (.key(let k1), .key(let k2)): return k1 == k2
@@ -179,21 +179,21 @@ public func == (br1: Bric.Ref, br2: Bric.Ref) -> Bool {
     }
 }
 
-extension Bric.Ref : Hashable {
+extension JSum.Ref : Hashable {
 }
 
-public extension Bric {
+public extension JSum {
     /// Updated the bric at the given existant path and sets the specified value
-    func update(_ value: Bric, pointer: Bric.Ref...) -> Bric? {
+    func update(_ value: JSum, pointer: JSum.Ref...) -> JSum? {
         return alter { return $0 == pointer ? value : $1 }
     }
 
-    /// Recursively visits each node in this Bric and performs the alteration specified by the mutator
-    func alter(mutator: (Pointer, Bric) throws -> Bric?) rethrows -> Bric? {
+    /// Recursively visits each node in this JSum and performs the alteration specified by the mutator
+    func alter(mutator: (Pointer, JSum) throws -> JSum?) rethrows -> JSum? {
         return try alterPath(path: [], mutator)
     }
 
-    fileprivate func alterPath(path: Pointer = [], _ mutator: (Pointer, Bric) throws -> Bric?) rethrows -> Bric? {
+    fileprivate func alterPath(path: Pointer = [], _ mutator: (Pointer, JSum) throws -> JSum?) rethrows -> JSum? {
         switch self {
         case .arr(var values):
             for (i, v) in values.enumerated().reversed() {

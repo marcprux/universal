@@ -21,19 +21,19 @@ class BricBracTests : XCTestCase {
         throw XCTSkip("Linux fail")
         #endif
 
-        let bric: Bric = ["a": [1, 2, true, false, nil]]
+        let bric: JSum = ["a": [1, 2, true, false, nil]]
         let cocoa = FoundationBricolage.brac(bric: bric)
         XCTAssertNotNil(cocoa.object)
         let bric2 = cocoa.bric()
         XCTAssertEqual(bric, bric2)
 
-        XCTAssertEqual(Bric.str("ABC"), FoundationBricolage(primitive: "ABC" as NSObject)?.bric())
-        XCTAssertEqual(Bric.bol(false), FoundationBricolage(primitive: false as NSObject)?.bric())
-        XCTAssertEqual(Bric.bol(true), FoundationBricolage(primitive: true as NSObject)?.bric())
-        XCTAssertEqual(Bric.num(1.0), FoundationBricolage(primitive: 1 as NSObject)?.bric())
-        XCTAssertEqual(Bric.num(1.0), FoundationBricolage(primitive: 1.0 as NSObject)?.bric())
-        XCTAssertEqual(Bric.num(3.14159), FoundationBricolage(primitive: 3.14159 as NSObject)?.bric())
-        XCTAssertEqual(Bric.nul, FoundationBricolage(primitive: NSNull() as NSObject)?.bric())
+        XCTAssertEqual(JSum.str("ABC"), FoundationBricolage(primitive: "ABC" as NSObject)?.bric())
+        XCTAssertEqual(JSum.bol(false), FoundationBricolage(primitive: false as NSObject)?.bric())
+        XCTAssertEqual(JSum.bol(true), FoundationBricolage(primitive: true as NSObject)?.bric())
+        XCTAssertEqual(JSum.num(1.0), FoundationBricolage(primitive: 1 as NSObject)?.bric())
+        XCTAssertEqual(JSum.num(1.0), FoundationBricolage(primitive: 1.0 as NSObject)?.bric())
+        XCTAssertEqual(JSum.num(3.14159), FoundationBricolage(primitive: 3.14159 as NSObject)?.bric())
+        XCTAssertEqual(JSum.nul, FoundationBricolage(primitive: NSNull() as NSObject)?.bric())
 
         // array and dict are unsupported
         XCTAssertEqual(nil, FoundationBricolage(primitive: [] as NSObject)?.bric())
@@ -58,8 +58,8 @@ class BricBracTests : XCTestCase {
         var t = CFAbsoluteTimeGetCurrent()
         var c = 0
         while true {
-            _ = try? Bric.parse(scalars) // caliper.json: ~64/sec, rap.json: 105/sec
-//            _ = try? Bric.validate(scalars, options: .Strict) // caliper.json: ~185/sec, rap.json: ~380/sec
+            _ = try? JSum.parse(scalars) // caliper.json: ~64/sec, rap.json: 105/sec
+//            _ = try? JSum.validate(scalars, options: .Strict) // caliper.json: ~185/sec, rap.json: ~380/sec
 //            _ = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) // caliper.json: ~985/sec, rap.json: 1600/sec
             c += 1
             let t2 = CFAbsoluteTimeGetCurrent()
@@ -106,19 +106,19 @@ class BricBracTests : XCTestCase {
         expectPass("[ { \"q\": \"\\\"\" } ]", [ [ "q": "\"" ]])
 
         do {
-            let unescaped: Bric = "abc\"def"
+            let unescaped: JSum = "abc\"def"
             let escaped: String = "\"abc\\\"def\""
 
             let str = unescaped.stringify()
             XCTAssertEqual(escaped, str)
 
-            let bric = try Bric.parse(escaped)
+            let bric = try JSum.parse(escaped)
             XCTAssertEqual(unescaped, bric)
         }
     }
 
     func testISO8601JSONDates() {
-        func testDateParse(_ str: Bric, _ unix: Int64?, canonical: Bool = false, line: UInt = #line) {
+        func testDateParse(_ str: JSum, _ unix: Int64?, canonical: Bool = false, line: UInt = #line) {
             guard let dtm = str.dtm else { return XCTAssertEqual(nil, unix, line: line) }
 
             // we extracted a date/time; convert it to a UNIX timestamp
@@ -301,7 +301,7 @@ class BricBracTests : XCTestCase {
             }
 
             do {
-                let x = try Array<Optional<Array<Bool>>>.brac(bric: [[false] as Bric, nil, [true, true] as Bric, [] as Bric])
+                let x = try Array<Optional<Array<Bool>>>.brac(bric: [[false] as JSum, nil, [true, true] as JSum, [] as JSum])
                 XCTAssertEqual(x.bric(), [[false], nil, [true, true], []])
             }
 
@@ -451,18 +451,18 @@ class BricBracTests : XCTestCase {
 
     }
 
-    func bricOrderedMapper(_ dict: [String: Bric]) -> AnyIterator<(key: String, value: Bric)> {
+    func bricOrderedMapper(_ dict: [String: JSum]) -> AnyIterator<(key: String, value: JSum)> {
         return AnyIterator(dict.sorted { $0.0 < $1.0 }.makeIterator())
     }
 
     func testOutputNulls() {
-        let bric: Bric = ["num": 1, "nul": nil]
+        let bric: JSum = ["num": 1, "nul": nil]
 
 //        XCTAssertEqual("{\"nul\":null,\"num\":1}", bric.stringify(mapper: bricOrderedMapper))
     }
 
 //    func testBricBracModifiers() {
-//        var bric = Bric.str("x")
+//        var bric = JSum.str("x")
 //        bric.str! += "x"
 //        XCTAssertEqual("xx", bric)
 //        bric.str = nil
@@ -496,7 +496,7 @@ class BricBracTests : XCTestCase {
 """
 
         do {
-            let bric: Bric = ["name": "Apple", "ceo": ["name": "Tim", "age": 50, "male": true, "children": []], "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]]]
+            let bric: JSum = ["name": "Apple", "ceo": ["name": "Tim", "age": 50, "male": true, "children": []], "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]]]
 
 //            let str = bric.stringify(mapper: bricOrderedMapper)
 //            // note that key order differs on MacOS and iOS, probably due to different hashing
@@ -504,7 +504,7 @@ class BricBracTests : XCTestCase {
         }
 
         do { // test quote serialization
-            let bric: Bric = "abc\"def"
+            let bric: JSum = "abc\"def"
             let str = bric.stringify()
             XCTAssertEqual("\"abc\\\"def\"", str)
         }
@@ -512,7 +512,7 @@ class BricBracTests : XCTestCase {
 
     func expectFail(_ s: String, _ msg: String? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
         do {
-            _ = try Bric.parse(s, options: options)
+            _ = try JSum.parse(s, options: options)
             XCTFail("Should have failed to parse", file: (file), line: line)
         } catch {
             if let m = msg {
@@ -521,9 +521,9 @@ class BricBracTests : XCTestCase {
         }
     }
 
-    func expectPass(_ s: String, _ bric: Bric? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
+    func expectPass(_ s: String, _ bric: JSum? = nil, options: JSONParser.Options = .Strict, file: StaticString = #file, line: UInt = #line) {
         do {
-            let b = try Bric.parse(s, options: options)
+            let b = try JSum.parse(s, options: options)
             if let bric = bric {
                 XCTAssertEqual(bric, b, file: (file), line: line)
             } else {
@@ -738,11 +738,11 @@ class BricBracTests : XCTestCase {
                     _ = try CoreFoundationBricolage.parseJSON(scalars, options: JSONParser.Options.Strict)
 //                    let nsobj = Unmanaged<NSObject>.fromOpaque(COpaquePointer(fbric.ptr)).takeRetainedValue()
                 } else if cocoa {
-                    let _: NSObject = try Bric.parseCocoa(scalars)
+                    let _: NSObject = try JSum.parseCocoa(scalars)
                 } else if validate {
-                    try Bric.validate(scalars, options: JSONParser.Options.Strict)
+                    try JSum.validate(scalars, options: JSONParser.Options.Strict)
                 } else {
-                    _ = try Bric.parse(scalars)
+                    _ = try JSum.parse(scalars)
                 }
             }
             let je = CFAbsoluteTimeGetCurrent()
@@ -760,9 +760,9 @@ class BricBracTests : XCTestCase {
     #endif
 
     #if canImport(JavaScriptCore)
-    @discardableResult func parsePath(_ path: String, strict: Bool, file: StaticString = #file, line: UInt = #line) throws -> Bric {
+    @discardableResult func parsePath(_ path: String, strict: Bool, file: StaticString = #file, line: UInt = #line) throws -> JSum {
         let str = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
-        let bric = try Bric.parse(str as String, options: strict ? .Strict : .Lenient)
+        let bric = try JSum.parse(str as String, options: strict ? .Strict : .Lenient)
 
         // always check to ensure that our strinification matches that of JavaScriptCore
         try compareJSCStringification(bric, msg: (path as NSString).lastPathComponent, file: file, line: line)
@@ -785,7 +785,7 @@ class BricBracTests : XCTestCase {
         }
 
         do {
-            cocoaBric = try Bric.parseCocoa(string)
+            cocoaBric = try JSum.parseCocoa(string)
         } catch {
             bricError = error
         }
@@ -830,15 +830,15 @@ class BricBracTests : XCTestCase {
     ///   Swift Dictionaries and JSC Objects)
     ///
     /// * We outputs exponential notation for some large integers, whereas JSC nevers appears to do so
-    func compareJSCStringification(_ b: Bric, space: Int = 2, msg: String, file: StaticString = #file, line: UInt = #line) throws {
+    func compareJSCStringification(_ b: JSum, space: Int = 2, msg: String, file: StaticString = #file, line: UInt = #line) throws {
         // JSC only allows dictionaries and arrays, so wrap any primitives in an array
-        let bric: Bric = ["ob": b] // we just wrap everything in an array
+        let bric: JSum = ["ob": b] // we just wrap everything in an array
 
         // key ordering in output is arbitrary depending on the underlying dictionary implementation,
         // and Swift and JavaScriptCore list keys in a different order; so to test this properly,
         // we need to serialize the swift key order the same as JavaScriptCore; we do this by
         // having the mapper query the JSContents for the order in which the keys would be output
-        func mapper(_ dict: [String: Bric]) -> AnyIterator<(key: String, value: Bric)> {
+        func mapper(_ dict: [String: JSum]) -> AnyIterator<(key: String, value: JSum)> {
             return AnyIterator(Array(dict).sorted(by: { kv1, kv2 in
                 return kv1.0 < kv2.0
             }).makeIterator())
@@ -869,9 +869,9 @@ class BricBracTests : XCTestCase {
 
     func testNulNilEquivalence() {
         do {
-            let j1 = Bric.obj(["foo": "bar"])
+            let j1 = JSum.obj(["foo": "bar"])
 
-            let j2 = Bric.obj(["foo": "bar", "baz": nil])
+            let j2 = JSum.obj(["foo": "bar", "baz": nil])
 
             // the two Brics are not the same...
             XCTAssertNotEqual(j1, j2)
@@ -881,7 +881,7 @@ class BricBracTests : XCTestCase {
                 XCTAssertNotEqual(d1, d2)
             }
 
-            let j3 = Bric.obj(["foo": "bar", "baz": .nul])
+            let j3 = JSum.obj(["foo": "bar", "baz": .nul])
             // the two Brics are the same...
             XCTAssertEqual(j2, j3)
 
@@ -897,7 +897,7 @@ class BricBracTests : XCTestCase {
 
 
     func testKeyedSubscripting() {
-        let val: Bric = ["key": "foo"]
+        let val: JSum = ["key": "foo"]
         if let _: String = val["key"]?.str {
         } else {
             XCTFail()
@@ -905,18 +905,18 @@ class BricBracTests : XCTestCase {
     }
 
     func testBricAlter() {
-        XCTAssertEqual("Bar", Bric.str("Foo").alter { (_, _) in "Bar" })
-        XCTAssertEqual(123, Bric.str("Foo").alter { (_, _) in 123 })
-        XCTAssertEqual([:], Bric.arr([]).alter { (_, _) in [:] })
+        XCTAssertEqual("Bar", JSum.str("Foo").alter { (_, _) in "Bar" })
+        XCTAssertEqual(123, JSum.str("Foo").alter { (_, _) in 123 })
+        XCTAssertEqual([:], JSum.arr([]).alter { (_, _) in [:] })
 
-        XCTAssertEqual(["foo": 1, "bar": "XXX"], Bric.obj(["foo": 1, "bar": 2]).alter {
+        XCTAssertEqual(["foo": 1, "bar": "XXX"], JSum.obj(["foo": 1, "bar": 2]).alter {
             return $0 == [.key("bar")] ? "XXX" : $1
         })
 
         do {
-            let b1: Bric = [["foo": 1, "bar": 2], ["foo": 1, "bar": 2]]
-            let b2: Bric = [["foo": 1, "bar": 2], ["foo": "XXX", "bar": "XXX"]]
-            let path: Bric.Pointer = [.index(1) ]
+            let b1: JSum = [["foo": 1, "bar": 2], ["foo": 1, "bar": 2]]
+            let b2: JSum = [["foo": 1, "bar": 2], ["foo": "XXX", "bar": "XXX"]]
+            let path: JSum.Pointer = [.index(1) ]
             XCTAssertEqual(b2, b1.alter { return $0.starts(with: path) && $0 != path ? "XXX" : $1 })
         }
     }
@@ -997,7 +997,7 @@ class BricBracTests : XCTestCase {
                                     try profileJSON(str, count: count, validate: false, cocoa: false, cf: true)
                                     try profileJSON(str, count: count, validate: false, cocoa: true, cf: false)
                                 } else if type == "jsonschema" {
-                                    let bric = try Bric.parse(contents)
+                                    let bric = try JSum.parse(contents)
 
                                     // the format of the tests in https://github.com/json-schema/JSON-Schema-Test-Suite are arrays of objects that contain a "schema" item
                                     guard case let .arr(items) = bric else {
@@ -1078,7 +1078,7 @@ class BricBracTests : XCTestCase {
 
     func testJSONPointers() {
         // http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
-        let json: Bric = [
+        let json: JSum = [
             "foo": ["bar", "baz"],
             "": 0,
             "a/b": 1,
@@ -1195,13 +1195,13 @@ class BricBracTests : XCTestCase {
             let opts = JSONParser.Options.Strict
 
             do {
-                let bric: Bric = [123, 456.789, ["xyz": true], false, [], [nil], nil]
+                let bric: JSum = [123, 456.789, ["xyz": true], false, [], [nil], nil]
                 let json = bric.stringify().unicodeScalars
-                var brics: [Bric] = []
-                try Bric.bricolageParser(options: opts, delegate: { (b, _) in brics.append(b); return b }).parse(json, complete: true)
+                var brics: [JSum] = []
+                try JSum.bricolageParser(options: opts, delegate: { (b, _) in brics.append(b); return b }).parse(json, complete: true)
 
                 // the expected output: note that redundant values are expected, since every bric generates an event
-                let expected: [Bric] = [123, 456.789, "xyz", true, ["xyz": true], false, [], nil, [nil], nil, [123, 456.789, ["xyz": true], false, [], [nil], nil]]
+                let expected: [JSum] = [123, 456.789, "xyz", true, ["xyz": true], false, [], nil, [nil], nil, [123, 456.789, ["xyz": true], false, [], [nil], nil]]
 
                 XCTAssertEqual(brics, expected)
             } catch {
@@ -1209,12 +1209,12 @@ class BricBracTests : XCTestCase {
             }
 
             do {
-                var processed: [Bric] = []
+                var processed: [JSum] = []
 
                 // here we are filtereding all events at leavel 1 so they are not stored in the top-level Bric array
                 // this demonstrates using the parser as a streaming Bricolage parser of top-level array elements
                 // without the parser needing the retain all of the events themselves
-                let parser = Bric.bricolageParser(options: opts, delegate: { (bric, level) in
+                let parser = JSum.bricolageParser(options: opts, delegate: { (bric, level) in
                     if level == 1 {
                         processed.append(bric)
                         return nil
@@ -1223,7 +1223,7 @@ class BricBracTests : XCTestCase {
                     }
                 })
 
-                let inputs: Array<Bric> = [ ["a": true], ["b": 123.45], ["c": nil], ["d": "xyz"] ]
+                let inputs: Array<JSum> = [ ["a": true], ["b": 123.45], ["c": nil], ["d": "xyz"] ]
                 try parser.parse(["["]) // open a top-level array
                 XCTAssertEqual([], processed) // no events yet
 
@@ -1258,8 +1258,8 @@ class BricBracTests : XCTestCase {
 
     func testStreamingEncoding() {
         for (expected, input) in [
-            (expected: nil as Bric, input: "null"),
-            (expected: ["😂": nil] as Bric, input: "{\"😂\": null}"),
+            (expected: nil as JSum, input: "null"),
+            (expected: ["😂": nil] as JSum, input: "{\"😂\": null}"),
             ] {
                 // encode the above in a variety of codecs and feed them into a streaming parser to make sure they parse correctly
                 let utf16: [UTF16.CodeUnit] = Array(input.utf16)
@@ -1377,7 +1377,7 @@ class BricBracTests : XCTestCase {
         do {
             let path = testResourcePath() + "/profile/rap.json"
             let contents = try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue)
-            let bric = try Bric.parse(contents as String)
+            let bric = try JSum.parse(contents as String)
             let cocoa = try JSONSerialization.jsonObject(with: contents.data(using: String.Encoding.utf8.rawValue)!, options: JSONSerialization.ReadingOptions())
 
             for _ in 0...10 {
@@ -1595,19 +1595,19 @@ class BricBracTests : XCTestCase {
     }
 
 //    func testDeepMerge() {
-//        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(bric: ["bar": "baz"]), ["foo": "bar", "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": "bar"]).merge(bric: ["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).merge(bric: ["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).merge(bric: ["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[[["x": "y"]]]]]]).merge(bric: ["bar": "baz", "foo": [1, 2, [[[["a": "b"]]]]]]), ["foo": [1, 2, [[[["a": "b", "x": "y"]]]]], "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": [1, 2, [[2, [["x": "y"]]]]]]).merge(bric: ["bar": "baz", "foo": [1, 2, [[2, [["a": "b"]]]]]]), ["foo": [1, 2, [[2, [["a": "b", "x": "y"]]]]], "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": "bar"]).merge(bric: ["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": "bar"]).merge(bric: ["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": [1, 2, 3]]).merge(bric: ["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": [1, 2, ["x": "y"]]]).merge(bric: ["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["a": "b", "x": "y"]], "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": [1, 2, [[[["x": "y"]]]]]]).merge(bric: ["bar": "baz", "foo": [1, 2, [[[["a": "b"]]]]]]), ["foo": [1, 2, [[[["a": "b", "x": "y"]]]]], "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": [1, 2, [[2, [["x": "y"]]]]]]).merge(bric: ["bar": "baz", "foo": [1, 2, [[2, [["a": "b"]]]]]]), ["foo": [1, 2, [[2, [["a": "b", "x": "y"]]]]], "bar": "baz"])
 //    }
 
 //    func testShallowMerge() {
-//        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(bric: ["bar": "baz"]), ["foo": "bar", "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": "bar"]).assign(bric: ["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": [1, 2, 3]]).assign(bric: ["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
-//        XCTAssertEqual(Bric.obj(["foo": [1, 2, ["x": "y"]]]).assign(bric: ["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": "bar"]).assign(bric: ["bar": "baz"]), ["foo": "bar", "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": "bar"]).assign(bric: ["bar": "baz", "foo": "bar2"]), ["foo": "bar", "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": [1, 2, 3]]).assign(bric: ["bar": "baz", "foo": "bar2"]), ["foo": [1,2,3], "bar": "baz"])
+//        XCTAssertEqual(JSum.obj(["foo": [1, 2, ["x": "y"]]]).assign(bric: ["bar": "baz", "foo": [1, 2, ["a": "b"]]]), ["foo": [1, 2, ["x": "y"]], "bar": "baz"])
 //    }
 
     func testCodableConversion() throws {
@@ -1643,7 +1643,7 @@ class BricBracTests : XCTestCase {
     
 }
 
-extension Bric {
+extension JSum {
     func stringify() -> String! {
         try! self.canonicalJSON
     }
@@ -1675,9 +1675,9 @@ struct Planet : Codable {
 
 
 /// Parses the given stream of elements with the associated codec
-func parseCodec<C: UnicodeCodec, S: Sequence>(_ codecType: C.Type, _ seq: S) throws -> Bric where S.Iterator.Element == C.CodeUnit {
-    var top: Bric = nil
-    let parser = Bric.bricolageParser(options: .Strict) { (b, l) in
+func parseCodec<C: UnicodeCodec, S: Sequence>(_ codecType: C.Type, _ seq: S) throws -> JSum where S.Iterator.Element == C.CodeUnit {
+    var top: JSum = nil
+    let parser = JSum.bricolageParser(options: .Strict) { (b, l) in
         if l == 0 { top = b }
         return b
     }
@@ -1719,8 +1719,8 @@ extension Person : BricBrac {
         case name, male, age, children
     }
 
-    func bric() -> Bric {
-        return Bric(obj: [
+    func bric() -> JSum {
+        return JSum(obj: [
             Keys.name.rawValue: name.bric(),
             Keys.male.rawValue: male.bric(),
             Keys.age.rawValue: age.bric(),
@@ -1728,7 +1728,7 @@ extension Person : BricBrac {
             ])
     }
 
-    static func brac(bric: Bric) throws -> Person {
+    static func brac(bric: JSum) throws -> Person {
         return try Person(
             name: bric.brac(key: Keys.name.rawValue),
             male: bric.brac(key: Keys.male.rawValue),
@@ -1743,14 +1743,14 @@ enum Executive : Equatable, BricBrac {
     case human(Person)
     case robot(serialNumber: String)
 
-    func bric() -> Bric {
+    func bric() -> JSum {
         switch self {
         case .human(let p): return p.bric()
         case .robot(let id): return id.bric()
         }
     }
 
-    static func brac(bric: Bric) throws -> Executive {
+    static func brac(bric: JSum) throws -> Executive {
         switch bric {
         case .str(let id): return .robot(serialNumber: id)
         case .obj(let dict) where dict["name"] != nil: return try .human(Person.brac(bric: bric))
@@ -1803,7 +1803,7 @@ final class Company : Equatable, BricBrac {
         self.subsidiaries = subsidiaries
     }
 
-    func bric() -> Bric {
+    func bric() -> JSum {
         let keys = Company.keys
         return [
             keys.name: name.bric(),
@@ -1815,7 +1815,7 @@ final class Company : Equatable, BricBrac {
         ]
     }
 
-    static func brac(bric: Bric) throws -> Company {
+    static func brac(bric: JSum) throws -> Company {
         return try Company(
             name: bric.brac(key: keys.name),
             ceo: bric.brac(key: keys.ceo),
@@ -1858,11 +1858,11 @@ struct Car {
 }
 
 extension CGPoint : Bricable, Bracable {
-    public func bric() -> Bric {
-        return ["x": Bric(num: x.native), "y": Bric(num: y.native)]
+    public func bric() -> JSum {
+        return ["x": JSum(num: x.native), "y": JSum(num: y.native)]
     }
 
-    public static func brac(bric: Bric) throws -> CGPoint {
+    public static func brac(bric: JSum) throws -> CGPoint {
         return try CGPoint(x: CGFloat(bric.brac(key: "x") as CGFloat.NativeType), y: CGFloat(bric.brac(key: "y") as CGFloat.NativeType))
     }
 }
@@ -1870,12 +1870,12 @@ extension CGPoint : Bricable, Bracable {
 /// Example of conferring JSON serialization on an existing non-final class
 extension Date : Bricable, Bracable {
     /// NSDate will be saved by simply storing it as a double with the number of seconds since 1970
-    public func bric() -> Bric {
-        return Bric(num: timeIntervalSince1970)
+    public func bric() -> JSum {
+        return JSum(num: timeIntervalSince1970)
     }
 
     /// Restore an NSDate from a "time" field
-    public static func brac(bric: Bric) throws -> Date {
+    public static func brac(bric: JSum) throws -> Date {
         return self.init(timeIntervalSince1970: try bric.bracNum())
     }
 }
@@ -2343,7 +2343,7 @@ public struct ColumnMap<T : Codable & Hashable> : Codable, Equatable {
 
 extension BricBracTests {
     public func testColumnMap() throws {
-        let values: [[String: Bric]] = [
+        let values: [[String: JSum]] = [
             ["foo": 1, "bar": "X"],
             ["foo": 2, "bar": nil],
             [:],

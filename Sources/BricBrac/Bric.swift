@@ -20,25 +20,25 @@ extension Bricolage {
 public extension Bricable {
     /// Returns the Bric'd form of this instance
 //    @available(*, deprecated, renamed: "jsum")
-    func bric() -> Bric {
+    func bric() -> JSum {
         try! self.jsum()
     }
 }
 
 extension Bricolagable {
-    public func bric() -> Bric { return bricolage() }
+    public func bric() -> JSum { return bricolage() }
 }
 
 /// Storage for JSON that is tailored for Swift-fluent access
-extension Bric: Bricolage {
-    public typealias Storage = Bric
+extension JSum: Bricolage {
+    public typealias Storage = JSum
 
     public typealias NulType = Void
     public typealias BolType = Bool
     public typealias StrType = String
     public typealias NumType = Double
-    public typealias ArrType = Array<Bric>
-    public typealias ObjType = Dictionary<StrType, Bric>
+    public typealias ArrType = Array<JSum>
+    public typealias ObjType = Dictionary<StrType, JSum>
 
     public init(nul: NulType) { self = .nul }
     public init(bol: BolType) { self = .bol(bol) }
@@ -73,8 +73,8 @@ extension Bric: Bricolage {
     public static func createArray() -> ArrType { return ArrType() }
     public static func createString(_ scalars: [UnicodeScalar]) -> StrType? { return String(scalars: scalars) }
     public static func createNumber(_ scalars: [UnicodeScalar]) -> NumType? { return Double(String(scalars: scalars)) }
-    public static func putElement(_ arr: ArrType, element: Bric) -> ArrType { return arr + [element] }
-    public static func putKeyValue(_ object: ObjType, key: StrType, value: Bric) -> ObjType {
+    public static func putElement(_ arr: ArrType, element: JSum) -> ArrType { return arr + [element] }
+    public static func putKeyValue(_ object: ObjType, key: StrType, value: JSum) -> ObjType {
         var obj = object
         obj[key] = value
         return obj
@@ -95,11 +95,11 @@ extension String {
     public init() {
     }
 
-    public func bric() -> Bric {
+    public func bric() -> JSum {
         return [:]
     }
 
-    public static func brac(bric: Bric) throws -> HollowBric {
+    public static func brac(bric: JSum) throws -> HollowBric {
         return HollowBric()
     }
 }
@@ -110,13 +110,13 @@ public func ==(lhs: HollowBric, rhs: HollowBric) -> Bool {
 
 
 //extension OneOf2 : Bricable where T1: Bricable, T2: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric)]()
 //    }
 //}
 
 extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -125,13 +125,13 @@ extension OneOf2 : Bracable where T1: Bracable, T2: Bracable {
 }
 
 //extension OneOf3 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric)]()
 //    }
 //}
 
 extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -140,13 +140,13 @@ extension OneOf3 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable {
     }
 }
 //extension OneOf4 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric)]()
 //    }
 //}
 
 extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -157,13 +157,13 @@ extension OneOf4 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 //extension OneOf5 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric)]()
 //    }
 //}
 
 extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -175,13 +175,13 @@ extension OneOf5 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 //extension OneOf6 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric)]()
 //    }
 //}
 
 extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -194,13 +194,13 @@ extension OneOf6 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 //extension OneOf7 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric)]()
 //    }
 //}
 
 extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -214,13 +214,13 @@ extension OneOf7 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 //extension OneOf8 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric)]()
 //    }
 //}
 
 extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -235,13 +235,13 @@ extension OneOf8 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 //extension OneOf9 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric, T9.bric)]()
 //    }
 //}
 
 extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -257,13 +257,13 @@ extension OneOf9 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: 
 }
 
 //extension OneOf10 : Bricable where T1: Bricable, T2: Bricable, T3: Bricable, T4: Bricable, T5: Bricable, T6: Bricable, T7: Bricable, T8: Bricable, T9: Bricable, T10: Bricable {
-//    @inlinable public func bric() -> Bric {
+//    @inlinable public func bric() -> JSum {
 //        self[routing: (T1.bric, T2.bric, T3.bric, T4.bric, T5.bric, T6.bric, T7.bric, T8.bric, T9.bric, T10.bric)]()
 //    }
 //}
 
 extension OneOf10 : Bracable where T1: Bracable, T2: Bracable, T3: Bracable, T4: Bracable, T5: Bracable, T6: Bracable, T7: Bracable, T8: Bracable, T9: Bracable, T10: Bracable {
-    @inlinable public static func brac(bric: Bric) throws -> Self {
+    @inlinable public static func brac(bric: JSum) throws -> Self {
         return try bric.brac(oneOf: [
             { try .v1(T1.brac(bric: bric)) },
             { try .v2(T2.brac(bric: bric)) },
@@ -292,8 +292,8 @@ public protocol ISO8601DateTime {
 }
 
 
-public extension Bric {
-    /// Returns the underlying `BricDateTime` for `Bric.str` cases that can be pased with `ISO8601FromString`, else nil
+public extension JSum {
+    /// Returns the underlying `BricDateTime` for `JSum.str` cases that can be pased with `ISO8601FromString`, else nil
     var dtm: BricDateTime? {
         if let str = self.str {
             return BricDateTime(str)
@@ -338,12 +338,12 @@ public struct BricDateTime: ISO8601DateTime, Hashable, Equatable, Codable, Custo
     public var description: String { return toISO8601String() }
 
     /// BricDateTime instances are serialized to ISO-8601 strings
-    public func bric() -> Bric {
-        return Bric.str(toISO8601String())
+    public func bric() -> JSum {
+        return JSum.str(toISO8601String())
     }
 
     /// BricDateTime instances are serialized to ISO-8601 strings
-    public static func brac(bric: Bric) throws -> BricDateTime {
+    public static func brac(bric: JSum) throws -> BricDateTime {
         guard case .str(let str) = bric else { return try bric.invalidType() }
         guard let dtm = BricDateTime(str) else { return try bric.invalidRawValue(str) }
         return dtm

@@ -8,21 +8,21 @@
 /// Adoption of Bracable signals that the type can be instantiated from some Bric
 public protocol Bracable {
     /// Try to construct an instance of the type from the `Bric` parameter
-    static func brac(bric: Bric) throws -> Self
+    static func brac(bric: JSum) throws -> Self
 }
 
-extension Bric : Bracable {
+extension JSum : Bracable {
     /// Bric always bracs to itself
-    public static func brac(bric: Bric) throws -> Bric {
+    public static func brac(bric: JSum) throws -> JSum {
         return bric
     }
 }
 
 /// Object keyed subscription helpers for fluent dictionary-like access to Bric
-public extension Bric {
+public extension JSum {
 
     /// Bric has a string subscript when it is an object type
-    subscript(key: String)->Bric? {
+    subscript(key: String) -> JSum? {
         get { return try? brac(key: key) }
 
         set {
@@ -36,7 +36,7 @@ public extension Bric {
 
 extension String: Bracable {
     /// A String is Brac'd to a `Bric.str` or else throws an error
-    public static func brac(bric: Bric) throws -> String {
+    public static func brac(bric: JSum) throws -> String {
         if case .str(let str) = bric {
             return str
         } else {
@@ -47,7 +47,7 @@ extension String: Bracable {
 
 extension Bool: Bracable {
     /// A Bool is Brac'd to a `Bric.bol` or else throws an error
-    public static func brac(bric: Bric) throws -> Bool {
+    public static func brac(bric: JSum) throws -> Bool {
         if case .bol(let bol) = bric {
             return bol
         } else {
@@ -64,7 +64,7 @@ extension String {
 }
 
 
-public extension Bric {
+public extension JSum {
     /// Bracs this type as Void, throwing an error if the underlying type is not null
     func bracNul() throws -> Void {
         guard case .nul = self else { return try invalidType() }
@@ -89,13 +89,13 @@ public extension Bric {
     }
 
     /// Bracs this type as an Object, throwing an error if the underlying type is not an object
-    func bracObj() throws -> [String: Bric] {
+    func bracObj() throws -> [String: JSum] {
         guard case .obj(let x) = self else { return try invalidType() }
         return x
     }
 
     /// Bracs this type as an Array, throwing an error if the underlying type is not an array
-    func bracArr() throws -> [Bric] {
+    func bracArr() throws -> [JSum] {
         guard case .arr(let x) = self else { return try invalidType() }
         return x
     }
@@ -103,9 +103,9 @@ public extension Bric {
 }
 
 /// Extensions for Bracing instances by key and inferred return type
-public extension Bric {
+public extension JSum {
 
-    internal func objectKey(_ key: String) throws -> Optional<Bric> {
+    internal func objectKey(_ key: String) throws -> Optional<JSum> {
         guard case .obj(let dict) = self else {
             throw BracError.keyWithoutObject(key: key, path: [])
         }
@@ -148,7 +148,7 @@ public extension Bric {
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    func brac<T1, T2>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2) throws -> (T1?, T2?) {
+    func brac<T1, T2>(anyOf b1: (JSum) throws -> T1, _ b2: (JSum) throws -> T2) throws -> (T1?, T2?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -164,7 +164,7 @@ public extension Bric {
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    func brac<T1, T2, T3>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3) throws -> (T1?, T2?, T3?) {
+    func brac<T1, T2, T3>(anyOf b1: (JSum) throws -> T1, _ b2: (JSum) throws -> T2, _ b3: (JSum) throws -> T3) throws -> (T1?, T2?, T3?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -182,7 +182,7 @@ public extension Bric {
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    func brac<T1, T2, T3, T4>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3, _ b4: (Bric) throws -> T4) throws -> (T1?, T2?, T3?, T4?) {
+    func brac<T1, T2, T3, T4>(anyOf b1: (JSum) throws -> T1, _ b2: (JSum) throws -> T2, _ b3: (JSum) throws -> T3, _ b4: (JSum) throws -> T4) throws -> (T1?, T2?, T3?, T4?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -202,7 +202,7 @@ public extension Bric {
     }
 
     /// Reads at least one of the given Brics, throwing an error if none of the brics passed
-    func brac<T1, T2, T3, T4, T5>(anyOf b1: (Bric) throws -> T1, _ b2: (Bric) throws -> T2, _ b3: (Bric) throws -> T3, _ b4: (Bric) throws -> T4, _ b5: (Bric) throws -> T5) throws -> (T1?, T2?, T3?, T4?, T5?) {
+    func brac<T1, T2, T3, T4, T5>(anyOf b1: (JSum) throws -> T1, _ b2: (JSum) throws -> T2, _ b3: (JSum) throws -> T3, _ b4: (JSum) throws -> T4, _ b5: (JSum) throws -> T5) throws -> (T1?, T2?, T3?, T4?, T5?) {
         var errs: [Error] = []
 
         var t1: T1?
@@ -223,19 +223,19 @@ public extension Bric {
         }
     }
 
-    /// Reads all of the given Brics, throwing an error if any of the closures threw an error
+    /// Reads all of the given JSums, throwing an error if any of the closures threw an error
     func brac<T: Bracable>(allOf: [() throws -> T]) throws -> [T] {
         return try brac(range: allOf.count...allOf.count, bracers: allOf)
     }
 
     /// Bracs the T with the given factory
-    func brac<T1, T2>(both t1: (Bric) throws -> T1, _ t2: (Bric) throws -> T2) throws -> (T1, T2) {
+    func brac<T1, T2>(both t1: (JSum) throws -> T1, _ t2: (JSum) throws -> T2) throws -> (T1, T2) {
         return try (t1(self), t2(self))
     }
 
-    /// Returns a dictionary of keys to raw Brics for all keys that are not present in the given RawType (e.g., an enum of keys)
-    /// This is useful for maintaining the underlying Brics of any object keys that are not strictly enumerated
-    func brac<R: RawRepresentable>(disjoint keys: R.Type) throws -> Dictionary<String, Bric> where R.RawValue == String {
+    /// Returns a dictionary of keys to raw JSums for all keys that are not present in the given RawType (e.g., an enum of keys)
+    /// This is useful for maintaining the underlying JSums of any object keys that are not strictly enumerated
+    func brac<R: RawRepresentable>(disjoint keys: R.Type) throws -> Dictionary<String, JSum> where R.RawValue == String {
         guard case .obj(let d) = self else { return try invalidType() }
         var dict = d
         for key in dict.keys {
@@ -285,8 +285,8 @@ public extension Bric {
 }
 
 extension WrapperType where Self : ExpressibleByNilLiteral, Wrapped : Bracable {
-    /// Returns this wrapper around the bracMap, or returns `.None` if the parameter is `Bric.nul`
-    public static func brac(bric: Bric) throws -> Self {
+    /// Returns this wrapper around the bracMap, or returns `.None` if the parameter is `JSum.nul`
+    public static func brac(bric: JSum) throws -> Self {
         if case .nul = bric { return nil } // an optional is allowed to be nil
         return Self(try Wrapped.brac(bric: bric))
     }
@@ -298,7 +298,7 @@ extension Optional : Bracable where Wrapped : Bracable {
 extension RawRepresentable where RawValue : Bracable {
 
     /// Returns this RawRepresentable around the brac, or throws an error if the parameter cannot be used to create the RawRepresentable
-    public static func brac(bric: Bric) throws -> Self {
+    public static func brac(bric: JSum) throws -> Self {
         let rawValue = try RawValue.brac(bric: bric)
         if let x = Self(rawValue: rawValue) {
             return x
@@ -311,8 +311,8 @@ extension RawRepresentable where RawValue : Bracable {
 
 
 extension RangeReplaceableCollection where Element : Bracable {
-    /// All sequences brac to a `Bric.arr` array
-    public static func brac(bric: Bric) throws -> Self {
+    /// All sequences brac to a `JSum.arr` array
+    public static func brac(bric: JSum) throws -> Self {
         if case .arr(let arr) = bric {
             return Self.init(try arr.map(Element.brac(bric:)))
         } else {
@@ -331,8 +331,8 @@ extension ContiguousArray : Bracable where Element : Bracable {
 }
 
 extension CollectionOfOne : Bracable where Element : Bracable {
-    /// All sequences brac to a `Bric.arr` array
-    public static func brac(bric: Bric) throws -> CollectionOfOne {
+    /// All sequences brac to a `JSum.arr` array
+    public static func brac(bric: JSum) throws -> CollectionOfOne {
         if case .arr(let arr) = bric, arr.count == 1 {
             return CollectionOfOne(try arr.map(Element.brac(bric:))[0])
         } else {
@@ -342,8 +342,8 @@ extension CollectionOfOne : Bracable where Element : Bracable {
 }
 
 extension EmptyCollection : Bracable where Element : Bracable {
-    /// All sequences brac to a `Bric.arr` array
-    public static func brac(bric: Bric) throws -> EmptyCollection {
+    /// All sequences brac to a `JSum.arr` array
+    public static func brac(bric: JSum) throws -> EmptyCollection {
         if case .arr(let arr) = bric, arr.count == 0 {
             return EmptyCollection()
         } else {
@@ -353,8 +353,8 @@ extension EmptyCollection : Bracable where Element : Bracable {
 }
 
 extension Set : Bracable where Element : Bracable {
-    /// All sequences brac to a `Bric.arr` array
-    public static func brac(bric: Bric) throws -> Set {
+    /// All sequences brac to a `JSum.arr` array
+    public static func brac(bric: JSum) throws -> Set {
         if case .arr(let arr) = bric {
             return Set(try arr.map(Element.brac(bric:)))
         } else {
@@ -364,7 +364,7 @@ extension Set : Bracable where Element : Bracable {
 }
 
 extension Dictionary : Bracable where Key == String, Value : Bracable {
-    public static func brac(bric: Bric) throws -> Dictionary {
+    public static func brac(bric: JSum) throws -> Dictionary {
         if case .obj(let obj) = bric {
             return try obj.mapValues(Value.brac)
         } else {
@@ -383,7 +383,7 @@ public protocol BracableNumberConvertible : Bracable {
 
 extension BracableNumberConvertible {
     /// Converts the given numeric bric to this numeric type, throwing an error if the Bric was not a number or overflows the bounds
-    public static func brac(bric: Bric) throws -> Self {
+    public static func brac(bric: JSum) throws -> Self {
         if case .num(let num) = bric {
             return try fromBric(num: num)
         } else {
@@ -483,44 +483,44 @@ extension UInt64 : BracableNumberConvertible {
 
 public enum BracError: Error, CustomDebugStringConvertible {
     /// A required key was not found in the given instance
-    case missingRequiredKey(type: Any.Type, key: String, path: Bric.Pointer)
+    case missingRequiredKey(type: Any.Type, key: String, path: JSum.Pointer)
 
     /// The type of the given Bric was invalid
-    case invalidType(type: Any.Type, actual: String, path: Bric.Pointer)
+    case invalidType(type: Any.Type, actual: String, path: JSum.Pointer)
 
     /// The value of the RawValue could not be converted
-    case invalidRawValue(type: Any.Type, value: Any, path: Bric.Pointer)
+    case invalidRawValue(type: Any.Type, value: Any, path: JSum.Pointer)
 
     /// The numeric value overflows the storage of the target number
-    case numericOverflow(type: Any.Type, value: Double, path: Bric.Pointer)
+    case numericOverflow(type: Any.Type, value: Double, path: JSum.Pointer)
 
     /// The array required a certain element but contained the wrong number
-    case invalidArrayLength(required: ClosedRange<Int>, actual: Int, path: Bric.Pointer)
+    case invalidArrayLength(required: ClosedRange<Int>, actual: Int, path: JSum.Pointer)
 
     /// The type needed to be an object
-    case keyWithoutObject(key: String, path: Bric.Pointer)
+    case keyWithoutObject(key: String, path: JSum.Pointer)
 
     /// The enumeration value of the Bric could not be found
-    case badEnum(bric: Bric, path: Bric.Pointer)
+    case badEnum(bric: JSum, path: JSum.Pointer)
 
     /// An unrecognized key was found in the input dictionary
-    case unrecognizedKey(key: String, path: Bric.Pointer)
+    case unrecognizedKey(key: String, path: JSum.Pointer)
 
     /// An unrecognized key was found in the input dictionary
-    case shouldNotBracError(type: Any.Type, path: Bric.Pointer)
+    case shouldNotBracError(type: Any.Type, path: JSum.Pointer)
 
     /// Too many matches were found for the given schema
-    case multipleMatches(type: Any.Type, path: Bric.Pointer)
+    case multipleMatches(type: Any.Type, path: JSum.Pointer)
 
     /// An unrecognized key was found in the input dictionary
-    case multipleErrors(errors: Array<Error>, path: Bric.Pointer)
+    case multipleErrors(errors: Array<Error>, path: JSum.Pointer)
 
     public var debugDescription: String {
         return describeErrors(space: 2)
     }
 
     public func describeErrors(space: Int = 0) -> String {
-        func at(path: Bric.Pointer) -> String {
+        func at(path: JSum.Pointer) -> String {
             if path.isEmpty {
                 return ""
             }
@@ -565,7 +565,7 @@ public enum BracError: Error, CustomDebugStringConvertible {
     }
 
     /// The RFC 6901 JSON Pointer path to where the error occurred in the source JSON
-    public var path: Bric.Pointer {
+    public var path: JSum.Pointer {
         get {
             switch self {
             case .missingRequiredKey(_, _, let path): return path
@@ -611,14 +611,14 @@ public enum BracError: Error, CustomDebugStringConvertible {
     }
 
     /// Returns the same error with the given path prepended
-    public func prepend(path prepend: Bric.Pointer) -> BracError {
+    public func prepend(path prepend: JSum.Pointer) -> BracError {
         var err = self
         err.path = prepend + err.path
         return err
     }
 }
 
-public extension Bric {
+public extension JSum {
     /// Utility function that simply throws an BracError.InvalidType
     func invalidType<T>() throws -> T {
         switch self {
@@ -642,7 +642,7 @@ private func bracPath<T>(_ key: String, _ f: @autoclosure () throws -> T) throws
     do {
         return try f()
     } catch let err as BracError {
-        throw err.prepend(path: [Bric.Ref(key: key)])
+        throw err.prepend(path: [JSum.Ref(key: key)])
     } catch {
         throw error
     }
@@ -653,7 +653,7 @@ private func bracIndex<T>(_ index: Int, _ f: @autoclosure () throws -> T) throws
     do {
         return try f()
     } catch let err as BracError {
-        throw err.prepend(path: [Bric.Ref(index: index)])
+        throw err.prepend(path: [JSum.Ref(index: index)])
     } catch {
         throw error
     }

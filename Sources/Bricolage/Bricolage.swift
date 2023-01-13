@@ -861,3 +861,27 @@ public class FilterEncoder { // }: Combine.TopLevelEncoder // no need to import 
     }
 }
 
+
+/// A Nullable is a type that can be either explicitly null or a given type.
+public typealias Nullable<T> = XOr<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
+
+/// An single-element enumeration that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
+@frozen public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseIterable {
+    case null
+
+    public init(nilLiteral: ()) { self = .null }
+    public init() { self = .null }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encodeNil()
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if !container.decodeNil() {
+            throw DecodingError.typeMismatch(ExplicitNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for ExplicitNull"))
+        }
+        self = .null
+    }
+}

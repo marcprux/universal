@@ -9,7 +9,7 @@ import Foundation
 import Bricolage
 
 /// `BricEncoder` facilitates the encoding of `Encodable` values into `Bric`.
-public typealias BricEncoder = BricolageEncoder<Bric>
+public typealias BricEncoder = BricolageEncoder<JSum>
 
 /// A general coding key implementation.
 public struct AnyCodingKey : CodingKey {

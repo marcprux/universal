@@ -19,7 +19,7 @@ public extension JSONSchema {
 
 extension Decodable {
     /// Initializes the instance by de-serializeing the JSON from the in-memory `Bric` instance.
-    @inlinable public init(bric: Bric, decoder: JSONDecoder = JSONDecoder(), encoder: JSONEncoder = JSONEncoder()) throws {
+    @inlinable public init(bric: JSum, decoder: JSONDecoder = JSONDecoder(), encoder: JSONEncoder = JSONEncoder()) throws {
         self = try decoder.decode(Self.self, from: encoder.encode(bric))
     }
 
@@ -105,7 +105,7 @@ private func createJSONEncoder(_ outputFormatting: JSONEncoder.OutputFormatting,
     return encoder
 }
 
-public extension Bric {
+public extension JSum {
     /// Singleton JSON encoder used for encoding; must be public to permit use as default arg;
     /// “On iOS 7 and later and macOS 10.9 and later JSONSerialization is thread safe.”
     static let JSONEncoderUnsorted = createJSONEncoder([], sortedKeys: false, withoutEscapingSlashes: true) // we want it to be unsorted
@@ -160,32 +160,32 @@ public extension Encodable {
     ///
     /// Example: for a 2.3MB JSON, this has been seen to be almost 3x faster (269ms vs. 769ms)
     @inlinable func encodedString() throws -> String {
-        return String(data: try Bric.JSONEncoderUnsorted.encode(self), encoding: .utf8) ?? "{}"
+        return String(data: try JSum.JSONEncoderUnsorted.encode(self), encoding: .utf8) ?? "{}"
     }
 
     /// Returns an encoded string for the given encoder (defaulting to a JSON encoder);
     /// this is somewhat slower than `encodedString` because it returns unordered keys.
     ///
     /// Example: for a 2.3MB JSON, this has been seen to be almost 3x slower (269ms vs. 769ms)
-    @inlinable func encodedStringSorted(encoder: (Self) throws -> (Data) = Bric.JSONEncoderSorted.encode) rethrows -> String {
+    @inlinable func encodedStringSorted(encoder: (Self) throws -> (Data) = JSum.JSONEncoderSorted.encode) rethrows -> String {
         return String(data: try encoder(self), encoding: .utf8) ?? "{}"
     }
 
     /// Returns an pretty-printed encoded string for the encodable.
     @inlinable func encodedStringFormatted() throws -> String {
-        return String(data: try Bric.JSONEncoderFormatted.encode(self), encoding: .utf8) ?? "{}"
+        return String(data: try JSum.JSONEncoderFormatted.encode(self), encoding: .utf8) ?? "{}"
     }
 
     /// The result of a call with the default parameters to `bricEncoded()`.
     /// `memoz`-able.
-    @inlinable var bricResult: Result<Bric, Error> {
+    @inlinable var bricResult: Result<JSum, Error> {
         Result { try bricEncoded() }
     }
 
-    /// Takes an Encodable instance and serialies it to JSON and then parses it as a Bric.
+    /// Takes an Encodable instance and serialies it to JSON and then parses it as a JSum.
     /// This only works for top-level encodable properties (i.e., Array and Dictionary, but not String, Double, or Boolean).
-    /// Full support would require a custom JSONEncoder to encode directly as a Bric.
-    @inlinable func bricEncoded(dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Bric {
+    /// Full support would require a custom JSONEncoder to encode directly as a JSum.
+    @inlinable func bricEncoded(dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> JSum {
         let encoder = JSONEncoder()
 
         if let dateEncodingStrategy = dateEncodingStrategy { encoder.dateEncodingStrategy = dateEncodingStrategy }
@@ -195,7 +195,7 @@ public extension Encodable {
         
         let data = try encoder.encode(self)
         guard let str = String(data: data, encoding: .utf8) else { return .nul } // unlikely
-        return try Bric.parse(str)
+        return try JSum.parse(str)
     }
 }
 
@@ -328,11 +328,11 @@ public extension Bricable {
             decoder.userInfo = userInfo
         }
 
-        return try decoder.decode(type, from: Bric.JSONEncoderUnsorted.encode(self.bric()))
+        return try decoder.decode(type, from: JSum.JSONEncoderUnsorted.encode(self.bric()))
     }
 }
 
-public extension Bric {
+public extension JSum {
 
     /// Validates the given JSON string and throws an error if there was a problem
     static func parseCocoa(_ string: String, options: JSONParser.Options = .CocoaCompat) throws -> NSObject {
@@ -432,7 +432,7 @@ public extension FoundationBricolage {
     }
 
     /// Returns the Cocoa wrapper from the given bric.
-    @inlinable static func primitiveValue(for bric: Bric) -> NSObject? {
+    @inlinable static func primitiveValue(for bric: JSum) -> NSObject? {
         switch bric {
         case .arr: return nil // not primitive
         case .obj: return nil // not primitive
@@ -444,7 +444,7 @@ public extension FoundationBricolage {
     }
 
     /// Returns the Cocoa wrapper from the given bric.
-    @inlinable static func cocoaValue(for bric: Bric) -> NSObject {
+    @inlinable static func cocoaValue(for bric: JSum) -> NSObject {
         switch bric {
         case .arr(let arr): return arr as NSArray
         case .obj(let obj): return obj as NSDictionary
@@ -458,44 +458,44 @@ public extension FoundationBricolage {
 }
 
 extension FoundationBricolage : Bracable {
-    @inlinable public func bric() -> Bric {
+    @inlinable public func bric() -> JSum {
         return FoundationBricolage.toBric(object)
     }
 
     @usableFromInline static let bolTypes = Set(arrayLiteral: "B", "c") // "B" on 64-bit, "c" on 32-bit
-    @usableFromInline static func toBric(_ object: Any) -> Bric {
+    @usableFromInline static func toBric(_ object: Any) -> JSum {
         if let bol = object as? BolType, bolTypes.contains(String(cString: bol.objCType)) {
             if let b = bol as? Bool {
-                return Bric.bol(b)
+                return JSum.bol(b)
             } else {
-                return Bric.bol(false)
+                return JSum.bol(false)
             }
         }
         if let str = object as? StrType {
-            return Bric.str(str as String)
+            return JSum.str(str as String)
         }
         if let num = object as? NumType {
             if let d = num as? Double {
-                return Bric.num(d)
+                return JSum.num(d)
             } else {
-                return Bric.num(0.0)
+                return JSum.num(0.0)
             }
         }
         if let arr = object as? ArrType {
-            return Bric.arr(arr.map(toBric))
+            return JSum.arr(arr.map(toBric))
         }
         if let obj = object as? ObjType {
-            var dict: [String: Bric] = [:]
+            var dict: [String: JSum] = [:]
             for (key, value) in obj {
                 dict[String(describing: key)] = toBric(value as AnyObject)
             }
-            return Bric.obj(dict)
+            return JSum.obj(dict)
         }
 
-        return Bric.nul
+        return JSum.nul
     }
 
-    public static func brac(bric: Bric) -> FoundationBricolage {
+    public static func brac(bric: JSum) -> FoundationBricolage {
         switch bric {
         case .nul:
             return FoundationBricolage(nul: FoundationBricolage.createNull())

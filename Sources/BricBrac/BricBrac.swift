@@ -61,7 +61,7 @@ extension NotBrac : Decodable where T : Decodable {
 //}
 
 extension NotBrac : Bracable where T : Bracable {
-    public static func brac(bric: Bric) throws -> NotBrac {
+    public static func brac(bric: JSum) throws -> NotBrac {
         do {
             _ = try T.brac(bric: bric)
         } catch {

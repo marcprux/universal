@@ -20,7 +20,7 @@ class CurioTests: XCTestCase {
     #if !os(Windows) // “D:\a\1\s\swift-corelibs-foundation\Sources\Foundation\Bundle.swift:113: Fatal error: init(for:) is not yet implemented”
     /// This is a sample schema file
     func testSampleSchema() throws {
-        let schemaBric: Bric = [
+        let schemaBric: JSum = [
             "$schema": "http://json-schema.org/draft-04/schema#",
             "type": "object",
             "properties": [
@@ -247,7 +247,7 @@ class CurioTests: XCTestCase {
                 var refschema : [String : JSONSchema] = [:]
 
                 let source = try String(contentsOf: file)
-                let bric = try Bric.parse(source)
+                let bric = try JSum.parse(source)
 
                 for (key, value) in try bric.resolve() {
                     var subschema = try JSONSchema(bric: value)
@@ -294,7 +294,7 @@ class CurioTests: XCTestCase {
 
 public class TestSampleModel : XCTestCase {
 
-    @discardableResult func assertBracable(bric: Bric, line: UInt = #line) -> Error? {
+    @discardableResult func assertBracable(bric: JSum, line: UInt = #line) -> Error? {
         do {
 //            let sample = try SampleModel.brac(bric: bric)
             let sample = try SampleModel(bric: bric)
@@ -306,7 +306,7 @@ public class TestSampleModel : XCTestCase {
         }
     }
 
-    @discardableResult func assertNOTBracable(bric: Bric, line: UInt = #line) -> Error? {
+    @discardableResult func assertNOTBracable(bric: JSum, line: UInt = #line) -> Error? {
         do {
             _ = try SampleModel(bric: bric)
             XCTFail("should not have bracd", line: line)
@@ -317,7 +317,7 @@ public class TestSampleModel : XCTestCase {
     }
 
     func testAnyOfField() {
-        var bric: Bric = [
+        var bric: JSum = [
             "allOfField": [
                 "a1": 1,
                 "a2": "a2",
@@ -360,7 +360,7 @@ public class TestSampleModel : XCTestCase {
     }
 
     func testForbidAdditionalProperties() {
-        var bric: Bric = [
+        var bric: JSum = [
             "anyOfField": [ "b1": 1, "b2": "b2" ],
             "allOfField": [ "a1": 1, "a2": "a2", "a3": true, "a4": 1.2 ],
             "oneOfField": [ "c1": 1, "c2": "b2", ],
@@ -374,7 +374,7 @@ public class TestSampleModel : XCTestCase {
     }
 
     func testArrayField() {
-        var bric: Bric = [
+        var bric: JSum = [
             "anyOfField": [ "b1": 1, "b2": "b2" ],
             "allOfField": [ "a1": 1, "a2": "a2", "a3": true, "a4": 1.2 ],
             "oneOfField": [ "c1": 1, "c2": "b2", ],
@@ -410,7 +410,7 @@ public class TestSampleModel : XCTestCase {
     }
 
     func testNestedFields() {
-        var bric: Bric = [
+        var bric: JSum = [
             "anyOfField": [ "b1": 1, "b2": "b2" ],
             "allOfField": [ "a1": 1, "a2": "a2", "a3": true, "a4": 1.2 ],
             "oneOfField": [ "c1": 1, "c2": "b2", ],
@@ -449,7 +449,7 @@ public class TestSampleModel : XCTestCase {
     }
 
     func testVerifyNotFieldFiles() throws {
-        let bric: Bric = [
+        let bric: JSum = [
             "allOfField": [
                 "a1": 1,
                 "a2": "a2",

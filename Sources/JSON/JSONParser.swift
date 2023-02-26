@@ -8,11 +8,13 @@ import struct Foundation.UUID
 import struct Foundation.URL
 import struct Foundation.Date
 import struct Foundation.Data
-import struct Foundation.Decimal
+
+// MARK: Old JSON Parser
+// TODO: resurrect and convert to an async parser to receive JSON events from a stream
 
 /// A non-recursive streaming parser for JSON (ECMA-404). The parser operates by being fed a complete or 
 /// partial sequence of `UnicodeScalar`s and emits events for every JSON syntax component that is encountered.
-public final class JSONParser {
+private final class JSONParser {
 
     /// An event that is emitted during parsing
     public enum Event : CustomDebugStringConvertible {
@@ -685,7 +687,7 @@ public final class JSONParser {
 ///
 /// - Note: The formatting methods are twice as fast when the code is included in
 ///   the same module as JSONParser, probably due to whole-module optimization
-public extension JSONParser {
+extension JSONParser {
 
     /// Process the JSON String with optional formatting
     ///
@@ -789,7 +791,7 @@ private extension UnicodeScalar {
 
 extension JSONParser.Event : Equatable { }
 
-public func ==(e1: JSONParser.Event, e2: JSONParser.Event) -> Bool {
+fileprivate func ==(e1: JSONParser.Event, e2: JSONParser.Event) -> Bool {
     switch (e1, e2) {
     case (.arrayStart(let x1), .arrayStart(let x2)): return x1 == x2
     case (.arrayEnd(let x1), .arrayEnd(let x2)): return x1 == x2

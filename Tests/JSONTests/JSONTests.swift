@@ -81,7 +81,7 @@ final class JSONTests : XCTestCase {
     ///   - breadth: how many elements each object/array level of the graph should contain
     ///   - seed: the random seed
     /// - Returns: a JSum object full of random junk
-    func createSampleJSON(depth: Int, breadth: Int, rng: inout some RandomNumberGenerator) -> JSum {
+    func createSampleJSON(depth: Int, breadth: Int, rng: inout some RandomNumberGenerator) -> JSON {
         func coinFlip() -> Bool {
             .random(using: &rng)
         }
@@ -91,7 +91,7 @@ final class JSONTests : XCTestCase {
             UUID(rnd: &rng)
         }
 
-        var values: [JSum] = []
+        var values: [JSON] = []
         for _ in 0..<breadth {
             if depth > 1 && coinFlip() {
                 // create an object child

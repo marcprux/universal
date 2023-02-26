@@ -5,7 +5,7 @@ import Quanta
 
 
 /// A YAML tree node, which can contain a `Scalar` (`String`, `Int`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`
-public struct YAML : Isomorph, Sendable, Hashable, Codable {
+public struct YAML : Isomorph, Sendable, Hashable {
     public typealias NumberType = Either<IntegerLiteralType>.Or<FloatLiteralType>
     public typealias Scalar = ScalarOf<StringLiteralType, NumberType>
     public typealias Object = [Scalar: YAML]
@@ -105,6 +105,66 @@ public extension YAML {
     }
 }
 
+extension YAML : Encodable {
+    /// Encodes to a JSON-compatible encoder.
+    @inlinable public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self.rawValue {
+        case .a(let scalar):
+            switch scalar {
+            case .a(let string): try container.encode(string as String)
+            case .b(let scalar):
+                switch scalar {
+                case .a(let number):
+                    switch number {
+                    case .a(let integer): try container.encode(integer as Int)
+                    case .b(let double): try container.encode(double as Double)
+                    }
+                case .b(let scalar):
+                    switch scalar {
+                    case .a(let boolean): try container.encode(boolean as Bool)
+                    case .b(let null): assert(null as Never? == .none); try container.encodeNil()
+                    }
+                }
+            }
+
+        case .b(let quanta):
+            switch quanta.rawValue {
+            case .a(let array): try container.encode(array)
+            case .b(let dictionary): try container.encode(dictionary)
+            }
+        }
+    }
+}
+
+//extension YAML : Decodable {
+//    @inlinable public init(from decoder: Decoder) throws {
+//        let container = try decoder.singleValueContainer()
+//        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
+//        if container.decodeNil() {
+//            self = YAML.null
+//        } else {
+//            do {
+//                self = try YAML(booleanLiteral: container.decode(Bool.self))
+//            } catch DecodingError.typeMismatch {
+//                do {
+//                    self = try YAML(floatLiteral: container.decode(Double.self))
+//                } catch DecodingError.typeMismatch {
+//                    do {
+//                        self = try YAML(stringLiteral: container.decode(String.self))
+//                    } catch DecodingError.typeMismatch {
+//                        do {
+//                            self = try YAML(.init(decode() as Quanta<Key, Value>))
+//                        } catch DecodingError.typeMismatch {
+//                            throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+
 
 
 
@@ -134,6 +194,11 @@ public extension YAML {
 // SOFTWARE.
 
 extension YAML {
+    /// Parses the given YAML data.
+    public static func parse(_ yamlData: Data) throws -> YAML {
+        try parse(yaml: String(data: yamlData, encoding: .utf8) ?? String())
+    }
+
     /// Parses the given YAML string into a ``YAML``.
     /// - Parameter yaml: the YAML string to parse
     public static func parse(yaml: String) throws -> YAML {

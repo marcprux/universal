@@ -3,9 +3,25 @@
  */
 import Swift
 import Quanta
+import struct Foundation.Date
+import struct Foundation.Data
+import struct Foundation.URL
+import struct Foundation.Decimal
+import class Foundation.NSDate
+import class Foundation.NSData
+import class Foundation.NSURL
+import class Foundation.NSDecimalNumber
+import class Foundation.JSONDecoder
+import class Foundation.JSONEncoder
+import class Foundation.ISO8601DateFormatter
 
-#if canImport(Foundation)
-import Foundation
+extension JSON {
+    /// Parses the given `Data` into a `JSON` structure.
+    public static func parse(_ json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> JSON {
+        try JSON(fromJSON: json, decoder: decoder(), allowsJSON5: allowsJSON5, dataDecodingStrategy: dataDecodingStrategy, dateDecodingStrategy: dateDecodingStrategy, nonConformingFloatDecodingStrategy: nonConformingFloatDecodingStrategy, keyDecodingStrategy: keyDecodingStrategy, userInfo: userInfo)
+    }
+}
+
 
 // MARK: Encoding / Decoding
 
@@ -34,7 +50,7 @@ private extension _JSONContainer {
     }
 }
 
-/// A set of options for decoding an entity from a `JSum` instance.
+/// A set of options for decoding an entity from a `JSON` instance.
 open class JSONDecodingOptions {
     /// The strategy to use in decoding dates. Defaults to `.deferredToDate`.
     open var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
@@ -60,7 +76,7 @@ open class JSONDecodingOptions {
     }
 }
 
-/// A set of options for encoding an entity from a `JSum` instance.
+/// A set of options for encoding an entity from a `JSON` instance.
 open class JSONEncodingOptions {
     /// The output format to produce. Defaults to `[]`.
     open var outputFormatting: JSONEncoder.OutputFormatting
@@ -93,43 +109,43 @@ open class JSONEncodingOptions {
 #if canImport(Combine)
 import Combine
 @available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *)
-private protocol TopLevelJSumEncoder : TopLevelEncoder {
+private protocol TopLevelJEncoder : TopLevelEncoder {
 }
 @available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *)
-private protocol TopLevelJSumDecoder : TopLevelDecoder {
+private protocol TopLevelJDecoder : TopLevelDecoder {
 }
 #else
-private protocol TopLevelJSumEncoder {
+private protocol TopLevelJEncoder {
 }
-private protocol TopLevelJSumDecoder {
+private protocol TopLevelJDecoder {
 }
 #endif
 
 extension Encodable {
-    /// Creates an in-memory JSum representation of the instance's encoding.
+    /// Creates an in-memory J representation of the instance's encoding.
     ///
     /// - Parameter options: the options for serializing the data
-    /// - Returns: A JSum containing the structure of the encoded instance
+    /// - Returns: A J containing the structure of the encoded instance
     public func json(options: JSONEncodingOptions? = nil) throws -> JSON {
-        try JSumEncoder(options: options).encode(self)
+        try JEncoder(options: options).encode(self)
     }
 }
 
 extension Decodable {
     /// Creates an instance from an encoded intermediate representation.
     ///
-    /// A `JSum` can be created from JSON, YAML, Plists, or other similar data formats.
+    /// A `JSON` can be created from JSON, YAML, Plists, or other similar data formats.
     /// This intermediate representation can then be used to instantiate a compatible `Decodable` instance.
     ///
     /// - Parameters:
-    ///   - jsum: the JSum to load the instance from
+    ///   - json: the JSON to load the instance from
     ///   - options: the options for deserializing the data such as the decoding strategies for dates and data.
     @inlinable public init(json: JSON, options: JSONDecodingOptions? = nil) throws {
-        try self = JSumDecoder(options: options).decode(Self.self, from: json)
+        try self = JDecoder(options: options).decode(Self.self, from: json)
     }
 }
 
-@usableFromInline internal class JSumEncoder : TopLevelJSumEncoder {
+@usableFromInline internal class JEncoder : TopLevelJEncoder {
     @usableFromInline let options: JSONEncodingOptions
 
     /// Initializes `self` with default strategies.
@@ -156,7 +172,7 @@ extension Decodable {
     /// - Throws: `EncodingError.invalidValue` if a non-conforming floating-point value is encountered during encoding, and the encoding strategy is `.throw`.
     /// - Throws: An error if any value throws an error during encoding.
     @usableFromInline internal func encodeToTopLevelContainer<Value: Encodable>(_ value: Value) throws -> JSON {
-        let encoder = JSumElementEncoder(options: options)
+        let encoder = JSONElementEncoder(options: options)
         guard let topLevel = try encoder.box_(value) else {
             throw EncodingError.invalidValue(value,
                                              EncodingError.Context(codingPath: [],
@@ -168,8 +184,8 @@ extension Decodable {
 }
 
 
-/// `JSumDecoder` facilitates the decoding of `JSum` values into `Decodable` types.
-@usableFromInline internal class JSumDecoder : TopLevelJSumDecoder {
+/// `JDecoder` facilitates the decoding of `J` values into `Decodable` types.
+@usableFromInline internal class JDecoder : TopLevelJDecoder {
     @usableFromInline let options: JSONDecodingOptions
 
     /// Initializes `self` with default strategies.
@@ -208,7 +224,7 @@ extension Decodable {
 }
 
 
-fileprivate class JSumElementEncoder: Encoder {
+fileprivate class JSONElementEncoder: Encoder {
     fileprivate let options: JSONEncodingOptions
 
     /// The encoder's storage.
@@ -330,7 +346,7 @@ fileprivate struct _JSONEncodingStorage {
 
 fileprivate struct _JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     /// A reference to the encoder we're writing to.
-    private let encoder: JSumElementEncoder
+    private let encoder: JSONElementEncoder
 
     /// A reference to the container we're writing to.
     private var container: _JSONContainer
@@ -344,7 +360,7 @@ fileprivate struct _JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     /// Initializes `self` with the given references.
-    fileprivate init(referencing encoder: JSumElementEncoder, codingPath: [CodingKey], wrapping container: _JSONContainer) {
+    fileprivate init(referencing encoder: JSONElementEncoder, codingPath: [CodingKey], wrapping container: _JSONContainer) {
         self.encoder = encoder
         self.codingPath = codingPath
         self.container = container
@@ -397,11 +413,11 @@ fileprivate struct _JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     public mutating func superEncoder() -> Encoder {
-        return _JSONReferencingEncoder(referencing: self.encoder, at: self.container.json.count ?? 0, wrapping: self.container)
+        return _JSONReferencingEncoder(referencing: self.encoder, at: self.container.json.count, wrapping: self.container)
     }
 }
 
-extension JSumElementEncoder: SingleValueEncodingContainer {
+extension JSONElementEncoder: SingleValueEncodingContainer {
     private func assertCanEncodeNewValue() {
         precondition(self.canEncodeNewValue, "Attempt to encode value through single value container when previously value already encoded.")
     }
@@ -487,7 +503,7 @@ extension JSumElementEncoder: SingleValueEncodingContainer {
     }
 }
 
-extension JSumElementEncoder {
+extension JSONElementEncoder {
 
     /// Returns the given value boxed in a container appropriate for pushing onto the container stack.
     fileprivate func box(_ value: Bool) -> _JSONContainer {
@@ -646,7 +662,7 @@ extension JSumElementEncoder {
             return .init(json: .num((value as! NSDecimalNumber).doubleValue))
         }
 
-        // The value should request a container from the JSumElementEncoder.
+        // The value should request a container from the JSONElementEncoder.
         let depth = self.storage.count
         do {
             try value.encode(to: self)
@@ -672,7 +688,7 @@ fileprivate struct _JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
     typealias Key = K
 
     /// A reference to the encoder we're writing to.
-    private let encoder: JSumElementEncoder
+    private let encoder: JSONElementEncoder
 
     /// A reference to the container we're writing to.
     private var container: _JSONContainer
@@ -681,7 +697,7 @@ fileprivate struct _JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
     private(set) public var codingPath: [CodingKey]
 
     /// Initializes `self` with the given references.
-    fileprivate init(referencing encoder: JSumElementEncoder, codingPath: [CodingKey], wrapping container: _JSONContainer) {
+    fileprivate init(referencing encoder: JSONElementEncoder, codingPath: [CodingKey], wrapping container: _JSONContainer) {
         self.encoder = encoder
         self.codingPath = codingPath
         self.container = container
@@ -787,9 +803,9 @@ fileprivate struct _JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
 }
 
 
-/// `_JSONReferencingEncoder` is a special subclass of JSumElementEncoder which has its own storage, but references the contents of a different encoder.
+/// `_JSONReferencingEncoder` is a special subclass of JSONElementEncoder which has its own storage, but references the contents of a different encoder.
 /// It's used in `superEncoder()`, which returns a new encoder for encoding a superclass -- the lifetime of the encoder should not escape the scope it's created in, but it doesn't necessarily know when it's done being used (to write to the original container).
-fileprivate class _JSONReferencingEncoder: JSumElementEncoder {
+fileprivate class _JSONReferencingEncoder: JSONElementEncoder {
     /// The type of container we're referencing.
     private enum Reference {
         /// Referencing a specific index in an array container.
@@ -800,13 +816,13 @@ fileprivate class _JSONReferencingEncoder: JSumElementEncoder {
     }
 
     /// The encoder we're referencing.
-    private let encoder: JSumElementEncoder
+    private let encoder: JSONElementEncoder
 
     /// The container reference itself.
     private let reference: Reference
 
     /// Initializes `self` by referencing the given array container in the given encoder.
-    fileprivate init(referencing encoder: JSumElementEncoder, at index: Int, wrapping array: _JSONContainer) {
+    fileprivate init(referencing encoder: JSONElementEncoder, at index: Int, wrapping array: _JSONContainer) {
         self.encoder = encoder
         self.reference = .array(array, index)
         super.init(options: encoder.options, codingPath: encoder.codingPath)
@@ -815,7 +831,7 @@ fileprivate class _JSONReferencingEncoder: JSumElementEncoder {
     }
 
     /// Initializes `self` by referencing the given dictionary container in the given encoder.
-    fileprivate init(referencing encoder: JSumElementEncoder, at key: CodingKey, wrapping dictionary: _JSONContainer) {
+    fileprivate init(referencing encoder: JSONElementEncoder, at key: CodingKey, wrapping dictionary: _JSONContainer) {
         self.encoder = encoder
         self.reference = .dictionary(dictionary, key.stringValue)
         super.init(options: encoder.options, codingPath: encoder.codingPath)
@@ -1841,9 +1857,6 @@ fileprivate struct _JSONKey: CodingKey {
     fileprivate static let `super` = _JSONKey(stringValue: "super")!
 }
 
-
-#endif
-
 public extension Decodable {
     /// Initialized this instance from a JSON string
     init(fromJSON json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws {
@@ -1993,19 +2006,16 @@ let canonicalJSONEncoder: JSONEncoder = {
 
 
 
-@available(*, deprecated, renamed: "JSON")
-public typealias JSum = JSON
-
 extension Decodable where Self : Encodable {
 
-    /// Parses this codable into the given data structure, along with a raw `JSum`
+    /// Parses this codable into the given data structure, along with a raw `JSON`
     /// that will be used to verify that the codable instance contains all the expected properties.
     ///
     /// - Parameters:
-    ///   - data: the data to parse by the Codable and the JSum
+    ///   - data: the data to parse by the Codable and the JSON
     ///   - encoder: the custom encoder to use, or `nil` to use the system default
     ///   - decoder: the custom decoder to use, or `nil` to use the system default
-    /// - Returns: a tuple with both the parsed codable instance, as well as an optional `difference` JSum that will be nil if the codability was an exact match
+    /// - Returns: a tuple with both the parsed codable instance, as well as an optional `difference` JSON that will be nil if the codability was an exact match
     public static func codableComplete(data: Data, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil) throws -> (instance: Self, difference: JSON?) {
         let item = try (decoder ?? debugJSONDecoder).decode(Self.self, from: data)
         let itemJSON = try item.toJSON(encoder: encoder ?? canonicalJSONEncoder).utf8String

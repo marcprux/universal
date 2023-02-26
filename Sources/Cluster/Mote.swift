@@ -10,25 +10,26 @@ import struct Foundation.UUID
 import struct Foundation.Decimal
 
 /// One or many of a thing
-public enum Modicum<One, Many : Sequence> {
+public enum OneOrMore<One, More : Sequence> {
     case one(One)
-    case many(Many)
+    case more(More)
 }
 
-extension Modicum : Equatable where One : Equatable, Many : Equatable { }
-extension Modicum : Encodable where One : Encodable, Many : Encodable { }
-extension Modicum : Decodable where One : Decodable, Many : Decodable { }
-extension Modicum : Hashable where One : Hashable, Many : Hashable { }
-extension Modicum : Sendable where One : Sendable, Many : Sendable { }
-
-extension Modicum : Sequence {
-    public func makeIterator() -> IndexingIterator<[Either<One>.Or<Many.Element>]> {
+extension OneOrMore where More : ExpressibleByArrayLiteral, More.ArrayLiteralElement == One {
+    /// All the items as the `More` collection
+    @inlinable var items: More {
         switch self {
-        case .one(let one): return [Either.Or(one)].makeIterator()
-        case .many(let many): return many.map({ .init($0) }).makeIterator()
+        case .one(let one): return More(arrayLiteral: one)
+        case .more(let more): return more
         }
     }
 }
+
+extension OneOrMore : Equatable where One : Equatable, More : Equatable { }
+extension OneOrMore : Encodable where One : Encodable, More : Encodable { }
+extension OneOrMore : Decodable where One : Decodable, More : Decodable { }
+extension OneOrMore : Hashable where One : Hashable, More : Hashable { }
+extension OneOrMore : Sendable where One : Sendable, More : Sendable { }
 
 /// Either an Array or Dictionary of Values.
 public typealias KeyableValues<Key : Hashable, Value> = Either<[Value]>.Or<[Key: Value]>
@@ -43,8 +44,8 @@ public typealias KeyableValues<Key : Hashable, Value> = Either<[Value]>.Or<[Key:
 //}
 
 
-/// A cluster it a value or a sequence of values or a map of keyed values.
-public typealias Cluster<Key : Hashable, Value> = Modicum<Key, KeyableValues<Key, Value>>
+/// A mote is a `Value` or a sequence of `Value`s or a map of keyed `Value`s.
+public typealias Mote<Key : Hashable, Value> = OneOrMore<Key, KeyableValues<Key, Value>>
 
 /// A scalar that can contain a string type, a numeric type, a boolean type, and a null type.
 public typealias StrNumBoolNull<StrType, NumType, BoolType, NullType> = Either<StrType>.Or<NumType>.Or<BoolType>.Or<NullType>
@@ -128,6 +129,7 @@ public typealias Scalar = ScalarOf<StringLiteralType, FloatLiteralType>
 /// JSum can be created by parsing JSON, YAML, or Property List sources.
 ///
 /// They can also be used to instatiate a `Decodable` instance directly using the `Decodable.init(jsum:)` initializer.
+@available(*, deprecated, renamed: "JSON")
 @frozen public enum JSum : Hashable, Sendable {
     case arr([JSum]) // Array
     case obj(JObj) // Dictionary

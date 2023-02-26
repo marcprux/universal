@@ -6,13 +6,13 @@ import Cluster
 
 /// A YAML tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`
 public struct YAML : Isomorph {
-    public var rawValue: Cluster<Scalar, Scalar>
+    public var rawValue: Mote<Scalar, Scalar>
 
-    public init(rawValue: Cluster<Scalar, Scalar>) {
+    public init(rawValue: Mote<Scalar, Scalar>) {
         self.rawValue = rawValue
     }
 
-    public init(_ rawValue: Cluster<Scalar, Scalar>) {
+    public init(_ rawValue: Mote<Scalar, Scalar>) {
         self.rawValue = rawValue
     }
 }

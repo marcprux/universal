@@ -384,7 +384,7 @@ enum NeverCodableError : Error {
 }
 
 /// An Indirect is a simple wrapper for an underlying value stored via an indirect enum in order to permit recursive value types
-@propertyWrapper @frozen public indirect enum Indirect<Wrapped> : WrapperType, RawIsomorphism {
+@propertyWrapper @frozen public indirect enum Indirect<Wrapped> : WrapperType, Isomorph {
     case some(Wrapped)
 
     /// Construct a non-`nil` instance that stores `some`.
@@ -445,58 +445,49 @@ extension Indirect : Equatable where Wrapped : Equatable { }
 extension Indirect : Hashable where Wrapped : Hashable { }
 
 
-/// A type that permits items to be initialized non-optionally
-public protocol RawInitializable : RawRepresentable {
+/// A `RawRepresentable` that guarantees that the contents of `rawValue` are fully equivalent to the wrapper itself, thereby enabling isomorphic behaviors such as encoding & decoding itself as it's underlying value or converting between separate `Isomorph` with the same underlying `RawValue` .
+public protocol Isomorph : RawRepresentable {
     init(rawValue: RawValue)
 }
 
-public extension RawInitializable {
-    /// Defer optional initializer to the guaranteed initializer.
-    init?(rawValue: RawValue) {
-        self.init(rawValue: rawValue)
-    }
-}
+@available(*, deprecated, renamed: "Alias")
+public typealias RawCodable = Alias
 
-/// A `RawRepresentable` and `RawInitializable` that guarantees that the contents of `rawValue` are fully equivalent to the wrapper itself, thereby enabling isomorphic behaviors such as encoding & decoding itself as it's underlying value or converting between separate `RawIsomorphism` with the same underlying `RawValue` .
-public protocol RawIsomorphism : RawInitializable {
-}
-
-
-/// A RawCodable is a simple `RawRepresentable` wrapper except its coding
+/// An `Alias` is a simple `RawRepresentable` wrapper except its coding
 /// will store the underlying value directly rather than keyed as "rawValue",
 /// thus requiring that the `init(rawValue:)` be non-failable; it is useful
 /// as a codable typesafe wrapper for some general type like UUID where the
 /// Codable implementation does not automatically use the underlying type (like
 /// it does with primitives and Strings)
-public protocol RawCodable : RawIsomorphism, Codable where RawValue : Codable {
+public protocol Alias : Isomorph, Codable where RawValue : Codable {
 }
 
-public extension RawCodable {
-    /// A `RawCodable` deserializes from the underlying type's decoding with any intermediate wrapper
+public extension Alias {
+    /// An `Alias` deserializes from the underlying type's decoding with any intermediate wrapper
     init(from decoder: Decoder) throws {
         try self.init(rawValue: RawValue(from: decoder))
     }
 
-    /// A `RawCodable` serializes to the underlying type's encoding with any intermediate wrapper
+    /// An `Alias` serializes to the underlying type's encoding with any intermediate wrapper
     func encode(to encoder: Encoder) throws {
         try rawValue.encode(to: encoder)
     }
 }
 
-/// Conformance requirements of `RawIsomorphism` to `CaseIterable` when the `rawValue` is a `CaseIterable`.
+/// Conformance requirements of `Isomorph` to `CaseIterable` when the `rawValue` is a `CaseIterable`.
 ///
 /// ```swift
-/// struct DemoChoice : RawIsomorphism, CaseIterable { let rawValue: SomeEnum }
+/// struct DemoChoice : Isomorph, CaseIterable { let rawValue: SomeEnum }
 /// ```
-extension RawIsomorphism where RawValue : CaseIterable {
+extension Isomorph where RawValue : CaseIterable {
     public static var allCases: [Self] {
         RawValue.allCases.map(Self.init(rawValue:))
     }
 }
 
-public extension RawIsomorphism {
-    /// Converts between two `RawCodable` types that have the same underlying value
-    @inlinable func morphed<T: RawIsomorphism>() -> T where T.RawValue == Self.RawValue {
+public extension Isomorph {
+    /// Converts between two `Alias` types that have the same underlying value
+    @inlinable func morphed<T: Isomorph>() -> T where T.RawValue == Self.RawValue {
         T(rawValue: self.rawValue)
     }
 }

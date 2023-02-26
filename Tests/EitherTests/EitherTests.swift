@@ -6,7 +6,7 @@ import XCTest
 
 final class EitherTests: XCTestCase {
     func testEitherOr() throws {
-        typealias StringOrInt = XOr<String>.Or<Int>
+        typealias StringOrInt = Either<String>.Or<Int>
         let str = StringOrInt("ABC")
         let int = StringOrInt(12)
         XCTAssertNotEqual(str, int)

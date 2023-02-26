@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import BricBrac
+import MarcUp
 import Curio
 
 class CurioTests: XCTestCase {
@@ -220,7 +220,7 @@ class CurioTests: XCTestCase {
 
                 var outputDir = baseDir
 
-                // the JSON schema is special: it will be the one that BricBrac includes
+                // the JSON schema is special: it will be the one that MarcUp includes
                 let isJSONSchema = file.lastPathComponent == "JSONSchema.schema.json"
 
                 if isJSONSchema {
@@ -273,12 +273,12 @@ class CurioTests: XCTestCase {
                     .deletingPathExtension() // twice to get rid of both `schema` and `json`
                     .lastPathComponent
 
-                // instead of putting the output in the CurioTests, put it directly in the BricBrac Sources
+                // instead of putting the output in the CurioTests, put it directly in the MarcUp Sources
                 outputDir = outputDir // ROOT/Tests/CurioTests/
                     .deletingLastPathComponent() // ROOT/Tests/
                     .deletingLastPathComponent() // ROOT/
                     .appendingPathComponent("Sources") // ROOT/Sources/
-                    .appendingPathComponent("BricBrac") // ROOT/Sources/BricBrac/
+                    .appendingPathComponent("MarcUp") // ROOT/Sources/MarcUp/
 
                 let saveToTemp = true // we don't want to overwrite the current schema
 

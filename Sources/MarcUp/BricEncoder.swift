@@ -1,6 +1,6 @@
 //
 //  BricEncoder.swift
-//  BricBrac
+//  MarcUp
 //
 //  Created by Marc Prud'hommeaux on 3/27/18.
 //

@@ -1,6 +1,5 @@
 //
 //  JSONParser.swift
-//  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 8/20/15.
 //

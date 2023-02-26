@@ -1,6 +1,5 @@
 //
 //  BricIO+Cocoa.swift
-//  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 7/20/15.
 //

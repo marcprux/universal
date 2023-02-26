@@ -1,6 +1,5 @@
 //
-//  BricBracTests.swift
-//  Bric-à-brac
+//  MarcUpTests.swift
 //
 //  Created by Marc Prud'hommeaux on 6/14/15.
 //

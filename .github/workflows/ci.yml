@@ -1,4 +1,4 @@
-name: BricBrac CI
+name: MarcUp CI
 
 on:
   push:
@@ -32,18 +32,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Test (Debug)
-        run: xcodebuild clean test -configuration Debug -scheme "BricBrac-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
+        run: xcodebuild clean test -configuration Debug -scheme "MarcUp-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
       - name: Test (Release)
-        run: xcodebuild clean test -configuration Release -scheme "BricBrac-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
+        run: xcodebuild clean test -configuration Release -scheme "MarcUp-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
 
   tvos:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v2
       - name: Test (Debug)
-        run: xcodebuild clean test -configuration Debug -scheme "BricBrac-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+        run: xcodebuild clean test -configuration Debug -scheme "MarcUp-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
       - name: Test (Release)
-        run: xcodebuild clean test -configuration Release -scheme "BricBrac-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+        run: xcodebuild clean test -configuration Release -scheme "MarcUp-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
 
   macos:
     runs-on: macos-12
@@ -73,10 +73,10 @@ jobs:
           cat Package.swift
 
           swift package --allow-writing-to-directory docs \
-            generate-documentation --target BricBrac \
+            generate-documentation --target MarcUp \
             --disable-indexing \
             --transform-for-static-hosting \
-            --hosting-base-path BricBrac \
+            --hosting-base-path MarcUp \
             --output-path docs
 
       - name: Deploy

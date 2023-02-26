@@ -1,6 +1,5 @@
 //
 //  Brac.swift
-//  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 6/20/15.
 //

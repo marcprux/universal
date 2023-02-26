@@ -1,19 +1,18 @@
 //
-//  BricBracTests.swift
-//  Bric-à-brac
+//  MarcUpTests.swift
 //
 //  Created by Marc Prud'hommeaux on 6/14/15.
 //
 
 import XCTest
-import BricBrac
+import MarcUp
 import Bricolage
 import JSON
 #if canImport(JavaScriptCore)
 import JavaScriptCore
 #endif
 
-class BricBracTests : XCTestCase {
+class MarcUpTests : XCTestCase {
 
 #if canImport(Foundation)
     func testBricConversion() throws {
@@ -78,7 +77,7 @@ class BricBracTests : XCTestCase {
         func q(_ s: String)->String { return "\"" + s + "\"" }
 
         expectPass(q("\\/"), "/")
-        expectPass(q("http:\\/\\/glimpse.io\\/"), "http://glimpse.io/")
+        expectPass(q("http:\\/\\/prux.org\\/"), "http://prux.org/")
 
         expectPass(q("\\n"), "\n")
         expectPass(q("\\r"), "\r")
@@ -197,7 +196,7 @@ class BricBracTests : XCTestCase {
         
     }
 
-    func testBricBracPerson() {
+    func testMarcUpPerson() {
         do {
             let p1 = try Person.brac(bric: ["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]) // , "children": []])
             print("p1: \(p1)")
@@ -235,7 +234,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-//    func testBricBracCompany() {
+//    func testMarcUpCompany() {
 //        do { // Human CEO
 //            let bric: Bric = ["name": "Apple", "ceo": ["name": "Tim", "age": 50, "male": true, "children": []], "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]], "subsidiaries": nil]
 //
@@ -275,7 +274,7 @@ class BricBracTests : XCTestCase {
 //    }
 
     func testReferenceCycles() {
-        let company = Company(name: "Glimpse", ceo: nil, status: .`private`, customers: [], employees: [])
+        let company = Company(name: "prux", ceo: nil, status: .`private`, customers: [], employees: [])
         company.subsidiaries = [company]
 //        company.bric() // this would blow the stack because of object cycles
     }
@@ -461,7 +460,7 @@ class BricBracTests : XCTestCase {
 //        XCTAssertEqual("{\"nul\":null,\"num\":1}", bric.stringify(mapper: bricOrderedMapper))
     }
 
-//    func testBricBracModifiers() {
+//    func testMarcUpModifiers() {
 //        var bric = JSum.str("x")
 //        bric.str! += "x"
 //        XCTAssertEqual("xx", bric)
@@ -490,7 +489,7 @@ class BricBracTests : XCTestCase {
 //
 //    }
 
-    func testBricBracSerialization() {
+    func testMarcUpSerialization() {
         let json = """
 {"ceo":{"age":50,"children":[],"male":true,"name":"Tim"},"customers":[{"age":41,"children":["Bebe"],"male":false,"name":"Emily"}],"employees":[{"age":41,"children":["Bebe"],"male":true,"name":"Marc"}],"name":"Apple","status":"public"}
 """
@@ -565,7 +564,7 @@ class BricBracTests : XCTestCase {
         XCTAssertEqual("[12.8]", [OneOf2<Double, Decimal>.v2(Decimal(12.8))].jsonDebugDescription)
     }
 
-    func testBricBracParsing() {
+    func testMarcUpParsing() {
         func q(_ s: String)->String { return "\"" + s + "\"" }
 
         expectPass("1", 1)
@@ -667,7 +666,7 @@ class BricBracTests : XCTestCase {
 
         expectPass(q("/"), "/")
         expectPass(q("\\/"), "/")
-        expectPass(q("http:\\/\\/glimpse.io\\/"), "http://glimpse.io/")
+        expectPass(q("http:\\/\\/prux.org\\/"), "http://prux.org/")
 
         expectPass(q("\\n"), "\n")
         expectPass(q("\\r"), "\r")
@@ -692,7 +691,7 @@ class BricBracTests : XCTestCase {
     }
 
     /// Verify that our serialization is compatible with NSJSONSerialization
-    func testBricBracCocoaCompatNumbers() throws {
+    func testMarcUpCocoaCompatNumbers() throws {
         #if false
         // FIXME: something broke around 5.1
             compareCocoaParsing("1.2345678", msg: "fraction alone")
@@ -753,7 +752,7 @@ class BricBracTests : XCTestCase {
             }
             let ce = CFAbsoluteTimeGetCurrent()
 
-            print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": BricBrac: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
+            print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": MarcUp: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
         }
     }
     #endif
@@ -813,9 +812,9 @@ class BricBracTests : XCTestCase {
             }
             break
         case (_, _, _, .some(let ce)):
-            XCTFail("Cocoa failed/BricBrac passed «\(msg)»: \(ce)", file: (file), line: line)
+            XCTFail("Cocoa failed/MarcUp passed «\(msg)»: \(ce)", file: (file), line: line)
         case (_, _, .some(let je), _):
-            XCTFail("BricBrac failed/Cocoa passed «\(msg)»: \(je)", file: (file), line: line)
+            XCTFail("MarcUp failed/Cocoa passed «\(msg)»: \(je)", file: (file), line: line)
         default:
             XCTFail("Unexpected scenario «\(msg)»", file: (file), line: line)
         }
@@ -921,7 +920,7 @@ class BricBracTests : XCTestCase {
         }
     }
 
-//    func testBricBracAround() {
+//    func testMarcUpAround() {
 //        do {
 //            let x1: Array<String> = ["a", "b", "c"]
 //            let x2 = try Array<String>.brac(x1.bric())
@@ -948,7 +947,7 @@ class BricBracTests : XCTestCase {
     }
 
     #if canImport(JavaScriptCore)
-    func testBricBracCompatibility() throws {
+    func testMarcUpCompatibility() throws {
         let fm = FileManager.default
         do {
             let rsrc: String? = testResourcePath()
@@ -962,7 +961,7 @@ class BricBracTests : XCTestCase {
                         do {
                             let fullPath = (dir as NSString).appendingPathComponent(file)
 
-                            // first check to ensure that NSJSONSerialization's results match BricBrac's
+                            // first check to ensure that NSJSONSerialization's results match MarcUp's
 
                             if file.hasSuffix(".json") {
 
@@ -1713,8 +1712,8 @@ struct Person : Equatable {
     var children: [String]
 }
 
-/// Example of using an enum in a type extension for BricBrac with automatic hashability and equatability
-extension Person : BricBrac {
+/// Example of using an enum in a type extension for MarcUp with automatic hashability and equatability
+extension Person : MarcUp {
     enum Keys: String {
         case name, male, age, children
     }
@@ -1739,7 +1738,7 @@ extension Person : BricBrac {
 }
 
 
-enum Executive : Equatable, BricBrac {
+enum Executive : Equatable, MarcUp {
     case human(Person)
     case robot(serialNumber: String)
 
@@ -1759,16 +1758,16 @@ enum Executive : Equatable, BricBrac {
     }
 }
 
-enum CorporateStatus : String, Equatable, BricBrac {
+enum CorporateStatus : String, Equatable, MarcUp {
     case `public`, `private`
 }
 
-enum CorporateCode : Int, BricBrac {
+enum CorporateCode : Int, MarcUp {
     case a = 1, b = 2, c = 3, d = 4
 }
 
-/// Example of using a class and a tuple in the type itself to define the keys for BricBrac
-final class Company : Equatable, BricBrac {
+/// Example of using a class and a tuple in the type itself to define the keys for MarcUp
+final class Company : Equatable, MarcUp {
     static func == (lhs: Company, rhs: Company) -> Bool {
         return lhs.name == rhs.name
             && lhs.ceo == rhs.ceo
@@ -1880,7 +1879,7 @@ extension Date : Bricable, Bracable {
     }
 }
 
-extension BricBracTests {
+extension MarcUpTests {
     func testIndirect() {
         let encoder = JSONEncoder()
         if #available(macOS 10.13, iOS 11.0, watchOS 5.0, tvOS 12.0, *) {
@@ -1997,7 +1996,7 @@ extension BricBracTests {
             XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
 {"ons":null}
 """)
-            // without the special `Decodable` implementation, we would get: XCTAssertEqual failed: ("NullableHolder(ons: Optional(BricBrac.OneOf2<BricBrac.ExplicitNull, Swift.String>.v1(BricBrac.ExplicitNull())))") is not equal to ("NullableHolder(ons: nil)")
+            // without the special `Decodable` implementation, we would get: XCTAssertEqual failed: ("NullableHolder(ons: Optional(MarcUp.OneOf2<MarcUp.ExplicitNull, Swift.String>.v1(MarcUp.ExplicitNull())))") is not equal to ("NullableHolder(ons: nil)")
             XCTAssertEqual(nh, try nh.roundtripped())
         }
     }
@@ -2341,7 +2340,7 @@ public struct ColumnMap<T : Codable & Hashable> : Codable, Equatable {
     }
 }
 
-extension BricBracTests {
+extension MarcUpTests {
     public func testColumnMap() throws {
         let values: [[String: JSum]] = [
             ["foo": 1, "bar": "X"],

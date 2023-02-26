@@ -1,6 +1,5 @@
 //
 //  JSONTests.swift
-//  Bric-à-brac
 //
 //  Created by Marc Prud'hommeaux on 6/14/15.
 //
@@ -9,7 +8,7 @@ import JSON
 import JSum
 import XOr
 import Bricolage
-import BricBrac
+import MarcUp
 
 class JSONParserTests : XCTestCase {
 
@@ -68,7 +67,7 @@ class JSONParserTests : XCTestCase {
 //        XCTAssertEqual("[12.8]", [OneOf2<Double, Decimal>.v2(Decimal(12.8))].jsonDebugDescription)
 //    }
 
-    func testBricBracParsing() {
+    func testMarcUpParsing() {
         func q(_ s: String)->String { return "\"" + s + "\"" }
 
         expectPass("1", 1)
@@ -170,7 +169,7 @@ class JSONParserTests : XCTestCase {
 
         expectPass(q("/"), "/")
         expectPass(q("\\/"), "/")
-        expectPass(q("http:\\/\\/glimpse.io\\/"), "http://glimpse.io/")
+        expectPass(q("http:\\/\\/prux.org\\/"), "http://prux.org/")
 
         expectPass(q("\\n"), "\n")
         expectPass(q("\\r"), "\r")
@@ -195,7 +194,7 @@ class JSONParserTests : XCTestCase {
     }
 
     /// Verify that our serialization is compatible with NSJSONSerialization
-//    func testBricBracCocoaCompatNumbers() throws {
+//    func testMarcUpCocoaCompatNumbers() throws {
 //        #if false
 //        // FIXME: something broke around 5.1
 //            compareCocoaParsing("1.2345678", msg: "fraction alone")
@@ -256,7 +255,7 @@ class JSONParserTests : XCTestCase {
 //            }
 //            let ce = CFAbsoluteTimeGetCurrent()
 //
-//            print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": BricBrac: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
+//            print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": MarcUp: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
 //        }
 //    }
     #endif
@@ -316,9 +315,9 @@ class JSONParserTests : XCTestCase {
 //            }
 //            break
 //        case (_, _, _, .some(let ce)):
-//            XCTFail("Cocoa failed/BricBrac passed «\(msg)»: \(ce)", file: (file), line: line)
+//            XCTFail("Cocoa failed/MarcUp passed «\(msg)»: \(ce)", file: (file), line: line)
 //        case (_, _, .some(let je), _):
-//            XCTFail("BricBrac failed/Cocoa passed «\(msg)»: \(je)", file: (file), line: line)
+//            XCTFail("MarcUp failed/Cocoa passed «\(msg)»: \(je)", file: (file), line: line)
 //        default:
 //            XCTFail("Unexpected scenario «\(msg)»", file: (file), line: line)
 //        }
@@ -378,7 +377,7 @@ class JSONParserTests : XCTestCase {
 //        }
 //    }
 
-//    func testBricBracAround() {
+//    func testMarcUpAround() {
 //        do {
 //            let x1: Array<String> = ["a", "b", "c"]
 //            let x2 = try Array<String>.brac(x1.bric())
@@ -405,7 +404,7 @@ class JSONParserTests : XCTestCase {
     }
 
     #if canImport(JavaScriptCore)
-//    func testBricBracCompatibility() throws {
+//    func testMarcUpCompatibility() throws {
 //        let fm = FileManager.default
 //        do {
 //            let rsrc: String? = testResourcePath()
@@ -419,7 +418,7 @@ class JSONParserTests : XCTestCase {
 //                        do {
 //                            let fullPath = (dir as NSString).appendingPathComponent(file)
 //
-//                            // first check to ensure that NSJSONSerialization's results match BricBrac's
+//                            // first check to ensure that NSJSONSerialization's results match MarcUp's
 //
 //                            if file.hasSuffix(".json") {
 //

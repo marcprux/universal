@@ -1,6 +1,6 @@
 //
 //  Structures.swift
-//  BricBrac
+//  MarcUp
 //
 //  Created by Marc Prud'hommeaux on 11/4/15.
 //

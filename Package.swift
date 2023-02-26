@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "BricBrac",
+    name: "MarcUp",
     products: [
         .library(name: "XOr", targets: ["XOr"]),
         .library(name: "JSum", targets: ["JSum"]),
@@ -10,9 +10,7 @@ let package = Package(
         .library(name: "YAML", targets: ["YAML"]),
         .library(name: "JSON", targets: ["JSON"]),
         .library(name: "Bricolage", targets: ["Bricolage"]),
-        .library(name: "BricBrac", targets: ["BricBrac"]),
-        .library(name: "Curio", targets: ["Curio"]),
-//        .executable(name: "CurioTool", targets: ["CurioTool"]), // SR-1954
+        .library(name: "MarcUp", targets: ["MarcUp"]),
         ],
     dependencies: [
 //        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0")
@@ -27,14 +25,11 @@ let package = Package(
         .target(name: "YAML", dependencies: ["JSum"]),
         .testTarget(name: "YAMLTests", dependencies: ["YAML"], resources: []),
         .target(name: "JSON", dependencies: ["JSum", "Bricolage"]),
-        .testTarget(name: "JSONTests", dependencies: ["JSON", "BricBrac"], resources: []),
+        .testTarget(name: "JSONTests", dependencies: ["JSON", "MarcUp"], resources: []),
         .target(name: "Bricolage", dependencies: ["XOr"]),
         .testTarget(name: "BricolageTests", dependencies: ["Bricolage"], resources: []),
-        .target(name: "BricBrac", dependencies: ["XML", "YAML", "JSON"]),
-        .testTarget(name: "BricBracTests", dependencies: ["BricBrac"], resources: [.copy("testdata/")]),
-        .target(name: "Curio", dependencies: ["BricBrac"]),
-        .testTarget(name: "CurioTests", dependencies: ["BricBrac", "Curio"], resources: [.copy("schemas/")]),
-//        .target(name: "CurioTool", dependencies: ["Curio", .product(name: "ArgumentParser", package: "swift-argument-parser")]), // SR-1954
+        .target(name: "MarcUp", dependencies: ["XML", "YAML", "JSON"]),
+        .testTarget(name: "MarcUpTests", dependencies: ["MarcUp"], resources: [.copy("testdata/")]),
         ]
 )
 

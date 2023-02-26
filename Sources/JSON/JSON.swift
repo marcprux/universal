@@ -4,7 +4,7 @@
 //  Created by Marc Prud'hommeaux on 8/20/15.
 //
 import Either
-import Cluster
+import Quanta
 import struct Foundation.UUID
 import struct Foundation.URL
 import struct Foundation.Date

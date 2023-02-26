@@ -2,12 +2,13 @@
  Copyright (c) 2015-2023 Marc Prud'hommeaux
  */
 import Swift
-import Either
 import struct Foundation.Date
 import struct Foundation.URL
 import struct Foundation.Data
 import struct Foundation.UUID
 import struct Foundation.Decimal
+
+@_exported import Either
 
 /// One or many of a thing
 public enum OneOrMore<One, More : Sequence> {

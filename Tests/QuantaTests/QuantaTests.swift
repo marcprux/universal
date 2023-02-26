@@ -3,7 +3,7 @@
  */
 import Swift
 import XCTest
-import Cluster
+import Quanta
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif

@@ -1,7 +1,7 @@
 import Swift
 import Foundation
 import Either
-import Cluster
+import Quanta
 
 
 /// A YAML tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`

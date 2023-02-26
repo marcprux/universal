@@ -6,7 +6,7 @@
 
 import XCTest
 import MarcUp
-import Cluster
+import Quanta
 import JSON
 #if canImport(JavaScriptCore)
 import JavaScriptCore

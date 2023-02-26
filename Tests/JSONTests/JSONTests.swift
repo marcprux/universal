@@ -5,7 +5,7 @@
 ////
 //import XCTest
 //import JSON
-//import Cluster
+//import Quanta
 //import Either
 //
 //class JSONParserTests : XCTestCase {

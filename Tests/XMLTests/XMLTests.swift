@@ -4,7 +4,7 @@
 import Swift
 import XCTest
 import XML
-import Cluster
+import Quanta
 
 final class XMLTests: XCTestCase {
 

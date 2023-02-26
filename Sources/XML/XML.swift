@@ -3,7 +3,7 @@
  */
 import Swift
 import Foundation
-import Cluster
+import Quanta
 import Either
 
 #if canImport(FoundationXML)

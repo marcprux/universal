@@ -1,11 +1,11 @@
 /**
  Copyright (c) 2015-2023 Marc Prud'hommeaux
  */
-import XOr
+import Either
 import XCTest
 
-final class XOrTests: XCTestCase {
-    func testXOrOr() throws {
+final class EitherTests: XCTestCase {
+    func testEitherOr() throws {
         typealias StringOrInt = XOr<String>.Or<Int>
         let str = StringOrInt("ABC")
         let int = StringOrInt(12)

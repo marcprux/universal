@@ -3,7 +3,7 @@
 //
 //  Created by Marc Prud'hommeaux on 6/17/15.
 //
-import XOr
+import Either
 
 /// The various types that are encodable to bricolage
 public enum BricolageEncodable {

@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "MarcUp",
     products: [
-        .library(name: "XOr", targets: ["XOr"]),
+        .library(name: "Either", targets: ["Either"]),
         .library(name: "JSum", targets: ["JSum"]),
         .library(name: "XML", targets: ["XML"]),
         .library(name: "YAML", targets: ["YAML"]),
@@ -14,9 +14,9 @@ let package = Package(
     dependencies: [
     ],
     targets: [
-        .target(name: "XOr"),
-        .testTarget(name: "XOrTests", dependencies: ["XOr"], resources: []),
-        .target(name: "JSum", dependencies: ["XOr"]),
+        .target(name: "Either"),
+        .testTarget(name: "EitherTests", dependencies: ["Either"], resources: []),
+        .target(name: "JSum", dependencies: ["Either"]),
         .testTarget(name: "JSumTests", dependencies: ["JSum"], resources: []),
         .target(name: "XML", dependencies: ["JSum"]),
         .testTarget(name: "XMLTests", dependencies: ["XML"], resources: []),

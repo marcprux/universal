@@ -6,7 +6,7 @@
 //import XCTest
 //import JSON
 //import JSum
-//import XOr
+//import Either
 //
 //class JSONParserTests : XCTestCase {
 //

@@ -7,47 +7,35 @@ import Quanta
 #if canImport(Foundation)
 import Foundation
 
-public struct JSumOptions : OptionSet {
-    public let rawValue: Int
-    public init(rawValue: Int) { self.rawValue = rawValue }
-
-    public static let ignoreNonEncodable = Self(rawValue: 1 << 0)
-    // public static let xxx = Self(rawValue: 1 << 1)
-}
-
-private enum JSumErrors : Error {
-    case cannotEncode(nonEncodable: Any)
-}
-
 // MARK: Encoding / Decoding
 
-private extension _JSumContainer {
-    func addElement(_ element: _JSumContainer) throws {
-        guard let arr = self.jsum.arr else {
+private extension _JSONContainer {
+    func addElement(_ element: _JSONContainer) throws {
+        guard let arr = self.json.arr else {
             throw EncodingError.invalidValue(self, EncodingError.Context(codingPath: [], debugDescription: "Element was not an array"))
         }
-        self.jsum = .arr(arr + [element.jsum])
+        self.json = .arr(arr + [element.json])
     }
 
-    func insertElement(_ element: _JSumContainer, at index: Int) throws {
-        guard var arr = self.jsum.arr else {
+    func insertElement(_ element: _JSONContainer, at index: Int) throws {
+        guard var arr = self.json.arr else {
             throw EncodingError.invalidValue(self, EncodingError.Context(codingPath: [], debugDescription: "Element was not an array"))
         }
-        arr.insert(element.jsum, at: index)
-        self.jsum = .arr(arr)
+        arr.insert(element.json, at: index)
+        self.json = .arr(arr)
     }
 
-    func setProperty(_ key: String, _ element: _JSumContainer) throws {
-        guard var obj = self.jsum.obj else {
+    func setProperty(_ key: String, _ element: _JSONContainer) throws {
+        guard var obj = self.json.obj else {
             throw EncodingError.invalidValue(self, EncodingError.Context(codingPath: [], debugDescription: "Element was not an object"))
         }
-        obj[key] = element.jsum
-        self.jsum = .obj(obj)
+        obj[key] = element.json
+        self.json = .obj(obj)
     }
 }
 
 /// A set of options for decoding an entity from a `JSum` instance.
-open class JSumDecodingOptions {
+open class JSONDecodingOptions {
     /// The strategy to use in decoding dates. Defaults to `.deferredToDate`.
     open var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
 
@@ -73,7 +61,7 @@ open class JSumDecodingOptions {
 }
 
 /// A set of options for encoding an entity from a `JSum` instance.
-open class JSumEncodingOptions {
+open class JSONEncodingOptions {
     /// The output format to produce. Defaults to `[]`.
     open var outputFormatting: JSONEncoder.OutputFormatting
 
@@ -105,15 +93,15 @@ open class JSumEncodingOptions {
 #if canImport(Combine)
 import Combine
 @available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *)
-protocol TopLevelJSumEncoder : TopLevelEncoder {
+private protocol TopLevelJSumEncoder : TopLevelEncoder {
 }
 @available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *)
-protocol TopLevelJSumDecoder : TopLevelDecoder {
+private protocol TopLevelJSumDecoder : TopLevelDecoder {
 }
 #else
-protocol TopLevelJSumEncoder {
+private protocol TopLevelJSumEncoder {
 }
-protocol TopLevelJSumDecoder {
+private protocol TopLevelJSumDecoder {
 }
 #endif
 
@@ -122,7 +110,7 @@ extension Encodable {
     ///
     /// - Parameter options: the options for serializing the data
     /// - Returns: A JSum containing the structure of the encoded instance
-    public func jsum(options: JSumEncodingOptions? = nil) throws -> JSum {
+    public func json(options: JSONEncodingOptions? = nil) throws -> JSON {
         try JSumEncoder(options: options).encode(self)
     }
 }
@@ -136,17 +124,17 @@ extension Decodable {
     /// - Parameters:
     ///   - jsum: the JSum to load the instance from
     ///   - options: the options for deserializing the data such as the decoding strategies for dates and data.
-    @inlinable public init(jsum: JSum, options: JSumDecodingOptions? = nil) throws {
-        try self = JSumDecoder(options: options).decode(Self.self, from: jsum)
+    @inlinable public init(json: JSON, options: JSONDecodingOptions? = nil) throws {
+        try self = JSumDecoder(options: options).decode(Self.self, from: json)
     }
 }
 
-public class JSumEncoder : TopLevelJSumEncoder {
-    @usableFromInline let options: JSumEncodingOptions
+@usableFromInline internal class JSumEncoder : TopLevelJSumEncoder {
+    @usableFromInline let options: JSONEncodingOptions
 
     /// Initializes `self` with default strategies.
-    @inlinable public init(options: JSumEncodingOptions? = nil) {
-        self.options = options ?? JSumEncodingOptions()
+    @inlinable public init(options: JSONEncodingOptions? = nil) {
+        self.options = options ?? JSONEncodingOptions()
     }
 
     /// Encodes the given top-level value and returns its script object representation.
@@ -156,7 +144,7 @@ public class JSumEncoder : TopLevelJSumEncoder {
     /// - Returns: A new `Data` value containing the encoded script object data.
     /// - Throws: `EncodingError.invalidValue` if a non-conforming floating-point value is encountered during encoding, and the encoding strategy is `.throw`.
     /// - Throws: An error if any value throws an error during encoding.
-    @inlinable public func encode<Value: Encodable>(_ value: Value) throws -> JSum {
+    @inlinable public func encode<Value: Encodable>(_ value: Value) throws -> JSON {
         try encodeToTopLevelContainer(value)
     }
 
@@ -167,7 +155,7 @@ public class JSumEncoder : TopLevelJSumEncoder {
     /// - Returns: A new top-level array or dictionary representing the value.
     /// - Throws: `EncodingError.invalidValue` if a non-conforming floating-point value is encountered during encoding, and the encoding strategy is `.throw`.
     /// - Throws: An error if any value throws an error during encoding.
-    @usableFromInline internal func encodeToTopLevelContainer<Value: Encodable>(_ value: Value) throws -> JSum {
+    @usableFromInline internal func encodeToTopLevelContainer<Value: Encodable>(_ value: Value) throws -> JSON {
         let encoder = JSumElementEncoder(options: options)
         guard let topLevel = try encoder.box_(value) else {
             throw EncodingError.invalidValue(value,
@@ -175,18 +163,18 @@ public class JSumEncoder : TopLevelJSumEncoder {
                                                                    debugDescription: "Top-level \(Value.self) did not encode any values."))
         }
 
-        return topLevel.jsum
+        return topLevel.json
     }
 }
 
 
 /// `JSumDecoder` facilitates the decoding of `JSum` values into `Decodable` types.
-public class JSumDecoder : TopLevelJSumDecoder {
-    @usableFromInline let options: JSumDecodingOptions
+@usableFromInline internal class JSumDecoder : TopLevelJSumDecoder {
+    @usableFromInline let options: JSONDecodingOptions
 
     /// Initializes `self` with default strategies.
-    public init(options: JSumDecodingOptions? = nil) {
-        self.options = options ?? JSumDecodingOptions()
+    public init(options: JSONDecodingOptions? = nil) {
+        self.options = options ?? JSONDecodingOptions()
     }
 
     /// Decodes a top-level value of the given type from the given script representation.
@@ -197,7 +185,7 @@ public class JSumDecoder : TopLevelJSumDecoder {
     /// - Returns: A value of the requested type.
     /// - Throws: `DecodingError.dataCorrupted` if values requested from the payload are corrupted, or if the given data is not a valid script object.
     /// - Throws: An error if any value throws an error during decoding.
-    public func decode<T: Decodable>(_ type: T.Type, from data: JSum) throws -> T {
+    public func decode<T: Decodable>(_ type: T.Type, from data: JSON) throws -> T {
         try decode(type, fromTopLevel: data)
     }
 
@@ -209,8 +197,8 @@ public class JSumDecoder : TopLevelJSumDecoder {
     /// - Returns: A value of the requested type.
     /// - Throws: `DecodingError.dataCorrupted` if values requested from the payload are corrupted, or if the given data is not a valid script object.
     /// - Throws: An error if any value throws an error during decoding.
-    @usableFromInline internal func decode<T: Decodable>(_ type: T.Type, fromTopLevel container: JSum) throws -> T {
-        let decoder = _JSumDecoder(options: options, referencing: container)
+    @usableFromInline internal func decode<T: Decodable>(_ type: T.Type, fromTopLevel container: JSON) throws -> T {
+        let decoder = _JSONDecoder(options: options, referencing: container)
         guard let value = try decoder.unbox(container, as: type) else {
             throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: [], debugDescription: "The given data did not contain a top-level value."))
         }
@@ -221,10 +209,10 @@ public class JSumDecoder : TopLevelJSumDecoder {
 
 
 fileprivate class JSumElementEncoder: Encoder {
-    fileprivate let options: JSumEncodingOptions
+    fileprivate let options: JSONEncodingOptions
 
     /// The encoder's storage.
-    fileprivate var storage: _JSumEncodingStorage
+    fileprivate var storage: _JSONEncodingStorage
 
     /// The path to the current point in encoding.
     fileprivate(set) public var codingPath: [CodingKey]
@@ -235,9 +223,9 @@ fileprivate class JSumElementEncoder: Encoder {
     }
 
     /// Initializes `self` with the given top-level encoder options.
-    fileprivate init(options: JSumEncodingOptions, codingPath: [CodingKey] = []) {
+    fileprivate init(options: JSONEncodingOptions, codingPath: [CodingKey] = []) {
         self.options = options
-        self.storage = _JSumEncodingStorage()
+        self.storage = _JSONEncodingStorage()
         self.codingPath = codingPath
     }
 
@@ -256,7 +244,7 @@ fileprivate class JSumElementEncoder: Encoder {
 
     public func container<Key>(keyedBy: Key.Type) -> KeyedEncodingContainer<Key> {
         // If an existing keyed container was already requested, return that one.
-        let topContainer: _JSumContainer
+        let topContainer: _JSONContainer
         if self.canEncodeNewValue {
             // We haven't yet pushed a container at this level; do so here.
             topContainer = self.storage.pushKeyedContainer(options)
@@ -268,13 +256,13 @@ fileprivate class JSumElementEncoder: Encoder {
             topContainer = container
         }
 
-        let container = _JSumKeyedEncodingContainer<Key>(referencing: self, codingPath: self.codingPath, wrapping: topContainer)
+        let container = _JSONKeyedEncodingContainer<Key>(referencing: self, codingPath: self.codingPath, wrapping: topContainer)
         return KeyedEncodingContainer(container)
     }
 
     public func unkeyedContainer() -> UnkeyedEncodingContainer {
         // If an existing unkeyed container was already requested, return that one.
-        let topContainer: _JSumContainer
+        let topContainer: _JSONContainer
         if self.canEncodeNewValue {
             // We haven't yet pushed a container at this level; do so here.
             do {
@@ -290,7 +278,7 @@ fileprivate class JSumElementEncoder: Encoder {
             topContainer = container
         }
 
-        return _JSumUnkeyedEncodingContainer(referencing: self, codingPath: self.codingPath, wrapping: topContainer)
+        return _JSONUnkeyedEncodingContainer(referencing: self, codingPath: self.codingPath, wrapping: topContainer)
     }
 
     public func singleValueContainer() -> SingleValueEncodingContainer {
@@ -298,18 +286,18 @@ fileprivate class JSumElementEncoder: Encoder {
     }
 }
 
-fileprivate final class _JSumContainer {
-    var jsum: JSum
-    init(jsum: JSum) {
-        self.jsum = jsum
+fileprivate final class _JSONContainer {
+    var json: JSON
+    init(json: JSON) {
+        self.json = json
     }
 }
 
 // MARK: - Encoding Storage and Containers
-fileprivate struct _JSumEncodingStorage {
+fileprivate struct _JSONEncodingStorage {
     /// The container stack.
     /// Elements may be any one of the script types
-    private(set) fileprivate var containers: [_JSumContainer] = []
+    private(set) fileprivate var containers: [_JSONContainer] = []
 
     /// Initializes `self` with no containers.
     fileprivate init() {}
@@ -318,51 +306,51 @@ fileprivate struct _JSumEncodingStorage {
         return self.containers.count
     }
 
-    fileprivate mutating func pushKeyedContainer(_ options: JSumEncodingOptions) -> _JSumContainer {
-        let dictionary = _JSumContainer(jsum: JSum.obj([:]))
+    fileprivate mutating func pushKeyedContainer(_ options: JSONEncodingOptions) -> _JSONContainer {
+        let dictionary = _JSONContainer(json: JSON.obj([:]))
         self.containers.append(dictionary)
         return dictionary
     }
 
-    fileprivate mutating func pushUnkeyedContainer(_ options: JSumEncodingOptions) throws -> _JSumContainer {
-        let array = _JSumContainer(jsum: JSum.arr([]))
+    fileprivate mutating func pushUnkeyedContainer(_ options: JSONEncodingOptions) throws -> _JSONContainer {
+        let array = _JSONContainer(json: JSON.arr([]))
         self.containers.append(array)
         return array
     }
 
-    fileprivate mutating func push(container: __owned _JSumContainer) {
+    fileprivate mutating func push(container: __owned _JSONContainer) {
         self.containers.append(container)
     }
 
-    fileprivate mutating func popContainer() -> _JSumContainer {
+    fileprivate mutating func popContainer() -> _JSONContainer {
         precondition(!self.containers.isEmpty, "Empty container stack.")
         return self.containers.popLast()!
     }
 }
 
-fileprivate struct _JSumUnkeyedEncodingContainer: UnkeyedEncodingContainer {
+fileprivate struct _JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     /// A reference to the encoder we're writing to.
     private let encoder: JSumElementEncoder
 
     /// A reference to the container we're writing to.
-    private var container: _JSumContainer
+    private var container: _JSONContainer
 
     /// The path of coding keys taken to get to this point in encoding.
     private(set) public var codingPath: [CodingKey]
 
     /// The number of elements encoded into the container.
     public var count: Int {
-        container.jsum.count ?? 0
+        container.json.count
     }
 
     /// Initializes `self` with the given references.
-    fileprivate init(referencing encoder: JSumElementEncoder, codingPath: [CodingKey], wrapping container: _JSumContainer) {
+    fileprivate init(referencing encoder: JSumElementEncoder, codingPath: [CodingKey], wrapping container: _JSONContainer) {
         self.encoder = encoder
         self.codingPath = codingPath
         self.container = container
     }
 
-    public mutating func encodeNil() throws { try container.addElement(.init(jsum: JSum.null)) }
+    public mutating func encodeNil() throws { try container.addElement(.init(json: JSON.null)) }
     public mutating func encode(_ value: Bool) throws { try container.addElement(encoder.box(value)) }
     public mutating func encode(_ value: Int) throws { try container.addElement(encoder.box(value)) }
     public mutating func encode(_ value: Int8) throws { try container.addElement(encoder.box(value)) }
@@ -379,37 +367,37 @@ fileprivate struct _JSumUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     public mutating func encode(_ value: String) throws { try container.addElement(encoder.box(value)) }
 
     public mutating func encode<T: Encodable>(_ value: T) throws {
-        self.encoder.codingPath.append(_JSumKey(index: self.count))
+        self.encoder.codingPath.append(_JSONKey(index: self.count))
         defer { self.encoder.codingPath.removeLast() }
         try self.container.addElement(self.encoder.box(value))
     }
 
     public mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> {
-        self.codingPath.append(_JSumKey(index: self.count))
+        self.codingPath.append(_JSONKey(index: self.count))
         defer { self.codingPath.removeLast() }
 
-        let dictionary = _JSumContainer(jsum: JSum.obj([:]))
+        let dictionary = _JSONContainer(json: JSON.obj([:]))
         try? self.container.addElement(dictionary)
 
-        let container = _JSumKeyedEncodingContainer<NestedKey>(referencing: self.encoder, codingPath: self.codingPath, wrapping: dictionary)
+        let container = _JSONKeyedEncodingContainer<NestedKey>(referencing: self.encoder, codingPath: self.codingPath, wrapping: dictionary)
         return KeyedEncodingContainer(container)
     }
 
     public mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
-        self.codingPath.append(_JSumKey(index: self.count))
+        self.codingPath.append(_JSONKey(index: self.count))
         defer { self.codingPath.removeLast() }
 
         do {
-            let array = _JSumContainer(jsum: JSum.arr([]))
+            let array = _JSONContainer(json: JSON.arr([]))
             try self.container.addElement(array)
-            return _JSumUnkeyedEncodingContainer(referencing: self.encoder, codingPath: self.codingPath, wrapping: array)
+            return _JSONUnkeyedEncodingContainer(referencing: self.encoder, codingPath: self.codingPath, wrapping: array)
         } catch {
             fatalError("Failed to pushUnkeyedContainer: \(error)")
         }
     }
 
     public mutating func superEncoder() -> Encoder {
-        return _JSumReferencingEncoder(referencing: self.encoder, at: self.container.jsum.count ?? 0, wrapping: self.container)
+        return _JSONReferencingEncoder(referencing: self.encoder, at: self.container.json.count ?? 0, wrapping: self.container)
     }
 }
 
@@ -420,7 +408,7 @@ extension JSumElementEncoder: SingleValueEncodingContainer {
 
     public func encodeNil() throws {
         assertCanEncodeNewValue()
-        self.storage.push(container: _JSumContainer(jsum: JSum.null))
+        self.storage.push(container: _JSONContainer(json: JSON.null))
     }
 
     public func encode(_ value: Bool) throws {
@@ -502,72 +490,72 @@ extension JSumElementEncoder: SingleValueEncodingContainer {
 extension JSumElementEncoder {
 
     /// Returns the given value boxed in a container appropriate for pushing onto the container stack.
-    fileprivate func box(_ value: Bool) -> _JSumContainer {
-        .init(jsum: .bol(value))
+    fileprivate func box(_ value: Bool) -> _JSONContainer {
+        .init(json: .bol(value))
     }
 
-    fileprivate func box(_ value: Int) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: Int) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: Int8) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: Int8) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: Int16) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: Int16) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: Int32) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: Int32) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: Int64) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: Int64) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: UInt) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: UInt) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: UInt8) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: UInt8) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: UInt16) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: UInt16) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: UInt32) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: UInt32) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: UInt64) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: UInt64) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: Float) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: Float) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: Double) -> _JSumContainer {
-        .init(jsum: .num(.init(value)))
+    fileprivate func box(_ value: Double) -> _JSONContainer {
+        .init(json: .num(.init(value)))
     }
-    fileprivate func box(_ value: String) -> _JSumContainer {
-        .init(jsum: .str(value))
+    fileprivate func box(_ value: String) -> _JSONContainer {
+        .init(json: .str(value))
     }
-    fileprivate func box(_ date: Date) throws -> _JSumContainer {
+    fileprivate func box(_ date: Date) throws -> _JSONContainer {
         switch self.options.dateEncodingStrategy {
         case .deferredToDate:
             // Must be called with a surrounding with(pushedKey:) call.
             // Dates encode as single-value objects; this can't both throw and push a container, so no need to catch the error.
             try date.encode(to: self)
-            return .init(jsum: self.storage.popContainer().jsum)
+            return .init(json: self.storage.popContainer().json)
 
         case .secondsSince1970:
-            return .init(jsum: .num(date.timeIntervalSince1970))
+            return .init(json: .num(date.timeIntervalSince1970))
 
         case .millisecondsSince1970:
-            return .init(jsum: .num(1000.0 * date.timeIntervalSince1970))
+            return .init(json: .num(1000.0 * date.timeIntervalSince1970))
 
         case .iso8601:
             if #available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *) {
-                return .init(jsum: .str(_iso8601Formatter.string(from: date)))
+                return .init(json: .str(_iso8601Formatter.string(from: date)))
             } else {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
         case .formatted(let formatter):
-            return .init(jsum: .str(formatter.string(from: date)))
+            return .init(json: .str(formatter.string(from: date)))
 
         case .custom(let closure):
             let depth = self.storage.count
@@ -584,18 +572,18 @@ extension JSumElementEncoder {
 
             guard self.storage.count > depth else {
                 // The closure didn't encode anything. Return the default keyed container.
-                return .init(jsum: .obj([:]))
+                return .init(json: .obj([:]))
             }
 
             // We can pop because the closure encoded something.
             return self.storage.popContainer()
 
         @unknown default:
-            return .init(jsum: .str(_iso8601Formatter.string(from: date)))
+            return .init(json: .str(_iso8601Formatter.string(from: date)))
         }
     }
 
-    func box(_ data: Data) throws -> _JSumContainer {
+    func box(_ data: Data) throws -> _JSONContainer {
         switch self.options.dataEncodingStrategy {
         case .deferredToData:
             // Must be called with a surrounding with(pushedKey:) call.
@@ -615,7 +603,7 @@ extension JSumElementEncoder {
             return self.storage.popContainer()
 
         case .base64:
-            return .init(jsum: .str(data.base64EncodedString()))
+            return .init(json: .str(data.base64EncodedString()))
 
         case .custom(let closure):
             let depth = self.storage.count
@@ -632,30 +620,30 @@ extension JSumElementEncoder {
 
             guard self.storage.count > depth else {
                 // The closure didn't encode anything. Return the default keyed container.
-                return .init(jsum: .obj([:]))
+                return .init(json: .obj([:]))
             }
 
             // We can pop because the closure encoded something.
             return self.storage.popContainer()
         @unknown default:
-            return .init(jsum: .str(data.base64EncodedString()))
+            return .init(json: .str(data.base64EncodedString()))
         }
     }
 
-    fileprivate func box<T: Encodable>(_ value: T) throws -> _JSumContainer {
-        return try self.box_(value) ?? .init(jsum: JSum.obj([:]))
+    fileprivate func box<T: Encodable>(_ value: T) throws -> _JSONContainer {
+        return try self.box_(value) ?? .init(json: JSON.obj([:]))
     }
 
-    fileprivate func box_<T: Encodable>(_ value: T) throws -> _JSumContainer? {
+    fileprivate func box_<T: Encodable>(_ value: T) throws -> _JSONContainer? {
         let type = Swift.type(of: value)
         if type == Date.self || type == NSDate.self {
             return try self.box((value as! Date))
         } else if type == Data.self || type == NSData.self {
             return try self.box((value as! Data))
         } else if type == URL.self || type == NSURL.self {
-            return .init(jsum: .str((value as! URL).absoluteString))
+            return .init(json: .str((value as! URL).absoluteString))
         } else if type == Decimal.self || type == NSDecimalNumber.self {
-            return .init(jsum: .num((value as! NSDecimalNumber).doubleValue))
+            return .init(json: .num((value as! NSDecimalNumber).doubleValue))
         }
 
         // The value should request a container from the JSumElementEncoder.
@@ -680,83 +668,83 @@ extension JSumElementEncoder {
     }
 }
 
-fileprivate struct _JSumKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
+fileprivate struct _JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
     typealias Key = K
 
     /// A reference to the encoder we're writing to.
     private let encoder: JSumElementEncoder
 
     /// A reference to the container we're writing to.
-    private var container: _JSumContainer
+    private var container: _JSONContainer
 
     /// The path of coding keys taken to get to this point in encoding.
     private(set) public var codingPath: [CodingKey]
 
     /// Initializes `self` with the given references.
-    fileprivate init(referencing encoder: JSumElementEncoder, codingPath: [CodingKey], wrapping container: _JSumContainer) {
+    fileprivate init(referencing encoder: JSumElementEncoder, codingPath: [CodingKey], wrapping container: _JSONContainer) {
         self.encoder = encoder
         self.codingPath = codingPath
         self.container = container
     }
 
     public mutating func encodeNil(forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .null))
+        try container.setProperty(key.stringValue, .init(json: .null))
     }
 
     public mutating func encode(_ value: Bool, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .bol(value)))
+        try container.setProperty(key.stringValue, .init(json: .bol(value)))
     }
 
     public mutating func encode(_ value: Int, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: Int8, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: Int16, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: Int32, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: Int64, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: UInt, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: UInt8, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: UInt16, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: UInt32, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: UInt64, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: String, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .str(value)))
+        try container.setProperty(key.stringValue, .init(json: .str(value)))
     }
 
     public mutating func encode(_ value: Float, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
     }
 
     public mutating func encode(_ value: Double, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .num(value)))
+        try container.setProperty(key.stringValue, .init(json: .num(value)))
     }
 
     public mutating func encode<T: Encodable>(_ value: T, forKey key: Key) throws {
@@ -766,49 +754,49 @@ fileprivate struct _JSumKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
     }
 
     public mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: Key) -> KeyedEncodingContainer<NestedKey> {
-        let dictionary = _JSumContainer(jsum: JSum.obj([:]))
+        let dictionary = _JSONContainer(json: JSON.obj([:]))
         _ = try? self.container.setProperty(key.stringValue, dictionary)
 
         self.codingPath.append(key)
         defer { self.codingPath.removeLast() }
 
-        let container = _JSumKeyedEncodingContainer<NestedKey>(referencing: self.encoder, codingPath: self.codingPath, wrapping: dictionary)
+        let container = _JSONKeyedEncodingContainer<NestedKey>(referencing: self.encoder, codingPath: self.codingPath, wrapping: dictionary)
         return KeyedEncodingContainer(container)
     }
 
     public mutating func nestedUnkeyedContainer(forKey key: Key) -> UnkeyedEncodingContainer {
         do {
-            let array = _JSumContainer(jsum: JSum.arr([]))
+            let array = _JSONContainer(json: JSON.arr([]))
             try container.setProperty(key.stringValue, array)
 
             self.codingPath.append(key)
             defer { self.codingPath.removeLast() }
-            return _JSumUnkeyedEncodingContainer(referencing: self.encoder, codingPath: self.codingPath, wrapping: array)
+            return _JSONUnkeyedEncodingContainer(referencing: self.encoder, codingPath: self.codingPath, wrapping: array)
         } catch {
             fatalError("Failed to nestedUnkeyedContainer: \(error)")
         }
     }
 
     public mutating func superEncoder() -> Encoder {
-        return _JSumReferencingEncoder(referencing: self.encoder, at: _JSumKey.super, wrapping: self.container)
+        return _JSONReferencingEncoder(referencing: self.encoder, at: _JSONKey.super, wrapping: self.container)
     }
 
     public mutating func superEncoder(forKey key: Key) -> Encoder {
-        return _JSumReferencingEncoder(referencing: self.encoder, at: key, wrapping: self.container)
+        return _JSONReferencingEncoder(referencing: self.encoder, at: key, wrapping: self.container)
     }
 }
 
 
-/// `_JSumReferencingEncoder` is a special subclass of JSumElementEncoder which has its own storage, but references the contents of a different encoder.
+/// `_JSONReferencingEncoder` is a special subclass of JSumElementEncoder which has its own storage, but references the contents of a different encoder.
 /// It's used in `superEncoder()`, which returns a new encoder for encoding a superclass -- the lifetime of the encoder should not escape the scope it's created in, but it doesn't necessarily know when it's done being used (to write to the original container).
-fileprivate class _JSumReferencingEncoder: JSumElementEncoder {
+fileprivate class _JSONReferencingEncoder: JSumElementEncoder {
     /// The type of container we're referencing.
     private enum Reference {
         /// Referencing a specific index in an array container.
-        case array(_JSumContainer, Int)
+        case array(_JSONContainer, Int)
 
         /// Referencing a specific key in a dictionary container.
-        case dictionary(_JSumContainer, String)
+        case dictionary(_JSONContainer, String)
     }
 
     /// The encoder we're referencing.
@@ -818,16 +806,16 @@ fileprivate class _JSumReferencingEncoder: JSumElementEncoder {
     private let reference: Reference
 
     /// Initializes `self` by referencing the given array container in the given encoder.
-    fileprivate init(referencing encoder: JSumElementEncoder, at index: Int, wrapping array: _JSumContainer) {
+    fileprivate init(referencing encoder: JSumElementEncoder, at index: Int, wrapping array: _JSONContainer) {
         self.encoder = encoder
         self.reference = .array(array, index)
         super.init(options: encoder.options, codingPath: encoder.codingPath)
 
-        self.codingPath.append(_JSumKey(index: index))
+        self.codingPath.append(_JSONKey(index: index))
     }
 
     /// Initializes `self` by referencing the given dictionary container in the given encoder.
-    fileprivate init(referencing encoder: JSumElementEncoder, at key: CodingKey, wrapping dictionary: _JSumContainer) {
+    fileprivate init(referencing encoder: JSumElementEncoder, at key: CodingKey, wrapping dictionary: _JSONContainer) {
         self.encoder = encoder
         self.reference = .dictionary(dictionary, key.stringValue)
         super.init(options: encoder.options, codingPath: encoder.codingPath)
@@ -844,9 +832,9 @@ fileprivate class _JSumReferencingEncoder: JSumElementEncoder {
 
     // Finalizes `self` by writing the contents of our storage to the referenced encoder's storage.
     deinit {
-        let value: _JSumContainer
+        let value: _JSONContainer
         switch self.storage.count {
-        case 0: value = _JSumContainer(jsum: JSum.obj([:]))
+        case 0: value = _JSONContainer(json: JSON.obj([:]))
         case 1: value = self.storage.popContainer()
         default: fatalError("Referencing encoder deallocated with multiple containers on stack.")
         }
@@ -862,11 +850,11 @@ fileprivate class _JSumReferencingEncoder: JSumElementEncoder {
 }
 
 
-fileprivate class _JSumDecoder: Decoder {
-    let options: JSumDecodingOptions
+fileprivate class _JSONDecoder: Decoder {
+    let options: JSONDecodingOptions
 
     /// The decoder's storage.
-    fileprivate var storage: _JSumDecodingStorage
+    fileprivate var storage: _JSONDecodingStorage
 
     /// The path to the current point in encoding.
     fileprivate(set) public var codingPath: [CodingKey]
@@ -877,9 +865,9 @@ fileprivate class _JSumDecoder: Decoder {
     }
 
     /// Initializes `self` with the given top-level container and options.
-    fileprivate init(options: JSumDecodingOptions, referencing container: JSum, at codingPath: [CodingKey] = []) {
+    fileprivate init(options: JSONDecodingOptions, referencing container: JSON, at codingPath: [CodingKey] = []) {
         self.options = options
-        self.storage = _JSumDecodingStorage()
+        self.storage = _JSONDecodingStorage()
         self.storage.push(container: container)
         self.codingPath = codingPath
     }
@@ -895,7 +883,7 @@ fileprivate class _JSumDecoder: Decoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: Any].self, reality: self.storage.topContainer)
         }
 
-        let container = _JSumKeyedDecodingContainer<Key>(referencing: self, wrapping: obj)
+        let container = _JSONKeyedDecodingContainer<Key>(referencing: self, wrapping: obj)
         return KeyedDecodingContainer(container)
     }
 
@@ -910,7 +898,7 @@ fileprivate class _JSumDecoder: Decoder {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: self.storage.topContainer)
         }
 
-        return _JSumUnkeyedDecodingContainer(referencing: self, wrapping: arr)
+        return _JSONUnkeyedDecodingContainer(referencing: self, wrapping: arr)
     }
 
     public func singleValueContainer() throws -> SingleValueDecodingContainer {
@@ -918,10 +906,10 @@ fileprivate class _JSumDecoder: Decoder {
     }
 }
 
-fileprivate struct _JSumDecodingStorage {
+fileprivate struct _JSONDecodingStorage {
     /// The container stack.
     /// Elements may be any one of the script types
-    private(set) fileprivate var containers: [JSum] = []
+    private(set) fileprivate var containers: [JSON] = []
 
     /// Initializes `self` with no containers.
     fileprivate init() {}
@@ -930,12 +918,12 @@ fileprivate struct _JSumDecodingStorage {
         return self.containers.count
     }
 
-    fileprivate var topContainer: JSum {
+    fileprivate var topContainer: JSON {
         precondition(!self.containers.isEmpty, "Empty container stack.")
         return self.containers.last!
     }
 
-    fileprivate mutating func push(container: __owned JSum) {
+    fileprivate mutating func push(container: __owned JSON) {
         self.containers.append(container)
     }
 
@@ -945,20 +933,20 @@ fileprivate struct _JSumDecodingStorage {
     }
 }
 
-fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol {
+fileprivate struct _JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol {
     typealias Key = K
 
     /// A reference to the decoder we're reading from.
-    private let decoder: _JSumDecoder
+    private let decoder: _JSONDecoder
 
     /// A reference to the container we're reading from.
-    private let container: [String: JSum]
+    private let container: [String: JSON]
 
     /// The path of coding keys taken to get to this point in decoding.
     private(set) public var codingPath: [CodingKey]
 
     /// Initializes `self` by referencing the given decoder and container.
-    fileprivate init(referencing decoder: _JSumDecoder, wrapping container: [String: JSum]) {
+    fileprivate init(referencing decoder: _JSONDecoder, wrapping container: [String: JSON]) {
         self.decoder = decoder
         self.container = container
         self.codingPath = decoder.codingPath
@@ -1214,7 +1202,7 @@ fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: Any].self, reality: value)
         }
 
-        let container = _JSumKeyedDecodingContainer<NestedKey>(referencing: self.decoder, wrapping: obj)
+        let container = _JSONKeyedDecodingContainer<NestedKey>(referencing: self.decoder, wrapping: obj)
         return KeyedDecodingContainer(container)
     }
 
@@ -1232,19 +1220,19 @@ fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: value)
         }
 
-        return _JSumUnkeyedDecodingContainer(referencing: self.decoder, wrapping: array)
+        return _JSONUnkeyedDecodingContainer(referencing: self.decoder, wrapping: array)
     }
 
     private func _superDecoder(forKey key: __owned CodingKey) throws -> Decoder {
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
 
-        let value: JSum = self.container[key.stringValue] ?? .null
-        return _JSumDecoder(options: self.decoder.options, referencing: value, at: self.decoder.codingPath)
+        let value: JSON = self.container[key.stringValue] ?? .null
+        return _JSONDecoder(options: self.decoder.options, referencing: value, at: self.decoder.codingPath)
     }
 
     public func superDecoder() throws -> Decoder {
-        return try _superDecoder(forKey: _JSumKey.super)
+        return try _superDecoder(forKey: _JSONKey.super)
     }
 
     public func superDecoder(forKey key: Key) throws -> Decoder {
@@ -1252,12 +1240,12 @@ fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
     }
 }
 
-fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
+fileprivate struct _JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     /// A reference to the decoder we're reading from.
-    private let decoder: _JSumDecoder
+    private let decoder: _JSONDecoder
 
     /// A reference to the container we're reading from.
-    private let container: [JSum]
+    private let container: [JSON]
 
     /// The path of coding keys taken to get to this point in decoding.
     private(set) public var codingPath: [CodingKey]
@@ -1266,7 +1254,7 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     private(set) public var currentIndex: Int
 
     /// Initializes `self` by referencing the given decoder and container.
-    fileprivate init(referencing decoder: _JSumDecoder, wrapping container: [JSum]) {
+    fileprivate init(referencing decoder: _JSONDecoder, wrapping container: [JSON]) {
         self.decoder = decoder
         self.container = container
         self.codingPath = decoder.codingPath
@@ -1283,7 +1271,7 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decodeNil() throws -> Bool {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(Any?.self, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(Any?.self, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         if self.container[self.currentIndex] == .null {
@@ -1296,14 +1284,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Bool.Type) throws -> Bool {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Bool.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1312,14 +1300,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int.Type) throws -> Int {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Int.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1328,14 +1316,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int8.Type) throws -> Int8 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Int8.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1344,14 +1332,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int16.Type) throws -> Int16 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Int16.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1360,14 +1348,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int32.Type) throws -> Int32 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Int32.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1376,14 +1364,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int64.Type) throws -> Int64 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Int64.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1392,14 +1380,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt.Type) throws -> UInt {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: UInt.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1408,14 +1396,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt8.Type) throws -> UInt8 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: UInt8.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1424,14 +1412,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt16.Type) throws -> UInt16 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: UInt16.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1440,14 +1428,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt32.Type) throws -> UInt32 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: UInt32.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1456,14 +1444,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt64.Type) throws -> UInt64 {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: UInt64.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1472,14 +1460,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Float.Type) throws -> Float {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Float.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1488,14 +1476,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Double.Type) throws -> Double {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: Double.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1504,14 +1492,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: String.Type) throws -> String {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: String.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1520,14 +1508,14 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode<T: Decodable>(_ type: T.Type) throws -> T {
         guard !self.isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try self.decoder.unbox(self.container[self.currentIndex], as: type) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSONKey(index: self.currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         self.currentIndex += 1
@@ -1535,7 +1523,7 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     public mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws -> KeyedDecodingContainer<NestedKey> {
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard !self.isAtEnd else {
@@ -1550,16 +1538,16 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
 
         guard let obj = value.obj else {
-            throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: JSum].self, reality: value)
+            throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: JSON].self, reality: value)
         }
 
         self.currentIndex += 1
-        let container = _JSumKeyedDecodingContainer<NestedKey>(referencing: self.decoder, wrapping: obj)
+        let container = _JSONKeyedDecodingContainer<NestedKey>(referencing: self.decoder, wrapping: obj)
         return KeyedDecodingContainer(container)
     }
 
     public mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard !self.isAtEnd else {
@@ -1580,11 +1568,11 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
 
         self.currentIndex += 1
-        return _JSumUnkeyedDecodingContainer(referencing: self.decoder, wrapping: arr)
+        return _JSONUnkeyedDecodingContainer(referencing: self.decoder, wrapping: arr)
     }
 
     public mutating func superDecoder() throws -> Decoder {
-        self.decoder.codingPath.append(_JSumKey(index: self.currentIndex))
+        self.decoder.codingPath.append(_JSONKey(index: self.currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard !self.isAtEnd else {
@@ -1594,11 +1582,11 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
         let value = self.container[self.currentIndex]
         self.currentIndex += 1
-        return _JSumDecoder(options: self.decoder.options, referencing: value, at: self.decoder.codingPath)
+        return _JSONDecoder(options: self.decoder.options, referencing: value, at: self.decoder.codingPath)
     }
 }
 
-extension _JSumDecoder: SingleValueDecodingContainer {
+extension _JSONDecoder: SingleValueDecodingContainer {
     private func expectNonNull<T>(_ type: T.Type) throws {
         if storage.topContainer == .null {
             throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected \(type) but found null value instead."))
@@ -1693,9 +1681,9 @@ internal var _iso8601Formatter: ISO8601DateFormatter = {
 }()
 
 
-extension _JSumDecoder {
+extension _JSONDecoder {
     /// Returns the given value unboxed from a container.
-    fileprivate func unbox(_ value: JSum, as type: Bool.Type) throws -> Bool? {
+    fileprivate func unbox(_ value: JSON, as type: Bool.Type) throws -> Bool? {
         guard let bol = value.bol else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
@@ -1703,18 +1691,18 @@ extension _JSumDecoder {
         return bol
     }
 
-    fileprivate func unboxNumber(_ value: JSum) throws -> Double {
+    fileprivate func unboxNumber(_ value: JSON) throws -> Double {
         guard let num = value.num else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: Double.self, reality: value)
         }
         return num
     }
 
-    fileprivate func unbox(_ value: JSum, as type: Double.Type) throws -> Double? {
+    fileprivate func unbox(_ value: JSON, as type: Double.Type) throws -> Double? {
         try unboxNumber(value)
     }
 
-    fileprivate func unbox(_ value: JSum, as type: String.Type) throws -> String? {
+    fileprivate func unbox(_ value: JSON, as type: String.Type) throws -> String? {
         guard let str = value.str else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
@@ -1722,7 +1710,7 @@ extension _JSumDecoder {
         return str
     }
 
-    fileprivate func unbox(_ value: JSum, as type: Date.Type) throws -> Date? {
+    fileprivate func unbox(_ value: JSON, as type: Date.Type) throws -> Date? {
         switch options.dateDecodingStrategy {
         case .deferredToDate:
             return try Date(from: self)
@@ -1770,7 +1758,7 @@ extension _JSumDecoder {
         }
     }
 
-    fileprivate func unbox(_ value: JSum, as type: Data.Type) throws -> Data? {
+    fileprivate func unbox(_ value: JSON, as type: Data.Type) throws -> Data? {
         switch options.dataDecodingStrategy {
         case .deferredToData:
             return try Data(from: self)
@@ -1794,7 +1782,7 @@ extension _JSumDecoder {
         }
     }
 
-    fileprivate func unbox(_ value: JSum, as type: URL.Type) throws -> URL? {
+    fileprivate func unbox(_ value: JSON, as type: URL.Type) throws -> URL? {
         guard let string = value.str else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected URL string."))
         }
@@ -1802,7 +1790,7 @@ extension _JSumDecoder {
         return URL(string: string)
     }
 
-    fileprivate func unbox<T: Decodable>(_ value: JSum, as type: T.Type) throws -> T? {
+    fileprivate func unbox<T: Decodable>(_ value: JSON, as type: T.Type) throws -> T? {
         if type == Date.self || type == NSDate.self {
             return try self.unbox(value, as: Date.self) as? T
         } else if type == Data.self || type == NSData.self {
@@ -1831,7 +1819,7 @@ extension DecodingError {
     }
 }
 
-fileprivate struct _JSumKey: CodingKey {
+fileprivate struct _JSONKey: CodingKey {
     public var stringValue: String
     public var intValue: Int?
 
@@ -1850,7 +1838,7 @@ fileprivate struct _JSumKey: CodingKey {
         self.intValue = index
     }
 
-    fileprivate static let `super` = _JSumKey(stringValue: "super")!
+    fileprivate static let `super` = _JSONKey(stringValue: "super")!
 }
 
 
@@ -2005,294 +1993,8 @@ let canonicalJSONEncoder: JSONEncoder = {
 
 
 
-
-/// A JSum is a Joint Sum type, which is an enumeration that can represent one of:
-///
-/// - `JSum.bol`: `Bool`
-/// - `JSum.str`: `String`
-/// - `JSum.num`: `Double`
-/// - `JSum.arr`: `Array<JSum>`
-/// - `JSum.obj`: `Dictionary<String, JSum>`
-/// - `JSum.null`: `nil`
-///
-/// The type can be fluently represented with literals that closely match JSON, such as:
-///
-/// ```
-/// let ob: JSum = [
-///    "string": "hello",
-///    "number": 1.23,
-///    "null": nil,
-///    "array": [1, nil, "foo"],
-///    "object": [
-///        "x": "a",
-///        "y": 5,
-///        "z": [:]
-///    ]
-/// ]
-/// ```
-///
-/// JSum can be created by parsing JSON, YAML, or Property List sources.
-///
-/// They can also be used to instatiate a `Decodable` instance directly using the `Decodable.init(jsum:)` initializer.
 @available(*, deprecated, renamed: "JSON")
 public typealias JSum = JSON
-
-@frozen public enum JSumOLD : Hashable, Sendable {
-    case arr([JSum]) // Array
-    case obj(JObj) // Dictionary
-    case str(String) // String
-    case num(Double) // Number
-    case bol(Bool) // Boolean
-    case nul // Null
-}
-
-/// A `JObj` is the associated dictionary type for a `JSum.obj`, which is equivalent to a JSON "object".
-public typealias JObj = [String: JSum]
-
-public extension JSumOLD {
-    /// Returns the ``Bool`` value of type ``bol``.
-    var bool: Bool? {
-        switch self {
-        case .bol(let b):
-            return b
-        default:
-            return nil
-        }
-    }
-
-    /// Returns the ``Int`` value of type ``num``.
-    var int: Int? {
-        switch self {
-        case .num(let f):
-            if Double(Int(f)) == f {
-                return Int(f)
-            } else {
-                return nil
-            }
-        default:
-            return nil
-        }
-    }
-
-    /// Returns the ``Double`` value of type ``num``.
-    var double: Double? {
-        switch self {
-        case .num(let f):
-            return f
-        default:
-            return nil
-        }
-    }
-
-    /// Returns the ``String`` value of type ``str``.
-    var string: String? {
-        switch self {
-        case .str(let s):
-            return s
-        default:
-            return nil
-        }
-    }
-
-    /// Returns the ``Array<JSum>`` value of type ``arr``.
-    var array: [JSum]? {
-        switch self {
-        case .arr(let array):
-            return array
-        default:
-            return nil
-        }
-    }
-
-    /// Returns the ``dictionary<String, JSum>`` value of type ``obj``.
-    var dictionary: [JObj.Key: JSum]? {
-        switch self {
-        case .obj(let dictionary):
-            return dictionary
-        default:
-            return nil
-        }
-    }
-
-    /// Returns the number of elements for an ``arr`` or key/values for an ``obj``
-    var count: Int? {
-        switch self {
-        case .arr(let array):
-            return array.count
-        case .obj(let dictionary):
-            return dictionary.count
-        default:
-            return nil
-        }
-    }
-}
-extension JSumOLD : ExpressibleByNilLiteral {
-    /// Creates ``nul`` JSum
-    @inlinable public init(nilLiteral: ()) {
-        self = .nul
-    }
-}
-
-extension JSumOLD : ExpressibleByBooleanLiteral {
-    /// Creates boolean JSum
-    @inlinable public init(booleanLiteral value: BooleanLiteralType) {
-        self = .bol(value)
-    }
-}
-
-extension JSumOLD : ExpressibleByFloatLiteral {
-    /// Creates numeric JSum
-    @inlinable public init(floatLiteral value: FloatLiteralType) {
-        self = .num(value)
-    }
-}
-
-extension JSumOLD : ExpressibleByIntegerLiteral {
-    /// Creates numeric JSum
-    @inlinable public init(integerLiteral value: IntegerLiteralType) {
-        self = .num(Double(value))
-    }
-}
-
-extension JSumOLD : ExpressibleByArrayLiteral {
-    /// Creates an array of JSum
-    @inlinable public init(arrayLiteral elements: JSum...) {
-        self = .arr(elements)
-    }
-}
-
-extension JSumOLD : ExpressibleByStringLiteral {
-    /// Creates String JSum
-    @inlinable public init(stringLiteral value: String) {
-        self = .str(value)
-    }
-}
-
-extension JSumOLD : ExpressibleByDictionaryLiteral {
-    /// Creates a dictionary of `String` to `JSum`
-    @inlinable public init(dictionaryLiteral elements: (String, JSum)...) {
-        var d: Dictionary<String, JSum> = [:]
-        for (k, v) in elements { d[k] = v }
-        self = .obj(d)
-    }
-}
-
-/// Convenience accessors for the payloads of the various `JSum` types
-public extension JSumOLD {
-    /// Returns the underlying String payload if this is a `JSum.str`, otherwise `.none`
-    @inlinable var str: String? {
-        guard case .str(let str) = self else { return .none }
-        return str
-    }
-
-    /// Returns the underlying Boolean payload if this is a `JSum.bol`, otherwise `.none`
-    @inlinable var bol: Bool? {
-        guard case .bol(let bol) = self else { return .none }
-        return bol
-    }
-
-    /// Returns the underlying Double payload if this is a `JSum.num`, otherwise `.none`
-    @inlinable var num: Double? {
-        guard case .num(let num) = self else { return .none }
-        return num
-    }
-
-    /// Returns the underlying JObj payload if this is a `JSum.obj`, otherwise `.none`
-    @inlinable var obj: JObj? {
-        guard case .obj(let obj) = self else { return .none }
-        return obj
-    }
-
-    /// Returns the underlying Array payload if this is a `JSum.arr`, otherwise `.none`
-    @inlinable var arr: [JSum]? {
-        guard case .arr(let arr) = self else { return .none }
-        return arr
-    }
-
-    /// Returns the underlying `nil` payload if this is a `JSum.nul`, otherwise `.none`
-    @inlinable var nul: Void? {
-        guard case .nul = self else { return .none }
-        return ()
-    }
-
-    /// JSum has a string subscript when it is an object type; setting a value on a non-obj type has no effect
-    @inlinable subscript(key: String) -> JSum? {
-        get {
-            guard case .obj(let obj) = self else { return .none }
-            return obj[key]
-        }
-
-        set {
-            guard case .obj(var obj) = self else { return }
-            obj[key] = newValue
-            self = .obj(obj)
-        }
-    }
-
-    /// JSum has a save indexed subscript when it is an array type; setting a value on a non-array type has no effect
-    @inlinable subscript(index: Int) -> JSum? {
-        get {
-            guard case .arr(let arr) = self else { return .none }
-            if index < 0 || index >= arr.count { return .none }
-            return arr[index]
-        }
-
-        set {
-            guard case .arr(var arr) = self else { return }
-            if index < 0 || index >= arr.count { return }
-            arr[index] = newValue ?? JSum.null
-            self = .arr(arr)
-        }
-    }
-}
-
-extension JSumOLD : Encodable {
-    @inlinable public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case .nul: try container.encodeNil()
-        case .bol(let x): try container.encode(x)
-        case .num(let x): try container.encode(x)
-        case .str(let x): try container.encode(x)
-        case .obj(let x): try container.encode(x)
-        case .arr(let x): try container.encode(x)
-        }
-    }
-}
-
-extension JSumOLD : Decodable {
-    @inlinable public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
-        if container.decodeNil() {
-            self = .nul
-        } else {
-            do {
-                self = try .bol(container.decode(Bool.self))
-            } catch DecodingError.typeMismatch {
-                do {
-                    self = try .num(container.decode(Double.self))
-                } catch DecodingError.typeMismatch {
-                    do {
-                        self = try .str(container.decode(String.self))
-                    } catch DecodingError.typeMismatch {
-                        do {
-                            self = try .arr(decode())
-                        } catch DecodingError.typeMismatch {
-                            do {
-                                self = try .obj(decode())
-                            } catch DecodingError.typeMismatch {
-                                throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
 
 extension Decodable where Self : Encodable {
 
@@ -2304,15 +2006,15 @@ extension Decodable where Self : Encodable {
     ///   - encoder: the custom encoder to use, or `nil` to use the system default
     ///   - decoder: the custom decoder to use, or `nil` to use the system default
     /// - Returns: a tuple with both the parsed codable instance, as well as an optional `difference` JSum that will be nil if the codability was an exact match
-    public static func codableComplete(data: Data, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil) throws -> (instance: Self, difference: JSum?) {
+    public static func codableComplete(data: Data, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil) throws -> (instance: Self, difference: JSON?) {
         let item = try (decoder ?? debugJSONDecoder).decode(Self.self, from: data)
         let itemJSON = try item.toJSON(encoder: encoder ?? canonicalJSONEncoder).utf8String
 
-        // parse into a generic JSum and ensure that both the items are serialized the same
-        let raw = try (decoder ?? debugJSONDecoder).decode(JSum.self, from: data)
+        // parse into a generic JSON and ensure that both the items are serialized the same
+        let raw = try (decoder ?? debugJSONDecoder).decode(JSON.self, from: data)
         let rawJSON = try raw.toJSON(encoder: encoder ?? canonicalJSONEncoder).utf8String
 
-        return (instance: item, difference: itemJSON == rawJSON ? JSum?.none : raw)
+        return (instance: item, difference: itemJSON == rawJSON ? JSON?.none : raw)
     }
 }
 

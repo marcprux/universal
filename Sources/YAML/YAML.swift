@@ -374,7 +374,6 @@ private func parseValue(_ context: Context) -> YAMLResult<ContextValue> {
         return parseliteral(context)
 
     case .folded:
-        #warning("need to make key Scalar?")
         let cv = parseliteral(context)
         let c = cv >>- getContext
         let v = cv

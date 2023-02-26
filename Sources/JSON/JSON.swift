@@ -3,7 +3,39 @@
 //
 //  Created by Marc Prud'hommeaux on 8/20/15.
 //
+import Either
 import Cluster
+import struct Foundation.UUID
+import struct Foundation.URL
+import struct Foundation.Date
+import struct Foundation.Data
+import struct Foundation.Decimal
+
+/// A JSON tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[JSON]`, or `[String: JSON]`
+public struct JSON : Isomorph {
+    public var rawValue: Cluster<String, Scalar>
+
+    public init(rawValue: Cluster<String, Scalar>) {
+        self.rawValue = rawValue
+    }
+}
+
+
+/// A rich JSON type, which can contain a `Date` (ISO-8601), `Data` (base-64), `String`, `Integer`, `Double`, `Bool`, `Null`, `[Scalar]`, or `[String: Scalar]`
+public struct JSONX : Isomorph {
+    /// A rich JSON type, which can contain a `UUID`, `URL`, `Date` (ISO-8601), `Data` (base-64), `String`, `Integer`, `Double`, `Bool`, `Null`, `[Scalar]`, or `[String: Scalar]`
+    public typealias Scalar = ScalarOf<Either<UUID>.Or<URL>.Or<Date>.Or<Data>.Or<String>, Either<Int>.Or<Decimal>>
+
+    public var rawValue: Cluster<String, Scalar>
+
+    public init(rawValue: Cluster<String, Scalar>) {
+        self.rawValue = rawValue
+    }
+}
+
+
+
+
 
 /// A non-recursive streaming parser for JSON (ECMA-404). The parser operates by being fed a complete or 
 /// partial sequence of `UnicodeScalar`s and emits events for every JSON syntax component that is encountered.

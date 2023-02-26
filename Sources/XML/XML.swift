@@ -4,10 +4,23 @@
 import Swift
 import Foundation
 import Cluster
+import Either
 
 #if canImport(FoundationXML)
 import FoundationXML
 #endif // canImport(FoundationXML)
+
+
+/// An XML tree node, which can contain a `String`, `[XML]`, or `[String: XML]`
+public struct XML : Isomorph {
+    public var rawValue: Cluster<String, String>
+
+    public init(rawValue: Cluster<String, String>) {
+        self.rawValue = rawValue
+    }
+}
+
+
 
 extension JSum {
     /// Parses the given XML string into a ``JSum``.

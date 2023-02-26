@@ -3,6 +3,11 @@
  */
 import Swift
 import Either
+import struct Foundation.Date
+import struct Foundation.URL
+import struct Foundation.Data
+import struct Foundation.UUID
+import struct Foundation.Decimal
 
 /// One or many of a thing
 public enum Modicum<One, Many : Sequence> {
@@ -10,9 +15,88 @@ public enum Modicum<One, Many : Sequence> {
     case many(Many)
 }
 
-public typealias ArrayOrMap<Key : Hashable, Value> = Either<[Value]>.Or<[Key: Value]>
+extension Modicum : Equatable where One : Equatable, Many : Equatable { }
+extension Modicum : Encodable where One : Encodable, Many : Encodable { }
+extension Modicum : Decodable where One : Decodable, Many : Decodable { }
+extension Modicum : Hashable where One : Hashable, Many : Hashable { }
+extension Modicum : Sendable where One : Sendable, Many : Sendable { }
 
-public typealias ObjectCluster<K : Hashable, V> = Modicum<V, ArrayOrMap<K, V>>
+extension Modicum : Sequence {
+    public func makeIterator() -> IndexingIterator<[Either<One>.Or<Many.Element>]> {
+        switch self {
+        case .one(let one): return [Either.Or(one)].makeIterator()
+        case .many(let many): return many.map({ .init($0) }).makeIterator()
+        }
+    }
+}
+
+/// Either an Array or Dictionary of Values.
+public typealias KeyableValues<Key : Hashable, Value> = Either<[Value]>.Or<[Key: Value]>
+
+//extension KeyableValues {
+//    public var values: [B.Value] {
+//        switch self {
+//        case .a(let a): return [a]
+//        case .b(let b): return b.values
+//        }
+//    }
+//}
+
+
+/// A cluster it a value or a sequence of values or a map of keyed values.
+public typealias Cluster<Key : Hashable, Value> = Modicum<Key, KeyableValues<Key, Value>>
+
+
+/// A scalar that can contain a string type, a numeric type, a boolean type, and a null type.
+public typealias StrNumBoolNull<StrType, NumType, BoolType, NullType> = Either<StrType>.Or<NumType>.Or<BoolType>.Or<NullType>
+
+/// The base of a JSON scalar, which contains fixed boolean and null type and variable string and numeric types.
+public typealias ScalarOf<StrType, NumType> = StrNumBoolNull<StrType, NumType, BooleanLiteralType, Never?>
+
+/// A `String`, `Double`, `Bool`, or `Null` (represented by `Optional<Never>.none`)
+public typealias Scalar = ScalarOf<StringLiteralType, FloatLiteralType>
+
+
+
+// MARK: JSON Initializers
+
+//extension JSON : ExpressibleByNilLiteral {
+//    public init(nilLiteral: ()) {
+//        self = .scalar(.init())
+//    }
+//}
+//
+//extension JSON : ExpressibleByIntegerLiteral {
+//    public init(integerLiteral value: IntegerLiteralType) {
+//        self = .scalar(.init(value))
+//    }
+//}
+//
+//extension JSON : ExpressibleByFloatLiteral {
+//    public init(floatLiteral value: FloatLiteralType) {
+//        self = .scalar(.init(.init(.init(value))))
+//    }
+//}
+//
+//extension JSON : ExpressibleByStringLiteral, ExpressibleByUnicodeScalarLiteral, ExpressibleByExtendedGraphemeClusterLiteral {
+//    public init(stringLiteral value: StringLiteralType) {
+//        self = .scalar(.init(value))
+//    }
+//
+//    public init(extendedGraphemeClusterLiteral value: String) {
+//        self = .scalar(.init(value))
+//    }
+//
+//    public init(unicodeScalarLiteral value: String) {
+//        self = .scalar(.init(value))
+//    }
+//}
+//
+//extension JSON : ExpressibleByArrayLiteral {
+//    public init(arrayLiteral elements: JSON...) {
+//        self = .array(elements)
+//    }
+//}
 
 
 

@@ -1,3 +1,21 @@
+import Swift
+import Foundation
+import Either
+import Cluster
+
+
+/// A YAML tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`
+public struct YAML : Isomorph {
+    public var rawValue: Cluster<Scalar, Scalar>
+
+    public init(rawValue: Cluster<Scalar, Scalar>) {
+        self.rawValue = rawValue
+    }
+}
+
+
+
+
 // The YAML parsing code borrows heavily from the https://github.com/behrang/YamlSwift which is released under the following license:
 //
 // The MIT License (MIT)
@@ -21,9 +39,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-import Swift
-import Foundation
-import Cluster
 
 extension JSum {
     /// Parses the given YAML string into a ``JSum``.

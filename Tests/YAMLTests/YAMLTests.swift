@@ -112,7 +112,7 @@ final class YAMLTests : XCTestCase {
         XCTAssertEqual(try yaml("NuLL"), .string("NuLL"))
         XCTAssertEqual(try yaml("null#"), .string("null#"))
         XCTAssertEqual(try yaml("null#string"), .string("null#string"))
-//        XCTAssertEqual(try yaml("null #comment"), nil)
+        XCTAssertEqual(try yaml("null #comment"), .null)
 
         let value: YAML = .null
         XCTAssertEqual(value, .null)
@@ -152,7 +152,7 @@ final class YAMLTests : XCTestCase {
 
     func testInt() {
         XCTAssertEqual(try yaml("0"), .integer(0))
-//        XCTAssertEqual(try yaml("+0").integer, 0)
+        XCTAssertEqual(try yaml("+0").integer, 0)
         XCTAssertEqual(try yaml("-0"), 0)
         XCTAssertEqual(try yaml("2"), 2)
         XCTAssertEqual(try yaml("+2"), 2)
@@ -863,79 +863,79 @@ final class YAMLTests : XCTestCase {
         XCTAssertEqual(value["date"], "2002-12-14")
     }
 
-    let exampleYaml =
-    "%YAML 1.2\n" +
-    "---\n" +
-    "YAML: YAML Ain't Markup Language\n" +
-    "\n" +
-    "What It Is: YAML is a human friendly data serialization\n" +
-    "  standard for all programming languages.\n" +
-    "\n" +
-    "YAML Resources:\n" +
-    "  YAML 1.2 (3rd Edition): http://yaml.org/spec/1.2/spec.html\n" +
-    "  YAML 1.1 (2nd Edition): http://yaml.org/spec/1.1/\n" +
-    "  YAML 1.0 (1st Edition): http://yaml.org/spec/1.0/\n" +
-    "  YAML Issues Page: https://github.com/yaml/yaml/issues\n" +
-    "  YAML Mailing List: yaml-core@lists.sourceforge.net\n" +
-    "  YAML IRC Channel: \"#yaml on irc.freenode.net\"\n" +
-    "  YAML Cookbook (Ruby): http://yaml4r.sourceforge.net/cookbook/\n" +
-    "  YAML Reference Parser: http://yaml.org/ypaste/\n" +
-    "\n" +
-    "Projects:\n" +
-    "  C/C++ Libraries:\n" +
-    "  - libyaml       # \"C\" Fast YAML 1.1\n" +
-    "  - Syck          # (dated) \"C\" YAML 1.0\n" +
-    "  - yaml-cpp      # C++ YAML 1.2 implementation\n" +
-    "  Ruby:\n" +
-    "  - psych         # libyaml wrapper (in Ruby core for 1.9.2)\n" +
-    "  - RbYaml        # YAML 1.1 (PyYaml Port)\n" +
-    "  - yaml4r        # YAML 1.0, standard library syck binding\n" +
-    "  Python:\n" +
-    "  - PyYaml        # YAML 1.1, pure python and libyaml binding\n" +
-    "  - PySyck        # YAML 1.0, syck binding\n" +
-    "  Java:\n" +
-    "  - JvYaml        # Java port of RbYaml\n" +
-    "  - SnakeYAML     # Java 5 / YAML 1.1\n" +
-    "  - YamlBeans     # To/from JavaBeans\n" +
-    "  - JYaml         # Original Java Implementation\n" +
-    "  Perl Modules:\n" +
-    "  - YAML          # Pure Perl YAML Module\n" +
-    "  - YAML::XS      # Binding to libyaml\n" +
-    "  - YAML::Syck    # Binding to libsyck\n" +
-    "  - YAML::Tiny    # A small YAML subset module\n" +
-    "  - PlYaml        # Perl port of PyYaml\n" +
-    "  C#/.NET:\n" +
-    "  - yaml-net      # YAML 1.1 library\n" +
-    "  - yatools.net   # (in-progress) YAML 1.1 implementation\n" +
-    "  PHP:\n" +
-    "  - php-yaml      # libyaml bindings (YAML 1.1)\n" +
-    "  - syck          # syck bindings (YAML 1.0)\n" +
-    "  - spyc          # yaml loader/dumper (YAML 1.?)\n" +
-    "  OCaml:\n" +
-    "  - ocaml-syck    # YAML 1.0 via syck bindings\n" +
-    "  Javascript:\n" +
-    "  - JS-YAML       # Native PyYAML port to JavaScript.\n" +
-    "  - JS-YAML Online# Browserified JS-YAML demo, to play with YAML.\n" +
-    "  Actionscript:\n" +
-    "  - as3yaml       # port of JvYAML (1.1)\n" +
-    "  Haskell:\n" +
-    "  - YamlReference # Haskell 1.2 reference parser\n" +
-    "  Others:\n" +
-    "  - yamlvim (src) # YAML dumper/emitter in pure vimscript\n" +
-    "\n" +
-    "Related Projects:\n" +
-    "  - Rx            # Multi-Language Schemata Tool for JSON/YAML\n" +
-    "  - Kwalify       # Ruby Schemata Tool for JSON/YAML\n" +
-    "  - yaml_vim      # vim syntax files for YAML\n" +
-    "  - yatools.net   # Visual Studio editor for YAML\n" +
-    "  - JSON          # Official JSON Website\n" +
-    "  - Pygments      # Python language Syntax Colorizer /w YAML support\n" +
-    "\n" +
-    "News:\n" +
-    "  - 20-NOV-2011 -- JS-YAML, a JavaScript YAML parser.\n" +
-    "  - 18-AUG-2010 -- Ruby 1.9.2 includes psych, a libyaml wrapper.\n" +
-    "# Maintained by Clark C. Evans\n" +
-    "...\n"
+    let exampleYaml = """
+        %YAML 1.2
+        ---
+        YAML: YAML Ain't Markup Language
+
+        What It Is: YAML is a human friendly data serialization
+          standard for all programming languages.
+
+        YAML Resources:
+          YAML 1.2 (3rd Edition): http://yaml.org/spec/1.2/spec.html
+          YAML 1.1 (2nd Edition): http://yaml.org/spec/1.1/
+          YAML 1.0 (1st Edition): http://yaml.org/spec/1.0/
+          YAML Issues Page: https://github.com/yaml/yaml/issues
+          YAML Mailing List: yaml-core@lists.sourceforge.net
+          YAML IRC Channel: \"#yaml on irc.freenode.net\"
+          YAML Cookbook (Ruby): http://yaml4r.sourceforge.net/cookbook/
+          YAML Reference Parser: http://yaml.org/ypaste/
+
+        Projects:
+          C/C++ Libraries:
+          - libyaml       # \"C\" Fast YAML 1.1
+          - Syck          # (dated) \"C\" YAML 1.0
+          - yaml-cpp      # C++ YAML 1.2 implementation
+          Ruby:
+          - psych         # libyaml wrapper (in Ruby core for 1.9.2)
+          - RbYaml        # YAML 1.1 (PyYaml Port)
+          - yaml4r        # YAML 1.0, standard library syck binding
+          Python:
+          - PyYaml        # YAML 1.1, pure python and libyaml binding
+          - PySyck        # YAML 1.0, syck binding
+          Java:
+          - JvYaml        # Java port of RbYaml
+          - SnakeYAML     # Java 5 / YAML 1.1
+          - YamlBeans     # To/from JavaBeans
+          - JYaml         # Original Java Implementation
+          Perl Modules:
+          - YAML          # Pure Perl YAML Module
+          - YAML::XS      # Binding to libyaml
+          - YAML::Syck    # Binding to libsyck
+          - YAML::Tiny    # A small YAML subset module
+          - PlYaml        # Perl port of PyYaml
+          C#/.NET:
+          - yaml-net      # YAML 1.1 library
+          - yatools.net   # (in-progress) YAML 1.1 implementation
+          PHP:
+          - php-yaml      # libyaml bindings (YAML 1.1)
+          - syck          # syck bindings (YAML 1.0)
+          - spyc          # yaml loader/dumper (YAML 1.?)
+          OCaml:
+          - ocaml-syck    # YAML 1.0 via syck bindings
+          Javascript:
+          - JS-YAML       # Native PyYAML port to JavaScript.
+          - JS-YAML Online# Browserified JS-YAML demo, to play with YAML.
+          Actionscript:
+          - as3yaml       # port of JvYAML (1.1)
+          Haskell:
+          - YamlReference # Haskell 1.2 reference parser
+          Others:
+          - yamlvim (src) # YAML dumper/emitter in pure vimscript
+
+        Related Projects:
+          - Rx            # Multi-Language Schemata Tool for JSON/YAML
+          - Kwalify       # Ruby Schemata Tool for JSON/YAML
+          - yaml_vim      # vim syntax files for YAML
+          - yatools.net   # Visual Studio editor for YAML
+          - JSON          # Official JSON Website
+          - Pygments      # Python language Syntax Colorizer /w YAML support
+
+        News:
+          - 20-NOV-2011 -- JS-YAML, a JavaScript YAML parser.
+          - 18-AUG-2010 -- Ruby 1.9.2 includes psych, a libyaml wrapper.
+        # Maintained by Clark C. Evans
+        """
 
     func testYamlHomepage() throws {
         let value = try yaml(exampleYaml)

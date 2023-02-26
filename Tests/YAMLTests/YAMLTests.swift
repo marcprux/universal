@@ -941,8 +941,7 @@ final class YAMLTests : XCTestCase {
         let value = try yaml(exampleYaml)
         XCTAssertEqual(value.count, 6)
         XCTAssertEqual(value["YAML"], "YAML Ain't Markup Language")
-        XCTAssertEqual(value["What It Is"], .string("YAML is a human friendly data" +
-                                                 " serialization standard for all programming languages."))
+        XCTAssertEqual(value["What It Is"], .string("YAML is a human friendly data serialization standard for all programming languages."))
         XCTAssertEqual(value["YAML Resources"]?.count, 8)
         XCTAssert(value["YAML Resources"]?["YAML 1.2 (3rd Edition)"] ==
                   "http://yaml.org/spec/1.2/spec.html")
@@ -958,8 +957,12 @@ final class YAMLTests : XCTestCase {
     }
 
     func testPerformanceExample() {
-        //self.measure() { // stddev fails on Linux
+        #if os(Linux)
+        _ = try? yaml(self.exampleYaml)
+        #else
+        self.measure() { // stddev fails on Linux
             _ = try? yaml(self.exampleYaml)
-        //}
+        }
+        #endif
     }
 }

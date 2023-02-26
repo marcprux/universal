@@ -22,19 +22,24 @@ public struct YAML : Isomorph, Sendable, Hashable, Codable {
     }
 }
 
+extension YAML.Scalar {
+    public static let null = YAML.Scalar(Never?.none)
+    public static let `true` = YAML.Scalar(true)
+    public static let `false` = YAML.Scalar(false)
+}
 
 /// Convenience accessors for the payloads of the various `YAML` types
 public extension YAML {
-    static let null = YAML(.init(.init(nil)))
-    static let `true` = YAML(.init(.init(true)))
-    static let `false` = YAML(.init(.init(false)))
+    static let null = YAML(Either.Or(YAML.Scalar.null))
+    static let `true` = YAML(Either.Or(YAML.Scalar.true))
+    static let `false` = YAML(Either.Or(YAML.Scalar.false))
 
-    static func str(_ str: String) -> Self { YAML(.init(.init(str))) }
-    static func dbl(_ dbl: Double) -> Self { YAML(.init(.init(dbl))) }
-    static func int(_ int: Int) -> Self { YAML(.init(.init(int))) }
-    static func bol(_ bol: Bool) -> Self { YAML(.init(.init(bol))) }
-    static func arr(_ arr: [YAML]) -> Self { YAML(.init(Quanta(rawValue: .init(arr)))) }
-    static func obj(_ obj: [Scalar: YAML]) -> Self { YAML(.init(Quanta(rawValue: .init(obj)))) }
+    static func string(_ str: String) -> Self { YAML(Either.Or(Scalar(str))) }
+    static func double(_ dbl: Double) -> Self { YAML(Either.Or(Scalar(dbl))) }
+    static func integer(_ int: Int) -> Self { YAML(Either.Or(Scalar(int))) }
+    static func boolean(_ bol: Bool) -> Self { YAML(Either.Or(Scalar(bol))) }
+    static func array(_ arr: [YAML]) -> Self { YAML(Either.Or(Quanta(rawValue: .init(arr)))) }
+    static func object(_ obj: [Scalar: YAML]) -> Self { YAML(Either.Or(Quanta(rawValue: .init(obj)))) }
 
     /// Returns the underlying String payload if this is a `YAML.str`, otherwise `.none`
     @inlinable var string: String? {
@@ -317,38 +322,38 @@ private func parseValue(_ context: Context) -> YAMLResult<ContextValue> {
     case .int:
         let m = peekMatch(context)
         // will throw runtime error if overflows
-        let v = YAML.int(parseInt(m, radix: 10))
+        let v = YAML.integer(parseInt(m, radix: 10))
         return YAMLParser.lift((advance(context), v))
 
     case .intOct:
         let m = peekMatch(context) |> YAMLParser.YAMLExp.replace(YAMLParser.YAMLExp.regex("0o"), template: "")
         // will throw runtime error if overflows
-        let v = YAML.int(parseInt(m, radix: 8))
+        let v = YAML.integer(parseInt(m, radix: 8))
         return YAMLParser.lift((advance(context), v))
 
     case .intHex:
         let m = peekMatch(context) |> YAMLParser.YAMLExp.replace(YAMLParser.YAMLExp.regex("0x"), template: "")
         // will throw runtime error if overflows
-        let v = YAML.int(parseInt(m, radix: 16))
+        let v = YAML.integer(parseInt(m, radix: 16))
         return YAMLParser.lift((advance(context), v))
 
     case .intSex:
         let m = peekMatch(context)
-        let v = YAML.int(parseInt(m, radix: 60))
+        let v = YAML.integer(parseInt(m, radix: 60))
         return YAMLParser.lift((advance(context), v))
 
     case .infinityP:
-        return YAMLParser.lift((advance(context), .dbl(Double.infinity)))
+        return YAMLParser.lift((advance(context), .double(Double.infinity)))
 
     case .infinityN:
-        return YAMLParser.lift((advance(context), .dbl(-Double.infinity)))
+        return YAMLParser.lift((advance(context), .double(-Double.infinity)))
 
     case .nan:
-        return YAMLParser.lift((advance(context), .dbl(Double.nan)))
+        return YAMLParser.lift((advance(context), .double(Double.nan)))
 
     case .double:
         let m = NSString(string: peekMatch(context))
-        return YAMLParser.lift((advance(context), .dbl(m.doubleValue)))
+        return YAMLParser.lift((advance(context), .double(m.doubleValue)))
 
     case .dash:
         return parseBlockSeq(context)
@@ -374,7 +379,7 @@ private func parseValue(_ context: Context) -> YAMLResult<ContextValue> {
         let c = cv >>- getContext
         let v = cv
         >>- getValue
-        >>- { value in YAML.str(foldBlock(value.string ?? "")) }
+        >>- { value in YAML.string(foldBlock(value.string ?? "")) }
         return createContextValue <^> c <*> v
 
     case .indent:
@@ -448,22 +453,7 @@ private func checkKeyValueUniqueness(_ acc: [YAML.Scalar: YAML]) ->(_ context: C
 private extension YAML {
     /// This YAML as a key in a dictionary.
     var yamlKey: Object.Key? {
-        #warning("FIXME")
-        fatalError()
-//        switch self {
-//        case .nul:
-//            return nil
-//        case .bol(let x):
-//            return x.description
-//        case .num(let x):
-//            return x.description
-//        case .str(let x):
-//            return x
-//        case .arr(_):
-//            return nil // cannot be used as a key
-//        case .obj(_):
-//            return nil // cannot be used as a key
-//        }
+        rawValue.infer()
     }
 }
 
@@ -484,7 +474,7 @@ private func parseFlowSeq(_ context: Context) -> YAMLResult<ContextValue> {
 private func parseFlowSeq(_ acc: [YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         if peekType(context) == .closeSB {
-            return YAMLParser.lift((advance(context), .arr(acc)))
+            return YAMLParser.lift((advance(context), .array(acc)))
         }
         let cv = YAMLParser.lift(context)
         >>- ignoreSpace
@@ -509,7 +499,7 @@ private func parseFlowMap(_ context: Context) -> YAMLResult<ContextValue> {
 private func parseFlowMap(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         if peekType(context) == .closeCB {
-            return YAMLParser.lift((advance(context), .obj(acc)))
+            return YAMLParser.lift((advance(context), .object(acc)))
         }
         let ck = YAMLParser.lift(context)
         >>- ignoreSpace
@@ -538,7 +528,7 @@ private func parseBlockSeq(_ context: Context) -> YAMLResult<ContextValue> {
 private func parseBlockSeq(_ acc: [YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         if peekType(context) != .dash {
-            return YAMLParser.lift((context, .arr(acc)))
+            return YAMLParser.lift((context, .array(acc)))
         }
         let cv = YAMLParser.lift(context)
         >>- advance
@@ -571,7 +561,7 @@ private func parseBlockMap(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResul
             return parseStringKeyValue(acc)(context)
 
         default:
-            return YAMLParser.lift((context, .obj(acc)))
+            return YAMLParser.lift((context, .object(acc)))
         }
     }
 }
@@ -635,15 +625,15 @@ private func parseString(_ context: Context) -> YAMLResult<ContextValue> {
     case .string:
         let m = normalizeBreaks(peekMatch(context))
         let folded = m |> YAMLParser.YAMLExp.replace(YAMLParser.YAMLExp.regex("^[ \\t\\n]+|[ \\t\\n]+$"), template: "") |> foldFlow
-        return YAMLParser.lift((advance(context), .str(folded)))
+        return YAMLParser.lift((advance(context), .string(folded)))
 
     case .stringDQ:
         let m = unwrapQuotedString(normalizeBreaks(peekMatch(context)))
-        return YAMLParser.lift((advance(context), .str(unescapeDoubleQuotes(foldFlow(m)))))
+        return YAMLParser.lift((advance(context), .string(unescapeDoubleQuotes(foldFlow(m)))))
 
     case .stringSQ:
         let m = unwrapQuotedString(normalizeBreaks(peekMatch(context)))
-        return YAMLParser.lift((advance(context), .str(unescapeSingleQuotes(foldFlow(m)))))
+        return YAMLParser.lift((advance(context), .string(unescapeSingleQuotes(foldFlow(m)))))
 
     default:
         return YAMLParser.fail(error("expected string")(context))
@@ -720,7 +710,7 @@ private func parseliteral(_ context: Context) -> YAMLResult<ContextValue> {
     >>| YAMLParser.`guard`(error(error1)(blockContext), check: !check1)
     >>| YAMLParser.`guard`(error(error2)(blockContext), check: !check2)
     >>| c
-    >>- { context in (context, .str(trimmed))}
+    >>- { context in (context, .string(trimmed))}
 }
 
 

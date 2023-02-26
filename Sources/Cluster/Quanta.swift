@@ -44,8 +44,8 @@ public typealias KeyableValues<Key : Hashable, Value> = Either<[Value]>.Or<[Key:
 //}
 
 
-/// A mote is a `Value` or a sequence of `Value`s or a map of keyed `Value`s.
-public typealias Mote<Key : Hashable, Value> = OneOrMore<Key, KeyableValues<Key, Value>>
+/// Quanta are a `Value` or a sequence of `Value`s or a map of keyed `Value`s.
+public typealias Quanta<Key : Hashable, Value> = OneOrMore<Key, KeyableValues<Key, Value>>
 
 /// A scalar that can contain a string type, a numeric type, a boolean type, and a null type.
 public typealias StrNumBoolNull<StrType, NumType, BoolType, NullType> = Either<StrType>.Or<NumType>.Or<BoolType>.Or<NullType>

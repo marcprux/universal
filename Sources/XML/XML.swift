@@ -13,13 +13,13 @@ import FoundationXML
 
 /// An XML tree node, which can contain a `String`, `[XML]`, or `[String: XML]`
 public struct XML : Isomorph {
-    public var rawValue: Mote<String, String>
+    public var rawValue: Quanta<String, String>
 
-    public init(rawValue: Mote<String, String>) {
+    public init(rawValue: Quanta<String, String>) {
         self.rawValue = rawValue
     }
 
-    public init(_ rawValue: Mote<String, String>) {
+    public init(_ rawValue: Quanta<String, String>) {
         self.rawValue = rawValue
     }
 }

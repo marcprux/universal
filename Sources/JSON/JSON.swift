@@ -13,13 +13,13 @@ import struct Foundation.Decimal
 
 /// A JSON tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[JSON]`, or `[String: JSON]`
 public struct JSON : Isomorph {
-    public var rawValue: Mote<String, Scalar>
+    public var rawValue: Quanta<String, Scalar>
 
-    public init(rawValue: Mote<String, Scalar>) {
+    public init(rawValue: Quanta<String, Scalar>) {
         self.rawValue = rawValue
     }
 
-    public init(_ rawValue: Mote<String, Scalar>) {
+    public init(_ rawValue: Quanta<String, Scalar>) {
         self.rawValue = rawValue
     }
 }
@@ -30,13 +30,13 @@ public struct JSONX : Isomorph {
     /// A rich JSON type, which can contain a `UUID`, `URL`, `Date` (ISO-8601), `Data` (base-64), `String`, `Integer`, `Double`, `Bool`, `Null`, `[Scalar]`, or `[String: Scalar]`
     public typealias Scalar = ScalarOf<Either<UUID>.Or<URL>.Or<Date>.Or<Data>.Or<String>, Either<Int>.Or<Decimal>>
 
-    public var rawValue: Mote<String, Scalar>
+    public var rawValue: Quanta<String, Scalar>
 
-    public init(rawValue: Mote<String, Scalar>) {
+    public init(rawValue: Quanta<String, Scalar>) {
         self.rawValue = rawValue
     }
 
-    public init(_ rawValue: Mote<String, Scalar>) {
+    public init(_ rawValue: Quanta<String, Scalar>) {
         self.rawValue = rawValue
     }
 }

@@ -4,10 +4,12 @@ import Either
 import Quanta
 
 
-/// A YAML tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`
+/// A YAML tree node, which can contain a `Scalar` (`String`, `Int`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`
 public struct YAML : Isomorph, Sendable, Hashable, Codable {
-    public typealias Scalar = ScalarOf<StringLiteralType, FloatLiteralType>
-    public typealias RawValue = Quantum<Scalar, Scalar, YAML>
+    public typealias NumberType = Either<IntegerLiteralType>.Or<FloatLiteralType>
+    public typealias Scalar = ScalarOf<StringLiteralType, NumberType>
+    public typealias Object = [Scalar: YAML]
+    public typealias RawValue = Quantum<Scalar, Object.Key, Object.Value>
 
     public var rawValue: RawValue
 
@@ -19,6 +21,85 @@ public struct YAML : Isomorph, Sendable, Hashable, Codable {
         self.rawValue = rawValue
     }
 }
+
+
+/// Convenience accessors for the payloads of the various `YAML` types
+public extension YAML {
+    static let null = YAML(.init(.init(nil)))
+    static let `true` = YAML(.init(.init(true)))
+    static let `false` = YAML(.init(.init(false)))
+
+    static func str(_ str: String) -> Self { YAML(.init(.init(str))) }
+    static func dbl(_ dbl: Double) -> Self { YAML(.init(.init(dbl))) }
+    static func int(_ int: Int) -> Self { YAML(.init(.init(int))) }
+    static func bol(_ bol: Bool) -> Self { YAML(.init(.init(bol))) }
+    static func arr(_ arr: [YAML]) -> Self { YAML(.init(Quanta(rawValue: .init(arr)))) }
+    static func obj(_ obj: [Scalar: YAML]) -> Self { YAML(.init(Quanta(rawValue: .init(obj)))) }
+
+    /// Returns the underlying String payload if this is a `YAML.str`, otherwise `.none`
+    @inlinable var string: String? {
+        rawValue.infer()?.infer()
+    }
+
+    /// Returns the underlying Boolean payload if this is a `YAML.bol`, otherwise `.none`
+    @inlinable var boolean: Bool? {
+        rawValue.infer()?.infer()
+    }
+
+    /// Returns the underlying Double payload if this is a `YAML.dbl`, otherwise `.none`
+    @inlinable var double: Double? {
+        rawValue.infer()?.infer()
+    }
+
+    /// Returns the underlying Double payload if this is a `YAML.int`, otherwise `.none`
+    @inlinable var integer: Int? {
+        rawValue.infer()?.infer()
+    }
+
+    /// Returns the underlying Double for either `int` or `dbl` types.
+    @inlinable var number: Double? {
+        double ?? integer.map(Double.init)
+    }
+
+    /// Returns the underlying JObj payload if this is a `YAML.obj`, otherwise `.none`
+    @inlinable var object: Object? {
+        rawValue.infer()?.rawValue.infer()
+    }
+
+    /// Returns the underlying Array payload if this is a `YAML.arr`, otherwise `.none`
+    @inlinable var array: [YAML]? {
+        rawValue.infer()?.rawValue.infer()
+    }
+
+    /// YAML has a string subscript when it is an object type; setting a value on a non-obj type has no effect
+    @inlinable subscript(key: Scalar) -> YAML? {
+        object?[key]
+    }
+
+    /// YAML has a save indexed subscript when it is an array type; setting a value on a non-array type has no effect
+    @inlinable subscript(index: Int) -> YAML? {
+        array?[index]
+    }
+
+    /// Returns true if this represents the JSON literal `null`.
+    var isNull: Bool {
+        self == YAML.null
+    }
+
+    /// The number of elements this contains: either the count of the underyling array or dictiionary, or 0 if `null`, or else 1 for a scalar.
+    @inlinable var count: Int {
+        switch rawValue {
+        case .a:
+            return isNull ? 0 : 1
+        case .b(let collection):
+            switch collection.rawValue {
+            case .a(let x): return x.count
+            case .b(let x): return x.count
+            }
+        }
+    }
+}
+
 
 
 
@@ -47,29 +128,23 @@ public struct YAML : Isomorph, Sendable, Hashable, Codable {
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-extension JSum {
-    /// Parses the given YAML string into a ``JSum``.
+extension YAML {
+    /// Parses the given YAML string into a ``YAML``.
     /// - Parameter yaml: the YAML string to parse
-    public static func parse(yaml: String) throws -> JSum {
+    public static func parse(yaml: String) throws -> YAML {
         let result = YAMLParser.tokenize(yaml) >>=- Context.parseDoc
         if let value = result.value { return value } else { throw ResultError.message(result.error) }
     }
 
-    /// Parses the given YAML string into multuple ``JSum``s.
+    /// Parses the given YAML string into multuple ``YAML``s.
     /// - Parameter yaml: the YAML string to parse
-    public static func parse(yamls: String) throws -> [JSum] {
+    public static func parse(yamls: String) throws -> [YAML] {
         let result = YAMLParser.tokenize(yamls) >>=- Context.parseDocs
         if let value = result.value { return value } else { throw ResultError.message(result.error) }
     }
 }
 
-private extension JSum {
-    static func int(_ number: Int) -> JSum {
-        .num(Double(number))
-    }
-}
-
-private extension JSum {
+private extension YAML {
     enum ResultError: LocalizedError {
         case message(String?)
 
@@ -86,14 +161,14 @@ private enum YAMLParser {
 
     struct Context {
         let tokens: [YAMLParser.TokenMatch]
-        let aliases: [String.SubSequence: JSum]
+        let aliases: [String.SubSequence: YAML]
 
-        init(_ tokens: [YAMLParser.TokenMatch], _ aliases: [String.SubSequence: JSum] = [:]) {
+        init(_ tokens: [YAMLParser.TokenMatch], _ aliases: [String.SubSequence: YAML] = [:]) {
             self.tokens = tokens
             self.aliases = aliases
         }
 
-        static func parseDoc(_ tokens: [YAMLParser.TokenMatch]) -> YAMLResult<JSum> {
+        static func parseDoc(_ tokens: [YAMLParser.TokenMatch]) -> YAMLResult<YAML> {
             let c = YAMLParser.lift(Context(tokens))
             let cv = c >>=- parseHeader >>=- parseValue
             let v = cv >>- getValue
@@ -104,11 +179,11 @@ private enum YAMLParser {
             >>| v
         }
 
-        static func parseDocs(_ tokens: [YAMLParser.TokenMatch]) -> YAMLResult<[JSum]> {
+        static func parseDocs(_ tokens: [YAMLParser.TokenMatch]) -> YAMLResult<[YAML]> {
             return parseDocs([])(Context(tokens))
         }
 
-        static func parseDocs(_ acc: [JSum]) -> (Context) -> YAMLResult<[JSum]> {
+        static func parseDocs(_ acc: [YAML]) -> (Context) -> YAMLResult<[YAML]> {
             return { context in
                 if peekType(context) == .end {
                     return YAMLParser.lift(acc)
@@ -139,13 +214,13 @@ private typealias Context = YAMLParser.Context
 
 private var error = YAMLParser.Context.error
 
-private typealias ContextValue = (context: Context, value: JSum)
-private typealias ContextKey = (context: Context, key: JObj.Key)
+private typealias ContextValue = (context: Context, value: YAML)
+private typealias ContextKey = (context: Context, key: YAML.Object.Key)
 
-private func createContextValue(_ context: Context) -> (JSum) -> ContextValue { { value in (context, value) } }
+private func createContextValue(_ context: Context) -> (YAML) -> ContextValue { { value in (context, value) } }
 private func getContext(_ cv: ContextValue) -> Context { cv.context }
-private func getValue(_ cv: ContextValue) -> JSum { cv.value }
-private func peekType(_ context: Context) -> JSum.TokenType { context.tokens[0].type }
+private func getValue(_ cv: ContextValue) -> YAML { cv.value }
+private func peekType(_ context: Context) -> YAML.TokenType { context.tokens[0].type }
 private func peekMatch(_ context: Context) -> String { context.tokens[0].match }
 
 
@@ -169,7 +244,7 @@ private func ignoreDocEnd(_ context: Context) -> Context {
     return ignoreDocEnd(advance(context))
 }
 
-private func expect(_ type: JSum.TokenType, message: String) -> (Context) -> YAMLResult<Context> {
+private func expect(_ type: YAML.TokenType, message: String) -> (Context) -> YAMLResult<Context> {
     return { context in
         let check = peekType(context) == type
         return YAMLParser.`guard`(error(message)(context), check: check)
@@ -231,49 +306,49 @@ private func parseValue(_ context: Context) -> YAMLResult<ContextValue> {
         return parseValue(ignoreSpace(context))
 
     case .null:
-        return YAMLParser.lift((advance(context), nil))
+        return YAMLParser.lift((advance(context), .null))
 
     case ._true:
-        return YAMLParser.lift((advance(context), true))
+        return YAMLParser.lift((advance(context), .true))
 
     case ._false:
-        return YAMLParser.lift((advance(context), false))
+        return YAMLParser.lift((advance(context), .false))
 
     case .int:
         let m = peekMatch(context)
         // will throw runtime error if overflows
-        let v = JSum.int(parseInt(m, radix: 10))
+        let v = YAML.int(parseInt(m, radix: 10))
         return YAMLParser.lift((advance(context), v))
 
     case .intOct:
         let m = peekMatch(context) |> YAMLParser.YAMLExp.replace(YAMLParser.YAMLExp.regex("0o"), template: "")
         // will throw runtime error if overflows
-        let v = JSum.int(parseInt(m, radix: 8))
+        let v = YAML.int(parseInt(m, radix: 8))
         return YAMLParser.lift((advance(context), v))
 
     case .intHex:
         let m = peekMatch(context) |> YAMLParser.YAMLExp.replace(YAMLParser.YAMLExp.regex("0x"), template: "")
         // will throw runtime error if overflows
-        let v = JSum.int(parseInt(m, radix: 16))
+        let v = YAML.int(parseInt(m, radix: 16))
         return YAMLParser.lift((advance(context), v))
 
     case .intSex:
         let m = peekMatch(context)
-        let v = JSum.int(parseInt(m, radix: 60))
+        let v = YAML.int(parseInt(m, radix: 60))
         return YAMLParser.lift((advance(context), v))
 
     case .infinityP:
-        return YAMLParser.lift((advance(context), .num(Double.infinity)))
+        return YAMLParser.lift((advance(context), .dbl(Double.infinity)))
 
     case .infinityN:
-        return YAMLParser.lift((advance(context), .num(-Double.infinity)))
+        return YAMLParser.lift((advance(context), .dbl(-Double.infinity)))
 
     case .nan:
-        return YAMLParser.lift((advance(context), .num(Double.nan)))
+        return YAMLParser.lift((advance(context), .dbl(Double.nan)))
 
     case .double:
         let m = NSString(string: peekMatch(context))
-        return YAMLParser.lift((advance(context), .num(m.doubleValue)))
+        return YAMLParser.lift((advance(context), .dbl(m.doubleValue)))
 
     case .dash:
         return parseBlockSeq(context)
@@ -294,11 +369,12 @@ private func parseValue(_ context: Context) -> YAMLResult<ContextValue> {
         return parseliteral(context)
 
     case .folded:
+        #warning("need to make key Scalar?")
         let cv = parseliteral(context)
         let c = cv >>- getContext
         let v = cv
         >>- getValue
-        >>- { value in JSum.str(foldBlock(value.string ?? "")) }
+        >>- { value in YAML.str(foldBlock(value.string ?? "")) }
         return createContextValue <^> c <*> v
 
     case .indent:
@@ -324,10 +400,10 @@ private func parseValue(_ context: Context) -> YAMLResult<ContextValue> {
         let value = context.aliases[name]
         let err = "unknown alias \(name)"
         return YAMLParser.`guard`(error(err)(context), check: value != nil)
-        >>| YAMLParser.lift((advance(context), value ?? nil))
+        >>| YAMLParser.lift((advance(context), value ?? YAML.null))
 
     case .end, .dedent:
-        return YAMLParser.lift((context, nil))
+        return YAMLParser.lift((context, YAML.null))
 
     default:
         return YAMLParser.fail(error("unexpected type \(peekType(context))")(context))
@@ -335,7 +411,7 @@ private func parseValue(_ context: Context) -> YAMLResult<ContextValue> {
     }
 }
 
-private func addAlias(_ name: String.SubSequence) -> (JSum) -> (Context) -> Context {
+private func addAlias(_ name: String.SubSequence) -> (YAML) -> (Context) -> Context {
     return { value in
         return { context in
             var aliases = context.aliases
@@ -345,11 +421,11 @@ private func addAlias(_ name: String.SubSequence) -> (JSum) -> (Context) -> Cont
     }
 }
 
-private func appendToArray(_ array: [JSum]) -> (JSum) -> [JSum] {
+private func appendToArray(_ array: [YAML]) -> (YAML) -> [YAML] {
     { array + [$0] }
 }
 
-private func putToMap(_ map: [JObj.Key: JSum]) -> (JSum) -> (JSum) -> [JObj.Key: JSum] {
+private func putToMap(_ map: [YAML.Scalar: YAML]) -> (YAML) -> (YAML) -> [YAML.Scalar: YAML] {
     { key in
         { value in
             var map = map
@@ -361,7 +437,7 @@ private func putToMap(_ map: [JObj.Key: JSum]) -> (JSum) -> (JSum) -> [JObj.Key:
     }
 }
 
-private func checkKeyValueUniqueness(_ acc: [JObj.Key: JSum]) ->(_ context: Context, _ key: JObj.Key) -> YAMLResult<ContextKey> {
+private func checkKeyValueUniqueness(_ acc: [YAML.Scalar: YAML]) ->(_ context: Context, _ key: YAML.Scalar) -> YAMLResult<ContextKey> {
     { (context, key) in
         let err = "duplicate key \(key)"
         return YAMLParser.`guard`(error(err)(context), check: !acc.keys.contains(key))
@@ -369,32 +445,33 @@ private func checkKeyValueUniqueness(_ acc: [JObj.Key: JSum]) ->(_ context: Cont
     }
 }
 
-private extension JSum {
-    /// This YAML as a key in a dictionary. Technically, YAML keys can be any type, but we coerce them to a string to work with `JSum.obj`.
-    var yamlKey: JObj.Key? {
-        switch self {
-        case .nul:
-            return nil
-        case .bol(let x):
-            return x.description
-        case .num(let x):
-            return x.description
-        case .str(let x):
-            return x
-        case .arr(_):
-            return nil // cannot be used as a key
-        case .obj(_):
-            return nil // cannot be used as a key
-        }
+private extension YAML {
+    /// This YAML as a key in a dictionary.
+    var yamlKey: Object.Key? {
+        #warning("FIXME")
+        fatalError()
+//        switch self {
+//        case .nul:
+//            return nil
+//        case .bol(let x):
+//            return x.description
+//        case .num(let x):
+//            return x.description
+//        case .str(let x):
+//            return x
+//        case .arr(_):
+//            return nil // cannot be used as a key
+//        case .obj(_):
+//            return nil // cannot be used as a key
+//        }
     }
 }
 
-private func checkKeyUniqueness(_ acc: [JObj.Key: JSum]) ->(_ context: Context, _ value: JSum) -> YAMLResult<ContextValue> {
-    { (context, value) in
-        let key = value.string ?? value.double?.description ?? value.bool?.description ?? ""
-        let err = "duplicate key \(key)"
-        return YAMLParser.`guard`(error(err)(context), check: !acc.keys.contains(key))
-        >>| YAMLParser.lift((context, .str(key)))
+private func checkKeyUniqueness(_ acc: [YAML.Scalar: YAML]) ->(_ context: Context, _ key: YAML) -> YAMLResult<ContextValue> {
+    { (context, key) in
+        let err = "duplicate key"
+        return YAMLParser.`guard`(error(err)(context), check: key.rawValue.a == nil || !acc.keys.contains(key.rawValue.a!))
+        >>| YAMLParser.lift((context, key))
     }
 }
 
@@ -404,7 +481,7 @@ private func parseFlowSeq(_ context: Context) -> YAMLResult<ContextValue> {
     >>=- parseFlowSeq([])
 }
 
-private func parseFlowSeq(_ acc: [JSum]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseFlowSeq(_ acc: [YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         if peekType(context) == .closeSB {
             return YAMLParser.lift((advance(context), .arr(acc)))
@@ -429,7 +506,7 @@ private func parseFlowMap(_ context: Context) -> YAMLResult<ContextValue> {
     >>=- parseFlowMap([:])
 }
 
-private func parseFlowMap(_ acc: [JObj.Key: JSum]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseFlowMap(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         if peekType(context) == .closeCB {
             return YAMLParser.lift((advance(context), .obj(acc)))
@@ -458,7 +535,7 @@ private func parseBlockSeq(_ context: Context) -> YAMLResult<ContextValue> {
     parseBlockSeq([])(context)
 }
 
-private func parseBlockSeq(_ acc: [JSum]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseBlockSeq(_ acc: [YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         if peekType(context) != .dash {
             return YAMLParser.lift((context, .arr(acc)))
@@ -483,7 +560,7 @@ private func parseBlockMap(_ context: Context) -> YAMLResult<ContextValue> {
     parseBlockMap([:])(context)
 }
 
-private func parseBlockMap(_ acc: [JObj.Key: JSum]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseBlockMap(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         switch peekType(context) {
 
@@ -499,7 +576,7 @@ private func parseBlockMap(_ acc: [JObj.Key: JSum]) -> (Context) -> YAMLResult<C
     }
 }
 
-private func parseQuestionMarkkeyValue(_ acc: [JObj.Key: JSum]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseQuestionMarkkeyValue(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         let ck = YAMLParser.lift(context)
         >>=- expect(.questionMark, message: "expected ?")
@@ -521,7 +598,7 @@ private func parseQuestionMarkkeyValue(_ acc: [JObj.Key: JSum]) -> (Context) -> 
 
 private func parseColonValueOrNil(_ context: Context) -> YAMLResult<ContextValue> {
     if peekType(context) != .colon {
-        return YAMLParser.lift((context, nil))
+        return YAMLParser.lift((context, YAML.null))
     }
     return parseColonValue(context)
 }
@@ -533,7 +610,7 @@ private func parseColonValue(_ context: Context) -> YAMLResult<ContextValue> {
     >>=- parseValue
 }
 
-private func parseStringKeyValue(_ acc: [JObj.Key: JSum]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseStringKeyValue(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         let ck = YAMLParser.lift(context)
         >>=- parseString
@@ -870,7 +947,7 @@ private extension YAMLParser  {
     static func `guard`(_ error: @autoclosure() -> String, check: Bool) -> YAMLResult<()> { check ? lift(()) : .error(error()) }
 }
 
-private extension JSum {
+private extension YAML {
     enum TokenType: String {
         case yamlDirective = "%YAML"
         case docStart = "doc-start"
@@ -918,7 +995,7 @@ private extension JSum {
     }
 }
 
-private typealias TokenPattern = (type: JSum.TokenType, pattern: NSRegularExpression)
+private typealias TokenPattern = (type: YAML.TokenType, pattern: NSRegularExpression)
 
 private let bBreak = "(?:\\r\\n|\\r|\\n)"
 
@@ -976,7 +1053,7 @@ private let tokenPatterns: [TokenPattern] = [
 ]
 
 private extension YAMLParser {
-    typealias TokenMatch = (type: JSum.TokenType, match: String)
+    typealias TokenMatch = (type: YAML.TokenType, match: String)
 
     static func escapeErrorContext(_ text: String) -> String {
         let endIndex = text.index(text.startIndex, offsetBy: 50, limitedBy: text.endIndex) ?? text.endIndex

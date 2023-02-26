@@ -253,9 +253,9 @@ extension Either.Or where B : EitherOr, B.A : EitherOr {
     public init(_ rawValue: B.A.B) { self = .init(.init(.init(rawValue))) }
 
     /// `B.P.P` if that is the case
-    public func infer() -> B.A.A? { infer()?.infer()?.infer() }
+    public func infer() -> B.A.A? { infer()?.infer() }
     /// `B.P.B` if that is the case
-    public func infer() -> B.A.B? { infer()?.infer()?.infer() }
+    public func infer() -> B.A.B? { infer()?.infer() }
 }
 
 extension Either.Or where B : EitherOr, B.B : EitherOr {
@@ -263,9 +263,19 @@ extension Either.Or where B : EitherOr, B.B : EitherOr {
     public init(_ rawValue: B.B.B) { self = .init(.init(.init(rawValue))) }
 
     /// `B.B.P` if that is the case
-    public func infer() -> B.B.A? { infer()?.infer()?.infer() }
+    public func infer() -> B.B.A? { infer()?.infer() }
     /// `B.B.B` if that is the case
-    public func infer() -> B.B.B? { infer()?.infer()?.infer() }
+    public func infer() -> B.B.B? { infer()?.infer() }
+}
+
+extension Either.Or where B : EitherOr, B.B : EitherOr, B.B.B : EitherOr {
+    public init(_ rawValue: B.B.B.A) { self = .init(.init(.init(rawValue))) }
+    public init(_ rawValue: B.B.B.B) { self = .init(.init(.init(rawValue))) }
+
+    /// `B.B.P` if that is the case
+    public func infer() -> B.B.B.A? { infer()?.infer() }
+    /// `B.B.B` if that is the case
+    public func infer() -> B.B.B.B? { infer()?.infer() }
 }
 
 // … and so on …
@@ -410,17 +420,21 @@ public typealias RawCodable = Alias
 public protocol Alias : Isomorph, Codable {
 }
 
-extension Alias where RawValue : Codable {
-    /// An `Alias` deserializes from the underlying type's decoding with any intermediate wrapper
-    init(from decoder: Decoder) throws {
-        try self.init(rawValue: RawValue(from: decoder))
-    }
+// This is the template for an implementation of Codable, but the default implementation in the protocol isn't used.
 
-    /// An `Alias` serializes to the underlying type's encoding with any intermediate wrapper
-    func encode(to encoder: Encoder) throws {
-        try rawValue.encode(to: encoder)
-    }
-}
+//extension Decodable where Self: Isomorph, Self.RawValue : Decodable {
+//    /// An `Isomorph` deserializes from the underlying type's decoding with any intermediate wrapper
+//    init(from decoder: Decoder) throws {
+//        try self.init(rawValue: RawValue(from: decoder))
+//    }
+//}
+
+//extension Isomorph where RawValue : Encodable {
+//    /// An `Isomorph` serializes to the underlying type's encoding with any intermediate wrapper
+//    func encode(to encoder: Encoder) throws {
+//        try rawValue.encode(to: encoder)
+//    }
+//}
 
 /// Conformance requirements of `Isomorph` to `CaseIterable` when the `rawValue` is a `CaseIterable`.
 ///

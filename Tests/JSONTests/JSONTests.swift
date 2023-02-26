@@ -55,13 +55,23 @@ final class JSONTests : XCTestCase {
         XCTAssertEqual(js["array"]?[1], .null)
         XCTAssertEqual(js["array"]?[2], "foo")
 
-        let data = try js.json()
-        XCTAssertEqual(data.utf8String, """
+        XCTAssertEqual(JSON.null, try JSON(fromJSON: "null".utf8Data))
+        XCTAssertEqual(JSON.false, try JSON(fromJSON: "false".utf8Data))
+        XCTAssertEqual(JSON.true, try JSON(fromJSON: "true".utf8Data))
+        XCTAssertEqual(1.0, try JSON(fromJSON: "1.0".utf8Data))
+        XCTAssertEqual(1.1, try JSON(fromJSON: "1.1".utf8Data))
+        XCTAssertEqual("abc", try JSON(fromJSON: #""abc""#.utf8Data))
+        XCTAssertEqual(["abc"], try JSON(fromJSON: #"["abc"]"#.utf8Data))
+
+        let json = try js.canonicalJSON
+
+        XCTAssertEqual(json, """
         {"array":[1,null,"foo"],"bool":false,"null":null,"number":1.23,"object":{"x":"a","y":5,"z":{}},"string":"hello"}
         """)
 
-//        let js2 = try JSON(json: data)
-//        XCTAssertEqual(js, js2)
+
+        let js2 = try JSON(fromJSON: json.utf8Data)
+        XCTAssertEqual(js, js2)
     }
 
 
@@ -90,10 +100,10 @@ final class JSONTests : XCTestCase {
             } else {
                 // create a primitive child
                 switch Int.random(in: 0...3, using: &rng) {
-                case 0: values.append(JSum.bol(.random(using: &rng)))
-                case 1: values.append(JSum.num(Double.random(in: -999999...999999, using: &rng)))
-                case 2: values.append(JSum.str(uuid().uuidString))
-                default: values.append(.nul)
+                case 0: values.append(JSON.bol(.random(using: &rng)))
+                case 1: values.append(JSON.num(Double.random(in: -999999...999999, using: &rng)))
+                case 2: values.append(JSON.str(uuid().uuidString))
+                default: values.append(.null)
                 }
             }
         }
@@ -117,7 +127,7 @@ final class JSONTests : XCTestCase {
 //        try measureParsing(kind: .json)
 //    }
 //
-//    func testParseJSumPerformance() throws {
+//    func testParseJSONPerformance() throws {
 //        // DEBUG: 14K: measured [Time, seconds] average: 0.002, relative standard deviation: 4.282%, values: [0.002516, 0.002369, 0.002197, 0.002189, 0.002437, 0.002381, 0.002297, 0.002350, 0.002295, 0.002236]
 //        // DEBUG: 136K: measured [Time, seconds] average: 0.021, relative standard deviation: 5.877%, values: [0.023745, 0.022153, 0.020028, 0.020618, 0.019954, 0.020540, 0.019805, 0.020610, 0.019882, 0.019749]
 //        try measureParsing(kind: .jsum)
@@ -130,12 +140,12 @@ final class JSONTests : XCTestCase {
 //    }
 
     func testCodableComplete() throws {
-        XCTAssertNil(try JSum.codableComplete(data: #"{}"#.utf8Data).difference)
-        XCTAssertNil(try JSum.codableComplete(data: #"[]"#.utf8Data).difference)
-        XCTAssertNil(try JSum.codableComplete(data: #""x""#.utf8Data).difference)
-        XCTAssertNil(try JSum.codableComplete(data: #"12.34"#.utf8Data).difference)
-        XCTAssertNil(try JSum.codableComplete(data: #"false"#.utf8Data).difference)
-        XCTAssertNil(try JSum.codableComplete(data: #"null"#.utf8Data).difference)
+        XCTAssertNil(try JSON.codableComplete(data: #"{}"#.utf8Data).difference)
+        XCTAssertNil(try JSON.codableComplete(data: #"[]"#.utf8Data).difference)
+        XCTAssertNil(try JSON.codableComplete(data: #""x""#.utf8Data).difference)
+        XCTAssertNil(try JSON.codableComplete(data: #"12.34"#.utf8Data).difference)
+        XCTAssertNil(try JSON.codableComplete(data: #"false"#.utf8Data).difference)
+        XCTAssertNil(try JSON.codableComplete(data: #"null"#.utf8Data).difference)
 
         struct Stuff : Codable {
             let str: String?
@@ -150,7 +160,7 @@ final class JSONTests : XCTestCase {
         XCTAssertNotNil(try Stuff.codableComplete(data: #"{ "str": "abc", "q": false }"#.utf8Data).difference, "should have shown a difference for unrecognized property")
     }
 
-    func testJSumCoding() throws {
+    func testJSONCoding() throws {
         struct Simple : Codable {
             var str: String?
             var int: Int?
@@ -175,10 +185,10 @@ final class JSONTests : XCTestCase {
         XCTAssertEqual([false, nil, true], try Simple(jsum: ["arr": [false, nil, true]]).arr)
 
 //        XCTAssertEqual(0, try JSumDecoder(options: .init(dateDecodingStrategy: .iso8601)).decode(Simple.self, from: ["date": .str(Date(timeIntervalSinceReferenceDate: 0).ISO8601Format())]).date?.timeIntervalSinceReferenceDate)
-        XCTAssertEqual(0, try JSumDecoder(options: .init(dateDecodingStrategy: .secondsSince1970)).decode(Simple.self, from: ["date": .num(Date(timeIntervalSinceReferenceDate: 0).timeIntervalSince1970)]).date?.timeIntervalSinceReferenceDate)
-        XCTAssertEqual(0, try JSumDecoder(options: .init(dateDecodingStrategy: .millisecondsSince1970)).decode(Simple.self, from: ["date": .num(Date(timeIntervalSinceReferenceDate: 0).timeIntervalSince1970 * 1000)]).date?.timeIntervalSinceReferenceDate)
+        XCTAssertEqual(0, try JSumDecoder(options: .init(dateDecodingStrategy: .secondsSince1970)).decode(Simple.self, from: ["date": JSON.num(Date(timeIntervalSinceReferenceDate: 0).timeIntervalSince1970)]).date?.timeIntervalSinceReferenceDate)
+        XCTAssertEqual(0, try JSumDecoder(options: .init(dateDecodingStrategy: .millisecondsSince1970)).decode(Simple.self, from: ["date": JSON.num(Date(timeIntervalSinceReferenceDate: 0).timeIntervalSince1970 * 1000)]).date?.timeIntervalSinceReferenceDate)
 
-        XCTAssertEqual("abc".utf8Data, try JSumDecoder(options: .init(dataDecodingStrategy: .base64)).decode(Simple.self, from: ["data": .str("YWJj")]).data)
+        XCTAssertEqual("abc".utf8Data, try JSumDecoder(options: .init(dataDecodingStrategy: .base64)).decode(Simple.self, from: ["data": JSON.str("YWJj")]).data)
 
         // a custom decoder that takes an int and decodes a 0-filled Data of that size
         XCTAssertEqual(Data(repeating: 0, count: 123), try JSumDecoder(options: .init(dataDecodingStrategy: .custom({ decoder in

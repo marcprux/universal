@@ -2,6 +2,7 @@
  Copyright (c) 2015-2023 Marc Prud'hommeaux
  */
 import Swift
+import Quanta
 
 #if canImport(Foundation)
 import Foundation
@@ -361,7 +362,7 @@ fileprivate struct _JSumUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         self.container = container
     }
 
-    public mutating func encodeNil() throws { try container.addElement(.init(jsum: JSum.nul)) }
+    public mutating func encodeNil() throws { try container.addElement(.init(jsum: JSum.null)) }
     public mutating func encode(_ value: Bool) throws { try container.addElement(encoder.box(value)) }
     public mutating func encode(_ value: Int) throws { try container.addElement(encoder.box(value)) }
     public mutating func encode(_ value: Int8) throws { try container.addElement(encoder.box(value)) }
@@ -419,7 +420,7 @@ extension JSumElementEncoder: SingleValueEncodingContainer {
 
     public func encodeNil() throws {
         assertCanEncodeNewValue()
-        self.storage.push(container: _JSumContainer(jsum: JSum.nul))
+        self.storage.push(container: _JSumContainer(jsum: JSum.null))
     }
 
     public func encode(_ value: Bool) throws {
@@ -699,7 +700,7 @@ fileprivate struct _JSumKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
     }
 
     public mutating func encodeNil(forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(jsum: .nul))
+        try container.setProperty(key.stringValue, .init(jsum: .null))
     }
 
     public mutating func encode(_ value: Bool, forKey key: Key) throws {
@@ -884,13 +885,13 @@ fileprivate class _JSumDecoder: Decoder {
     }
 
     public func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> {
-        guard !(self.storage.topContainer == .nul) else {
+        guard !(self.storage.topContainer == .null) else {
             throw DecodingError.valueNotFound(KeyedDecodingContainer<Key>.self,
                                               DecodingError.Context(codingPath: self.codingPath,
                                                                     debugDescription: "Cannot get keyed decoding container -- found null value instead."))
         }
 
-        guard case .obj(let obj) = self.storage.topContainer else {
+        guard let obj = self.storage.topContainer.obj else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: Any].self, reality: self.storage.topContainer)
         }
 
@@ -899,13 +900,13 @@ fileprivate class _JSumDecoder: Decoder {
     }
 
     public func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-        guard !(self.storage.topContainer == .nul) else {
+        guard !(self.storage.topContainer == .null) else {
             throw DecodingError.valueNotFound(UnkeyedDecodingContainer.self,
                                               DecodingError.Context(codingPath: self.codingPath,
                                                                     debugDescription: "Cannot get unkeyed decoding container -- found null value instead."))
         }
 
-        guard case .arr(let arr) = self.storage.topContainer else {
+        guard let arr = self.storage.topContainer.arr else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: self.storage.topContainer)
         }
 
@@ -972,7 +973,7 @@ fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
     }
 
     public func decodeNil(forKey key: Key) throws -> Bool {
-        (self.container[key.stringValue] == .nul) != false
+        (self.container[key.stringValue] == .null) != false
     }
 
     public func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool {
@@ -1209,7 +1210,7 @@ fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
                                                                     debugDescription: "Cannot get nested keyed container -- no value found for key \"\(key.stringValue)\""))
         }
 
-        guard let obj = value.dictionary else {
+        guard let obj = value.obj else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: Any].self, reality: value)
         }
 
@@ -1227,7 +1228,7 @@ fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
                                                                     debugDescription: "Cannot get nested unkeyed container -- no value found for key \"\(key.stringValue)\""))
         }
 
-        guard let array = value.array else {
+        guard let array = value.arr else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: value)
         }
 
@@ -1238,7 +1239,7 @@ fileprivate struct _JSumKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
         self.decoder.codingPath.append(key)
         defer { self.decoder.codingPath.removeLast() }
 
-        let value: JSum = self.container[key.stringValue] ?? .nul
+        let value: JSum = self.container[key.stringValue] ?? .null
         return _JSumDecoder(options: self.decoder.options, referencing: value, at: self.decoder.codingPath)
     }
 
@@ -1285,7 +1286,7 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             throw DecodingError.valueNotFound(Any?.self, DecodingError.Context(codingPath: self.decoder.codingPath + [_JSumKey(index: self.currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
-        if self.container[self.currentIndex] == .nul {
+        if self.container[self.currentIndex] == .null {
             self.currentIndex += 1
             return true
         } else {
@@ -1544,11 +1545,11 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
 
         let value = self.container[self.currentIndex]
-        guard value != .nul else {
+        guard value != .null else {
             throw DecodingError.valueNotFound(KeyedDecodingContainer<NestedKey>.self, DecodingError.Context(codingPath: self.codingPath, debugDescription: "Cannot get keyed decoding container -- found null value instead."))
         }
 
-        guard let obj = value.dictionary else {
+        guard let obj = value.obj else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: JSum].self, reality: value)
         }
 
@@ -1568,13 +1569,13 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
 
         let value = self.container[self.currentIndex]
-        guard !(value == .nul) else {
+        guard !(value == .null) else {
             throw DecodingError.valueNotFound(UnkeyedDecodingContainer.self,
                                               DecodingError.Context(codingPath: self.codingPath,
                                                                     debugDescription: "Cannot get keyed decoding container -- found null value instead."))
         }
 
-        guard case .arr(let arr) = value else {
+        guard let arr = value.arr else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: value)
         }
 
@@ -1599,13 +1600,13 @@ fileprivate struct _JSumUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
 extension _JSumDecoder: SingleValueDecodingContainer {
     private func expectNonNull<T>(_ type: T.Type) throws {
-        if storage.topContainer == .nul {
+        if storage.topContainer == .null {
             throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected \(type) but found null value instead."))
         }
     }
 
     public func decodeNil() -> Bool {
-        storage.topContainer == .nul
+        storage.topContainer == .null
     }
 
     public func decode(_ type: Bool.Type) throws -> Bool {
@@ -1695,7 +1696,7 @@ internal var _iso8601Formatter: ISO8601DateFormatter = {
 extension _JSumDecoder {
     /// Returns the given value unboxed from a container.
     fileprivate func unbox(_ value: JSum, as type: Bool.Type) throws -> Bool? {
-        guard case .bol(let bol) = value else {
+        guard let bol = value.bol else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
@@ -1703,7 +1704,7 @@ extension _JSumDecoder {
     }
 
     fileprivate func unboxNumber(_ value: JSum) throws -> Double {
-        guard case .num(let num) = value else {
+        guard let num = value.num else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: Double.self, reality: value)
         }
         return num
@@ -1714,7 +1715,7 @@ extension _JSumDecoder {
     }
 
     fileprivate func unbox(_ value: JSum, as type: String.Type) throws -> String? {
-        guard case .str(let str) = value else {
+        guard let str = value.str else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
@@ -1742,7 +1743,7 @@ extension _JSumDecoder {
 
         case .iso8601:
             if #available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *) {
-                guard let string = value.string,
+                guard let string = value.str,
                       let date = _iso8601Formatter.date(from: string) else {
                     throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
                 }
@@ -1753,7 +1754,7 @@ extension _JSumDecoder {
             }
 
         case .formatted(let formatter):
-            guard let string = value.string else {
+            guard let string = value.str else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
             }
             guard let date = formatter.date(from: string) else {
@@ -1775,7 +1776,7 @@ extension _JSumDecoder {
             return try Data(from: self)
 
         case .base64:
-            guard let string = value.string else {
+            guard let string = value.str else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected data to be Base64."))
             }
 
@@ -1794,7 +1795,7 @@ extension _JSumDecoder {
     }
 
     fileprivate func unbox(_ value: JSum, as type: URL.Type) throws -> URL? {
-        guard let string = value.string else {
+        guard let string = value.str else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected URL string."))
         }
 
@@ -1855,16 +1856,15 @@ fileprivate struct _JSumKey: CodingKey {
 
 #endif
 
-
 public extension Decodable {
     /// Initialized this instance from a JSON string
-    init(json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws {
+    init(fromJSON json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws {
         let decoder = decoder()
-    #if !os(Linux) && !os(Android) && !os(Windows)
+        #if !os(Linux) && !os(Android) && !os(Windows)
         if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
             decoder.allowsJSON5 = allowsJSON5
         }
-    #endif
+        #endif
 
         if let dateDecodingStrategy = dateDecodingStrategy {
             decoder.dateDecodingStrategy = dateDecodingStrategy
@@ -1901,7 +1901,7 @@ extension Encodable {
     ///   - keyEncodingStrategy: the strategy for encoding keys
     ///   - userInfo: additional user info to pass to the encoder
     /// - Returns: the JSON-encoded `Data`
-    @inlinable public func json(encoder: @autoclosure () -> JSONEncoder = JSONEncoder(), outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Data {
+    @inlinable public func toJSON(encoder: @autoclosure () -> JSONEncoder = JSONEncoder(), outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Data {
         let formatting: JSONEncoder.OutputFormatting
         if #available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *) {
             formatting = outputFormatting ?? [.sortedKeys, .withoutEscapingSlashes]
@@ -1941,7 +1941,7 @@ extension Encodable {
     /// Returns the pretty-printed form of the JSON
     public var prettyJSON: String {
         get throws {
-            try json(encoder: prettyJSONEncoder).utf8String ?? "{}"
+            try toJSON(encoder: prettyJSONEncoder).utf8String ?? "{}"
         }
     }
 
@@ -1950,14 +1950,14 @@ extension Encodable {
     /// The encoder replicates JSON Canonical form [JSON Canonicalization Scheme (JCS)](https://tools.ietf.org/id/draft-rundgren-json-canonicalization-scheme-05.html)
     public var canonicalJSON: String {
         get throws {
-            try json(encoder: canonicalJSONEncoder).utf8String ?? "{}"
+            try toJSON(encoder: canonicalJSONEncoder).utf8String ?? "{}"
         }
     }
 
     /// Returns the debug form of the JSON
     public var debugJSON: String {
         get throws {
-            try json(encoder: debugJSONEncoder).utf8String ?? "{}"
+            try toJSON(encoder: debugJSONEncoder).utf8String ?? "{}"
         }
     }
 }
@@ -2002,6 +2002,298 @@ let canonicalJSONEncoder: JSONEncoder = {
     return encoder
 }()
 
+
+
+
+
+/// A JSum is a Joint Sum type, which is an enumeration that can represent one of:
+///
+/// - `JSum.bol`: `Bool`
+/// - `JSum.str`: `String`
+/// - `JSum.num`: `Double`
+/// - `JSum.arr`: `Array<JSum>`
+/// - `JSum.obj`: `Dictionary<String, JSum>`
+/// - `JSum.null`: `nil`
+///
+/// The type can be fluently represented with literals that closely match JSON, such as:
+///
+/// ```
+/// let ob: JSum = [
+///    "string": "hello",
+///    "number": 1.23,
+///    "null": nil,
+///    "array": [1, nil, "foo"],
+///    "object": [
+///        "x": "a",
+///        "y": 5,
+///        "z": [:]
+///    ]
+/// ]
+/// ```
+///
+/// JSum can be created by parsing JSON, YAML, or Property List sources.
+///
+/// They can also be used to instatiate a `Decodable` instance directly using the `Decodable.init(jsum:)` initializer.
+@available(*, deprecated, renamed: "JSON")
+public typealias JSum = JSON
+
+@frozen public enum JSumOLD : Hashable, Sendable {
+    case arr([JSum]) // Array
+    case obj(JObj) // Dictionary
+    case str(String) // String
+    case num(Double) // Number
+    case bol(Bool) // Boolean
+    case nul // Null
+}
+
+/// A `JObj` is the associated dictionary type for a `JSum.obj`, which is equivalent to a JSON "object".
+public typealias JObj = [String: JSum]
+
+public extension JSumOLD {
+    /// Returns the ``Bool`` value of type ``bol``.
+    var bool: Bool? {
+        switch self {
+        case .bol(let b):
+            return b
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the ``Int`` value of type ``num``.
+    var int: Int? {
+        switch self {
+        case .num(let f):
+            if Double(Int(f)) == f {
+                return Int(f)
+            } else {
+                return nil
+            }
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the ``Double`` value of type ``num``.
+    var double: Double? {
+        switch self {
+        case .num(let f):
+            return f
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the ``String`` value of type ``str``.
+    var string: String? {
+        switch self {
+        case .str(let s):
+            return s
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the ``Array<JSum>`` value of type ``arr``.
+    var array: [JSum]? {
+        switch self {
+        case .arr(let array):
+            return array
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the ``dictionary<String, JSum>`` value of type ``obj``.
+    var dictionary: [JObj.Key: JSum]? {
+        switch self {
+        case .obj(let dictionary):
+            return dictionary
+        default:
+            return nil
+        }
+    }
+
+    /// Returns the number of elements for an ``arr`` or key/values for an ``obj``
+    var count: Int? {
+        switch self {
+        case .arr(let array):
+            return array.count
+        case .obj(let dictionary):
+            return dictionary.count
+        default:
+            return nil
+        }
+    }
+}
+extension JSumOLD : ExpressibleByNilLiteral {
+    /// Creates ``nul`` JSum
+    @inlinable public init(nilLiteral: ()) {
+        self = .nul
+    }
+}
+
+extension JSumOLD : ExpressibleByBooleanLiteral {
+    /// Creates boolean JSum
+    @inlinable public init(booleanLiteral value: BooleanLiteralType) {
+        self = .bol(value)
+    }
+}
+
+extension JSumOLD : ExpressibleByFloatLiteral {
+    /// Creates numeric JSum
+    @inlinable public init(floatLiteral value: FloatLiteralType) {
+        self = .num(value)
+    }
+}
+
+extension JSumOLD : ExpressibleByIntegerLiteral {
+    /// Creates numeric JSum
+    @inlinable public init(integerLiteral value: IntegerLiteralType) {
+        self = .num(Double(value))
+    }
+}
+
+extension JSumOLD : ExpressibleByArrayLiteral {
+    /// Creates an array of JSum
+    @inlinable public init(arrayLiteral elements: JSum...) {
+        self = .arr(elements)
+    }
+}
+
+extension JSumOLD : ExpressibleByStringLiteral {
+    /// Creates String JSum
+    @inlinable public init(stringLiteral value: String) {
+        self = .str(value)
+    }
+}
+
+extension JSumOLD : ExpressibleByDictionaryLiteral {
+    /// Creates a dictionary of `String` to `JSum`
+    @inlinable public init(dictionaryLiteral elements: (String, JSum)...) {
+        var d: Dictionary<String, JSum> = [:]
+        for (k, v) in elements { d[k] = v }
+        self = .obj(d)
+    }
+}
+
+/// Convenience accessors for the payloads of the various `JSum` types
+public extension JSumOLD {
+    /// Returns the underlying String payload if this is a `JSum.str`, otherwise `.none`
+    @inlinable var str: String? {
+        guard case .str(let str) = self else { return .none }
+        return str
+    }
+
+    /// Returns the underlying Boolean payload if this is a `JSum.bol`, otherwise `.none`
+    @inlinable var bol: Bool? {
+        guard case .bol(let bol) = self else { return .none }
+        return bol
+    }
+
+    /// Returns the underlying Double payload if this is a `JSum.num`, otherwise `.none`
+    @inlinable var num: Double? {
+        guard case .num(let num) = self else { return .none }
+        return num
+    }
+
+    /// Returns the underlying JObj payload if this is a `JSum.obj`, otherwise `.none`
+    @inlinable var obj: JObj? {
+        guard case .obj(let obj) = self else { return .none }
+        return obj
+    }
+
+    /// Returns the underlying Array payload if this is a `JSum.arr`, otherwise `.none`
+    @inlinable var arr: [JSum]? {
+        guard case .arr(let arr) = self else { return .none }
+        return arr
+    }
+
+    /// Returns the underlying `nil` payload if this is a `JSum.nul`, otherwise `.none`
+    @inlinable var nul: Void? {
+        guard case .nul = self else { return .none }
+        return ()
+    }
+
+    /// JSum has a string subscript when it is an object type; setting a value on a non-obj type has no effect
+    @inlinable subscript(key: String) -> JSum? {
+        get {
+            guard case .obj(let obj) = self else { return .none }
+            return obj[key]
+        }
+
+        set {
+            guard case .obj(var obj) = self else { return }
+            obj[key] = newValue
+            self = .obj(obj)
+        }
+    }
+
+    /// JSum has a save indexed subscript when it is an array type; setting a value on a non-array type has no effect
+    @inlinable subscript(index: Int) -> JSum? {
+        get {
+            guard case .arr(let arr) = self else { return .none }
+            if index < 0 || index >= arr.count { return .none }
+            return arr[index]
+        }
+
+        set {
+            guard case .arr(var arr) = self else { return }
+            if index < 0 || index >= arr.count { return }
+            arr[index] = newValue ?? JSum.null
+            self = .arr(arr)
+        }
+    }
+}
+
+extension JSumOLD : Encodable {
+    @inlinable public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .nul: try container.encodeNil()
+        case .bol(let x): try container.encode(x)
+        case .num(let x): try container.encode(x)
+        case .str(let x): try container.encode(x)
+        case .obj(let x): try container.encode(x)
+        case .arr(let x): try container.encode(x)
+        }
+    }
+}
+
+extension JSumOLD : Decodable {
+    @inlinable public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
+        if container.decodeNil() {
+            self = .nul
+        } else {
+            do {
+                self = try .bol(container.decode(Bool.self))
+            } catch DecodingError.typeMismatch {
+                do {
+                    self = try .num(container.decode(Double.self))
+                } catch DecodingError.typeMismatch {
+                    do {
+                        self = try .str(container.decode(String.self))
+                    } catch DecodingError.typeMismatch {
+                        do {
+                            self = try .arr(decode())
+                        } catch DecodingError.typeMismatch {
+                            do {
+                                self = try .obj(decode())
+                            } catch DecodingError.typeMismatch {
+                                throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 extension Decodable where Self : Encodable {
 
     /// Parses this codable into the given data structure, along with a raw `JSum`
@@ -2014,11 +2306,11 @@ extension Decodable where Self : Encodable {
     /// - Returns: a tuple with both the parsed codable instance, as well as an optional `difference` JSum that will be nil if the codability was an exact match
     public static func codableComplete(data: Data, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil) throws -> (instance: Self, difference: JSum?) {
         let item = try (decoder ?? debugJSONDecoder).decode(Self.self, from: data)
-        let itemJSON = try item.json(encoder: encoder ?? canonicalJSONEncoder).utf8String
+        let itemJSON = try item.toJSON(encoder: encoder ?? canonicalJSONEncoder).utf8String
 
         // parse into a generic JSum and ensure that both the items are serialized the same
         let raw = try (decoder ?? debugJSONDecoder).decode(JSum.self, from: data)
-        let rawJSON = try raw.json(encoder: encoder ?? canonicalJSONEncoder).utf8String
+        let rawJSON = try raw.toJSON(encoder: encoder ?? canonicalJSONEncoder).utf8String
 
         return (instance: item, difference: itemJSON == rawJSON ? JSum?.none : raw)
     }

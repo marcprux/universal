@@ -4,12 +4,13 @@
 //  Created by Marc Prud'hommeaux on 8/20/15.
 //
 import Quanta
+import struct Foundation.Data
 
 /// A JSON tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[JSON]`, or `[String: JSON]`
 public struct JSON : Isomorph, Sendable, Hashable {
     public typealias Scalar = ScalarOf<StringLiteralType, FloatLiteralType>
-    public typealias RawValue = Quantum<String, Scalar, JSON>
     public typealias Object = [String: JSON]
+    public typealias RawValue = Quantum<Scalar, Object.Key, Object.Value>
 
     /// The single JSON type
     public static let null = JSON(nilLiteral: ())
@@ -98,13 +99,19 @@ extension JSON : ExpressibleByArrayLiteral {
 }
 
 extension JSON : ExpressibleByDictionaryLiteral {
-    public init(dictionaryLiteral elements: (String, JSON)...) {
+    public init(dictionaryLiteral elements: (JSON.Object.Key, JSON)...) {
         self.rawValue = .init(Quanta(rawValue: .init(Dictionary(uniqueKeysWithValues: elements))))
     }
 }
 
 /// Convenience accessors for the payloads of the various `JSON` types
 public extension JSON {
+    static func str(_ str: String) -> Self { .init(str) }
+    static func num(_ num: Double) -> Self { .init(num) }
+    static func bol(_ bol: Bool) -> Self { .init(bol) }
+    static func arr(_ arr: [JSON]) -> Self { .init(.init(Quanta(rawValue: .init(arr)))) }
+    static func obj(_ obj: [String: JSON]) -> Self { .init(.init(Quanta(rawValue: .init(obj)))) }
+
     /// Returns the underlying String payload if this is a `JSON.str`, otherwise `.none`
     @inlinable var str: String? {
         rawValue.infer()?.infer()
@@ -130,11 +137,6 @@ public extension JSON {
         rawValue.infer()?.rawValue.infer()
     }
 
-    /// Returns the underlying `nil` payload if this is a `JSON.nul`, otherwise `.none`
-//    @inlinable var nul: Never? {
-//        rawValue.infer()?.infer()?.infer()?.infer()
-//    }
-
     /// JSON has a string subscript when it is an object type; setting a value on a non-obj type has no effect
     @inlinable subscript(key: String) -> JSON? {
         obj?[key]
@@ -143,6 +145,19 @@ public extension JSON {
     /// JSON has a save indexed subscript when it is an array type; setting a value on a non-array type has no effect
     @inlinable subscript(index: Int) -> JSON? {
         arr?[index]
+    }
+
+    /// The number of elements this contains: either the count of the underyling array or dictiionary, or 0 if `null`, or else 1 for a scalar.
+    @inlinable var count: Int {
+        switch rawValue {
+        case .a:
+            return isNull ? 0 : 1
+        case .b(let collection):
+            switch collection.rawValue {
+            case .a(let x): return x.count
+            case .b(let x): return x.count
+            }
+        }
     }
 }
 
@@ -174,35 +189,31 @@ extension JSON : Encodable {
     }
 }
 
-//extension JSON : Decodable {
-//    @inlinable public init(from decoder: Decoder) throws {
-//        let container = try decoder.singleValueContainer()
-//        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
-//        if container.decodeNil() {
-//            self = .nul
-//        } else {
-//            do {
-//                self = try .bol(container.decode(Bool.self))
-//            } catch DecodingError.typeMismatch {
-//                do {
-//                    self = try .num(container.decode(Double.self))
-//                } catch DecodingError.typeMismatch {
-//                    do {
-//                        self = try .str(container.decode(String.self))
-//                    } catch DecodingError.typeMismatch {
-//                        do {
-//                            self = try .arr(decode())
-//                        } catch DecodingError.typeMismatch {
-//                            do {
-//                                self = try .obj(decode())
-//                            } catch DecodingError.typeMismatch {
-//                                throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+extension JSON : Decodable {
+    @inlinable public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
+        if container.decodeNil() {
+            self = JSON.null
+        } else {
+            do {
+                self = try JSON(booleanLiteral: container.decode(Bool.self))
+            } catch DecodingError.typeMismatch {
+                do {
+                    self = try JSON(floatLiteral: container.decode(Double.self))
+                } catch DecodingError.typeMismatch {
+                    do {
+                        self = try JSON(stringLiteral: container.decode(String.self))
+                    } catch DecodingError.typeMismatch {
+                        do {
+                            self = try JSON(.init(decode() as Quanta<Key, Value>))
+                        } catch DecodingError.typeMismatch {
+                            throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 

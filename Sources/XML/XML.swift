@@ -26,17 +26,6 @@ public struct XML : Isomorph, Sendable, Hashable, Codable {
     }
 }
 
-
-extension XML {
-    /// Parses the given XML string into a ``JSum``.
-    /// - Parameter xml: the XML string to parse
-    public static func parse(xml: String) throws -> JSum {
-        let node = try XMLNode.parse(data: xml.utf8Data, options: [.processNamespaces], entityResolver: nil)
-        let element = node.elementChildren.first ?? node // get the root element
-        return JSum.obj([element.elementName : element.jsum()])
-    }
-}
-
 /// An XML Element Document, which is an in-memory tree representation
 /// of the contents of an XML source.
 public struct XMLNode : Hashable {
@@ -124,7 +113,7 @@ public struct XMLNode : Hashable {
         var node = XMLNode(elementName: elementName, attributes: attributes)
         if let content = content {
             if CDATA {
-                node.children.append(.cdata(content.utf8Data))
+                node.children.append(.cdata(content.data(using: .utf8) ?? Data()))
             } else {
                 node.children.append(.content(content))
             }
@@ -438,97 +427,108 @@ public extension XMLNode {
 }
 
 
-extension XMLNode {
-    /// Convert this node to either an object (if there are any attributes or content children), or a string value.
-    ///
-    /// - Note: Multiple XML elements children with the same name will be converted to an array of those objects.
-    ///
-    /// This can cause format issues with decoding from the JSum to a data type with a collection element, since
-    /// instances of the document that contain only a single child for those nodes will deserialize it as a single element
-    /// instead of an array. This should be handled by using the `ElementOrArray<Child>` type, which will
-    /// handle both single-instance as well as multi-instanced types.
-    public func jsum() -> JSum {
-        if !self.attributes.isEmpty || !self.elementChildren.isEmpty {
-            return .obj(jobj())
-        } else {
-            return self.children.isEmpty ? .nul : .str(self.stringContent)
-        }
-    }
 
-    /// Converts this XML node into a `JSum`.
-    /// - Parameter collect: whether to treat multiple same-named elements as indicative of an array of instances.
-    /// - Returns: the converted `JSum`.
-    ///
-    /// - Note: The `collect` parameter will change the structure of the returned `JSum` based on whether there are single or multiple instanced of elements of the same name. This introduces special `Decodable` considerations, since the property of a `JSum` can be either a single element or an array, depending on the number of elements the document happens to hold. For these cases, the proeprties should be typed as an ``ElementOrArray`` to automatically handle either case.
-    ///
-    /// For example, the XML `<things><x>1</x><y>2</y><z>3</z></things>` will be parsed as:
-    /// ```
-    /// {
-    ///   "things": {
-    ///     "x": "1",
-    ///     "y": "2",
-    ///     "z": "3"
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// When collect = `false`, the XML `<things><x>1</x><y>2</y><x>3</x></things>` will be parsed in a lossy way:
-    /// ```
-    /// {
-    ///   "things": {
-    ///     "x": "3",
-    ///     "y": "2"
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// When collect=`true`, the same XML `<things><x>1</x><y>2</y><x>3</x></things>` will be parsed where `x` becomes an array:
-    /// ```
-    /// {
-    ///   "things": {
-    ///     "x": [
-    ///       "1",
-    ///       "3"
-    ///     ],
-    ///     "y": "2"
-    ///   }
-    /// }
-    /// ```
-    func jobj(collect: Bool = true) -> JObj {
-        let attrs = self.attributes
-        let childs = self.children
-        var obj = JObj()
-        for (key, value) in attrs {
-            obj[key] = .str(value)
-        }
-        for child in childs {
-            switch child {
-            case .element(let element):
-                if collect == true, let existing = obj[element.elementName] {
-                    // the element already exists … re-use an existing array, or else wrap it in one
-                    var array = existing.arr ?? [existing]
-                    array.append(element.jsum())
-                    obj[element.elementName] = .arr(array)
-                } else {
-                    // place the element as a single root element
-                    obj[element.elementName] = element.jsum()
-                }
-            case .content(let value):
-                obj["_"] = .str(value)
-            case .comment(_):
-                break
-            case .cdata(_):
-                break
-            case .whitespace(_):
-                break
-            case .processingInstruction:
-                break
-            }
-        }
-
-        return obj
-    }
-}
+//extension XML {
+//    /// Parses the given XML string into a ``XML``.
+//    /// - Parameter xml: the XML string to parse
+//    public static func parse(xml: String) throws -> XML {
+//        let node = try XMLNode.parse(data: xml.data(using: .utf8) ?? Data(), options: [.processNamespaces], entityResolver: nil)
+//        let element = node.elementChildren.first ?? node // get the root element
+////        return XML.obj([element.elementName : element.jsum()])
+//    }
+//}
+//
+//extension XMLNode {
+//    /// Convert this node to either an object (if there are any attributes or content children), or a string value.
+//    ///
+//    /// - Note: Multiple XML elements children with the same name will be converted to an array of those objects.
+//    ///
+//    /// This can cause format issues with decoding from the JSum to a data type with a collection element, since
+//    /// instances of the document that contain only a single child for those nodes will deserialize it as a single element
+//    /// instead of an array. This should be handled by using the `ElementOrArray<Child>` type, which will
+//    /// handle both single-instance as well as multi-instanced types.
+//    public func jsum() -> JSum {
+//        if !self.attributes.isEmpty || !self.elementChildren.isEmpty {
+//            return .obj(jobj())
+//        } else {
+//            return self.children.isEmpty ? .nul : .str(self.stringContent)
+//        }
+//    }
+//
+//    /// Converts this XML node into a `JSum`.
+//    /// - Parameter collect: whether to treat multiple same-named elements as indicative of an array of instances.
+//    /// - Returns: the converted `JSum`.
+//    ///
+//    /// - Note: The `collect` parameter will change the structure of the returned `JSum` based on whether there are single or multiple instanced of elements of the same name. This introduces special `Decodable` considerations, since the property of a `JSum` can be either a single element or an array, depending on the number of elements the document happens to hold. For these cases, the proeprties should be typed as an ``ElementOrArray`` to automatically handle either case.
+//    ///
+//    /// For example, the XML `<things><x>1</x><y>2</y><z>3</z></things>` will be parsed as:
+//    /// ```
+//    /// {
+//    ///   "things": {
+//    ///     "x": "1",
+//    ///     "y": "2",
+//    ///     "z": "3"
+//    ///   }
+//    /// }
+//    /// ```
+//    ///
+//    /// When collect = `false`, the XML `<things><x>1</x><y>2</y><x>3</x></things>` will be parsed in a lossy way:
+//    /// ```
+//    /// {
+//    ///   "things": {
+//    ///     "x": "3",
+//    ///     "y": "2"
+//    ///   }
+//    /// }
+//    /// ```
+//    ///
+//    /// When collect=`true`, the same XML `<things><x>1</x><y>2</y><x>3</x></things>` will be parsed where `x` becomes an array:
+//    /// ```
+//    /// {
+//    ///   "things": {
+//    ///     "x": [
+//    ///       "1",
+//    ///       "3"
+//    ///     ],
+//    ///     "y": "2"
+//    ///   }
+//    /// }
+//    /// ```
+//    func jobj(collect: Bool = true) -> JObj {
+//        let attrs = self.attributes
+//        let childs = self.children
+//        var obj = JObj()
+//        for (key, value) in attrs {
+//            obj[key] = .str(value)
+//        }
+//        for child in childs {
+//            switch child {
+//            case .element(let element):
+//                if collect == true, let existing = obj[element.elementName] {
+//                    // the element already exists … re-use an existing array, or else wrap it in one
+//                    var array = existing.arr ?? [existing]
+//                    array.append(element.jsum())
+//                    obj[element.elementName] = .arr(array)
+//                } else {
+//                    // place the element as a single root element
+//                    obj[element.elementName] = element.jsum()
+//                }
+//            case .content(let value):
+//                obj["_"] = .str(value)
+//            case .comment(_):
+//                break
+//            case .cdata(_):
+//                break
+//            case .whitespace(_):
+//                break
+//            case .processingInstruction:
+//                break
+//            }
+//        }
+//
+//        return obj
+//    }
+//}
 
 
 internal extension String {

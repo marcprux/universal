@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "MarcUp",
+    name: "Universal",
     products: [
         .library(name: "Either", targets: ["Either"]),
         .library(name: "Quanta", targets: ["Quanta"]),
         .library(name: "XML", targets: ["XML"]),
         .library(name: "YAML", targets: ["YAML"]),
         .library(name: "JSON", targets: ["JSON"]),
-        .library(name: "MarcUp", targets: ["MarcUp"]),
+        .library(name: "Universal", targets: ["Universal"]),
         ],
     dependencies: [
     ],
@@ -24,8 +24,8 @@ let package = Package(
         .testTarget(name: "YAMLTests", dependencies: ["YAML"], resources: []),
         .target(name: "JSON", dependencies: ["Quanta"]),
         .testTarget(name: "JSONTests", dependencies: ["JSON"], resources: []),
-        .target(name: "MarcUp", dependencies: ["XML", "YAML", "JSON"]),
-        .testTarget(name: "MarcUpTests", dependencies: ["MarcUp"], resources: [.copy("testdata/")]),
+        .target(name: "Universal", dependencies: ["XML", "YAML", "JSON"]),
+        .testTarget(name: "UniversalTests", dependencies: ["Universal"], resources: [.copy("testdata/")]),
         ]
 )
 

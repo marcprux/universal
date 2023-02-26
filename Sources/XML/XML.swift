@@ -12,14 +12,16 @@ import FoundationXML
 
 
 /// An XML tree node, which can contain a `String`, `[XML]`, or `[String: XML]`
-public struct XML : Isomorph {
-    public var rawValue: Quanta<String, String>
+public struct XML : Isomorph, Sendable, Hashable, Codable {
+    public typealias RawValue = Quantum<String, String, XML>
 
-    public init(rawValue: Quanta<String, String>) {
+    public var rawValue: RawValue
+
+    public init(rawValue: RawValue) {
         self.rawValue = rawValue
     }
 
-    public init(_ rawValue: Quanta<String, String>) {
+    public init(_ rawValue: RawValue) {
         self.rawValue = rawValue
     }
 }

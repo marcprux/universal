@@ -5,14 +5,17 @@ import Quanta
 
 
 /// A YAML tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`
-public struct YAML : Isomorph {
-    public var rawValue: Quanta<Scalar, Scalar>
+public struct YAML : Isomorph, Sendable, Hashable, Codable {
+    public typealias Scalar = ScalarOf<StringLiteralType, FloatLiteralType>
+    public typealias RawValue = Quantum<Scalar, Scalar, YAML>
 
-    public init(rawValue: Quanta<Scalar, Scalar>) {
+    public var rawValue: RawValue
+
+    public init(rawValue: RawValue) {
         self.rawValue = rawValue
     }
 
-    public init(_ rawValue: Quanta<Scalar, Scalar>) {
+    public init(_ rawValue: RawValue) {
         self.rawValue = rawValue
     }
 }

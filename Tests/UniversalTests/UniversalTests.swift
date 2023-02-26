@@ -1,18 +1,18 @@
 //
-//  MarcUpTests.swift
+//  UniversalTests.swift
 //
 //  Created by Marc Prud'hommeaux on 6/14/15.
 //
 
 import XCTest
-import MarcUp
+import Universal
 import Quanta
 import JSON
 #if canImport(JavaScriptCore)
 import JavaScriptCore
 #endif
 
-class MarcUpTests : XCTestCase {
+class UniversalTests : XCTestCase {
 
 #if canImport(Foundation)
 //    func testBricConversion() throws {
@@ -196,7 +196,7 @@ class MarcUpTests : XCTestCase {
 //
 //    }
 
-//    func testMarcUpPerson() {
+//    func testUniversalPerson() {
 //        do {
 //            let p1 = try Person.brac(bric: ["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]) // , "children": []])
 //            print("p1: \(p1)")
@@ -234,7 +234,7 @@ class MarcUpTests : XCTestCase {
 //        }
 //    }
 
-//    func testMarcUpCompany() {
+//    func testUniversalCompany() {
 //        do { // Human CEO
 //            let bric: Bric = ["name": "Apple", "ceo": ["name": "Tim", "age": 50, "male": true, "children": []], "status": "public", "customers": [["name": "Emily", "age": 41, "male": false, "children": ["Bebe"]]], "employees": [["name": "Marc", "age": 41, "male": true, "children": ["Bebe"]]], "subsidiaries": nil]
 //
@@ -460,7 +460,7 @@ class MarcUpTests : XCTestCase {
 ////        XCTAssertEqual("{\"nul\":null,\"num\":1}", bric.stringify(mapper: bricOrderedMapper))
 //    }
 //
-////    func testMarcUpModifiers() {
+////    func testUniversalModifiers() {
 ////        var bric = JSum.str("x")
 ////        bric.str! += "x"
 ////        XCTAssertEqual("xx", bric)
@@ -489,7 +489,7 @@ class MarcUpTests : XCTestCase {
 ////
 ////    }
 //
-//    func testMarcUpSerialization() {
+//    func testUniversalSerialization() {
 //        let json = """
 //{"ceo":{"age":50,"children":[],"male":true,"name":"Tim"},"customers":[{"age":41,"children":["Bebe"],"male":false,"name":"Emily"}],"employees":[{"age":41,"children":["Bebe"],"male":true,"name":"Marc"}],"name":"Apple","status":"public"}
 //"""
@@ -564,7 +564,7 @@ class MarcUpTests : XCTestCase {
 //        XCTAssertEqual("[12.8]", [OneOf2<Double, Decimal>.v2(Decimal(12.8))].jsonDebugDescription)
 //    }
 //
-//    func testMarcUpParsing() {
+//    func testUniversalParsing() {
 //        func q(_ s: String)->String { return "\"" + s + "\"" }
 //
 //        expectPass("1", 1)
@@ -691,7 +691,7 @@ class MarcUpTests : XCTestCase {
 //    }
 //
 //    /// Verify that our serialization is compatible with NSJSONSerialization
-//    func testMarcUpCocoaCompatNumbers() throws {
+//    func testUniversalCocoaCompatNumbers() throws {
 //        #if false
 //        // FIXME: something broke around 5.1
 //            compareCocoaParsing("1.2345678", msg: "fraction alone")
@@ -752,7 +752,7 @@ class MarcUpTests : XCTestCase {
 //            }
 //            let ce = CFAbsoluteTimeGetCurrent()
 //
-//            print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": MarcUp: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
+//            print((cf ? "CF" : cocoa ? "Cocoa" : validate ? "Validated" : "Fluent") + ": Universal: \(je-js) Cocoa: \(ce-cs) (\(Int(round((je-js)/(ce-cs))))x slower)")
 //        }
 //    }
 //    #endif
@@ -812,9 +812,9 @@ class MarcUpTests : XCTestCase {
 //            }
 //            break
 //        case (_, _, _, .some(let ce)):
-//            XCTFail("Cocoa failed/MarcUp passed «\(msg)»: \(ce)", file: (file), line: line)
+//            XCTFail("Cocoa failed/Universal passed «\(msg)»: \(ce)", file: (file), line: line)
 //        case (_, _, .some(let je), _):
-//            XCTFail("MarcUp failed/Cocoa passed «\(msg)»: \(je)", file: (file), line: line)
+//            XCTFail("Universal failed/Cocoa passed «\(msg)»: \(je)", file: (file), line: line)
 //        default:
 //            XCTFail("Unexpected scenario «\(msg)»", file: (file), line: line)
 //        }
@@ -920,7 +920,7 @@ class MarcUpTests : XCTestCase {
 //        }
 //    }
 //
-////    func testMarcUpAround() {
+////    func testUniversalAround() {
 ////        do {
 ////            let x1: Array<String> = ["a", "b", "c"]
 ////            let x2 = try Array<String>.brac(x1.bric())
@@ -947,7 +947,7 @@ class MarcUpTests : XCTestCase {
 //    }
 //
 //    #if canImport(JavaScriptCore)
-//    func testMarcUpCompatibility() throws {
+//    func testUniversalCompatibility() throws {
 //        let fm = FileManager.default
 //        do {
 //            let rsrc: String? = testResourcePath()
@@ -961,7 +961,7 @@ class MarcUpTests : XCTestCase {
 //                        do {
 //                            let fullPath = (dir as NSString).appendingPathComponent(file)
 //
-//                            // first check to ensure that NSJSONSerialization's results match MarcUp's
+//                            // first check to ensure that NSJSONSerialization's results match Universal's
 //
 //                            if file.hasSuffix(".json") {
 //
@@ -1712,8 +1712,8 @@ class MarcUpTests : XCTestCase {
 //    var children: [String]
 //}
 //
-///// Example of using an enum in a type extension for MarcUp with automatic hashability and equatability
-//extension Person : MarcUp {
+///// Example of using an enum in a type extension for Universal with automatic hashability and equatability
+//extension Person : Universal {
 //    enum Keys: String {
 //        case name, male, age, children
 //    }
@@ -1738,7 +1738,7 @@ class MarcUpTests : XCTestCase {
 //}
 //
 //
-//enum Executive : Equatable, MarcUp {
+//enum Executive : Equatable, Universal {
 //    case human(Person)
 //    case robot(serialNumber: String)
 //
@@ -1758,16 +1758,16 @@ class MarcUpTests : XCTestCase {
 //    }
 //}
 //
-//enum CorporateStatus : String, Equatable, MarcUp {
+//enum CorporateStatus : String, Equatable, Universal {
 //    case `public`, `private`
 //}
 //
-//enum CorporateCode : Int, MarcUp {
+//enum CorporateCode : Int, Universal {
 //    case a = 1, b = 2, c = 3, d = 4
 //}
 //
-///// Example of using a class and a tuple in the type itself to define the keys for MarcUp
-//final class Company : Equatable, MarcUp {
+///// Example of using a class and a tuple in the type itself to define the keys for Universal
+//final class Company : Equatable, Universal {
 //    static func == (lhs: Company, rhs: Company) -> Bool {
 //        return lhs.name == rhs.name
 //            && lhs.ceo == rhs.ceo
@@ -1879,7 +1879,7 @@ class MarcUpTests : XCTestCase {
 //    }
 //}
 //
-//extension MarcUpTests {
+//extension UniversalTests {
 //    func testIndirect() {
 //        let encoder = JSONEncoder()
 //        if #available(macOS 10.13, iOS 11.0, watchOS 5.0, tvOS 12.0, *) {
@@ -1996,7 +1996,7 @@ class MarcUpTests : XCTestCase {
 //            XCTAssertEqual(String(bytes: try encoder.encode(nh), encoding: .utf8), """
 //{"ons":null}
 //""")
-//            // without the special `Decodable` implementation, we would get: XCTAssertEqual failed: ("NullableHolder(ons: Optional(MarcUp.OneOf2<MarcUp.ExplicitNull, Swift.String>.v1(MarcUp.ExplicitNull())))") is not equal to ("NullableHolder(ons: nil)")
+//            // without the special `Decodable` implementation, we would get: XCTAssertEqual failed: ("NullableHolder(ons: Optional(Universal.OneOf2<Universal.ExplicitNull, Swift.String>.v1(Universal.ExplicitNull())))") is not equal to ("NullableHolder(ons: nil)")
 //            XCTAssertEqual(nh, try nh.roundtripped())
 //        }
 //    }
@@ -2340,7 +2340,7 @@ class MarcUpTests : XCTestCase {
 //    }
 //}
 //
-//extension MarcUpTests {
+//extension UniversalTests {
 //    public func testColumnMap() throws {
 //        let values: [[String: JSum]] = [
 //            ["foo": 1, "bar": "X"],

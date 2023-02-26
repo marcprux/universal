@@ -1,12 +1,14 @@
 //
 //  Either.swift
-//  MarcUp
+//  Universal
 //
 //  Created by Marc Prud'hommeaux on 11/4/15.
 //
 import Swift
 
 /// A type that can contain one of two other types.
+///
+/// A correct `EitherOr` implementation vows that either `a == nil && b != nil` or `a != nil && b == nil`.
 public protocol EitherOr {
     associatedtype A
     init(_ rawValue: A)
@@ -47,28 +49,16 @@ public protocol EitherOr {
 /// are mutually exclusive for decoding.
 ///
 /// In short, given `typealias DoubleOrFloat = Either<Double>.Or<Float>`: `try DoubleOrFloat(Float(1.0)).encoded().decoded() != DoubleOrFloat(Float(1.0))`
-public enum Either<A> : Isomorph {
+public struct Either<A> : Isomorph {
     public typealias Value = A
-    case a(A)
+    public var rawValue: Value
 
-    public var rawValue: A {
-        get {
-            switch self {
-            case .a(let value): return value
-            }
-        }
-
-        set {
-            self = .a(newValue)
-        }
-    }
-
-    public init(rawValue: A) { self = .a(rawValue) }
-    public init(_ rawValue: A) { self = .a(rawValue) }
+    public init(rawValue: A) { self.rawValue = rawValue }
+    public init(_ rawValue: A) { self.rawValue = rawValue }
 
     /// A sum type: `Either<A>.Or<B>` can hold either an `A` or a `B`.
     /// E.g., `Either<Int>.Or<String>.Or<Bool>` can hold either an `Int` or a `String` or a `Bool`
-    public enum Or<B> : EitherOr {
+    public enum Or<B> {
         public typealias A = Value
         public typealias B = B
         public typealias Or<C> = Either<A>.Or<Either<B>.Or<C>>
@@ -78,18 +68,42 @@ public enum Either<A> : Isomorph {
 
         public init(_ a: A) { self = .a(a) }
         public init(_ b: B) { self = .b(b) }
-
-        public var a: A? { infer() }
-        public var b: B? { infer() }
-
-        @inlinable public func infer() -> A? {
-            if case .a(let a) = self { return a } else { return nil }
-        }
-
-        @inlinable public func infer() -> B? {
-            if case .b(let b) = self { return b } else { return nil }
-        }
     }
+}
+
+extension Either {
+    public func or<B>(_ value: B) -> Either<A>.Or<B> where A == Optional<B> {
+        rawValue.map({ .init($0) }) ?? .init(value)
+    }
+}
+
+extension Either : EitherOr {
+    public typealias B = Never
+
+    public init(_ rawValue: Never) {
+        fatalError("not possible")
+    }
+
+    public var a: A? { rawValue }
+    public var b: B? { infer() }
+
+    @inlinable public func infer() -> B? {
+        nil
+    }
+}
+
+extension Either.Or : EitherOr {
+    public var a: A? { infer() }
+    public var b: B? { infer() }
+
+    @inlinable public func infer() -> A? {
+        if case .a(let a) = self { return a } else { return nil }
+    }
+
+    @inlinable public func infer() -> B? {
+        if case .b(let b) = self { return b } else { return nil }
+    }
+
 }
 
 extension Either.Or {
@@ -221,73 +235,6 @@ extension Either.Or : Error where A : Error, B : Error { }
 extension Either : Sendable where A : Sendable { }
 extension Either.Or : Sendable where A : Sendable, B : Sendable { }
 
-
-/// A `OneOrMany` is either a single element or a sequence of elements
-public typealias ElementOrSequence<Seq: Sequence> = Either<Seq.Element>.Or<Seq>
-
-/// A `OneOrMany` is either a single value or any array of zero or multiple values
-public typealias ElementOrArray<Element> = ElementOrSequence<Array<Element>>
-
-extension ElementOrSequence : ExpressibleByArrayLiteral where B : RangeReplaceableCollection, B.Element == A {
-    /// Initialized this sequence with either a single element or mutiple elements depending on the array contents.
-    public init(arrayLiteral elements: B.Element...) {
-        self = elements.count == 1 ? .a(elements[0]) : .b(.init(elements))
-    }
-}
-
-extension ElementOrSequence where B : Collection, B : ExpressibleByArrayLiteral, A == B.ArrayLiteralElement, A == B.Element {
-
-    /// The number of elements in .b; .p always returns 1
-    public var count: Int {
-        switch self {
-        case .a: return 1
-        case .b(let x): return x.count
-        }
-    }
-
-    /// The array of instances, whose setter will opt for the single option
-    public var collectionSingle: B {
-        get { map({ a in B(arrayLiteral: a) }, { b in b }).value }
-        set { self = newValue.count == 1 ? .a(newValue.first!) : .b(newValue) }
-    }
-
-    /// The array of instances, whose setter will opt for the multiple option
-    public var collectionMulti: B {
-        get { map({ p in B(arrayLiteral: p) }, { b in b }).value }
-        set { self = .b(newValue) }
-    }
-}
-
-/// An `XResult` is similar to a `Foundation.Result` except it uses `Either` arity
-public typealias XResult<Success, Failure: Error> = Either<Failure>.Or<Success>
-
-public extension XResult where A : Error {
-    typealias Failure = A
-    typealias Success = B
-
-    /// An `Either` whose first element is an error type can be converted to a `Result`.
-    /// Note that the arity is the opposite of `Result`: `Either`'s first type will be `Error`.
-    @inlinable var result: Result<Success, Failure> {
-        get {
-            switch self {
-            case .a(let error): return .failure(error)
-            case .b(let value): return .success(value)
-            }
-        }
-
-        set {
-            switch newValue {
-            case .success(let value): self = .b(value)
-            case .failure(let error): self = .a(error)
-            }
-        }
-    }
-
-    /// Unwraps the success value or throws a failure if it is an error
-    @inlinable func get() throws -> B {
-        try result.get()
-    }
-}
 
 // MARK: Inference support
 

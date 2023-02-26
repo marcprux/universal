@@ -7,98 +7,45 @@ import struct Foundation.URL
 import struct Foundation.Data
 import struct Foundation.UUID
 import struct Foundation.Decimal
-
 @_exported import Either
 
-/// One or many of a thing
-public enum OneOrMore<One, More : Sequence> {
-    case one(One)
-    case more(More)
-}
-
-extension OneOrMore where More : ExpressibleByArrayLiteral, More.ArrayLiteralElement == One {
-    /// All the items as the `More` collection
-    @inlinable var items: More {
-        switch self {
-        case .one(let one): return More(arrayLiteral: one)
-        case .more(let more): return more
-        }
-    }
-}
-
-extension OneOrMore : Equatable where One : Equatable, More : Equatable { }
-extension OneOrMore : Encodable where One : Encodable, More : Encodable { }
-extension OneOrMore : Decodable where One : Decodable, More : Decodable { }
-extension OneOrMore : Hashable where One : Hashable, More : Hashable { }
-extension OneOrMore : Sendable where One : Sendable, More : Sendable { }
-
-/// Either an Array or Dictionary of Values.
-public typealias KeyableValues<Key : Hashable, Value> = Either<[Value]>.Or<[Key: Value]>
-
-//extension KeyableValues {
-//    public var values: [B.Value] {
-//        switch self {
-//        case .a(let a): return [a]
-//        case .b(let b): return b.values
-//        }
-//    }
-//}
-
-
-/// Quanta are a `Value` or a sequence of `Value`s or a map of keyed `Value`s.
-public typealias Quanta<Key : Hashable, Value> = OneOrMore<Key, KeyableValues<Key, Value>>
+/// Quantum is a single `Value` or a sequence of `Value`s or a map of `Key`-keyed `Value`s.
+public typealias Quantum<Key : Hashable, Scalar, Value> = Either<Scalar>.Or<Quanta<Key, Value>>
 
 /// A scalar that can contain a string type, a numeric type, a boolean type, and a null type.
 public typealias StrNumBoolNull<StrType, NumType, BoolType, NullType> = Either<StrType>.Or<NumType>.Or<BoolType>.Or<NullType>
 
 /// The base of a JSON scalar, which contains fixed boolean and null type and variable string and numeric types.
-public typealias ScalarOf<StrType, NumType> = StrNumBoolNull<StrType, NumType, BooleanLiteralType, Never?>
-
-/// A `String`, `Double`, `Bool`, or `Null` (represented by `Optional<Never>.none`)
-public typealias Scalar = ScalarOf<StringLiteralType, FloatLiteralType>
+//public typealias ScalarOf<StrType, NumType> = StrNumBoolNull<StrType, NumType, BooleanLiteralType, Never?>
+public typealias ScalarOf<StrType, NumType> = Either<StrType>.Or<Either<NumType>.Or<Either<BooleanLiteralType>.Or<Never?>>>
 
 
 
-// MARK: JSON Initializers
 
-//extension JSON : ExpressibleByNilLiteral {
-//    public init(nilLiteral: ()) {
-//        self = .scalar(.init())
-//    }
-//}
-//
-//extension JSON : ExpressibleByIntegerLiteral {
-//    public init(integerLiteral value: IntegerLiteralType) {
-//        self = .scalar(.init(value))
-//    }
-//}
-//
-//extension JSON : ExpressibleByFloatLiteral {
-//    public init(floatLiteral value: FloatLiteralType) {
-//        self = .scalar(.init(.init(.init(value))))
-//    }
-//}
-//
-//extension JSON : ExpressibleByStringLiteral, ExpressibleByUnicodeScalarLiteral, ExpressibleByExtendedGraphemeClusterLiteral {
-//    public init(stringLiteral value: StringLiteralType) {
-//        self = .scalar(.init(value))
-//    }
-//
-//    public init(extendedGraphemeClusterLiteral value: String) {
-//        self = .scalar(.init(value))
-//    }
-//
-//    public init(unicodeScalarLiteral value: String) {
-//        self = .scalar(.init(value))
-//    }
-//}
-//
-//extension JSON : ExpressibleByArrayLiteral {
-//    public init(arrayLiteral elements: JSON...) {
-//        self = .array(elements)
-//    }
-//}
+/// A sequence of either keyed or unkeyed values
+public struct Quanta<Key : Hashable, Value> : Isomorph, Sequence {
+    public typealias RawValue = Either<[Value]>.Or<[Key: Value]>
 
+    public var rawValue: RawValue
+
+    public init(rawValue: RawValue) {
+        self.rawValue = rawValue
+    }
+
+    public init(_ rawValue: RawValue) {
+        self.rawValue = rawValue
+    }
+
+    public func makeIterator() -> RawValue.Iterator {
+        rawValue.makeIterator()
+    }
+}
+
+extension Quanta : Equatable where Value : Equatable { }
+extension Quanta : Hashable where Value : Hashable { }
+extension Quanta : Encodable where Value : Encodable, Key : Encodable { }
+extension Quanta : Decodable where Value : Decodable, Key : Decodable { }
+extension Quanta : Sendable where Value : Sendable, Key : Sendable { }
 
 
 

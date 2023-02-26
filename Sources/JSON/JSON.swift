@@ -18,6 +18,10 @@ public struct JSON : Isomorph {
     public init(rawValue: Cluster<String, Scalar>) {
         self.rawValue = rawValue
     }
+
+    public init(_ rawValue: Cluster<String, Scalar>) {
+        self.rawValue = rawValue
+    }
 }
 
 
@@ -29,6 +33,10 @@ public struct JSONX : Isomorph {
     public var rawValue: Cluster<String, Scalar>
 
     public init(rawValue: Cluster<String, Scalar>) {
+        self.rawValue = rawValue
+    }
+
+    public init(_ rawValue: Cluster<String, Scalar>) {
         self.rawValue = rawValue
     }
 }

@@ -10,7 +10,7 @@ final class XMLTests: XCTestCase {
 
     // MARK: XML Tests
 
-    private let xml = JSum.parse(xml:)
+    private let xml = XML.parse(xml:)
 
     func testParseXMLJSum() throws {
         XCTAssertEqual(try xml(#"<a/>"#), ["a": nil])

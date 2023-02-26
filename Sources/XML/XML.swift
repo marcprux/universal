@@ -18,11 +18,14 @@ public struct XML : Isomorph {
     public init(rawValue: Cluster<String, String>) {
         self.rawValue = rawValue
     }
+
+    public init(_ rawValue: Cluster<String, String>) {
+        self.rawValue = rawValue
+    }
 }
 
 
-
-extension JSum {
+extension XML {
     /// Parses the given XML string into a ``JSum``.
     /// - Parameter xml: the XML string to parse
     public static func parse(xml: String) throws -> JSum {

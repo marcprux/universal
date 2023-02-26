@@ -11,6 +11,10 @@ public struct YAML : Isomorph {
     public init(rawValue: Cluster<Scalar, Scalar>) {
         self.rawValue = rawValue
     }
+
+    public init(_ rawValue: Cluster<Scalar, Scalar>) {
+        self.rawValue = rawValue
+    }
 }
 
 

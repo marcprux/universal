@@ -266,3 +266,47 @@ public extension Nullable {
     /// A nullable `.full`, similar to `Optional.some`
     static func full(_ some: Q) -> Self { return .q(some) }
 }
+
+
+// MARK: Either
+
+
+/// The missing "either" type.
+public enum Either<A> {
+    case a(A)
+
+    public enum Or<B> {
+        case a(A)
+        case b(B)
+
+        public typealias Or<C> = Either<Self>.Or<C>
+    }
+}
+
+// MARK: Either SHEED
+
+extension Either : Sendable where A : Sendable { }
+extension Either.Or : Sendable where A : Sendable, B : Sendable { }
+
+extension Either : Hashable where A : Hashable { }
+extension Either.Or : Hashable where A : Hashable, B : Hashable { }
+
+extension Either : Equatable where A : Equatable { }
+extension Either.Or : Equatable where A : Equatable, B : Equatable { }
+
+extension Either : Encodable where A : Encodable { }
+extension Either.Or : Encodable where A : Encodable, B : Encodable { }
+
+extension Either : Decodable where A : Decodable { }
+extension Either.Or : Decodable where A : Decodable, B : Decodable { }
+
+// MARK: Either Construtor utilities
+
+extension Either {
+    public init(_ a: A) { self = .a(a) }
+}
+
+extension Either.Or {
+    public init(_ a: A) { self = .a(a) }
+    public init(_ b: B) { self = .b(b) }
+}

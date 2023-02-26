@@ -6,7 +6,7 @@
 
 import XCTest
 import BricBrac
-import JSum
+import MarcUp
 import JSON
 #if canImport(JavaScriptCore)
 import JavaScriptCore
@@ -193,7 +193,7 @@ class MarcUpTests : XCTestCase {
 //        testDateParse("2012-01-29T12:00:00.000+00:60", nil)
 //        //        testDateParse("-271821-04-20T00:00:00.000+00:01", nil)
 //        //        testDateParse("-271821-04-20T00:01:00.000+00:01", -8640000000000000)
-//        
+//
 //    }
 
 //    func testMarcUpPerson() {

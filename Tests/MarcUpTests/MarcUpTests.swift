@@ -3,7 +3,7 @@
  */
 import Swift
 import XCTest
-import JSum
+import MarcUp
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif

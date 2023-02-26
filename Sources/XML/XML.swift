@@ -3,7 +3,7 @@
  */
 import Swift
 import Foundation
-@_exported import JSum
+@_exported import MarcUp
 
 #if canImport(FoundationXML)
 import FoundationXML

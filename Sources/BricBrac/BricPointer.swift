@@ -3,7 +3,7 @@
 //
 //  Created by Marc Prud'hommeaux on 8/24/15.
 //
-import JSum
+import MarcUp
 
 /// Extension to JSum that supports JSON Pointers and JSON References
 public extension JSum {

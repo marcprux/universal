@@ -3,7 +3,7 @@
 //
 //  Created by Marc Prud'hommeaux on 8/20/15.
 //
-import JSum
+import MarcUp
 
 /// A non-recursive streaming parser for JSON (ECMA-404). The parser operates by being fed a complete or 
 /// partial sequence of `UnicodeScalar`s and emits events for every JSON syntax component that is encountered.

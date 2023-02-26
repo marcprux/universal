@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install -y libjavascriptcoregtk-4.0-dev
       - run: pkg-config --libs javascriptcoregtk-4.0
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Test (Debug)
         run: swift test -v --configuration debug
       - name: Test (Release)
@@ -30,7 +30,7 @@ jobs:
   ios:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Test (Debug)
         run: xcodebuild clean test -configuration Debug -scheme "MarcUp-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
       - name: Test (Release)
@@ -39,7 +39,7 @@ jobs:
   tvos:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Test (Debug)
         run: xcodebuild clean test -configuration Debug -scheme "MarcUp-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
       - name: Test (Release)
@@ -48,7 +48,7 @@ jobs:
   macos:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Test (Debug)
         run: swift test -v --configuration debug
       - name: Test (Release)
@@ -59,7 +59,7 @@ jobs:
     runs-on: macos-12 # needed to be able to document SwiftUI
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build documentation
         run: |
           swift -version

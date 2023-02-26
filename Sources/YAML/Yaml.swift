@@ -23,7 +23,7 @@
 // SOFTWARE.
 import Swift
 import Foundation
-@_exported import MarcUp
+import MarcUp
 
 extension JSum {
     /// Parses the given YAML string into a ``JSum``.

@@ -4,6 +4,7 @@
 import Swift
 import XCTest
 import XML
+import MarcUp
 
 final class XMLTests: XCTestCase {
 

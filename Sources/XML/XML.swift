@@ -3,7 +3,7 @@
  */
 import Swift
 import Foundation
-@_exported import MarcUp
+import MarcUp
 
 #if canImport(FoundationXML)
 import FoundationXML

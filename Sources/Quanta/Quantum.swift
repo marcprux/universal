@@ -7,12 +7,15 @@ import Swift
 /// Quantum is `Either` a single `Scalar` (e.g., string, boolean, or number) `Or` a `Quanta<Quantum>` (i.e., an array or `Key`-keyed map of this `Quantum`)
 public typealias Quantum<Scalar, Key : Hashable, Value> = Either<Scalar>.Or<Quanta<Key, Value>>
 
-/// A scalar that can contain a string type, a numeric type, a boolean type, and a null type.
-public typealias StrNumBoolNull<StrType, NumType, BoolType, NullType> = Either<StrType>.Or<NumType>.Or<BoolType>.Or<NullType>
+/// A Scalar's null value is an `Optional<Never>.none`
+///
+/// Note: this type was chosen over `Void` since it is `Codable`. The result is the same in that there is only a single valid instance.
+public typealias ScalarNull = Optional<Never>
 
 /// The base of a scalar type, which contains fixed boolean and null type and variable string and numeric types.
-//public typealias ScalarOf<StrType, NumType> = StrNumBoolNull<StrType, NumType, BooleanLiteralType, Never?>
-public typealias ScalarOf<StrType, NumType> = Either<StrType>.Or<Either<NumType>.Or<Either<BooleanLiteralType>.Or<Never?>>>
+//public typealias ScalarOf<StringType, NumericType> = Either<StringType>.Or<NumericType>.Or<BooleanLiteralType>.Or<ScalarNull>
+public typealias ScalarOf<StringType, NumericType> = Either<NumericType>.Or<StringType>.Or<Either<BooleanLiteralType>.Or<ScalarNull>>
+//public typealias ScalarOf<StringType, NumericType> = Either<StringType>.Or<Either<NumericType>.Or<Either<BooleanLiteralType>.Or<ScalarNull>>>
 
 
 

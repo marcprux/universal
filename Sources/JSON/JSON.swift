@@ -54,7 +54,7 @@ public struct JSON : Isomorph, Sendable, Hashable {
 
 extension JSON : ExpressibleByNilLiteral {
     public init(nilLiteral: ()) {
-        self.rawValue = .init(.init(.init(.init(Never?.none))))
+        self.rawValue = .init(.init(.init(.init(ScalarNull.none))))
     }
 }
 
@@ -168,14 +168,14 @@ extension JSON : Encodable {
         switch self.rawValue {
         case .a(let scalar):
             switch scalar {
-            case .a(let string): try container.encode(string as String)
+            case .a(let double): try container.encode(double as Double)
             case .b(let scalar):
                 switch scalar {
-                case .a(let double): try container.encode(double as Double)
+                case .a(let string): try container.encode(string as String)
                 case .b(let scalar):
                     switch scalar {
                     case .a(let boolean): try container.encode(boolean as Bool)
-                    case .b(let null): assert(null as Never? == .none); try container.encodeNil()
+                    case .b(let null): assert(null as ScalarNull == .none); try container.encodeNil()
                     }
                 }
             }

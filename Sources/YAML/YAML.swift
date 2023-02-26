@@ -23,7 +23,7 @@ public struct YAML : Isomorph, Sendable, Hashable {
 }
 
 extension YAML.Scalar {
-    public static let null = YAML.Scalar(Never?.none)
+    public static let null = YAML.Scalar(ScalarNull.none)
     public static let `true` = YAML.Scalar(true)
     public static let `false` = YAML.Scalar(false)
 }
@@ -35,8 +35,8 @@ public extension YAML {
     static let `false` = YAML(Either.Or(YAML.Scalar.false))
 
     static func string(_ str: String) -> Self { YAML(Either.Or(Scalar(str))) }
-    static func double(_ dbl: Double) -> Self { YAML(Either.Or(Scalar(dbl))) }
-    static func integer(_ int: Int) -> Self { YAML(Either.Or(Scalar(int))) }
+    static func double(_ dbl: Double) -> Self { YAML(Either.Or(Scalar(.init(dbl)))) }
+    static func integer(_ int: Int) -> Self { YAML(Either.Or(Scalar(.init(int)))) }
     static func boolean(_ bol: Bool) -> Self { YAML(Either.Or(Scalar(bol))) }
     static func array(_ arr: [YAML]) -> Self { YAML(Either.Or(Quanta(rawValue: .init(arr)))) }
     static func object(_ obj: [Scalar: YAML]) -> Self { YAML(Either.Or(Quanta(rawValue: .init(obj)))) }
@@ -53,12 +53,12 @@ public extension YAML {
 
     /// Returns the underlying Double payload if this is a `YAML.dbl`, otherwise `.none`
     @inlinable var double: Double? {
-        rawValue.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying Double payload if this is a `YAML.int`, otherwise `.none`
     @inlinable var integer: Int? {
-        rawValue.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying Double for either `int` or `dbl` types.
@@ -112,18 +112,18 @@ extension YAML : Encodable {
         switch self.rawValue {
         case .a(let scalar):
             switch scalar {
-            case .a(let string): try container.encode(string as String)
+            case .a(let number):
+                switch number {
+                case .a(let integer): try container.encode(integer as Int)
+                case .b(let double): try container.encode(double as Double)
+                }
             case .b(let scalar):
                 switch scalar {
-                case .a(let number):
-                    switch number {
-                    case .a(let integer): try container.encode(integer as Int)
-                    case .b(let double): try container.encode(double as Double)
-                    }
+                case .a(let string): try container.encode(string as String)
                 case .b(let scalar):
                     switch scalar {
                     case .a(let boolean): try container.encode(boolean as Bool)
-                    case .b(let null): assert(null as Never? == .none); try container.encodeNil()
+                    case .b(let null): assert(null as ScalarNull == .none); try container.encodeNil()
                     }
                 }
             }

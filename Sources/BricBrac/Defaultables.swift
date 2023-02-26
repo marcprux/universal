@@ -4,6 +4,8 @@
 //
 //  Created by Marc Prud'hommeaux on 7/12/19.
 //
+import JSum
+import XOr
 
 /// A defaultable type is a type that can be initialized with no arguments and a default value.
 /// The `defaultValue` instance should generally be considered an "empty instance".

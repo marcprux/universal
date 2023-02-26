@@ -4,7 +4,7 @@
 import Swift
 import XCTest
 import YAML
-import MarcUp
+import Cluster
 
 final class YamlTests : XCTestCase {
 

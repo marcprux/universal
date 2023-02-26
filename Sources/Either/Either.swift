@@ -6,10 +6,26 @@
 //
 import Swift
 
+/// A type that can contain one of two other types.
+public protocol EitherOr {
+    associatedtype A
+    init(_ rawValue: A)
+    /// If this type wraps a `A`
+    func infer() -> A?
+
+    associatedtype B
+    init(_ rawValue: B)
+    /// If this type wraps a `B`
+    func infer() -> B?
+
+    /// A further `Or`.
+//    associatedtype Or<C> : EitherOr
+}
+
 /// The basis of one of multiple possible types, equivalent to an
 /// `Either` sum type.
 ///
-/// A choice between two different types is expressed by `Either<P>.Or<Q>`.
+/// A choice between two different types is expressed by `Either<A>.Or<B>`.
 /// For example:
 ///
 /// ```
@@ -34,161 +50,161 @@ import Swift
 /// are mutually exclusive for decoding.
 ///
 /// In short, given `typealias DoubleOrFloat = Either<Double>.Or<Float>`: `try DoubleOrFloat(Float(1.0)).encoded().decoded() != DoubleOrFloat(Float(1.0))`
-public indirect enum Either<P> : RawRepresentable {
-    public typealias Value = P
-    case p(P)
+public enum Either<A> : Isomorph {
+    public typealias Value = A
+    case a(A)
 
-    public var rawValue: P {
+    public var rawValue: A {
         get {
             switch self {
-            case .p(let value): return value
+            case .a(let value): return value
             }
         }
 
         set {
-            self = .p(newValue)
+            self = .a(newValue)
         }
     }
 
-    public init(rawValue: P) { self = .p(rawValue) }
-    public init(_ rawValue: P) { self = .p(rawValue) }
+    public init(rawValue: A) { self = .a(rawValue) }
+    public init(_ rawValue: A) { self = .a(rawValue) }
 
-    /// A sum type: `Either<P>.Or<Q>` can hold either an `P` or a `Q`.
+    /// A sum type: `Either<A>.Or<B>` can hold either an `A` or a `B`.
     /// E.g., `Either<Int>.Or<String>.Or<Bool>` can hold either an `Int` or a `String` or a `Bool`
-    public indirect enum Or<Q> : EitherType {
-        public typealias P = Value
-        public typealias Q = Q
-        public typealias Or<R> = Either<P>.Or<Either<Q>.Or<R>>
+    public enum Or<B> : EitherOr {
+        public typealias A = Value
+        public typealias B = B
+        public typealias Or<C> = Either<A>.Or<Either<B>.Or<C>>
 
-        case p(P)
-        case q(Q)
+        case a(A)
+        case b(B)
 
-        public init(_ p: P) { self = .p(p) }
-        public init(_ q: Q) { self = .q(q) }
+        public init(_ a: A) { self = .a(a) }
+        public init(_ b: B) { self = .b(b) }
 
-        public var p: P? { infer() }
-        public var q: Q? { infer() }
+        public var a: A? { infer() }
+        public var b: B? { infer() }
 
-        @inlinable public func infer() -> P? {
-            if case .p(let p) = self { return p } else { return nil }
+        @inlinable public func infer() -> A? {
+            if case .a(let a) = self { return a } else { return nil }
         }
 
-        @inlinable public func infer() -> Q? {
-            if case .q(let q) = self { return q } else { return nil }
+        @inlinable public func infer() -> B? {
+            if case .b(let b) = self { return b } else { return nil }
         }
     }
 }
 
 extension Either.Or {
     /// Maps each side of an `Either.Or` through the given function
-    @inlinable public func map<T, U>(_ pf: (P) -> T, _ qf: (Q) -> U) -> Either<T>.Or<U> {
+    @inlinable public func map<T, U>(_ af: (A) -> T, _ bf: (B) -> U) -> Either<T>.Or<U> {
         switch self {
-        case .p(let p): return .p(pf(p))
-        case .q(let q): return .q(qf(q))
+        case .a(let a): return .a(af(a))
+        case .b(let b): return .b(bf(b))
         }
     }
 }
 
 extension Either.Or {
-    /// Returns a flipped view of the `Either.Or`, where `P` becomes `Q` and `Q` becomes `P`.
-    @inlinable public var swapped: Either<Q>.Or<P> {
+    /// Returns a flipped view of the `Either.Or`, where `A` becomes `B` and `B` becomes `A`.
+    @inlinable public var swapped: Either<B>.Or<A> {
         get {
             switch self {
-            case .p(let p): return .q(p)
-            case .q(let q): return .p(q)
+            case .a(let a): return .b(a)
+            case .b(let b): return .a(b)
             }
         }
 
         set {
             switch newValue {
-            case .p(let p): self = .q(p)
-            case .q(let q): self = .p(q)
+            case .a(let a): self = .b(a)
+            case .b(let b): self = .a(b)
             }
         }
     }
 }
 
-extension Either.Or where P == Q {
-    /// The underlying read-only value of either p or q
-    @inlinable public var value: P {
+extension Either.Or where A == B {
+    /// The underlying read-only value of either p or b
+    @inlinable public var value: A {
         get {
             switch self {
-            case .p(let p): return p
-            case .q(let q): return q
+            case .a(let a): return a
+            case .b(let b): return b
             }
         }
     }
 
-    /// The underlying value of the p or q, when `P == Q`, where mutation always sets `.p`.
-    @inlinable public var pvalue: P {
+    /// The underlying value of the p or b, when `P == B`, where mutation always sets `.p`.
+    @inlinable public var avalue: A {
         get {
             switch self {
-            case .p(let p): return p
-            case .q(let q): return q
+            case .a(let a): return a
+            case .b(let b): return b
             }
         }
 
         set {
-            self = .p(newValue)
+            self = .a(newValue)
         }
     }
 
-    /// The underlying value of the p or q, when `P == Q`, where mutation always sets `.q`.
-    @inlinable public var qvalue: P {
+    /// The underlying value of the p or b, when `A == B`, where mutation always sets `.b`.
+    @inlinable public var bvalue: B {
         get {
             switch self {
-            case .q(let q): return q
-            case .p(let p): return p
+            case .b(let b): return b
+            case .a(let p): return p
             }
         }
 
         set {
-            self = .q(newValue)
+            self = .b(newValue)
         }
     }
 }
 
-extension Either : Equatable where P : Equatable { }
-extension Either.Or : Equatable where P : Equatable, Q : Equatable { }
+extension Either : Equatable where A : Equatable { }
+extension Either.Or : Equatable where A : Equatable, B : Equatable { }
 
-extension Either : Hashable where P : Hashable { }
-extension Either.Or : Hashable where P : Hashable, Q : Hashable { }
+extension Either : Hashable where A : Hashable { }
+extension Either.Or : Hashable where A : Hashable, B : Hashable { }
 
-extension Either : Encodable where P : Encodable {
+extension Either : Encodable where A : Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.rawValue)
     }
 }
 
-extension Either.Or : Encodable where P : Encodable, Q : Encodable {
+extension Either.Or : Encodable where A : Encodable, B : Encodable {
     public func encode(to encoder: Encoder) throws {
         // we differ from the default Encodable behavior of enums in that we encode the underlying values directly, without referencing the case names
         var container = encoder.singleValueContainer()
         switch self {
-        case .p(let x): try container.encode(x)
-        case .q(let x): try container.encode(x)
+        case .a(let x): try container.encode(x)
+        case .b(let x): try container.encode(x)
         }
     }
 }
 
 
-extension Either : Decodable where P : Decodable {
+extension Either : Decodable where A : Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let element = try container.decode(P.self)
+        let element = try container.decode(A.self)
         self.init(rawValue: element)
     }
 }
 
-extension Either.Or : Decodable where P : Decodable, Q : Decodable {
+extension Either.Or : Decodable where A : Decodable, B : Decodable {
     /// `Either.Or` implements decodable for brute-force trying to decode first `A` and then `B`
     public init(from decoder: Decoder) throws {
         do {
-            self = try .p(.init(from: decoder))
+            self = try .a(.init(from: decoder))
         } catch let e1 {
             do {
-                self = try .q(.init(from: decoder))
+                self = try .b(.init(from: decoder))
             } catch let e2 {
                 throw EitherDecodingError(e1: e1, e2: e2)
             }
@@ -202,11 +218,11 @@ extension Either.Or : Decodable where P : Decodable, Q : Decodable {
     }
 }
 
-extension Either : Error where P : Error { }
-extension Either.Or : Error where P : Error, Q : Error { }
+extension Either : Error where A : Error { }
+extension Either.Or : Error where A : Error, B : Error { }
 
-extension Either : Sendable where P : Sendable { }
-extension Either.Or : Sendable where P : Sendable, Q : Sendable { }
+extension Either : Sendable where A : Sendable { }
+extension Either.Or : Sendable where A : Sendable, B : Sendable { }
 
 
 /// A `OneOrMany` is either a single element or a sequence of elements
@@ -215,109 +231,97 @@ public typealias ElementOrSequence<Seq: Sequence> = Either<Seq.Element>.Or<Seq>
 /// A `OneOrMany` is either a single value or any array of zero or multiple values
 public typealias ElementOrArray<Element> = ElementOrSequence<Array<Element>>
 
-extension ElementOrSequence : ExpressibleByArrayLiteral where Q : RangeReplaceableCollection, Q.Element == P {
+extension ElementOrSequence : ExpressibleByArrayLiteral where B : RangeReplaceableCollection, B.Element == A {
     /// Initialized this sequence with either a single element or mutiple elements depending on the array contents.
-    public init(arrayLiteral elements: Q.Element...) {
-        self = elements.count == 1 ? .p(elements[0]) : .q(.init(elements))
+    public init(arrayLiteral elements: B.Element...) {
+        self = elements.count == 1 ? .a(elements[0]) : .b(.init(elements))
     }
 }
 
-extension ElementOrSequence where Q : Collection, Q : ExpressibleByArrayLiteral, P == Q.ArrayLiteralElement, P == Q.Element {
+extension ElementOrSequence where B : Collection, B : ExpressibleByArrayLiteral, A == B.ArrayLiteralElement, A == B.Element {
 
-    /// The number of elements in .q; .p always returns 1
+    /// The number of elements in .b; .p always returns 1
     public var count: Int {
         switch self {
-        case .p: return 1
-        case .q(let x): return x.count
+        case .a: return 1
+        case .b(let x): return x.count
         }
     }
 
     /// The array of instances, whose setter will opt for the single option
-    public var collectionSingle: Q {
-        get { map({ p in Q(arrayLiteral: p) }, { q in q }).value }
-        set { self = newValue.count == 1 ? .p(newValue.first!) : .q(newValue) }
+    public var collectionSingle: B {
+        get { map({ a in B(arrayLiteral: a) }, { b in b }).value }
+        set { self = newValue.count == 1 ? .a(newValue.first!) : .b(newValue) }
     }
 
     /// The array of instances, whose setter will opt for the multiple option
-    public var collectionMulti: Q {
-        get { map({ p in Q(arrayLiteral: p) }, { q in q }).value }
-        set { self = .q(newValue) }
+    public var collectionMulti: B {
+        get { map({ p in B(arrayLiteral: p) }, { b in b }).value }
+        set { self = .b(newValue) }
     }
 }
 
 /// An `XResult` is similar to a `Foundation.Result` except it uses `Either` arity
 public typealias XResult<Success, Failure: Error> = Either<Failure>.Or<Success>
 
-public extension XResult where P : Error {
-    typealias Success = Q
-    typealias Failure = P
+public extension XResult where A : Error {
+    typealias Failure = A
+    typealias Success = B
 
     /// An `Either` whose first element is an error type can be converted to a `Result`.
     /// Note that the arity is the opposite of `Result`: `Either`'s first type will be `Error`.
     @inlinable var result: Result<Success, Failure> {
         get {
             switch self {
-            case .p(let error): return .failure(error)
-            case .q(let value): return .success(value)
+            case .a(let error): return .failure(error)
+            case .b(let value): return .success(value)
             }
         }
 
         set {
             switch newValue {
-            case .success(let value): self = .q(value)
-            case .failure(let error): self = .p(error)
+            case .success(let value): self = .b(value)
+            case .failure(let error): self = .a(error)
             }
         }
     }
 
     /// Unwraps the success value or throws a failure if it is an error
-    @inlinable func get() throws -> Q {
+    @inlinable func get() throws -> B {
         try result.get()
     }
 }
 
-// MARK: Inferrence support
+// MARK: Inference support
 
-public protocol EitherType {
-    associatedtype P
-    init(_ rawValue: P)
-    /// If this type wraps a `P`
-    func infer() -> P?
+extension Either.Or where B : EitherOr {
+    public init(_ rawValue: B.A) { self = .init(.init(rawValue)) }
+    public init(_ rawValue: B.B) { self = .init(.init(rawValue)) }
 
-    associatedtype Q
-    init(_ rawValue: Q)
-    /// If this type wraps a `Q`
-    func infer() -> Q?
+    /// `B.P` if that is the case
+    public func infer() -> B.A? { infer()?.infer() }
+    /// `B.B` if that is the case
+    public func infer() -> B.B? { infer()?.infer() }
 }
 
-extension Either.Or where Q : EitherType {
-    public init(_ rawValue: Q.P) { self = .init(.init(rawValue)) }
-    public init(_ rawValue: Q.Q) { self = .init(.init(rawValue)) }
+extension Either.Or where B : EitherOr, B.A : EitherOr {
+    public init(_ rawValue: B.A.A) { self = .init(.init(.init(rawValue))) }
+    public init(_ rawValue: B.A.B) { self = .init(.init(.init(rawValue))) }
 
-    /// `Q.P` if that is the case
-    public func infer() -> Q.P? { infer()?.infer() }
-    /// `Q.Q` if that is the case
-    public func infer() -> Q.Q? { infer()?.infer() }
+    /// `B.P.P` if that is the case
+    public func infer() -> B.A.A? { infer()?.infer()?.infer() }
+    /// `B.P.B` if that is the case
+    public func infer() -> B.A.B? { infer()?.infer()?.infer() }
 }
 
-extension Either.Or where Q : EitherType, Q.P : EitherType {
-    public init(_ rawValue: Q.P.P) { self = .init(.init(.init(rawValue))) }
-    public init(_ rawValue: Q.P.Q) { self = .init(.init(.init(rawValue))) }
+extension Either.Or where B : EitherOr, B.B : EitherOr {
+    public init(_ rawValue: B.B.A) { self = .init(.init(.init(rawValue))) }
+    public init(_ rawValue: B.B.B) { self = .init(.init(.init(rawValue))) }
 
-    /// `Q.P.P` if that is the case
-    public func infer() -> Q.P.P? { infer()?.infer()?.infer() }
-    /// `Q.P.Q` if that is the case
-    public func infer() -> Q.P.Q? { infer()?.infer()?.infer() }
-}
-
-extension Either.Or where Q : EitherType, Q.Q : EitherType {
-    public init(_ rawValue: Q.Q.P) { self = .init(.init(.init(rawValue))) }
-    public init(_ rawValue: Q.Q.Q) { self = .init(.init(.init(rawValue))) }
-
-    /// `Q.Q.P` if that is the case
-    public func infer() -> Q.Q.P? { infer()?.infer()?.infer() }
-    /// `Q.Q.Q` if that is the case
-    public func infer() -> Q.Q.Q? { infer()?.infer()?.infer() }
+    /// `B.B.P` if that is the case
+    public func infer() -> B.B.A? { infer()?.infer()?.infer() }
+    /// `B.B.B` if that is the case
+    public func infer() -> B.B.B? { infer()?.infer()?.infer() }
 }
 
 // … and so on …
@@ -492,27 +496,6 @@ public extension Isomorph {
     }
 }
 
-public extension Optional where Wrapped == ExplicitNull {
-    /// Converts an `.some(ExplicitNull.null)` to `false` and `.none` to `true`
-    var explicitNullAsFalse: Bool {
-        get { self == ExplicitNull.null ? false : true }
-        set { self = newValue == true ? .none : .some(ExplicitNull.null) }
-    }
-}
-
-public extension WrapperType where Self : ExpressibleByNilLiteral {
-//    /// Returns this wrapped instance as a `Nullablle`
-//    var asNullable: Nullable<Wrapped> {
-//        get { flatMap({ .init($0) }) ?? .null }
-//        set { self = newValue.q.flatMap({ .init($0) }) ?? nil }
-//    }
-
-    /// Returns this wrapped instance as an `Optional<Nullablle>`, where an underlying `null` is converted to `none`.
-    var asNullableOptional: Nullable<Wrapped>? {
-        get { flatMap({ .init($0) }) }
-        set { self = newValue?.q.flatMap({ .init($0) }) ?? nil }
-    }
-}
 
 public extension WrapperType where Wrapped : Equatable, Self : ExpressibleByNilLiteral {
     /// Convenience for mapping between a sub-set of cases for the given optional. For example, given
@@ -546,35 +529,32 @@ public extension WrapperType where Wrapped : Equatable, Self : ExpressibleByNilL
     }
 }
 
+extension Either.Or : IteratorProtocol where A : IteratorProtocol, B : IteratorProtocol {
+    public typealias Element = Either<A.Element>.Or<B.Element>
 
-/// An single-element enumeration that marks an explicit nil reference; this is as opposed to an Optional which can be absent, whereas an ExplicitNull requires that the value be exactly "null"
-@frozen public enum ExplicitNull : Codable, Hashable, ExpressibleByNilLiteral, CaseIterable {
-    case null
-
-    public init(nilLiteral: ()) { self = .null }
-    public init() { self = .null }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encodeNil()
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if !container.decodeNil() {
-            throw DecodingError.typeMismatch(ExplicitNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for ExplicitNull"))
+    public mutating func next() -> Either<A.Element>.Or<B.Element>? {
+        switch self {
+        case .a(var p):
+            defer { self = .a(p) }
+            return p.next().map({ .init($0) })
+        case .b(var b):
+            defer { self = .b(b) }
+            return b.next().map({ .init($0) })
         }
-        self = .null
     }
 }
 
-/// A Nullable is a type that can be either explicitly null or a given type.
-public typealias Nullable<T> = Either<ExplicitNull>.Or<T> // note that type order is important, since "null" in `OneOf2<ExplicitNull, <Optional<String>>>` will fall back to matching both the `ExplicitNull` and the `Optional<String>` types
-
-public extension Nullable {
-    /// A nullable `.full`, similar to `Optional.some`
-    static func full(_ some: Q) -> Self { return .q(some) }
+extension Either.Or : Sequence where A : Sequence, B : Sequence {
+    public func makeIterator() -> Either<A.Iterator>.Or<B.Iterator> {
+        switch self {
+        case .a(let p): return .init(p.makeIterator())
+        case .b(let b): return .init(b.makeIterator())
+        }
+    }
 }
+
+
 
 @available(*, deprecated, renamed: "Either")
 public typealias XOr = Either
+

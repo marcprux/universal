@@ -5,7 +5,7 @@
 ////
 //import XCTest
 //import JSON
-//import MarcUp
+//import Cluster
 //import Either
 //
 //class JSONParserTests : XCTestCase {

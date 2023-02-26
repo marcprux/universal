@@ -4,7 +4,7 @@
 import Swift
 import XCTest
 import XML
-import MarcUp
+import Cluster
 
 final class XMLTests: XCTestCase {
 

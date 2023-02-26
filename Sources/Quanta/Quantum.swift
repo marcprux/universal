@@ -2,11 +2,6 @@
  Copyright (c) 2015-2023 Marc Prud'hommeaux
  */
 import Swift
-import struct Foundation.Date
-import struct Foundation.URL
-import struct Foundation.Data
-import struct Foundation.UUID
-import struct Foundation.Decimal
 @_exported import Either
 
 /// Quantum is `Either` a single `Scalar` (e.g., string, boolean, or number) `Or` a `Quanta<Quantum>` (i.e., an array or `Key`-keyed map of this `Quantum`)

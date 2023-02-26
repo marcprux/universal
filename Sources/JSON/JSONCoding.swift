@@ -126,7 +126,7 @@ extension Encodable {
     ///
     /// - Parameter options: the options for serializing the data
     /// - Returns: A J containing the structure of the encoded instance
-    public func json(options: JSONEncodingOptions? = nil) throws -> JSON {
+    @inlinable public func json(options: JSONEncodingOptions? = nil) throws -> JSON {
         try JEncoder(options: options).encode(self)
     }
 }

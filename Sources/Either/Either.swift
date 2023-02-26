@@ -17,9 +17,6 @@ public protocol EitherOr {
     init(_ rawValue: B)
     /// If this type wraps a `B`
     func infer() -> B?
-
-    /// A further `Or`.
-//    associatedtype Or<C> : EitherOr
 }
 
 /// The basis of one of multiple possible types, equivalent to an
@@ -463,10 +460,10 @@ public typealias RawCodable = Alias
 /// as a codable typesafe wrapper for some general type like UUID where the
 /// Codable implementation does not automatically use the underlying type (like
 /// it does with primitives and Strings)
-public protocol Alias : Isomorph, Codable where RawValue : Codable {
+public protocol Alias : Isomorph, Codable {
 }
 
-public extension Alias {
+extension Alias where RawValue : Codable {
     /// An `Alias` deserializes from the underlying type's decoding with any intermediate wrapper
     init(from decoder: Decoder) throws {
         try self.init(rawValue: RawValue(from: decoder))

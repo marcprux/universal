@@ -46,7 +46,6 @@ public typealias KeyableValues<Key : Hashable, Value> = Either<[Value]>.Or<[Key:
 /// A cluster it a value or a sequence of values or a map of keyed values.
 public typealias Cluster<Key : Hashable, Value> = Modicum<Key, KeyableValues<Key, Value>>
 
-
 /// A scalar that can contain a string type, a numeric type, a boolean type, and a null type.
 public typealias StrNumBoolNull<StrType, NumType, BoolType, NullType> = Either<StrType>.Or<NumType>.Or<BoolType>.Or<NullType>
 

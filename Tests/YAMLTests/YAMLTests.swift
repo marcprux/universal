@@ -6,7 +6,7 @@ import XCTest
 import YAML
 import Cluster
 
-final class YamlTests : XCTestCase {
+final class YAMLTests : XCTestCase {
 
     // MARK: YAML Tests
 

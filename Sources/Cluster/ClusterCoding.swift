@@ -2,7 +2,6 @@
  Copyright (c) 2015-2023 Marc Prud'hommeaux
  */
 import Swift
-import Either
 
 #if canImport(Foundation)
 import Foundation

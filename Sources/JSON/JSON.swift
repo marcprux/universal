@@ -140,12 +140,28 @@ public extension JSON {
 
     /// JSON has a string subscript when it is an object type; setting a value on a non-obj type has no effect
     @inlinable subscript(key: String) -> JSON? {
-        object?[key]
+        get {
+            object?[key]
+        }
+
+        set {
+            guard var object = object else { return }
+            object[key] = newValue
+            self = .object(object)
+        }
     }
 
     /// JSON has a save indexed subscript when it is an array type; setting a value on a non-array type has no effect
     @inlinable subscript(index: Int) -> JSON? {
-        array?[index]
+        get {
+            array?[index]
+        }
+
+        set {
+            guard var array = array else { return }
+            array[index] = newValue ?? .null
+            self = .array(array)
+        }
     }
 
     /// The number of elements this contains: either the count of the underyling array or dictiionary, or 0 if `null`, or else 1 for a scalar.

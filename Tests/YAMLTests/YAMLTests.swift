@@ -269,6 +269,8 @@ final class YAMLTests : XCTestCase {
     }
 
     func testDictionary() {
+        XCTAssertEqual("Dictionary([x: Int(1)])", try yaml(#"{"x": 1}"#).description)
+
         XCTAssertEqual(try yaml(#"{"x": 1}"#), ["x":1])
         XCTAssertEqual(try yaml(#"x: 1"#), ["x":1])
         //XCTAssertEqual(try yaml(#"1: 1"#), [YAML.Scalar(.init(1)):1])

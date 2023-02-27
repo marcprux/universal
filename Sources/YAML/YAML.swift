@@ -124,6 +124,43 @@ public extension YAML {
     }
 }
 
+extension YAML: CustomStringConvertible {
+    public var description: String {
+        switch self.rawValue {
+        case .a(let scalar):
+            switch scalar {
+            case .a(let number):
+                switch number {
+                case .a(let integer): let _: Int = integer; return "Int(\(integer))"
+                case .b(let double): let _: Double = double; return "Double(\(double))"
+                }
+            case .b(let scalar):
+                switch scalar {
+                case .a(let string): let _: String = string; return "String(\(string))"
+                case .b(let scalar):
+                    switch scalar {
+                    case .a(let boolean): let _: Bool = boolean; return "Bool(\(boolean))"
+                    case .b(let null): let _: ScalarNull = null; return "Null"
+                    }
+                }
+            }
+
+        case .b(let quanta):
+            switch quanta.rawValue {
+            case .a(let array): let _: [YAML] = array; return "Array(\(array.map(\.description))"
+            case .b(let dictionary): let _: [Scalar: YAML] = dictionary; return "Dictionary(\(dictionary))"
+            }
+        }
+
+    }
+}
+
+extension YAML.Scalar: CustomStringConvertible {
+    public var description: String {
+        map({ $0.map(\.description, \.description).value }, { $0.map(\.description, { $0.map(\.description, { (_: ScalarNull) in "null" }).value } ).value }).value
+    }
+}
+
 extension YAML : Encodable {
     /// Encodes to a JSON-compatible encoder.
     @inlinable public func encode(to encoder: Encoder) throws {
@@ -164,37 +201,6 @@ extension YAML : Encodable {
         return d
     }
 }
-
-//extension YAML : Decodable {
-//    @inlinable public init(from decoder: Decoder) throws {
-//        let container = try decoder.singleValueContainer()
-//        func decode<T: Decodable>() throws -> T { try container.decode(T.self) }
-//        if container.decodeNil() {
-//            self = YAML.null
-//        } else {
-//            do {
-//                self = try YAML(booleanLiteral: container.decode(Bool.self))
-//            } catch DecodingError.typeMismatch {
-//                do {
-//                    self = try YAML(floatLiteral: container.decode(Double.self))
-//                } catch DecodingError.typeMismatch {
-//                    do {
-//                        self = try YAML(stringLiteral: container.decode(String.self))
-//                    } catch DecodingError.typeMismatch {
-//                        do {
-//                            self = try YAML(.init(decode() as Quanta<Key, Value>))
-//                        } catch DecodingError.typeMismatch {
-//                            throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-
-
-
 
 extension YAML : ExpressibleByStringLiteral {
     public init(stringLiteral value: StringLiteralType) {

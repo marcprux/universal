@@ -8,14 +8,15 @@ import XCTest
 import Universal
 
 class UniversalTests : XCTestCase {
+    let json = { (str: String) in try JSON.parse(str.utf8Data) }
+    let yaml = { (str: String) in try YAML.parse(str.utf8Data) }
+    let xml = { (str: String) in try XML.parse(str.utf8Data) }
+
     func testCompareFormats() throws {
-        let json = { (str: String) in try JSON.parse(str.utf8Data) }
 
         do {
             try XCTAssertEqual(json(#""abc""#), json(#""abc""#).json())
         }
-
-        let yaml = { (str: String) in try YAML.parse(str.utf8Data) }
 
         do {
             try XCTAssertEqual(json(#""abc""#), yaml("abc").json())
@@ -33,7 +34,6 @@ class UniversalTests : XCTestCase {
             try XCTAssertEqual(json(#"[false, 2.2]"#), yaml("- false\n- 2.2").json())
         }
 
-        let xml = { (str: String) in try XML.parse(str.utf8Data) }
 
         do {
             try XCTAssertEqual(json(#"{"node": "abc"}"#), xml("<node>abc</node>").json())
@@ -42,7 +42,7 @@ class UniversalTests : XCTestCase {
         }
     }
 
-    func testFluentComparisons() {
+    func testFluentComparisons() throws {
         XCTAssertEqual(nil, try (nil as YAML).json())
         XCTAssertEqual(true, try (true as YAML).json())
         XCTAssertEqual(false, try (false as YAML).json())
@@ -57,6 +57,27 @@ class UniversalTests : XCTestCase {
 
         // FIXME: is this wrong?
         XCTAssertEqual(["x", "1"], try (["x": "1"] as YAML).json())
+    }
+
+    func testYAMLJSON() throws {
+        XCTAssertEqual(#"[["int",1]]"#, try yaml(#"[{"int":1}]"#).json().canonicalJSON)
+    }
+
+    func testDeserialize() throws {
+        struct SomeCodable : Equatable, Decodable {
+            let int: Int
+        }
+
+        func check<T: Equatable>(_ values: T...) throws {
+            for v in values {
+                XCTAssertEqual(values.first, v)
+            }
+        }
+
+//        try check([SomeCodable(int: 1)], json(#"[{"int":1.1}]"#).decode(), yaml(#"[{"int":1}]"#).json().decode())
+
+        try check(SomeCodable(int: 1), json(#"{"int":1.1}"#).decode()) // yaml(#"{"int":1.1}"#).json().decode())
+
     }
 }
 

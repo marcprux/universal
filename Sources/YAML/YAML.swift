@@ -239,7 +239,6 @@ extension YAML : ExpressibleByDictionaryLiteral {
 
 
 
-
 // The YAML parsing code borrows heavily from the https://github.com/behrang/YamlSwift which is released under the following license:
 //
 // The MIT License (MIT)
@@ -565,7 +564,7 @@ private func appendToArray(_ array: [YAML]) -> (YAML) -> [YAML] {
     { array + [$0] }
 }
 
-private func putToMap(_ map: [YAML.Scalar: YAML]) -> (YAML) -> (YAML) -> [YAML.Scalar: YAML] {
+private func putToMap(_ map: YAML.Object) -> (YAML) -> (YAML) -> YAML.Object {
     { key in
         { value in
             var map = map
@@ -577,7 +576,7 @@ private func putToMap(_ map: [YAML.Scalar: YAML]) -> (YAML) -> (YAML) -> [YAML.S
     }
 }
 
-private func checkKeyValueUniqueness(_ acc: [YAML.Scalar: YAML]) ->(_ context: Context, _ key: YAML.Scalar) -> YAMLResult<ContextKey> {
+private func checkKeyValueUniqueness(_ acc: YAML.Object) ->(_ context: Context, _ key: YAML.Scalar) -> YAMLResult<ContextKey> {
     { (context, key) in
         let err = "duplicate key \(key)"
         return YAMLParser.`guard`(error(err)(context), check: !acc.keys.contains(key))
@@ -592,7 +591,7 @@ private extension YAML {
     }
 }
 
-private func checkKeyUniqueness(_ acc: [YAML.Scalar: YAML]) ->(_ context: Context, _ key: YAML) -> YAMLResult<ContextValue> {
+private func checkKeyUniqueness(_ acc: YAML.Object) ->(_ context: Context, _ key: YAML) -> YAMLResult<ContextValue> {
     { (context, key) in
         let err = "duplicate key"
         return YAMLParser.`guard`(error(err)(context), check: key.rawValue.a == nil || !acc.keys.contains(key.rawValue.a!))
@@ -631,7 +630,7 @@ private func parseFlowMap(_ context: Context) -> YAMLResult<ContextValue> {
     >>=- parseFlowMap([:])
 }
 
-private func parseFlowMap(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseFlowMap(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         if peekType(context) == .closeCB {
             return YAMLParser.lift((advance(context), .object(acc)))
@@ -685,7 +684,7 @@ private func parseBlockMap(_ context: Context) -> YAMLResult<ContextValue> {
     parseBlockMap([:])(context)
 }
 
-private func parseBlockMap(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseBlockMap(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         switch peekType(context) {
 
@@ -701,7 +700,7 @@ private func parseBlockMap(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResul
     }
 }
 
-private func parseQuestionMarkkeyValue(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseQuestionMarkkeyValue(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         let ck = YAMLParser.lift(context)
         >>=- expect(.questionMark, message: "expected ?")
@@ -735,7 +734,7 @@ private func parseColonValue(_ context: Context) -> YAMLResult<ContextValue> {
     >>=- parseValue
 }
 
-private func parseStringKeyValue(_ acc: [YAML.Scalar: YAML]) -> (Context) -> YAMLResult<ContextValue> {
+private func parseStringKeyValue(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
     { context in
         let ck = YAMLParser.lift(context)
         >>=- parseString

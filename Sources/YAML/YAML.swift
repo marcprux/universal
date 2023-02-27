@@ -25,6 +25,26 @@ extension YAML.Scalar {
     public static let null = YAML.Scalar(ScalarNull.none)
     public static let `true` = YAML.Scalar(true)
     public static let `false` = YAML.Scalar(false)
+
+    /// Converts this scalar into a string that will be used for converting a keyed dictionary into a JSON-compatible key string.
+    var keyString: String {
+        switch self {
+        case .a(let a):
+            switch a {
+            case .a(let a): return a.description
+            case .b(let b): return b.description
+            }
+        case .b(let b):
+            switch b {
+            case .a(let a): return a
+            case .b(let b):
+                switch b {
+                case .a(let a): return a.description
+                case .b(let b): let _: Never? = b; return "null"
+                }
+            }
+        }
+    }
 }
 
 /// Convenience accessors for the payloads of the various `YAML` types
@@ -130,9 +150,18 @@ extension YAML : Encodable {
         case .b(let quanta):
             switch quanta.rawValue {
             case .a(let array): try container.encode(array)
-            case .b(let dictionary): try container.encode(dictionary)
+            case .b(let dictionary): try container.encode(stringifyKeys(for: dictionary))
             }
         }
+    }
+
+    /// Coerce the keys from a YAML to JSON to coerve for JSON-compatible serialization.
+    @usableFromInline func stringifyKeys(for dictionary: [Scalar: YAML]) -> [String: YAML] {
+        var d: [String: YAML] = Dictionary(minimumCapacity: dictionary.count)
+        for (key, value) in dictionary {
+            d[key.keyString] = value
+        }
+        return d
     }
 }
 
@@ -586,7 +615,7 @@ private func checkKeyValueUniqueness(_ acc: YAML.Object) ->(_ context: Context, 
 
 private extension YAML {
     /// This YAML as a key in a dictionary.
-    var yamlKey: Object.Key? {
+    var yamlKey: Scalar? {
         rawValue.infer()
     }
 }

@@ -268,6 +268,12 @@ final class YAMLTests : XCTestCase {
         XCTAssertEqual(value2[5]?[4], "http://example.com/foo#bar")
     }
 
+    func testDictionary() {
+        XCTAssertEqual(try yaml(#"{"x": 1}"#), ["x":1])
+        XCTAssertEqual(try yaml(#"x: 1"#), ["x":1])
+        //XCTAssertEqual(try yaml(#"1: 1"#), [YAML.Scalar(.init(1)):1])
+    }
+
     func testFlowSeq() {
         XCTAssertEqual(try yaml("[]"), .array([]))
         XCTAssertEqual(try yaml("[]").count, 0)
@@ -593,7 +599,7 @@ final class YAMLTests : XCTestCase {
     }
 
     func testExample11() throws {
-        let value = try yaml(
+        _ = try yaml(
             "? - Detroit Tigers\n" +
             "  - Chicago cubs\n" +
             ":\n" +

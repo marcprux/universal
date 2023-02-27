@@ -55,12 +55,12 @@ class UniversalTests : XCTestCase {
         XCTAssertEqual([1.1, nil, "abc", []], try ([1.1, nil, "abc", []] as YAML).json())
         XCTAssertEqual([1.1, nil, "abc", [nil]], try ([1.1, nil, "abc", [nil]] as YAML).json())
 
-        // FIXME: is this wrong?
-        XCTAssertEqual(["x", "1"], try (["x": "1"] as YAML).json())
+        XCTAssertEqual(["x": "1"], try (["x": "1"] as YAML).json())
     }
 
     func testYAMLJSON() throws {
-        XCTAssertEqual(#"[["int",1]]"#, try yaml(#"[{"int":1}]"#).json().canonicalJSON)
+        XCTAssertEqual(try yaml(#"x: 1"#), ["x":1])
+        XCTAssertEqual(try yaml(#"x: 1"#).json(), ["x":1])
     }
 
     func testDeserialize() throws {

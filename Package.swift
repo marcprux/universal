@@ -23,9 +23,9 @@ let package = Package(
         .target(name: "YAML", dependencies: ["Quanta"]),
         .testTarget(name: "YAMLTests", dependencies: ["YAML"], resources: []),
         .target(name: "JSON", dependencies: ["Quanta"]),
-        .testTarget(name: "JSONTests", dependencies: ["JSON"], resources: []),
+        .testTarget(name: "JSONTests", dependencies: ["JSON"], resources: [.copy("testdata/")]),
         .target(name: "Universal", dependencies: ["XML", "YAML", "JSON"]),
-        .testTarget(name: "UniversalTests", dependencies: ["Universal"], resources: [.copy("testdata/")]),
+        .testTarget(name: "UniversalTests", dependencies: ["Universal"]),
         ]
 )
 

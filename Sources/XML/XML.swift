@@ -12,7 +12,7 @@ import FoundationXML
 
 
 /// An XML tree node, which can contain a `String`, `[XML]`, or `[String: XML]`
-public struct XML : Isomorph, Sendable, Hashable, Codable {
+public struct XML : Isomorph, Sendable, Hashable {
     public typealias RawValue = Quantum<String, String, XML>
 
     public var rawValue: RawValue
@@ -23,6 +23,21 @@ public struct XML : Isomorph, Sendable, Hashable, Codable {
 
     public init(_ rawValue: RawValue) {
         self.rawValue = rawValue
+    }
+}
+
+extension XML : Encodable {
+    /// Encodes to a JSON-compatible encoder.
+    @inlinable public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self.rawValue {
+        case .a(let string): try container.encode(string as String)
+        case .b(let quanta):
+            switch quanta.rawValue {
+            case .a(let array): try container.encode(array)
+            case .b(let dictionary): try container.encode(dictionary)
+            }
+        }
     }
 }
 
@@ -434,8 +449,7 @@ extension XML {
     public static func parse(_ xmlData: Data) throws -> XML {
         let node = try XMLNode.parse(data: xmlData, options: [.processNamespaces], entityResolver: nil)
         let element = node.elementChildren.first ?? node // get the root element
-//        return XML(rawValue: .init([element.elementName : element.xml()]))
-        fatalError("TODO")
+        return XML(rawValue: .init(.init(.init([element.elementName : element.xml()]))))
     }
 }
 
@@ -449,12 +463,11 @@ extension XMLNode {
     /// instead of an array. This should be handled by using the `ElementOrArray<Child>` type, which will
     /// handle both single-instance as well as multi-instanced types.
     public func xml() -> XML {
-        fatalError("TODO")
-//        if !self.attributes.isEmpty || !self.elementChildren.isEmpty {
-//            return .init(.init(xmlObject()))
-//        } else {
-//            return .init(.init(self.stringContent))
-//        }
+        if !self.attributes.isEmpty || !self.elementChildren.isEmpty {
+            return XML(Either.Or(Quanta(Either.Or(xmlObject()))))
+        } else {
+            return XML(Either.Or(self.stringContent))
+        }
     }
 
     /// Converts this XML node into a `JSum`.
@@ -506,19 +519,17 @@ extension XMLNode {
         for child in childs {
             switch child {
             case .element(let element):
-                fatalError("TODO")
 //                if collect == true, let existing = obj[element.elementName] {
 //                    // the element already exists … re-use an existing array, or else wrap it in one
 //                    var array = existing.arr ?? [existing]
 //                    array.append(element.jsum())
 //                    obj[element.elementName] = .arr(array)
 //                } else {
-//                    // place the element as a single root element
-//                    obj[element.elementName] = element.jsum()
+                    // place the element as a single root element
+                    obj[element.elementName] = element.xml()
 //                }
             case .content(let value):
-                fatalError("TODO")
-//                obj["_"] = .str(value)
+                obj[""] = .init(.init(value))
             case .comment(_):
                 break
             case .cdata(_):

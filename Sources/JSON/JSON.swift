@@ -52,6 +52,40 @@ public struct JSON : Isomorph, Sendable, Hashable {
     }
 }
 
+extension JSON: CustomStringConvertible {
+    public var description: String {
+        "JSON" + describe(withType: true)
+    }
+
+    func describe(withType: Bool) -> String {
+        func desc<T: CustomStringConvertible>(_ value: T, _ type: String) -> String {
+            withType ? ".\(type)(\(value))" : "\(value)"
+        }
+
+        switch self.rawValue {
+        case .a(let scalar):
+            switch scalar {
+            case .a(let number): let _: Double = number; return desc(number, "number")
+            case .b(let scalar):
+                switch scalar {
+                case .a(let string): let _: String = string; return desc("\"" + string + "\"", "string")
+                case .b(let scalar):
+                    switch scalar {
+                    case .a(let boolean): let _: Bool = boolean; return desc(boolean, "boolean")
+                    case .b(let null): let _: ScalarNull = null; return ".null"
+                    }
+                }
+            }
+
+        case .b(let quanta):
+            switch quanta.rawValue {
+            case .a(let array): let _: [JSON] = array; return desc(array, "array")
+            case .b(let object): let _: Object = object; return desc(object, "object")
+            }
+        }
+
+    }
+}
 
 // MARK: JSON Initializers
 

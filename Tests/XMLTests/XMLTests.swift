@@ -34,12 +34,9 @@ final class XMLTests: XCTestCase {
         </root>
         """)
 
-//        XCTAssertEqual("", parsed.elementName) // root element
-//        XCTAssertEqual("root", parsed.elementChildren.first?.elementName)
-//        XCTAssertEqual(1, parsed.elementChildren.count)
-//        XCTAssertEqual(1, parsed.elementChildren.first?.elementChildren.count)
-//        XCTAssertEqual(2, parsed.elementChildren.first?.elementChildren.first?.elementChildren.count)
-//        XCTAssertEqual("Value", parsed.elementChildren.first?.elementChildren.first?.elementChildren.first?.childContentTrimmed)
+        let element = parsed.object?["root"]?.object?["element"]
+        XCTAssertEqual("Value", element?.object?["child1"]?.string?.trimmingCharacters(in: .whitespacesAndNewlines))
+        XCTAssertEqual("", element?.object?["child2"]?.string)
     }
 
     func testParseXMLNamespaced() throws {

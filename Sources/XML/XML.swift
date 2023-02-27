@@ -43,6 +43,45 @@ extension XML : Encodable {
     }
 }
 
+/// Convenience accessors for the payloads of the various `YAML` types
+public extension XML {
+    static func string(_ str: String) -> Self { XML(Either.Or(Scalar(str))) }
+    static func array(_ arr: [XML]) -> Self { XML(Either.Or(XML.Object.Quanta(rawValue: .init(arr)))) }
+    static func object(_ obj: [Scalar: XML]) -> Self { XML(Either.Or(XML.Object.Quanta(rawValue: .init(obj)))) }
+
+    /// Returns the underlying String payload if this is a `XML.str`, otherwise `.none`
+    @inlinable var string: String? {
+        rawValue.infer()
+    }
+
+    /// Returns the underlying JObj payload if this is a `YAML.obj`, otherwise `.none`
+    @inlinable var object: Object? {
+        rawValue.infer()?.rawValue.infer()
+    }
+
+    /// Returns the underlying Array payload if this is a `YAML.arr`, otherwise `.none`
+    @inlinable var array: [XML]? {
+        rawValue.infer()?.rawValue.infer()
+    }
+
+    /// YAML has a string subscript when it is an object type; setting a value on a non-obj type has no effect
+    @inlinable subscript(key: String) -> XML? {
+        object?[key]
+    }
+    /// The number of elements this contains: either the count of the underyling array or dictiionary, or 0 if `null`, or else 1 for a scalar.
+    @inlinable var count: Int {
+        switch rawValue {
+        case .a:
+            return 1
+        case .b(let collection):
+            switch collection.rawValue {
+            case .a(let x): return x.count
+            case .b(let x): return x.count
+            }
+        }
+    }
+}
+
 /// An XML Element Document, which is an in-memory tree representation
 /// of the contents of an XML source.
 public struct XMLNode : Hashable {
@@ -521,15 +560,15 @@ extension XMLNode {
         for child in childs {
             switch child {
             case .element(let element):
-//                if collect == true, let existing = obj[element.elementName] {
-//                    // the element already exists … re-use an existing array, or else wrap it in one
-//                    var array = existing.arr ?? [existing]
-//                    array.append(element.jsum())
-//                    obj[element.elementName] = .arr(array)
-//                } else {
+                if collect == true, let existing = obj[element.elementName] {
+                    // the element already exists … re-use an existing array, or else wrap it in one
+                    var array = existing.array ?? [existing]
+                    array.append(element.xml())
+                    obj[element.elementName] = .array(array)
+                } else {
                     // place the element as a single root element
                     obj[element.elementName] = element.xml()
-//                }
+                }
             case .content(let value):
                 obj[""] = .init(.init(value))
             case .comment(_):

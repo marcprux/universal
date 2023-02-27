@@ -34,11 +34,13 @@ class UniversalTests : XCTestCase {
             try XCTAssertEqual(json(#"[false, 2.2]"#), yaml("- false\n- 2.2").json())
         }
 
-
         do {
+            try XCTAssertEqual(json(#"{"node": "abc"}"#), xml("<node>abc</node>").json())
             try XCTAssertEqual(json(#"{"node": "abc"}"#), xml("<node>abc</node>").json())
             try XCTAssertEqual(json(#"{"node": "1"}"#), xml("<node>1</node>").json())
             try XCTAssertEqual(json(#"{"node": {"node": "1"}}"#), xml("<node><node>1</node></node>").json())
+            try XCTAssertEqual(json(#"{"node": {"node": "2"}}"#), xml("<node><node>2</node></node>").json())
+            try XCTAssertEqual(json(#"{"node": {"node": ["1", "2"]}}"#), xml("<node><node>1</node><node>2</node></node>").json())
         }
     }
 

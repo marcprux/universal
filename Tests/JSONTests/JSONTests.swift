@@ -12,16 +12,30 @@ import Either
 final class JSONTests : XCTestCase {
     func testJSON() throws {
         XCTAssertEqual(nil, JSON.null)
+        XCTAssertEqual("JSON.null", JSON.null.description)
         XCTAssertEqual(false, JSON.false)
+        XCTAssertEqual("JSON.boolean(false)", JSON.false.description)
         XCTAssertEqual(true, JSON.true)
+        XCTAssertEqual("JSON.boolean(true)", JSON.true.description)
 
         XCTAssertEqual(1, 1 as JSON)
+        XCTAssertEqual("JSON.number(1.0)", (1 as JSON).description)
         XCTAssertEqual("X", "X" as JSON)
+        XCTAssertEqual("JSON.string(\"X\")", ("X" as JSON).description)
+
         XCTAssertEqual(false, false as JSON)
         XCTAssertEqual(nil, nil as JSON)
+
         XCTAssertEqual([nil], [nil] as JSON)
+        XCTAssertEqual("JSON.array([JSON.null])", ([nil] as JSON).description)
+
         XCTAssertEqual(["X": nil], ["X": nil] as JSON)
+        XCTAssertEqual("JSON.object([\"X\": JSON.null])", (["X": nil] as JSON).description)
+
         XCTAssertEqual(["X": [1, 2.3, true, nil, "Y", ["Z"]]], ["X": [1, 2.3, true, nil, "Y", ["Z"]]] as JSON)
+        XCTAssertEqual(#"JSON.object(["X": JSON.array([JSON.number(1.0), JSON.number(2.3), JSON.boolean(true), JSON.null, JSON.string("Y"), JSON.array([JSON.string("Z")])])])"#, (["X": [1, 2.3, true, nil, "Y", ["Z"]]] as JSON).description)
+
+        XCTAssertEqual(JSON.object(["X": .array([.number(1.0), .number(2.3), .boolean(true), .null, .string("Y"), .array([.string("Z")])])]), (["X": [1, 2.3, true, nil, "Y", ["Z"]]] as JSON))
 
         let js: JSON = [
             "string": "hello",

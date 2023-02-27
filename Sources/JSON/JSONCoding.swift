@@ -108,10 +108,10 @@ open class JSONEncodingOptions {
 
 #if canImport(Combine)
 import Combine
-@available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 private protocol TopLevelJEncoder : TopLevelEncoder {
 }
-@available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 private protocol TopLevelJDecoder : TopLevelDecoder {
 }
 #else
@@ -1904,7 +1904,7 @@ extension Encodable {
     /// - Returns: the JSON-encoded `Data`
     @inlinable public func toJSON(encoder: @autoclosure () -> JSONEncoder = JSONEncoder(), outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Data {
         let formatting: JSONEncoder.OutputFormatting
-        if #available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *) {
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
             formatting = outputFormatting ?? [.sortedKeys, .withoutEscapingSlashes]
         } else {
             formatting = outputFormatting ?? [.sortedKeys]
@@ -1965,7 +1965,7 @@ extension Encodable {
 
 private let debugJSONEncoder: JSONEncoder = {
     let encoder = JSONEncoder()
-    if #available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *) {
+    if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
     } else {
         encoder.outputFormatting = [.sortedKeys]
@@ -1984,7 +1984,7 @@ private let debugJSONDecoder: JSONDecoder = {
 
 private let prettyJSONEncoder: JSONEncoder = {
     let encoder = JSONEncoder()
-    if #available(macOS 10.15, iOS 13.0, watchOS 5.0, tvOS 13.0, *) {
+    if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
     } else {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

@@ -41,5 +41,13 @@ class UniversalTests : XCTestCase {
             try XCTAssertEqual(json(#"{"node": {"node": "1"}}"#), xml("<node><node>1</node></node>").json())
         }
     }
+
+    func testFluentComparisons() {
+        XCTAssertEqual([""], try ([""] as YAML).json())
+        XCTAssertEqual([1], try ([1] as YAML).json())
+        XCTAssertEqual([1.1], try ([1.1] as YAML).json())
+        XCTAssertEqual([1.1, nil, "abc", []], try ([1.1, nil, "abc", []] as YAML).json())
+        XCTAssertEqual([1.1, nil, "abc", [nil]], try ([1.1, nil, "abc", [nil]] as YAML).json())
+    }
 }
 

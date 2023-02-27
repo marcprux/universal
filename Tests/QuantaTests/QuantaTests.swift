@@ -10,9 +10,9 @@ import FoundationNetworking
 
 final class QuantaTests : XCTestCase {
     func testQuanta() throws {
-        XCTAssertNotEqual(Quanta(.init([1])), Quanta(.init([1 : 1])))
+        XCTAssertNotEqual(Dictionary.Quanta(.init([1])), Dictionary.Quanta(.init([1 : 1])))
 
-        typealias QInt = Quanta<Int, Int>
+        typealias QInt = Dictionary<Int, Int>.Quanta
         XCTAssertEqual(QInt(.init([1])).mapValues({ $0 }), QInt(.init([1 : 1])).mapValues({ $0 }))
     }
 }

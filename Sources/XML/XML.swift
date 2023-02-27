@@ -11,9 +11,11 @@ import FoundationXML
 #endif // canImport(FoundationXML)
 
 
-/// An XML tree node, which can contain a `String`, `[XML]`, or `[String: XML]`
+/// An XML tree node, which can contain a `String`, `[XML]`, or a `[String: XML]` `Object`.
 public struct XML : Isomorph, Sendable, Hashable {
-    public typealias RawValue = Quantum<String, String, XML>
+    public typealias Scalar = String
+    public typealias Object = [String: XML]
+    public typealias RawValue = Either<Scalar>.Or<Object.Quanta>
 
     public var rawValue: RawValue
 
@@ -464,7 +466,7 @@ extension XMLNode {
     /// handle both single-instance as well as multi-instanced types.
     public func xml() -> XML {
         if !self.attributes.isEmpty || !self.elementChildren.isEmpty {
-            return XML(Either.Or(Quanta(Either.Or(xmlObject()))))
+            return XML(Either.Or(XML.Object.Quanta(Either.Or(xmlObject()))))
         } else {
             return XML(Either.Or(self.stringContent))
         }

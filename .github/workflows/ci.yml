@@ -11,23 +11,18 @@ on:
     - cron:  '30 10,22 * * *'
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode_14.1.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode_14.2.app/Contents/Developer
 
 jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - run: sudo apt-get update
-      - name: Install dependencies
-        run: sudo apt-get install -y libjavascriptcoregtk-4.0-dev
-      - run: pkg-config --libs javascriptcoregtk-4.0
-      - uses: actions/checkout@v3
       - name: Test (Debug)
         run: swift test -v --configuration debug
       - name: Test (Release)
         run: swift test -v --configuration release -Xswiftc -enable-testing
 
-  ios:
+  iOS:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
@@ -36,7 +31,7 @@ jobs:
       - name: Test (Release)
         run: xcodebuild clean test -configuration Release -scheme "Universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
 
-  tvos:
+  tvOS:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
@@ -45,7 +40,16 @@ jobs:
       - name: Test (Release)
         run: xcodebuild clean test -configuration Release -scheme "Universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
 
-  macos:
+  watchOS:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build (Debug)
+        run: xcodebuild clean test -configuration Debug -scheme "Universal-Package" -destination "OS=9.1,name=Apple Watch Ultra (49mm)"
+      - name: Build (Release)
+        run: xcodebuild clean test -configuration Release -scheme "Universal-Package" -destination "OS=9.1,name=Apple Watch Ultra (49mm)"
+
+  macOS:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3

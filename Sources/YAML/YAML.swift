@@ -3,13 +3,12 @@ import Foundation
 import Either
 import Quanta
 
-
-/// A YAML tree node, which can contain a `Scalar` (`String`, `Int`, `Double`, `Bool`, or `Null`), `[YAML]`, or `[Scalar: YAML]`
+/// A YAML tree node, which can contain a `Scalar` (`String`, `Int`, `Double`, `Bool`, or `Null`), `[YAML]`, or a `[Scalar: YAML]` `Object`.
 public struct YAML : Isomorph, Sendable, Hashable {
-    public typealias NumberType = Either<IntegerLiteralType>.Or<FloatLiteralType>
-    public typealias Scalar = ScalarOf<StringLiteralType, NumberType>
+    public typealias NumericType = Either<IntegerLiteralType>.Or<FloatLiteralType>
+    public typealias Scalar = ScalarOf<StringLiteralType, NumericType>
     public typealias Object = [Scalar: YAML]
-    public typealias RawValue = Quantum<Scalar, Object.Key, Object.Value>
+    public typealias RawValue = Either<Scalar>.Or<Object.Quanta>
 
     public var rawValue: RawValue
 
@@ -38,8 +37,8 @@ public extension YAML {
     static func double(_ dbl: Double) -> Self { YAML(Either.Or(Scalar(.init(dbl)))) }
     static func integer(_ int: Int) -> Self { YAML(Either.Or(Scalar(.init(int)))) }
     static func boolean(_ bol: Bool) -> Self { YAML(Either.Or(Scalar(bol))) }
-    static func array(_ arr: [YAML]) -> Self { YAML(Either.Or(Quanta(rawValue: .init(arr)))) }
-    static func object(_ obj: [Scalar: YAML]) -> Self { YAML(Either.Or(Quanta(rawValue: .init(obj)))) }
+    static func array(_ arr: [YAML]) -> Self { YAML(Either.Or(YAML.Object.Quanta(rawValue: .init(arr)))) }
+    static func object(_ obj: [Scalar: YAML]) -> Self { YAML(Either.Or(YAML.Object.Quanta(rawValue: .init(obj)))) }
 
     /// Returns the underlying String payload if this is a `YAML.str`, otherwise `.none`
     @inlinable var string: String? {
@@ -165,6 +164,78 @@ extension YAML : Encodable {
 //    }
 //}
 
+
+
+
+extension YAML : ExpressibleByStringLiteral {
+    public init(stringLiteral value: StringLiteralType) {
+        self = YAML(.init(Either.Or(value)))
+    }
+
+    public init(extendedGraphemeClusterLiteral value: String) {
+        self = YAML(.init(Either.Or(value)))
+    }
+
+    public init(unicodeScalarLiteral value: String) {
+        self = YAML(.init(Either.Or(value)))
+    }
+}
+
+extension YAML.Scalar : ExpressibleByStringLiteral, ExpressibleByExtendedGraphemeClusterLiteral, ExpressibleByUnicodeScalarLiteral {
+    public init(stringLiteral value: StringLiteralType) {
+        self = YAML.Scalar(value)
+    }
+
+    public init(extendedGraphemeClusterLiteral value: String) {
+        self = YAML.Scalar(value)
+    }
+
+    public init(unicodeScalarLiteral value: String) {
+        self = YAML.Scalar(value)
+    }
+}
+
+extension YAML : ExpressibleByNilLiteral {
+    public init(nilLiteral: ()) {
+        self = .null
+    }
+}
+
+extension YAML.Scalar : ExpressibleByNilLiteral {
+    public init(nilLiteral: ()) {
+        self = YAML.Scalar.null
+    }
+}
+
+extension YAML : ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: IntegerLiteralType) {
+        self = YAML(Either.Or(Scalar(Either.Or(value))))
+    }
+}
+
+extension YAML : ExpressibleByFloatLiteral {
+    public init(floatLiteral value: FloatLiteralType) {
+        self = YAML(Either.Or(Scalar(Either.Or(value))))
+    }
+}
+
+extension YAML : ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: BooleanLiteralType) {
+        self = YAML(Either.Or(Scalar(value)))
+    }
+}
+
+extension YAML : ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: YAML...) {
+        self = YAML(Either.Or(YAML.Object.Quanta(rawValue: Either.Or(elements))))
+    }
+}
+
+extension YAML : ExpressibleByDictionaryLiteral {
+    public init(dictionaryLiteral elements: (YAML.Object.Key, YAML)...) {
+        self = YAML(Either.Or(YAML.Object.Quanta(rawValue: Either.Or(Dictionary(uniqueKeysWithValues: elements)))))
+    }
+}
 
 
 

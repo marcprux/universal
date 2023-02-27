@@ -6,95 +6,6 @@ import XCTest
 import YAML
 import Quanta
 
-extension YAML : ExpressibleByStringLiteral {
-    public init(stringLiteral value: StringLiteralType) {
-        self = YAML(.init(Either.Or(value)))
-    }
-
-    public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
-        self = YAML(.init(Either.Or(value)))
-    }
-
-    public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
-        self = YAML(.init(Either.Or(value)))
-    }
-}
-
-extension YAML.Scalar : ExpressibleByStringLiteral, ExpressibleByExtendedGraphemeClusterLiteral, ExpressibleByUnicodeScalarLiteral {
-    public init(stringLiteral value: StringLiteralType) {
-        self = YAML.Scalar(value)
-    }
-
-    public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
-        self = YAML.Scalar(value)
-    }
-
-    public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
-        self = YAML.Scalar(value)
-    }
-}
-
-
-extension YAML.Scalar {
-    /// Creates a YAML scalar from the given string.
-    public static func str(_ value: StringLiteralType) -> YAML.Scalar {
-        YAML.Scalar(value)
-    }
-
-    /// Creates a YAML scalar from the given int.
-    public static func int(_ value: IntegerLiteralType) -> YAML.Scalar {
-        YAML.Scalar(.init(value))
-    }
-
-    /// Creates a YAML scalar from the given double.
-    public static func dbl(_ value: FloatLiteralType) -> YAML.Scalar {
-        YAML.Scalar(.init(value))
-    }
-}
-
-extension YAML : ExpressibleByNilLiteral {
-    public init(nilLiteral: ()) {
-        self = .null
-    }
-}
-
-extension YAML.Scalar : ExpressibleByNilLiteral {
-    public init(nilLiteral: ()) {
-        self = YAML.Scalar.null
-    }
-}
-
-extension YAML : ExpressibleByIntegerLiteral {
-    public init(integerLiteral value: IntegerLiteralType) {
-        self = YAML(Either.Or(Scalar(Either.Or(value))))
-    }
-}
-
-extension YAML : ExpressibleByFloatLiteral {
-    public init(floatLiteral value: FloatLiteralType) {
-        self = YAML(Either.Or(Scalar(Either.Or(value))))
-    }
-}
-
-extension YAML : ExpressibleByBooleanLiteral {
-    public init(booleanLiteral value: BooleanLiteralType) {
-        self = YAML(Either.Or(Scalar(value)))
-    }
-}
-
-extension YAML : ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: YAML...) {
-        self = YAML(Either.Or(Quanta(rawValue: Either.Or(elements))))
-    }
-}
-
-extension YAML : ExpressibleByDictionaryLiteral {
-    public init(dictionaryLiteral elements: (YAML.Object.Key, YAML)...) {
-        self = YAML(Either.Or(Quanta(rawValue: Either.Or(Dictionary(uniqueKeysWithValues: elements)))))
-    }
-}
-
-
 final class YAMLTests : XCTestCase {
 
     // MARK: YAML Tests
@@ -330,9 +241,9 @@ final class YAMLTests : XCTestCase {
         XCTAssertThrowsError(try yaml("a: x\ny\n  z"))
         XCTAssertEqual(try yaml("- a: x\n   y\n    z"), [["a": "x y z"]])
         XCTAssertEqual(try yaml("- a:\n   x\n    y\n   z"), [["a": "x y z"]])
-        XCTAssertEqual(try yaml("- a:     \n   x\n    y\n   z"), [[.str("a"): "x y z"]])
+        XCTAssertEqual(try yaml("- a:     \n   x\n    y\n   z"), [["a": "x y z"]])
         XCTAssert(try yaml("- a: # comment\n   x\n    y\n   z") ==
-                  [[.str("a"): "x y z"]])
+                  [["a": "x y z"]])
 
         let value1: YAML = "Radin"
         XCTAssertEqual(value1, "Radin")

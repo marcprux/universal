@@ -27,26 +27,26 @@ extension JSON {
 
 private extension _JSONContainer {
     func addElement(_ element: _JSONContainer) throws {
-        guard let arr = self.json.arr else {
+        guard let arr = self.json.array else {
             throw EncodingError.invalidValue(self, EncodingError.Context(codingPath: [], debugDescription: "Element was not an array"))
         }
-        self.json = .arr(arr + [element.json])
+        self.json = .array(arr + [element.json])
     }
 
     func insertElement(_ element: _JSONContainer, at index: Int) throws {
-        guard var arr = self.json.arr else {
+        guard var arr = self.json.array else {
             throw EncodingError.invalidValue(self, EncodingError.Context(codingPath: [], debugDescription: "Element was not an array"))
         }
         arr.insert(element.json, at: index)
-        self.json = .arr(arr)
+        self.json = .array(arr)
     }
 
     func setProperty(_ key: String, _ element: _JSONContainer) throws {
-        guard var obj = self.json.obj else {
+        guard var obj = self.json.object else {
             throw EncodingError.invalidValue(self, EncodingError.Context(codingPath: [], debugDescription: "Element was not an object"))
         }
         obj[key] = element.json
-        self.json = .obj(obj)
+        self.json = .object(obj)
     }
 }
 
@@ -323,13 +323,13 @@ fileprivate struct _JSONEncodingStorage {
     }
 
     fileprivate mutating func pushKeyedContainer(_ options: JSONEncodingOptions) -> _JSONContainer {
-        let dictionary = _JSONContainer(json: JSON.obj([:]))
+        let dictionary = _JSONContainer(json: JSON.object([:]))
         self.containers.append(dictionary)
         return dictionary
     }
 
     fileprivate mutating func pushUnkeyedContainer(_ options: JSONEncodingOptions) throws -> _JSONContainer {
-        let array = _JSONContainer(json: JSON.arr([]))
+        let array = _JSONContainer(json: JSON.array([]))
         self.containers.append(array)
         return array
     }
@@ -392,7 +392,7 @@ fileprivate struct _JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         self.codingPath.append(_JSONKey(index: self.count))
         defer { self.codingPath.removeLast() }
 
-        let dictionary = _JSONContainer(json: JSON.obj([:]))
+        let dictionary = _JSONContainer(json: JSON.object([:]))
         try? self.container.addElement(dictionary)
 
         let container = _JSONKeyedEncodingContainer<NestedKey>(referencing: self.encoder, codingPath: self.codingPath, wrapping: dictionary)
@@ -404,7 +404,7 @@ fileprivate struct _JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         defer { self.codingPath.removeLast() }
 
         do {
-            let array = _JSONContainer(json: JSON.arr([]))
+            let array = _JSONContainer(json: JSON.array([]))
             try self.container.addElement(array)
             return _JSONUnkeyedEncodingContainer(referencing: self.encoder, codingPath: self.codingPath, wrapping: array)
         } catch {
@@ -507,47 +507,47 @@ extension JSONElementEncoder {
 
     /// Returns the given value boxed in a container appropriate for pushing onto the container stack.
     fileprivate func box(_ value: Bool) -> _JSONContainer {
-        .init(json: .bol(value))
+        .init(json: .boolean(value))
     }
 
     fileprivate func box(_ value: Int) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: Int8) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: Int16) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: Int32) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: Int64) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: UInt) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: UInt8) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: UInt16) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: UInt32) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: UInt64) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: Float) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: Double) -> _JSONContainer {
-        .init(json: .num(.init(value)))
+        .init(json: .number(.init(value)))
     }
     fileprivate func box(_ value: String) -> _JSONContainer {
-        .init(json: .str(value))
+        .init(json: .string(value))
     }
     fileprivate func box(_ date: Date) throws -> _JSONContainer {
         switch self.options.dateEncodingStrategy {
@@ -558,20 +558,20 @@ extension JSONElementEncoder {
             return .init(json: self.storage.popContainer().json)
 
         case .secondsSince1970:
-            return .init(json: .num(date.timeIntervalSince1970))
+            return .init(json: .number(date.timeIntervalSince1970))
 
         case .millisecondsSince1970:
-            return .init(json: .num(1000.0 * date.timeIntervalSince1970))
+            return .init(json: .number(1000.0 * date.timeIntervalSince1970))
 
         case .iso8601:
             if #available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *) {
-                return .init(json: .str(_iso8601Formatter.string(from: date)))
+                return .init(json: .string(_iso8601Formatter.string(from: date)))
             } else {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
         case .formatted(let formatter):
-            return .init(json: .str(formatter.string(from: date)))
+            return .init(json: .string(formatter.string(from: date)))
 
         case .custom(let closure):
             let depth = self.storage.count
@@ -588,14 +588,14 @@ extension JSONElementEncoder {
 
             guard self.storage.count > depth else {
                 // The closure didn't encode anything. Return the default keyed container.
-                return .init(json: .obj([:]))
+                return .init(json: .object([:]))
             }
 
             // We can pop because the closure encoded something.
             return self.storage.popContainer()
 
         @unknown default:
-            return .init(json: .str(_iso8601Formatter.string(from: date)))
+            return .init(json: .string(_iso8601Formatter.string(from: date)))
         }
     }
 
@@ -619,7 +619,7 @@ extension JSONElementEncoder {
             return self.storage.popContainer()
 
         case .base64:
-            return .init(json: .str(data.base64EncodedString()))
+            return .init(json: .string(data.base64EncodedString()))
 
         case .custom(let closure):
             let depth = self.storage.count
@@ -636,18 +636,18 @@ extension JSONElementEncoder {
 
             guard self.storage.count > depth else {
                 // The closure didn't encode anything. Return the default keyed container.
-                return .init(json: .obj([:]))
+                return .init(json: .object([:]))
             }
 
             // We can pop because the closure encoded something.
             return self.storage.popContainer()
         @unknown default:
-            return .init(json: .str(data.base64EncodedString()))
+            return .init(json: .string(data.base64EncodedString()))
         }
     }
 
     fileprivate func box<T: Encodable>(_ value: T) throws -> _JSONContainer {
-        return try self.box_(value) ?? .init(json: JSON.obj([:]))
+        return try self.box_(value) ?? .init(json: JSON.object([:]))
     }
 
     fileprivate func box_<T: Encodable>(_ value: T) throws -> _JSONContainer? {
@@ -657,9 +657,9 @@ extension JSONElementEncoder {
         } else if type == Data.self || type == NSData.self {
             return try self.box((value as! Data))
         } else if type == URL.self || type == NSURL.self {
-            return .init(json: .str((value as! URL).absoluteString))
+            return .init(json: .string((value as! URL).absoluteString))
         } else if type == Decimal.self || type == NSDecimalNumber.self {
-            return .init(json: .num((value as! NSDecimalNumber).doubleValue))
+            return .init(json: .number((value as! NSDecimalNumber).doubleValue))
         }
 
         // The value should request a container from the JSONElementEncoder.
@@ -708,59 +708,59 @@ fileprivate struct _JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
     }
 
     public mutating func encode(_ value: Bool, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .bol(value)))
+        try container.setProperty(key.stringValue, .init(json: .boolean(value)))
     }
 
     public mutating func encode(_ value: Int, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: Int8, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: Int16, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: Int32, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: Int64, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: UInt, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: UInt8, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: UInt16, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: UInt32, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: UInt64, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: String, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .str(value)))
+        try container.setProperty(key.stringValue, .init(json: .string(value)))
     }
 
     public mutating func encode(_ value: Float, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(.init(value))))
+        try container.setProperty(key.stringValue, .init(json: .number(.init(value))))
     }
 
     public mutating func encode(_ value: Double, forKey key: Key) throws {
-        try container.setProperty(key.stringValue, .init(json: .num(value)))
+        try container.setProperty(key.stringValue, .init(json: .number(value)))
     }
 
     public mutating func encode<T: Encodable>(_ value: T, forKey key: Key) throws {
@@ -770,7 +770,7 @@ fileprivate struct _JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
     }
 
     public mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: Key) -> KeyedEncodingContainer<NestedKey> {
-        let dictionary = _JSONContainer(json: JSON.obj([:]))
+        let dictionary = _JSONContainer(json: JSON.object([:]))
         _ = try? self.container.setProperty(key.stringValue, dictionary)
 
         self.codingPath.append(key)
@@ -782,7 +782,7 @@ fileprivate struct _JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingConta
 
     public mutating func nestedUnkeyedContainer(forKey key: Key) -> UnkeyedEncodingContainer {
         do {
-            let array = _JSONContainer(json: JSON.arr([]))
+            let array = _JSONContainer(json: JSON.array([]))
             try container.setProperty(key.stringValue, array)
 
             self.codingPath.append(key)
@@ -850,7 +850,7 @@ fileprivate class _JSONReferencingEncoder: JSONElementEncoder {
     deinit {
         let value: _JSONContainer
         switch self.storage.count {
-        case 0: value = _JSONContainer(json: JSON.obj([:]))
+        case 0: value = _JSONContainer(json: JSON.object([:]))
         case 1: value = self.storage.popContainer()
         default: fatalError("Referencing encoder deallocated with multiple containers on stack.")
         }
@@ -895,7 +895,7 @@ fileprivate class _JSONDecoder: Decoder {
                                                                     debugDescription: "Cannot get keyed decoding container -- found null value instead."))
         }
 
-        guard let obj = self.storage.topContainer.obj else {
+        guard let obj = self.storage.topContainer.object else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: Any].self, reality: self.storage.topContainer)
         }
 
@@ -910,7 +910,7 @@ fileprivate class _JSONDecoder: Decoder {
                                                                     debugDescription: "Cannot get unkeyed decoding container -- found null value instead."))
         }
 
-        guard let arr = self.storage.topContainer.arr else {
+        guard let arr = self.storage.topContainer.array else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: self.storage.topContainer)
         }
 
@@ -1214,7 +1214,7 @@ fileprivate struct _JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
                                                                     debugDescription: "Cannot get nested keyed container -- no value found for key \"\(key.stringValue)\""))
         }
 
-        guard let obj = value.obj else {
+        guard let obj = value.object else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: Any].self, reality: value)
         }
 
@@ -1232,7 +1232,7 @@ fileprivate struct _JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingConta
                                                                     debugDescription: "Cannot get nested unkeyed container -- no value found for key \"\(key.stringValue)\""))
         }
 
-        guard let array = value.arr else {
+        guard let array = value.array else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: value)
         }
 
@@ -1553,7 +1553,7 @@ fileprivate struct _JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             throw DecodingError.valueNotFound(KeyedDecodingContainer<NestedKey>.self, DecodingError.Context(codingPath: self.codingPath, debugDescription: "Cannot get keyed decoding container -- found null value instead."))
         }
 
-        guard let obj = value.obj else {
+        guard let obj = value.object else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [String: JSON].self, reality: value)
         }
 
@@ -1579,7 +1579,7 @@ fileprivate struct _JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
                                                                     debugDescription: "Cannot get keyed decoding container -- found null value instead."))
         }
 
-        guard let arr = value.arr else {
+        guard let arr = value.array else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: [Any].self, reality: value)
         }
 
@@ -1700,7 +1700,7 @@ internal var _iso8601Formatter: ISO8601DateFormatter = {
 extension _JSONDecoder {
     /// Returns the given value unboxed from a container.
     fileprivate func unbox(_ value: JSON, as type: Bool.Type) throws -> Bool? {
-        guard let bol = value.bol else {
+        guard let bol = value.boolean else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
@@ -1708,7 +1708,7 @@ extension _JSONDecoder {
     }
 
     fileprivate func unboxNumber(_ value: JSON) throws -> Double {
-        guard let num = value.num else {
+        guard let num = value.number else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: Double.self, reality: value)
         }
         return num
@@ -1719,7 +1719,7 @@ extension _JSONDecoder {
     }
 
     fileprivate func unbox(_ value: JSON, as type: String.Type) throws -> String? {
-        guard let str = value.str else {
+        guard let str = value.string else {
             throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
         }
 
@@ -1732,14 +1732,14 @@ extension _JSONDecoder {
             return try Date(from: self)
 
         case .secondsSince1970:
-            guard let number = value.num else {
+            guard let number = value.number else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date secondsSince1970."))
             }
 
             return Date(timeIntervalSince1970: number)
 
         case .millisecondsSince1970:
-            guard let number = value.num else {
+            guard let number = value.number else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date millisecondsSince1970."))
             }
 
@@ -1747,7 +1747,7 @@ extension _JSONDecoder {
 
         case .iso8601:
             if #available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *) {
-                guard let string = value.str,
+                guard let string = value.string,
                       let date = _iso8601Formatter.date(from: string) else {
                     throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
                 }
@@ -1758,7 +1758,7 @@ extension _JSONDecoder {
             }
 
         case .formatted(let formatter):
-            guard let string = value.str else {
+            guard let string = value.string else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
             }
             guard let date = formatter.date(from: string) else {
@@ -1780,7 +1780,7 @@ extension _JSONDecoder {
             return try Data(from: self)
 
         case .base64:
-            guard let string = value.str else {
+            guard let string = value.string else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected data to be Base64."))
             }
 
@@ -1799,7 +1799,7 @@ extension _JSONDecoder {
     }
 
     fileprivate func unbox(_ value: JSON, as type: URL.Type) throws -> URL? {
-        guard let string = value.str else {
+        guard let string = value.string else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected URL string."))
         }
 

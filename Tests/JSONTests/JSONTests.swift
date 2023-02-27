@@ -37,19 +37,19 @@ final class JSONTests : XCTestCase {
         ]
 
         XCTAssertEqual(js["string"], "hello")
-        XCTAssertEqual(js["string"]?.str, "hello")
+        XCTAssertEqual(js["string"]?.string, "hello")
 
         XCTAssertEqual(js["number"], 1.23)
-        XCTAssertEqual(js["number"]?.num, 1.23)
+        XCTAssertEqual(js["number"]?.number, 1.23)
 
         XCTAssertEqual(js["null"], JSON.null)
         XCTAssertEqual(true, js["null"]?.isNull)
 
         XCTAssertEqual(js["array"], [1, nil, "foo"])
-        XCTAssertEqual(js["array"]?.arr, [1, nil, "foo"])
+        XCTAssertEqual(js["array"]?.array, [1, nil, "foo"])
 
         XCTAssertEqual(js["object"]?["x"], "a")
-        XCTAssertEqual(js["object"]?["x"]?.str, "a")
+        XCTAssertEqual(js["object"]?["x"]?.string, "a")
 
         XCTAssertEqual(js["array"]?[0], 1)
         XCTAssertEqual(js["array"]?[1], .null)
@@ -100,9 +100,9 @@ final class JSONTests : XCTestCase {
             } else {
                 // create a primitive child
                 switch Int.random(in: 0...3, using: &rng) {
-                case 0: values.append(JSON.bol(.random(using: &rng)))
-                case 1: values.append(JSON.num(Double.random(in: -999999...999999, using: &rng)))
-                case 2: values.append(JSON.str(uuid().uuidString))
+                case 0: values.append(JSON.boolean(.random(using: &rng)))
+                case 1: values.append(JSON.number(Double.random(in: -999999...999999, using: &rng)))
+                case 2: values.append(JSON.string(uuid().uuidString))
                 default: values.append(.null)
                 }
             }
@@ -114,9 +114,9 @@ final class JSONTests : XCTestCase {
             for value in values {
                 obj[uuid().uuidString] = value
             }
-            return .obj(obj)
+            return .object(obj)
         } else { // !coinFlip: make the elements an array
-            return .arr(values)
+            return .array(values)
         }
 
     }

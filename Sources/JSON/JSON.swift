@@ -107,45 +107,45 @@ extension JSON : ExpressibleByDictionaryLiteral {
 
 /// Convenience accessors for the payloads of the various `JSON` types
 public extension JSON {
-    static func str(_ str: String) -> Self { .init(str) }
-    static func num(_ num: Double) -> Self { .init(num) }
-    static func bol(_ bol: Bool) -> Self { .init(bol) }
-    static func arr(_ arr: [JSON]) -> Self { .init(.init(Object.Quanta(rawValue: .init(arr)))) }
-    static func obj(_ obj: [String: JSON]) -> Self { .init(.init(Object.Quanta(rawValue: .init(obj)))) }
+    static func string(_ str: String) -> Self { .init(str) }
+    static func number(_ num: Double) -> Self { .init(num) }
+    static func boolean(_ bol: Bool) -> Self { .init(bol) }
+    static func array(_ arr: [JSON]) -> Self { .init(.init(Object.Quanta(rawValue: .init(arr)))) }
+    static func object(_ obj: [String: JSON]) -> Self { .init(.init(Object.Quanta(rawValue: .init(obj)))) }
 
     /// Returns the underlying String payload if this is a `JSON.str`, otherwise `.none`
-    @inlinable var str: String? {
+    @inlinable var string: String? {
         rawValue.infer()?.infer()
     }
 
     /// Returns the underlying Boolean payload if this is a `JSON.bol`, otherwise `.none`
-    @inlinable var bol: Bool? {
+    @inlinable var boolean: Bool? {
         rawValue.infer()?.infer()
     }
 
     /// Returns the underlying Double payload if this is a `JSON.num`, otherwise `.none`
-    @inlinable var num: Double? {
+    @inlinable var number: Double? {
         rawValue.infer()?.infer()
     }
 
     /// Returns the underlying JObj payload if this is a `JSON.obj`, otherwise `.none`
-    @inlinable var obj: Object? {
+    @inlinable var object: Object? {
         rawValue.infer()?.rawValue.infer()
     }
 
     /// Returns the underlying Array payload if this is a `JSON.arr`, otherwise `.none`
-    @inlinable var arr: [JSON]? {
+    @inlinable var array: [JSON]? {
         rawValue.infer()?.rawValue.infer()
     }
 
     /// JSON has a string subscript when it is an object type; setting a value on a non-obj type has no effect
     @inlinable subscript(key: String) -> JSON? {
-        obj?[key]
+        object?[key]
     }
 
     /// JSON has a save indexed subscript when it is an array type; setting a value on a non-array type has no effect
     @inlinable subscript(index: Int) -> JSON? {
-        arr?[index]
+        array?[index]
     }
 
     /// The number of elements this contains: either the count of the underyling array or dictiionary, or 0 if `null`, or else 1 for a scalar.

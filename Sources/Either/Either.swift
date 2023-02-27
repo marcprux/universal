@@ -21,8 +21,7 @@ public protocol EitherOr {
     func infer() -> B?
 }
 
-/// The basis of one of multiple possible types, equivalent to an
-/// `Either` sum type.
+/// The basis of one of multiple possible types: `Either<A>.Or<B>`, `Either<A>.Or<B>.Or<C>`, etc.
 ///
 /// A choice between two different types is expressed by `Either<A>.Or<B>`.
 /// For example:

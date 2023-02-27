@@ -29,9 +29,7 @@ public extension Dictionary {
 public typealias ScalarNull = Optional<Never>
 
 /// The base of a scalar type, which contains fixed boolean and null type and variable string and numeric types.
-//public typealias ScalarOf<StringType, NumericType> = Either<StringType>.Or<NumericType>.Or<BooleanLiteralType>.Or<ScalarNull>
-public typealias ScalarOf<StringType, NumericType> = Either<NumericType>.Or<StringType>.Or<Either<BooleanLiteralType>.Or<ScalarNull>>
-//public typealias ScalarOf<StringType, NumericType> = Either<StringType>.Or<Either<NumericType>.Or<Either<BooleanLiteralType>.Or<ScalarNull>>>
+public typealias ScalarOf<StringType, NumericType> = Either<Either<NumericType>.Or<StringType>>.Or<Either<BooleanLiteralType>.Or<ScalarNull>>
 
 
 extension Dictionary.Quanta : Sequence {

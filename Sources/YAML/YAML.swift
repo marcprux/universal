@@ -28,22 +28,15 @@ extension YAML.Scalar {
 
     /// Converts this scalar into a string that will be used for converting a keyed dictionary into a JSON-compatible key string.
     var keyString: String {
-        switch self {
-        case .a(let a):
-            switch a {
-            case .a(let a): return a.description
-            case .b(let b): return b.description
-            }
-        case .b(let b):
-            switch b {
-            case .a(let a): return a
-            case .b(let b):
-                switch b {
-                case .a(let a): return a.description
-                case .b(let b): let _: Never? = b; return "null"
-                }
-            }
-        }
+        func keystr(_ value: String) -> String { value }
+        func keystr(_ value: ScalarNull) -> String { "null" }
+        func keystr(_ value: Bool) -> String { value ? "true" : "false" }
+        func keystr(_ value: Int) -> String { value.description }
+        func keystr(_ value: Double) -> String { value.description }
+        func keystr(_ value: A.A) -> String { value.map(keystr, keystr).value }
+        func keystr(_ value: A) -> String { value.map(keystr, keystr).value }
+        func keystr(_ value: B) -> String { value.map(keystr, keystr).value }
+        return map(keystr, keystr).value
     }
 }
 
@@ -53,16 +46,20 @@ public extension YAML {
     static let `true` = YAML(Either.Or(YAML.Scalar.true))
     static let `false` = YAML(Either.Or(YAML.Scalar.false))
 
-    static func string(_ str: String) -> Self { YAML(Either.Or(Scalar(str))) }
-    static func double(_ dbl: Double) -> Self { YAML(Either.Or(Scalar(.init(dbl)))) }
-    static func integer(_ int: Int) -> Self { YAML(Either.Or(Scalar(.init(int)))) }
+    static func string(_ str: String) -> Self { YAML(Either.Or(Scalar(.init(str)))) }
+    static func double(_ dbl: Double) -> Self { YAML(Either.Or(Scalar(.init(.init(dbl))))) }
+    static func integer(_ int: Int) -> Self { YAML(Either.Or(Scalar(.init(.init(int))))) }
     static func boolean(_ bol: Bool) -> Self { YAML(Either.Or(Scalar(bol))) }
     static func array(_ arr: [YAML]) -> Self { YAML(Either.Or(YAML.Object.Quanta(rawValue: .init(arr)))) }
     static func object(_ obj: [Scalar: YAML]) -> Self { YAML(Either.Or(YAML.Object.Quanta(rawValue: .init(obj)))) }
 
+    @inlinable var scalar: Scalar? {
+        rawValue.infer()
+    }
+
     /// Returns the underlying String payload if this is a `YAML.str`, otherwise `.none`
     @inlinable var string: String? {
-        rawValue.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying Boolean payload if this is a `YAML.bol`, otherwise `.none`
@@ -72,12 +69,12 @@ public extension YAML {
 
     /// Returns the underlying Double payload if this is a `YAML.dbl`, otherwise `.none`
     @inlinable var double: Double? {
-        rawValue.infer()?.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying Double payload if this is a `YAML.int`, otherwise `.none`
     @inlinable var integer: Int? {
-        rawValue.infer()?.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying Double for either `int` or `dbl` types.
@@ -128,36 +125,27 @@ extension YAML: CustomStringConvertible {
     public var description: String {
         switch self.rawValue {
         case .a(let scalar):
-            switch scalar {
-            case .a(let number):
-                switch number {
-                case .a(let integer): let _: Int = integer; return "Int(\(integer))"
-                case .b(let double): let _: Double = double; return "Double(\(double))"
-                }
-            case .b(let scalar):
-                switch scalar {
-                case .a(let string): let _: String = string; return "String(\(string))"
-                case .b(let scalar):
-                    switch scalar {
-                    case .a(let boolean): let _: Bool = boolean; return "Bool(\(boolean))"
-                    case .b(let null): let _: ScalarNull = null; return "Null"
-                    }
-                }
-            }
-
+            return scalar.description
         case .b(let quanta):
             switch quanta.rawValue {
-            case .a(let array): let _: [YAML] = array; return "Array(\(array.map(\.description))"
-            case .b(let dictionary): let _: [Scalar: YAML] = dictionary; return "Dictionary(\(dictionary))"
+            case .a(let array): let _: [YAML] = array; return ".array(\(array))"
+            case .b(let dictionary): let _: [Scalar: YAML] = dictionary; return ".object(\(dictionary))"
             }
         }
-
     }
 }
 
 extension YAML.Scalar: CustomStringConvertible {
     public var description: String {
-        map({ $0.map(\.description, \.description).value }, { $0.map(\.description, { $0.map(\.description, { (_: ScalarNull) in "null" }).value } ).value }).value
+        func desc(_ value: String) -> String { ".string(\"\(value)\")" }
+        func desc(_ value: ScalarNull) -> String { ".null" }
+        func desc(_ value: Bool) -> String { value ? ".true" : ".false" }
+        func desc(_ value: Int) -> String { ".integer(\(value))" }
+        func desc(_ value: Double) -> String { ".double(\(value))" }
+        func desc(_ value: A.A) -> String { value.map(desc, desc).value }
+        func desc(_ value: A) -> String { value.map(desc, desc).value }
+        func desc(_ value: B) -> String { value.map(desc, desc).value }
+        return map(desc, desc).value
     }
 }
 
@@ -168,19 +156,19 @@ extension YAML : Encodable {
         switch self.rawValue {
         case .a(let scalar):
             switch scalar {
-            case .a(let number):
-                switch number {
-                case .a(let integer): try container.encode(integer as Int)
-                case .b(let double): try container.encode(double as Double)
-                }
-            case .b(let scalar):
-                switch scalar {
-                case .a(let string): try container.encode(string as String)
-                case .b(let scalar):
-                    switch scalar {
-                    case .a(let boolean): try container.encode(boolean as Bool)
-                    case .b(let null): assert(null as ScalarNull == .none); try container.encodeNil()
+            case .a(let x):
+                switch x {
+                case .a(let x):
+                    switch x {
+                    case .a(let x): let _: Int = x; try container.encode(x)
+                    case .b(let x): let _: Double = x; try container.encode(x)
                     }
+                case .b(let x): let _: String = x; try container.encode(x)
+                }
+            case .b(let x):
+                switch x {
+                case .a(let x): let _: Bool = x; try container.encode(x)
+                case .b(let x): let _: Never? = x; try container.encode(x)
                 }
             }
 
@@ -202,31 +190,38 @@ extension YAML : Encodable {
     }
 }
 
+extension YAML {
+    /// Creates a YAML from the given `Scalar`.
+    public init(_ scalar: Scalar) {
+        self = YAML(rawValue: .init(scalar))
+    }
+}
+
 extension YAML : ExpressibleByStringLiteral {
     public init(stringLiteral value: StringLiteralType) {
-        self = YAML(.init(Either.Or(value)))
+        self = YAML(rawValue: .init(Either.Or(Either.Or(value))))
     }
 
     public init(extendedGraphemeClusterLiteral value: String) {
-        self = YAML(.init(Either.Or(value)))
+        self = YAML(rawValue: .init(Either.Or(Either.Or(value))))
     }
 
     public init(unicodeScalarLiteral value: String) {
-        self = YAML(.init(Either.Or(value)))
+        self = YAML(rawValue: .init(Either.Or(Either.Or(value))))
     }
 }
 
 extension YAML.Scalar : ExpressibleByStringLiteral, ExpressibleByExtendedGraphemeClusterLiteral, ExpressibleByUnicodeScalarLiteral {
     public init(stringLiteral value: StringLiteralType) {
-        self = YAML.Scalar(value)
+        self = YAML.Scalar(.init(value))
     }
 
     public init(extendedGraphemeClusterLiteral value: String) {
-        self = YAML.Scalar(value)
+        self = YAML.Scalar(.init(value))
     }
 
     public init(unicodeScalarLiteral value: String) {
-        self = YAML.Scalar(value)
+        self = YAML.Scalar(.init(value))
     }
 }
 
@@ -244,13 +239,13 @@ extension YAML.Scalar : ExpressibleByNilLiteral {
 
 extension YAML : ExpressibleByIntegerLiteral {
     public init(integerLiteral value: IntegerLiteralType) {
-        self = YAML(Either.Or(Scalar(Either.Or(value))))
+        self = YAML(rawValue: .init(Scalar(.init(.init(value)))))
     }
 }
 
 extension YAML : ExpressibleByFloatLiteral {
     public init(floatLiteral value: FloatLiteralType) {
-        self = YAML(Either.Or(Scalar(Either.Or(value))))
+        self = YAML(rawValue: .init(Scalar(.init(.init(value)))))
     }
 }
 
@@ -390,7 +385,7 @@ private typealias Context = YAMLParser.Context
 private var error = YAMLParser.Context.error
 
 private typealias ContextValue = (context: Context, value: YAML)
-private typealias ContextKey = (context: Context, key: YAML.Object.Key)
+private typealias ContextKey = (context: Context, key: YAML.Scalar)
 
 private func createContextValue(_ context: Context) -> (YAML) -> ContextValue { { value in (context, value) } }
 private func getContext(_ cv: ContextValue) -> Context { cv.context }
@@ -603,8 +598,8 @@ private func putToMap(_ map: YAML.Object) -> (YAML) -> (YAML) -> YAML.Object {
     { key in
         { value in
             var map = map
-            if let yamlKey = key.yamlKey {
-                map[yamlKey] = value
+            if let key = key.scalar {
+                map[key] = value
             }
             return map
         }
@@ -629,7 +624,7 @@ private extension YAML {
 private func checkKeyUniqueness(_ acc: YAML.Object) ->(_ context: Context, _ key: YAML) -> YAMLResult<ContextValue> {
     { (context, key) in
         let err = "duplicate key"
-        return YAMLParser.`guard`(error(err)(context), check: key.rawValue.a == nil || !acc.keys.contains(key.rawValue.a!))
+        return YAMLParser.`guard`(error(err)(context), check: key.scalar == nil || !acc.keys.contains(key.scalar!))
         >>| YAMLParser.lift((context, key))
     }
 }

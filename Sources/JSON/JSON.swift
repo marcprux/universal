@@ -65,25 +65,24 @@ extension JSON: CustomStringConvertible {
         switch self.rawValue {
         case .a(let scalar):
             switch scalar {
-            case .a(let number): let _: Double = number; return desc(number, "number")
+            case .a(let scalar):
+                switch scalar {
+                case .a(let double): return desc(double as Double, "number")
+                case .b(let string): return desc("\"" + (string as String) + "\"", "string")
+                }
             case .b(let scalar):
                 switch scalar {
-                case .a(let string): let _: String = string; return desc("\"" + string + "\"", "string")
-                case .b(let scalar):
-                    switch scalar {
-                    case .a(let boolean): let _: Bool = boolean; return desc(boolean, "boolean")
-                    case .b(let null): let _: ScalarNull = null; return ".null"
-                    }
+                case .a(let boolean): return desc(boolean as Bool, "boolean")
+                case .b(let null): let _: ScalarNull = null; return ".null"
                 }
             }
 
         case .b(let quanta):
             switch quanta.rawValue {
-            case .a(let array): let _: [JSON] = array; return desc(array, "array")
-            case .b(let object): let _: Object = object; return desc(object, "object")
+            case .a(let array): return desc(array as [JSON], "array")
+            case .b(let object): return desc(object as [String: JSON], "object")
             }
         }
-
     }
 }
 
@@ -91,7 +90,7 @@ extension JSON: CustomStringConvertible {
 
 extension JSON : ExpressibleByNilLiteral {
     public init(nilLiteral: ()) {
-        self.rawValue = .init(.init(.init(.init(ScalarNull.none))))
+        self.rawValue = .init(.init(.init(ScalarNull.none)))
     }
 }
 
@@ -103,7 +102,7 @@ extension JSON : ExpressibleByBooleanLiteral {
 
 extension JSON : ExpressibleByIntegerLiteral {
     public init(integerLiteral value: IntegerLiteralType) {
-        self.rawValue = .init(.init(.init(value)))
+        self.rawValue = .init(.init(.init(Double(value))))
     }
 }
 
@@ -115,15 +114,15 @@ extension JSON : ExpressibleByFloatLiteral {
 
 extension JSON : ExpressibleByStringLiteral, ExpressibleByUnicodeScalarLiteral, ExpressibleByExtendedGraphemeClusterLiteral {
     public init(stringLiteral value: StringLiteralType) {
-        self.rawValue = .init(.init(value))
+        self.rawValue = .init(.init(.init(value)))
     }
 
     public init(extendedGraphemeClusterLiteral value: String) {
-        self.rawValue = .init(.init(value))
+        self.rawValue = .init(.init(.init(value)))
     }
 
     public init(unicodeScalarLiteral value: String) {
-        self.rawValue = .init(.init(value))
+        self.rawValue = .init(.init(.init(value)))
     }
 }
 
@@ -149,17 +148,17 @@ public extension JSON {
 
     /// Returns the underlying String payload if this is a `JSON.str`, otherwise `.none`
     @inlinable var string: String? {
-        rawValue.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying Boolean payload if this is a `JSON.bol`, otherwise `.none`
     @inlinable var boolean: Bool? {
-        rawValue.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying Double payload if this is a `JSON.num`, otherwise `.none`
     @inlinable var number: Double? {
-        rawValue.infer()?.infer()
+        rawValue.infer()?.infer()?.infer()
     }
 
     /// Returns the underlying JObj payload if this is a `JSON.obj`, otherwise `.none`
@@ -219,15 +218,15 @@ extension JSON : Encodable {
         switch self.rawValue {
         case .a(let scalar):
             switch scalar {
-            case .a(let double): try container.encode(double as Double)
+            case .a(let scalar):
+                switch scalar {
+                case .a(let double): try container.encode(double as Double)
+                case .b(let string): try container.encode(string as String)
+                }
             case .b(let scalar):
                 switch scalar {
-                case .a(let string): try container.encode(string as String)
-                case .b(let scalar):
-                    switch scalar {
-                    case .a(let boolean): try container.encode(boolean as Bool)
-                    case .b(let null): assert(null as ScalarNull == .none); try container.encodeNil()
-                    }
+                case .a(let boolean): try container.encode(boolean as Bool)
+                case .b(let null): let _: ScalarNull = null; try container.encodeNil()
                 }
             }
 

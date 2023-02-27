@@ -269,7 +269,11 @@ final class YAMLTests : XCTestCase {
     }
 
     func testDictionary() {
-        XCTAssertEqual("Dictionary([x: Int(1)])", try yaml(#"{"x": 1}"#).description)
+        XCTAssertEqual(#".object([.string("x"): .integer(1)])"#, try yaml(#"x: 1"#).description)
+
+        // TODO: integer and boolean keys
+        //XCTAssertEqual(#".object([.integer(2): .integer(1)])"#, try yaml(#"2: 1"#).description)
+        //XCTAssertEqual(#".object([.boolean(false): .integer(1)])"#, try yaml(#"false: 1"#).description)
 
         XCTAssertEqual(try yaml(#"{"x": 1}"#), ["x":1])
         XCTAssertEqual(try yaml(#"x: 1"#), ["x":1])

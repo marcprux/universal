@@ -43,11 +43,20 @@ class UniversalTests : XCTestCase {
     }
 
     func testFluentComparisons() {
+        XCTAssertEqual(nil, try (nil as YAML).json())
+        XCTAssertEqual(true, try (true as YAML).json())
+        XCTAssertEqual(false, try (false as YAML).json())
+        XCTAssertEqual(1, try (1 as YAML).json())
+        XCTAssertEqual(1.1, try (1.1 as YAML).json())
+
         XCTAssertEqual([""], try ([""] as YAML).json())
         XCTAssertEqual([1], try ([1] as YAML).json())
         XCTAssertEqual([1.1], try ([1.1] as YAML).json())
         XCTAssertEqual([1.1, nil, "abc", []], try ([1.1, nil, "abc", []] as YAML).json())
         XCTAssertEqual([1.1, nil, "abc", [nil]], try ([1.1, nil, "abc", [nil]] as YAML).json())
+
+        // FIXME: is this wrong?
+        XCTAssertEqual(["x", "1"], try (["x": "1"] as YAML).json())
     }
 }
 

@@ -17,6 +17,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Test (Debug)
         run: swift test -v --configuration debug
       - name: Test (Release)

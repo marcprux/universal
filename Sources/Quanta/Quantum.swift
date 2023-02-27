@@ -5,9 +5,9 @@ import Swift
 @_exported import Either
 
 public extension Dictionary {
-    /// A sequence of either keyed or unkeyed values.
+    /// A sequence of either keyed or unkeyed values, defined as `Either<[Value]>.Or<[Key: Value]>`.
     ///
-    /// A `Quanta` is used to abstract an `Array` and `Dictionary`, and is used as the collection half of `Quantum`.
+    /// A `Quanta` is used to abstract an `Array` and `Dictionary`.
     struct Quanta : Isomorph {
         public typealias RawValue = Either<[Value]>.Or<[Key: Value]>
 

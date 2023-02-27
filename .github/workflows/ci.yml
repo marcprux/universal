@@ -24,34 +24,34 @@ jobs:
         run: swift test -v --configuration release -Xswiftc -enable-testing
 
   iOS:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Test (Debug)
-        run: xcodebuild clean test -configuration Debug -scheme "Universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
+        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
       - name: Test (Release)
-        run: xcodebuild clean test -configuration Release -scheme "Universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
+        run: xcodebuild test -configuration Release -scheme "Universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14 Pro"
 
   tvOS:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Test (Debug)
-        run: xcodebuild clean test -configuration Debug -scheme "Universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
       - name: Test (Release)
-        run: xcodebuild clean test -configuration Release -scheme "Universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+        run: xcodebuild test -configuration Release -scheme "Universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
 
   watchOS:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Build (Debug)
-        run: xcodebuild clean test -configuration Debug -scheme "Universal-Package" -destination "OS=9.1,name=Apple Watch Ultra (49mm)"
-      - name: Build (Release)
-        run: xcodebuild clean test -configuration Release -scheme "Universal-Package" -destination "OS=9.1,name=Apple Watch Ultra (49mm)"
+      - name: Test (Debug)
+        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Ultra (49mm)"
+      - name: Test (Release)
+        run: xcodebuild test -configuration Release -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Ultra (49mm)"
 
   macOS:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Test (Debug)
@@ -61,7 +61,7 @@ jobs:
 
   api-doc:
     if: false
-    runs-on: macos-12 # needed to be able to document SwiftUI
+    runs-on: macos-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3

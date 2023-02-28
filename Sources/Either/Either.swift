@@ -48,17 +48,17 @@ public protocol EitherOr {
 /// are mutually exclusive for decoding.
 ///
 /// In short, given `typealias DoubleOrFloat = Either<Double>.Or<Float>`: `try DoubleOrFloat(Float(1.0)).encoded().decoded() != DoubleOrFloat(Float(1.0))`
-public struct Either<A> : Isomorph {
-    public typealias Value = A
-    public var rawValue: Value
+public struct Either<A> : EitherOr, Isomorph {
+    public typealias RawValue = A
+    public var rawValue: RawValue
 
     public init(rawValue: A) { self.rawValue = rawValue }
     public init(_ rawValue: A) { self.rawValue = rawValue }
 
     /// A sum type: `Either<A>.Or<B>` can hold either an `A` or a `B`.
     /// E.g., `Either<Int>.Or<String>.Or<Bool>` can hold either an `Int` or a `String` or a `Bool`
-    public enum Or<B> {
-        public typealias A = Value
+    public enum Or<B> : EitherOr {
+        public typealias A = RawValue
         public typealias B = B
         public typealias Or<C> = Either<A>.Or<Either<B>.Or<C>>
 
@@ -76,7 +76,7 @@ extension Either {
     }
 }
 
-extension Either : EitherOr {
+extension Either {
     public typealias B = Never
 
     public init(_ rawValue: Never) {
@@ -91,7 +91,7 @@ extension Either : EitherOr {
     }
 }
 
-extension Either.Or : EitherOr {
+extension Either.Or {
     public var a: A? { infer() }
     public var b: B? { infer() }
 

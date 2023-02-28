@@ -8,6 +8,18 @@ Universal
 
 **Universal**: A tiny zero-dependency cross-platform Swift parser for JSON, XML, and YAML, as well as an in-memory `JSON` data structure (and an `Either` type).
 
+## Usage:
+
+Add the following dependency to your `Package.swift`:
+
+```swift
+.package(url: "https://github.com/marcprux/universal.git", from: "5.0.5")
+```
+
+The package provides the modules `Either`, `JSON`, `XML`, `YAML`,
+or `Universal`, which is an umbrella module that re-exports all the other modules.
+
+
 ## Example:
 
 ```swift
@@ -53,7 +65,19 @@ func testUniversalExample() throws {
     assert(jsonEdit["parent"]?["child"] == "1") // now the JSON matches
 
     assert(xmlJSON == jsonEdit)
+}
+```
 
+## Coding
+
+Universal provides the ability to decode from (but not encode to) YAML and XML
+through their ability to convert to a `JSON` struct:
+
+
+```swift
+import Universal
+
+func testCoding() throws {
 
     struct Coded : Decodable, Equatable {
         let person: Person

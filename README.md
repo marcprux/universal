@@ -15,19 +15,19 @@ import Universal
 
 func testUniversalExample() throws {
     // JSON Parsing
-    let json: JSON = try JSON.parse("""
+    let json: JSON = try JSON.parse(Data("""
         {"parent": {"child": 1}}
-        """.data(using: .utf8)!)
+        """.utf8))
 
     assert(json["parent"]?["child"] == 1)
     assert(json["parent"]?["child"] == JSON.number(1.0)) // JSON's only number is Double
 
 
     // YAML Parsing
-    let yaml: YAML = try YAML.parse("""
+    let yaml: YAML = try YAML.parse(Data("""
         parent:
           child: 1
-        """.data(using: .utf8)!)
+        """.utf8))
 
     assert(yaml["parent"]?["child"] == 1)
     assert(yaml["parent"]?["child"] == YAML.integer(1)) // YAML can parse integers
@@ -38,9 +38,9 @@ func testUniversalExample() throws {
 
 
     // XML Parsing
-    let xml: XML = try XML.parse("""
+    let xml: XML = try XML.parse(Data("""
         <parent><child>1</child></parent>
-        """.data(using: .utf8)!)
+        """.utf8))
 
     let xmlJSON: JSON = try xml.json() // convert XML to JSON struct
 
@@ -54,6 +54,43 @@ func testUniversalExample() throws {
 
     assert(xmlJSON == jsonEdit)
 
+
+    struct Coded : Decodable, Equatable {
+        let person: Person
+
+        struct Person : Decodable, Equatable {
+            let firstName: String
+            let lastName: String
+            let astrologicalSign: String
+        }
+    }
+
+    let decodedFromJSON = try Coded(json: JSON.parse(Data("""
+        {
+          "person": {
+            "firstName": "Marc",
+            "lastName": "Prud'hommeaux",
+            "astrologicalSign": "Sagittarius"
+          }
+        }
+        """.utf8)))
+
+    let decodedFromYAML = try Coded(json: YAML.parse(Data("""
+        person:
+          firstName: Marc
+          lastName: Prud'hommeaux
+          astrologicalSign: Sagittarius
+        """.utf8)).json())
+    assert(decodedFromJSON == decodedFromYAML)
+
+    let decodedFromXML = try Coded(json: XML.parse(Data("""
+        <person>
+          <firstName>Marc</firstName>
+          <lastName>Prud&apos;hommeaux</lastName>
+          <astrologicalSign>Sagittarius</astrologicalSign>
+        </person>
+        """.utf8)).json())
+    assert(decodedFromJSON == decodedFromXML)
 }
 ```
 

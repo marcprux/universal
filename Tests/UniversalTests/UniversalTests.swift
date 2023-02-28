@@ -7,10 +7,45 @@
 import XCTest
 import Universal
 
+
 class UniversalTests : XCTestCase {
     let json = { (str: String) in try JSON.parse(str.utf8Data) }
     let yaml = { (str: String) in try YAML.parse(str.utf8Data) }
     let xml = { (str: String) in try XML.parse(str.utf8Data) }
+
+    func testExample() throws {
+        var json: JSON = try JSON.parse("""
+            {"parent": {"child": 1}}
+            """.data(using: .utf8)!)
+
+        assert(json["parent"]?["child"] == 1)
+
+
+        let yaml: YAML = try YAML.parse("""
+            parent:
+              child: 1
+            """.data(using: .utf8)!)
+        assert(yaml["parent"]?["child"] == 1)
+
+        let yamlJSON: JSON = try yaml.json() // convert YAML to JSON struct
+        assert(yamlJSON == json)
+
+
+
+        let xml: XML = try XML.parse("""
+            <parent><child>1</child></parent>
+            """.data(using: .utf8)!)
+
+        let xmlJSON: JSON = try xml.json() // convert XML to JSON struct
+
+        // XML parses everything as a String
+        assert(json["parent"]?["child"] == 1)
+        json["parent"]?["child"] = "1"
+        assert(json["parent"]?["child"] == "1") // now the JSON matches
+
+        assert(xmlJSON == json)
+
+    }
 
     func testCompareFormats() throws {
 

@@ -13,34 +13,42 @@ class UniversalTests : XCTestCase {
     let yaml = { (str: String) in try YAML.parse(str.utf8Data) }
     let xml = { (str: String) in try XML.parse(str.utf8Data) }
 
-    func testExample() throws {
+    func testUniversalExample() throws {
+        // JSON Parsing
         var json: JSON = try JSON.parse("""
             {"parent": {"child": 1}}
             """.data(using: .utf8)!)
 
         assert(json["parent"]?["child"] == 1)
+        assert(json["parent"]?["child"] == JSON.number(1.0)) // JSON's only number is Double
 
 
+        // YAML Parsing
         let yaml: YAML = try YAML.parse("""
             parent:
               child: 1
             """.data(using: .utf8)!)
+
         assert(yaml["parent"]?["child"] == 1)
+        assert(yaml["parent"]?["child"] == YAML.integer(1)) // YAML can parse integers
+        assert(yaml["parent"]?["child"] != 1.0) // not the same as a double
 
         let yamlJSON: JSON = try yaml.json() // convert YAML to JSON struct
         assert(yamlJSON == json)
 
 
-
+        // XML Parsing
         let xml: XML = try XML.parse("""
             <parent><child>1</child></parent>
             """.data(using: .utf8)!)
 
         let xmlJSON: JSON = try xml.json() // convert XML to JSON struct
 
-        // XML parses everything as a String
+        assert(xml["parent"]?["child"] == XML.string("1")) // XML parses everything as strings
+
+        // fixup the XML
         assert(json["parent"]?["child"] == 1)
-        json["parent"]?["child"] = "1"
+        json["parent"]?["child"] = JSON.string("1") // update the JSON to match
         assert(json["parent"]?["child"] == "1") // now the JSON matches
 
         assert(xmlJSON == json)

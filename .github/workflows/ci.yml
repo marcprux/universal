@@ -45,10 +45,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
+        # Retry due to: "Unable to boot the Simulator" and "Failed to prepare device 'Apple Watch Series 8 (45mm)' for impending launch" errors
       - name: Test (Debug)
-        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)"
+        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)" || xcodebuild test -configuration Debug -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)" || xcodebuild test -configuration Debug -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)"
       - name: Test (Release)
-        run: xcodebuild test -configuration Release -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)"
+        run: xcodebuild test -configuration Release -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)" || xcodebuild test -configuration Release -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)" || xcodebuild test -configuration Release -scheme "Universal-Package" -destination "platform=watchOS Simulator,OS=9.1,name=Apple Watch Series 8 (45mm)"
 
   macOS:
     runs-on: macos-latest

@@ -502,7 +502,9 @@ extension Either.Or : IteratorProtocol where A : IteratorProtocol, B : IteratorP
 }
 
 extension Either.Or : Sequence where A : Sequence, B : Sequence {
-    public func makeIterator() -> Either<A.Iterator>.Or<B.Iterator> {
+    public typealias Iterator = Either<A.Iterator>.Or<B.Iterator>
+
+    public func makeIterator() -> Iterator {
         switch self {
         case .a(let p): return .init(p.makeIterator())
         case .b(let b): return .init(b.makeIterator())

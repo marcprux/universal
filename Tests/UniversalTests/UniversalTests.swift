@@ -76,16 +76,19 @@ class UniversalTests : XCTestCase {
             """.utf8)))
 
         let decodedFromYAML = try Coded(json: YAML.parse(Data("""
+            # A YAML version of a Person
             person:
               firstName: Marc
               lastName: Prud'hommeaux
-              astrologicalSign: Sagittarius
+              astrologicalSign: Sagittarius # what's your sign?
             """.utf8)).json())
         assert(decodedFromJSON == decodedFromYAML)
 
         let decodedFromXML = try Coded(json: XML.parse(Data("""
+            <!-- An XML version of a Person -->
             <person>
               <firstName>Marc</firstName>
+              <!-- escaping and stuff -->
               <lastName>Prud&apos;hommeaux</lastName>
               <astrologicalSign>Sagittarius</astrologicalSign>
             </person>

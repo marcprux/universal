@@ -15,7 +15,7 @@ import Universal
 
 func testUniversalExample() throws {
     // JSON Parsing
-    var json: JSON = try JSON.parse("""
+    let json: JSON = try JSON.parse("""
         {"parent": {"child": 1}}
         """.data(using: .utf8)!)
 
@@ -46,12 +46,13 @@ func testUniversalExample() throws {
 
     assert(xml["parent"]?["child"] == XML.string("1")) // XML parses everything as strings
 
-    // fixup the XML
+    // fixup the XML by changing the JSON to match
     assert(json["parent"]?["child"] == 1)
-    json["parent"]?["child"] = JSON.string("1") // update the JSON to match
-    assert(json["parent"]?["child"] == "1") // now the JSON matches
+    var jsonEdit = json
+    jsonEdit["parent"]?["child"] = JSON.string("1") // update the JSON to match
+    assert(jsonEdit["parent"]?["child"] == "1") // now the JSON matches
 
-    assert(xmlJSON == json)
+    assert(xmlJSON == jsonEdit)
 
 }
 ```

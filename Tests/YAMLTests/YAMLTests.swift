@@ -4,7 +4,7 @@
 import Swift
 import XCTest
 import YAML
-import Quanta
+import Either
 
 final class YAMLTests : XCTestCase {
 

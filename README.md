@@ -6,7 +6,7 @@ Universal
 [![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20Linux%20|%20Windows%20|%20iOS%20|%20tvOS%20|%20watchOS-lightgray.svg)](https://github.com/marcprux/universal/actions)
 [![](https://tokei.rs/b1/github/marcprux/universal)](https://github.com/marcprux/universal)
 
-**Universal**: A tiny zero-dependency cross-platform Swift parser for JSON, XML, and YAML, as well as an in-memory `JSON` data structure (and an `Either` type).
+**Universal**: A tiny zero-dependency cross-platform Swift parser and decoder for JSON, XML, YAML, and property lists.
 
 ## Usage:
 
@@ -16,7 +16,7 @@ Add the following dependency to your `Package.swift`:
 .package(url: "https://github.com/marcprux/universal.git", from: "5.0.5")
 ```
 
-The package provides the modules `Either`, `JSON`, `XML`, `YAML`,
+The package provides the modules `Either`, `JSON`, `XML`, `YAML`, `PLIST`,
 or `Universal`, which is an umbrella module that re-exports all the other modules.
 
 
@@ -77,48 +77,76 @@ through their ability to convert to a `JSON` struct:
 ```swift
 import Universal
 
-func testCoding() throws {
+struct Coded : Decodable, Equatable {
+    let person: Person
 
-    struct Coded : Decodable, Equatable {
-        let person: Person
-
-        struct Person : Decodable, Equatable {
-            let firstName: String
-            let lastName: String
-            let astrologicalSign: String
-        }
+    struct Person : Decodable, Equatable {
+        let firstName: String
+        let lastName: String
+        let astrologicalSign: String
     }
+}
 
-    let decodedFromJSON = try Coded(json: JSON.parse(Data("""
-        {
-          "person": {
-            "firstName": "Marc",
-            "lastName": "Prud'hommeaux",
-            "astrologicalSign": "Sagittarius"
-          }
-        }
-        """.utf8)))
+let decodedFromJSON = try Coded(json: JSON.parse(Data("""
+    {
+      "person": {
+        "firstName": "Marc",
+        "lastName": "Prud'hommeaux",
+        "astrologicalSign": "Sagittarius"
+      }
+    }
+    """.utf8)))
 
-    let decodedFromYAML = try Coded(json: YAML.parse(Data("""
-        # A YAML version of a Person
-        person:
-          firstName: Marc
-          lastName: Prud'hommeaux
-          astrologicalSign: Sagittarius # what's your sign?
-        """.utf8)).json())
-    assert(decodedFromJSON == decodedFromYAML)
+let decodedFromYAML = try Coded(json: YAML.parse(Data("""
+    # A YAML version of a Person
+    person:
+      firstName: Marc
+      lastName: Prud'hommeaux
+      astrologicalSign: Sagittarius # what's your sign?
+    """.utf8)).json())
+assert(decodedFromJSON == decodedFromYAML)
 
-    let decodedFromXML = try Coded(json: XML.parse(Data("""
-        <!-- An XML version of a Person -->
-        <person>
-          <firstName>Marc</firstName>
-          <!-- escaping and stuff -->
-          <lastName>Prud&apos;hommeaux</lastName>
-          <astrologicalSign>Sagittarius</astrologicalSign>
-        </person>
-        """.utf8)).json())
-    assert(decodedFromJSON == decodedFromXML)
-}```
+let decodedFromXML = try Coded(json: XML.parse(Data("""
+    <!-- An XML version of a Person -->
+    <person>
+      <firstName>Marc</firstName>
+      <!-- escaping and stuff -->
+      <lastName>Prud&apos;hommeaux</lastName>
+      <astrologicalSign>Sagittarius</astrologicalSign>
+    </person>
+    """.utf8)).json())
+assert(decodedFromYAML == decodedFromXML)
+
+let decodedFromPLISTXML = try Coded(json: PLIST.parse(Data("""
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+        <key>person</key>
+        <dict>
+            <key>firstName</key>
+            <string>Marc</string>
+            <key>lastName</key>
+            <string>Prud&apos;hommeaux</string>
+            <key>astrologicalSign</key>
+            <string>Sagittarius</string>
+        </dict>
+    </dict>
+    </plist>
+    """.utf8)).json())
+assert(decodedFromXML == decodedFromPLISTXML)
+
+let decodedFromPLISTOpenStep = try Coded(json: PLIST.parse(Data("""
+    {
+        person = {
+            firstName = Marc;
+            lastName = "Prud'hommeaux";
+            astrologicalSign = Sagittarius;
+        };
+    }
+    """.utf8)).json())
+assert(decodedFromPLISTOpenStep == decodedFromPLISTXML)
+```
 
 ## API
 

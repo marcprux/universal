@@ -3,14 +3,14 @@
 //
 //  Created by Marc Prud'hommeaux on 8/20/15.
 //
-import Quanta
+import Either
 import struct Foundation.Data
 
 /// A JSON tree node, which can contain a `Scalar` (`String`, `Double`, `Bool`, or `Null`), `[JSON]`, or `[String: JSON]`
 public struct JSON : Isomorph, Sendable, Hashable {
     public typealias Scalar = ScalarOf<StringLiteralType, FloatLiteralType>
     public typealias Object = [String: Self]
-    public typealias RawValue = Either<Scalar>.Or<Object.Quanta>
+    public typealias RawValue = Either<Scalar>.Or<Object.ValueContainer>
 
     /// A JSON `null`
     public static let null = JSON(nilLiteral: ())
@@ -77,8 +77,8 @@ extension JSON: CustomStringConvertible {
                 }
             }
 
-        case .b(let quanta):
-            switch quanta.rawValue {
+        case .b(let valueContainer):
+            switch valueContainer.rawValue {
             case .a(let array): return desc(array as [JSON], "array")
             case .b(let object): return desc(object as [String: JSON], "object")
             }
@@ -128,13 +128,13 @@ extension JSON : ExpressibleByStringLiteral, ExpressibleByUnicodeScalarLiteral, 
 
 extension JSON : ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: JSON...) {
-        self.rawValue = .init(Object.Quanta(rawValue: .init(elements)))
+        self.rawValue = .init(Object.ValueContainer(rawValue: .init(elements)))
     }
 }
 
 extension JSON : ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (JSON.Object.Key, JSON)...) {
-        self.rawValue = .init(Object.Quanta(rawValue: .init(Dictionary(uniqueKeysWithValues: elements))))
+        self.rawValue = .init(Object.ValueContainer(rawValue: .init(Dictionary(uniqueKeysWithValues: elements))))
     }
 }
 
@@ -143,8 +143,8 @@ public extension JSON {
     static func string(_ str: String) -> Self { .init(str) }
     static func number(_ num: Double) -> Self { .init(num) }
     static func boolean(_ bol: Bool) -> Self { .init(bol) }
-    static func array(_ arr: [JSON]) -> Self { .init(.init(Object.Quanta(rawValue: .init(arr)))) }
-    static func object(_ obj: [String: JSON]) -> Self { .init(.init(Object.Quanta(rawValue: .init(obj)))) }
+    static func array(_ arr: [JSON]) -> Self { .init(.init(Object.ValueContainer(rawValue: .init(arr)))) }
+    static func object(_ obj: [String: JSON]) -> Self { .init(.init(Object.ValueContainer(rawValue: .init(obj)))) }
 
     /// Returns the underlying String payload if this is a `JSON.str`, otherwise `.none`
     @inlinable var string: String? {
@@ -230,8 +230,8 @@ extension JSON : Encodable {
                 }
             }
 
-        case .b(let quanta):
-            switch quanta.rawValue {
+        case .b(let valueContainer):
+            switch valueContainer.rawValue {
             case .a(let array): try container.encode(array)
             case .b(let dictionary): try container.encode(dictionary)
             }
@@ -256,7 +256,7 @@ extension JSON : Decodable {
                         self = try JSON(stringLiteral: container.decode(String.self))
                     } catch DecodingError.typeMismatch {
                         do {
-                            self = try JSON(.init(decode() as Object.Quanta))
+                            self = try JSON(.init(decode() as Object.ValueContainer))
                         } catch DecodingError.typeMismatch {
                             throw DecodingError.typeMismatch(Self.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Encoded payload not of an expected type"))
                         }

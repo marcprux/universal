@@ -5,10 +5,10 @@ let package = Package(
     name: "Universal",
     products: [
         .library(name: "Either", targets: ["Either"]),
-        .library(name: "Quanta", targets: ["Quanta"]),
         .library(name: "XML", targets: ["XML"]),
         .library(name: "YAML", targets: ["YAML"]),
         .library(name: "JSON", targets: ["JSON"]),
+        .library(name: "PLIST", targets: ["PLIST"]),
         .library(name: "Universal", targets: ["Universal"]),
         ],
     dependencies: [
@@ -16,15 +16,15 @@ let package = Package(
     targets: [
         .target(name: "Either"),
         .testTarget(name: "EitherTests", dependencies: ["Either"], resources: []),
-        .target(name: "Quanta", dependencies: ["Either"]),
-        .testTarget(name: "QuantaTests", dependencies: ["Quanta"], resources: []),
-        .target(name: "XML", dependencies: ["Quanta"]),
+        .target(name: "XML", dependencies: ["Either"]),
         .testTarget(name: "XMLTests", dependencies: ["XML"], resources: []),
-        .target(name: "YAML", dependencies: ["Quanta"]),
+        .target(name: "YAML", dependencies: ["Either"]),
         .testTarget(name: "YAMLTests", dependencies: ["YAML"], resources: []),
-        .target(name: "JSON", dependencies: ["Quanta"]),
+        .target(name: "JSON", dependencies: ["Either"]),
         .testTarget(name: "JSONTests", dependencies: ["JSON"], resources: [.copy("testdata/")]),
-        .target(name: "Universal", dependencies: ["XML", "YAML", "JSON"]),
+        .target(name: "PLIST", dependencies: ["Either"]),
+        .testTarget(name: "PLISTTests", dependencies: ["PLIST"]),
+        .target(name: "Universal", dependencies: ["XML", "YAML", "JSON", "PLIST"]),
         .testTarget(name: "UniversalTests", dependencies: ["Universal"]),
         ]
 )

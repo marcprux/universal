@@ -3,7 +3,7 @@
 //
 //  Created by Marc Prud'hommeaux on 8/20/15.
 //
-import Quanta
+import Either
 import struct Foundation.UUID
 import struct Foundation.URL
 import struct Foundation.Date

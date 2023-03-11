@@ -513,7 +513,64 @@ extension Either.Or : Sequence where A : Sequence, B : Sequence {
 }
 
 
+public extension Dictionary {
+    /// A sequence of either keyed or unkeyed values, defined as `Either<[Value]>.Or<[Key: Value]>`.
+    ///
+    /// A `ValueContainer` is used to abstract an `Array` and `Dictionary`.
+    struct ValueContainer : Isomorph {
+        public typealias RawValue = Either<[Value]>.Or<[Key: Value]>
 
-@available(*, deprecated, renamed: "Either")
-public typealias XOr = Either
+        public var rawValue: RawValue
+
+        public init(rawValue: RawValue) {
+            self.rawValue = rawValue
+        }
+
+        public init(_ rawValue: RawValue) {
+            self.rawValue = rawValue
+        }
+
+        /// Returns all the values in the container in undefined order.
+        public var values: [Value] {
+            rawValue.map({ $0 }, { Array($0.values) }).value
+        }
+    }
+}
+
+/// A Scalar's null value is an `Optional<Never>.none`
+///
+/// Note: this type was chosen over `Void` since it is `Codable`. The result is the same in that there is only a single valid instance.
+public typealias ScalarNull = Optional<Never>
+
+/// The base of a scalar type, which contains fixed boolean and null type and variable string and numeric types.
+public typealias ScalarOf<ContainerType, NumericType> = Either<Either<NumericType>.Or<ContainerType>>.Or<Either<BooleanLiteralType>.Or<ScalarNull>>
+
+
+extension Dictionary.ValueContainer : Sequence {
+    /// Extracts and transforms all the values in the `ValueContainer`. Note that ordering will be unstable and indeterminate for dictionary values.
+    public func mapValues<U>(_ transform: (Value) -> U) -> [U] {
+        rawValue.map({ $0.map(transform) }, { Array($0.mapValues(transform).values) }).value
+    }
+
+    public func makeIterator() -> RawValue.Iterator {
+        rawValue.makeIterator()
+    }
+}
+
+extension Dictionary.ValueContainer : Equatable where Value : Equatable { }
+extension Dictionary.ValueContainer : Hashable where Value : Hashable { }
+
+extension Dictionary.ValueContainer : Encodable where Value : Encodable, Key : Encodable {
+    /// `ValueContainer` serializes to the underlying type's encoding with any intermediate wrapper
+    public func encode(to encoder: Encoder) throws {
+        try rawValue.encode(to: encoder)
+    }
+}
+extension Dictionary.ValueContainer : Decodable where Value : Decodable, Key : Decodable {
+    public init(from decoder: Decoder) throws {
+        try self.init(rawValue: RawValue(from: decoder))
+    }
+}
+
+extension Dictionary.ValueContainer : Sendable where Value : Sendable, Key : Sendable { }
 

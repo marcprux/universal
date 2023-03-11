@@ -7,10 +7,10 @@
 import XCTest
 import Universal
 
-
 class UniversalTests : XCTestCase {
     let json = { (str: String) in try JSON.parse(str.utf8Data) }
     let yaml = { (str: String) in try YAML.parse(str.utf8Data) }
+    let plist = { (str: String) in try PLIST.parse(str.utf8Data) }
     let xml = { (str: String) in try XML.parse(str.utf8Data) }
 
     func testUniversalExample() throws {
@@ -53,8 +53,9 @@ class UniversalTests : XCTestCase {
         assert(jsonEdit["parent"]?["child"] == "1") // now the JSON matches
 
         assert(xmlJSON == jsonEdit)
+    }
 
-
+    func testDecodingExample() throws {
         struct Coded : Decodable, Equatable {
             let person: Person
 
@@ -93,7 +94,38 @@ class UniversalTests : XCTestCase {
               <astrologicalSign>Sagittarius</astrologicalSign>
             </person>
             """.utf8)).json())
-        assert(decodedFromJSON == decodedFromXML)
+        assert(decodedFromYAML == decodedFromXML)
+
+        let decodedFromPLISTXML = try Coded(json: PLIST.parse(Data("""
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+                <key>person</key>
+                <dict>
+                    <key>firstName</key>
+                    <string>Marc</string>
+                    <key>lastName</key>
+                    <string>Prud&apos;hommeaux</string>
+                    <key>astrologicalSign</key>
+                    <string>Sagittarius</string>
+                </dict>
+            </dict>
+            </plist>
+            """.utf8)).json())
+        assert(decodedFromXML == decodedFromPLISTXML)
+
+        let decodedFromPLISTOpenStep = try Coded(json: PLIST.parse(Data("""
+            {
+                person = {
+                    firstName = Marc;
+                    lastName = "Prud'hommeaux";
+                    astrologicalSign = Sagittarius;
+                };
+            }
+            """.utf8)).json())
+        assert(decodedFromPLISTOpenStep == decodedFromPLISTXML)
+
     }
 
     func testCompareFormats() throws {

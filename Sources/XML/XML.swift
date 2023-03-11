@@ -3,7 +3,6 @@
  */
 import Swift
 import Foundation
-import Quanta
 import Either
 
 #if canImport(FoundationXML)
@@ -15,7 +14,7 @@ import FoundationXML
 public struct XML : Isomorph, Sendable, Hashable {
     public typealias Scalar = String
     public typealias Object = [String: XML]
-    public typealias RawValue = Either<Scalar>.Or<Object.Quanta>
+    public typealias RawValue = Either<Scalar>.Or<Object.ValueContainer>
 
     public var rawValue: RawValue
 
@@ -34,8 +33,8 @@ extension XML : Encodable {
         var container = encoder.singleValueContainer()
         switch self.rawValue {
         case .a(let string): try container.encode(string as String)
-        case .b(let quanta):
-            switch quanta.rawValue {
+        case .b(let valueContainer):
+            switch valueContainer.rawValue {
             case .a(let array): try container.encode(array)
             case .b(let dictionary): try container.encode(dictionary)
             }
@@ -46,8 +45,8 @@ extension XML : Encodable {
 /// Convenience accessors for the payloads of the various `YAML` types
 public extension XML {
     static func string(_ str: String) -> Self { XML(Either.Or(Scalar(str))) }
-    static func array(_ arr: [XML]) -> Self { XML(Either.Or(XML.Object.Quanta(rawValue: .init(arr)))) }
-    static func object(_ obj: [Scalar: XML]) -> Self { XML(Either.Or(XML.Object.Quanta(rawValue: .init(obj)))) }
+    static func array(_ arr: [XML]) -> Self { XML(Either.Or(XML.Object.ValueContainer(rawValue: .init(arr)))) }
+    static func object(_ obj: [Scalar: XML]) -> Self { XML(Either.Or(XML.Object.ValueContainer(rawValue: .init(obj)))) }
 
     /// Returns the underlying String payload if this is a `XML.str`, otherwise `.none`
     @inlinable var string: String? {
@@ -505,7 +504,7 @@ extension XMLNode {
     /// handle both single-instance as well as multi-instanced types.
     public func xml() -> XML {
         if !self.attributes.isEmpty || !self.elementChildren.isEmpty {
-            return XML(Either.Or(XML.Object.Quanta(Either.Or(xmlObject()))))
+            return XML(Either.Or(XML.Object.ValueContainer(Either.Or(xmlObject()))))
         } else {
             return XML(Either.Or(self.stringContent))
         }

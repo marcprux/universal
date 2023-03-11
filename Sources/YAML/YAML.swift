@@ -1,14 +1,13 @@
 import Swift
 import Foundation
 import Either
-import Quanta
 
 /// A YAML tree node, which can contain a `Scalar` (`String`, `Int`, `Double`, `Bool`, or `Null`), `[YAML]`, or a `[Scalar: YAML]` `Object`.
 public struct YAML : Isomorph, Sendable, Hashable {
     public typealias NumericType = Either<IntegerLiteralType>.Or<FloatLiteralType>
     public typealias Scalar = ScalarOf<StringLiteralType, NumericType>
     public typealias Object = [Scalar: YAML]
-    public typealias RawValue = Either<Scalar>.Or<Object.Quanta>
+    public typealias RawValue = Either<Scalar>.Or<Object.ValueContainer>
 
     public var rawValue: RawValue
 
@@ -50,8 +49,8 @@ public extension YAML {
     static func double(_ dbl: Double) -> Self { YAML(Either.Or(Scalar(.init(.init(dbl))))) }
     static func integer(_ int: Int) -> Self { YAML(Either.Or(Scalar(.init(.init(int))))) }
     static func boolean(_ bol: Bool) -> Self { YAML(Either.Or(Scalar(bol))) }
-    static func array(_ arr: [YAML]) -> Self { YAML(Either.Or(YAML.Object.Quanta(rawValue: .init(arr)))) }
-    static func object(_ obj: [Scalar: YAML]) -> Self { YAML(Either.Or(YAML.Object.Quanta(rawValue: .init(obj)))) }
+    static func array(_ arr: [YAML]) -> Self { YAML(Either.Or(YAML.Object.ValueContainer(rawValue: .init(arr)))) }
+    static func object(_ obj: [Scalar: YAML]) -> Self { YAML(Either.Or(YAML.Object.ValueContainer(rawValue: .init(obj)))) }
 
     @inlinable var scalar: Scalar? {
         rawValue.infer()
@@ -126,8 +125,8 @@ extension YAML: CustomStringConvertible {
         switch self.rawValue {
         case .a(let scalar):
             return scalar.description
-        case .b(let quanta):
-            switch quanta.rawValue {
+        case .b(let valueContainer):
+            switch valueContainer.rawValue {
             case .a(let array): let _: [YAML] = array; return ".array(\(array))"
             case .b(let dictionary): let _: [Scalar: YAML] = dictionary; return ".object(\(dictionary))"
             }
@@ -172,8 +171,8 @@ extension YAML : Encodable {
                 }
             }
 
-        case .b(let quanta):
-            switch quanta.rawValue {
+        case .b(let valueContainer):
+            switch valueContainer.rawValue {
             case .a(let array): try container.encode(array)
             case .b(let dictionary): try container.encode(stringifyKeys(for: dictionary))
             }
@@ -257,13 +256,13 @@ extension YAML : ExpressibleByBooleanLiteral {
 
 extension YAML : ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: YAML...) {
-        self = YAML(Either.Or(YAML.Object.Quanta(rawValue: Either.Or(elements))))
+        self = YAML(Either.Or(YAML.Object.ValueContainer(rawValue: Either.Or(elements))))
     }
 }
 
 extension YAML : ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (YAML.Object.Key, YAML)...) {
-        self = YAML(Either.Or(YAML.Object.Quanta(rawValue: Either.Or(Dictionary(uniqueKeysWithValues: elements)))))
+        self = YAML(Either.Or(YAML.Object.ValueContainer(rawValue: Either.Or(Dictionary(uniqueKeysWithValues: elements)))))
     }
 }
 

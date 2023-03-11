@@ -2,7 +2,7 @@
  Copyright (c) 2015-2023 Marc Prud'hommeaux
  */
 import Swift
-import Quanta
+import Either
 import struct Foundation.Date
 import struct Foundation.Data
 import struct Foundation.URL

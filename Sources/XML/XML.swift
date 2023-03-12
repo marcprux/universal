@@ -48,17 +48,17 @@ public extension XML {
     static func array(_ arr: [XML]) -> Self { XML(Either.Or(XML.Object.ValueContainer(rawValue: .init(arr)))) }
     static func object(_ obj: [Scalar: XML]) -> Self { XML(Either.Or(XML.Object.ValueContainer(rawValue: .init(obj)))) }
 
-    /// Returns the underlying String payload if this is a `XML.str`, otherwise `.none`
+    /// Returns the underlying String payload if this is an `XML.str`, otherwise `.none`
     @inlinable var string: String? {
         rawValue.infer()
     }
 
-    /// Returns the underlying JObj payload if this is a `YAML.obj`, otherwise `.none`
+    /// Returns the underlying JObj payload if this is an `XML.element`, otherwise `.none`
     @inlinable var object: Object? {
         rawValue.infer()?.rawValue.infer()
     }
 
-    /// Returns the underlying Array payload if this is a `YAML.arr`, otherwise `.none`
+    /// Returns the underlying Array payload if this is an `XML.children`, otherwise `.none`
     @inlinable var array: [XML]? {
         rawValue.infer()?.rawValue.infer()
     }

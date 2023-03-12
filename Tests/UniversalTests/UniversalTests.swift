@@ -195,5 +195,58 @@ class UniversalTests : XCTestCase {
         try check([SomeCodable(int: 1)], json(#"[{"int":1.1}]"#).decode(), yaml(#"[{"int":1}]"#).json().decode())
         try check(SomeCodable(int: 1), json(#"{"int":1.1}"#).decode()) // yaml(#"{"int":1.1}"#).json().decode())
     }
+
+    func testMergeJSON() throws {
+        XCTAssertEqual(2, try (1 as JSON).merged(with: 2))
+        XCTAssertEqual("Y", try ("X" as JSON).merged(with: "Y"))
+        XCTAssertEqual("Y", try (1 as JSON).merged(with: "Y"))
+
+        XCTAssertEqual(["A": 1, "B": true], try (["A": 1] as JSON).merged(with: ["B": true]))
+        XCTAssertEqual(["A": true], try (["A": 1] as JSON).merged(with: ["A": true]))
+
+        XCTAssertEqual([1, 2, 3], try ([1] as JSON).merged(with: [2, 3]))
+        XCTAssertEqual(["A": [1, 2, 1, 2]], try (["A": [1, 2]] as JSON).merged(with: ["A": [1, 2]]))
+    }
+
+    func testMergeXML() throws {
+        try XCTAssertEqual(XML.parse(Data("""
+        <abc x="1" y="z"/>
+        """.utf8)), XML.parse(Data("""
+        <abc x="1"/>
+        """.utf8)).merged(with: XML.parse(Data("""
+        <abc y="z"/>
+        """.utf8))))
+    }
+
+    func testMergeYAML() throws {
+        try XCTAssertEqual(YAML.parse(Data("""
+        root:
+            a: x
+            c: d
+            values:
+                - 1
+                - dict:
+                    q: z
+                - 2
+                - dict:
+                    z: q
+        """.utf8)), YAML.parse(Data("""
+        root:
+            a: b
+            values:
+                - 1
+                - dict:
+                    q: z
+        """.utf8)).merged(with: YAML.parse(Data("""
+        root:
+            c: d
+            a: x
+            values:
+                - 2
+                - dict:
+                    z: q
+        """.utf8))))
+    }
+
 }
 

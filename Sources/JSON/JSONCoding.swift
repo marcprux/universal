@@ -1866,7 +1866,7 @@ public extension Decodable {
     /// Initialized this instance from a JSON string
     init(fromJSON json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws {
         let decoder = decoder()
-        #if !os(Linux) && !os(Android) && !os(Windows)
+        #if XXX && !os(Linux) && !os(Android) && !os(Windows)
         if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
             decoder.allowsJSON5 = allowsJSON5
         }

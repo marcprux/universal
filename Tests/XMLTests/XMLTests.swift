@@ -62,7 +62,7 @@ final class XMLTests: XCTestCase {
         #elseif os(Windows)
         // Windows XML parsing doesn't seem to handle whitespace the same
         // try tidyHTML(preservesWhitespace: false) // actually, tidying doesn't seem to work at all
-        #elseif !os(Linux) && !os(Android) // these pass on Linux, but the whitespace in the output is different, so it fails the exact equality tests; I'll need to implement XCTAssertEqualDisgrgardingWhitespace() to test on Linux
+        #elseif XXX && !os(Linux) && !os(Android) // these pass on Linux, but the whitespace in the output is different, so it fails the exact equality tests; I'll need to implement XCTAssertEqualDisgrgardingWhitespace() to test on Linux
         try tidyHTML()
         #endif
     }

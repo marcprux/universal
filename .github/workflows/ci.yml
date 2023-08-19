@@ -26,19 +26,19 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Test watchOS (Debug)
-        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -destination "platform=watchOS Simulator,name=Apple Watch Series 8 (45mm)"
+        run: xcodebuild test -configuration Debug -scheme "universal-Package" -destination "platform=watchOS Simulator,name=Apple Watch Series 8 (45mm)"
       - name: Test watchOS (Release)
-        run: xcodebuild test -configuration Release -scheme "Universal-Package" -destination "platform=watchOS Simulator,name=Apple Watch Series 8 (45mm)"
+        run: xcodebuild test -configuration Release -scheme "universal-Package" -destination "platform=watchOS Simulator,name=Apple Watch Series 8 (45mm)"
 
       - name: Test tvOS (Debug)
-        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+        run: xcodebuild test -configuration Debug -scheme "universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
       - name: Test tvOS (Release)
-        run: xcodebuild test -configuration Release -scheme "Universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
+        run: xcodebuild test -configuration Release -scheme "universal-Package" -sdk "appletvsimulator" -destination "platform=tvOS Simulator,name=Apple TV" 
 
       - name: Test iOS (Debug)
-        run: xcodebuild test -configuration Debug -scheme "Universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14"
+        run: xcodebuild test -configuration Debug -scheme "universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14"
       - name: Test iOS (Release)
-        run: xcodebuild test -configuration Release -scheme "Universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14"
+        run: xcodebuild test -configuration Release -scheme "universal-Package" -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 14"
 
       - name: Test macOS (Debug)
         run: swift test -v --configuration debug

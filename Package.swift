@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Universal",
+    name: "universal",
     products: [
         .library(name: "Either", targets: ["Either"]),
         .library(name: "XML", targets: ["XML"]),

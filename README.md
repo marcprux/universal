@@ -148,16 +148,4 @@ let decodedFromPLISTOpenStep = try Coded(json: PLIST.parse(Data("""
 assert(decodedFromPLISTOpenStep == decodedFromPLISTXML)
 ```
 
-## API
-
-Browse the [API Documentation].
-
-
-## License
-
-LGPL 3.0
-See [LICENSE.LGPL](LICENSE.LGPL) for details.
-
-
 [Swift Package Manager]: https://swift.org/package-manager
-[API Documentation]: https://marcprux.github.io/universal/documentation/universal/

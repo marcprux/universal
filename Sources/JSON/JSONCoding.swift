@@ -555,7 +555,8 @@ extension JSONElementEncoder {
         .init(json: .string(value))
     }
     fileprivate func box(_ date: Date) throws -> _JSONContainer {
-        switch self.options.dateEncodingStrategy {
+        let strategy = self.options.dateEncodingStrategy
+        switch strategy {
         case .deferredToDate:
             // Must be called with a surrounding with(pushedKey:) call.
             // Dates encode as single-value objects; this can't both throw and push a container, so no need to catch the error.
@@ -575,7 +576,10 @@ extension JSONElementEncoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case .formatted(var fmt):
+        //case .formatted(let fmt):
+        // workaround for bug on Linux Swift 6.0 compiler: "error: 'let' binding pattern cannot appear in an expression"
+        case JSONEncoder.DateEncodingStrategy.formatted:
+            guard case JSONEncoder.DateEncodingStrategy.formatted(let fmt) = strategy else { fatalError("should never happen") }
             return .init(json: .string(fmt.string(from: date)))
 
         case .custom(let closure):
@@ -1762,7 +1766,7 @@ extension _JSONDecoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case .formatted(var fmt):
+        case JSONDecoder.DateDecodingStrategy.formatted(var fmt):
             guard let string = value.string else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
             }

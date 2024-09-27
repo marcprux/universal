@@ -575,10 +575,10 @@ extension JSONElementEncoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case .formatted(let formatter):
+        case let .formatted(formatter):
             return .init(json: .string(formatter.string(from: date)))
 
-        case .custom(let closure):
+        case let .custom(closure):
             let depth = self.storage.count
             do {
                 try closure(date, self)
@@ -626,7 +626,7 @@ extension JSONElementEncoder {
         case .base64:
             return .init(json: .string(data.base64EncodedString()))
 
-        case .custom(let closure):
+        case let .custom(closure):
             let depth = self.storage.count
             do {
                 try closure(data, self)
@@ -861,10 +861,10 @@ fileprivate class _JSONReferencingEncoder: JSONElementEncoder {
         }
 
         switch self.reference {
-        case .array(let array, let index):
+        case let .array(array, index):
             try? array.insertElement(value, at: index)
 
-        case .dictionary(let dictionary, let key):
+        case let .dictionary(dictionary, key):
             try? dictionary.setProperty(key, value)
         }
     }
@@ -1762,7 +1762,7 @@ extension _JSONDecoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case .formatted(let formatter):
+        case let .formatted(formatter):
             guard let string = value.string else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
             }
@@ -1771,7 +1771,7 @@ extension _JSONDecoder {
             }
             return date
 
-        case .custom(let closure):
+        case let .custom(closure):
             return try closure(self)
 
         @unknown default:
@@ -1795,7 +1795,7 @@ extension _JSONDecoder {
 
             return data
 
-        case .custom(let closure):
+        case let .custom(closure):
             return try closure(self)
 
         @unknown default:

@@ -11,6 +11,11 @@ on:
     - cron:  '30 10,22 * * *'
 
 jobs:
+  ci-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
   ci:
     runs-on: macos-13
     steps:

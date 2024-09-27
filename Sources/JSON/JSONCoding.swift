@@ -575,7 +575,7 @@ extension JSONElementEncoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case .formatted: fatalError("FIXME")
+        case .formatted(let _): fatalError("FIXME")
         //case .formatted(let formatter):
             //return .init(json: .string(formatter.string(from: date)))
 
@@ -1763,7 +1763,7 @@ extension _JSONDecoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case .formatted: fatalError("FIXME")
+        case .formatted(let _): fatalError("FIXME")
         //case .formatted(let formatter):
             //guard let string = value.string else {
                 //throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))

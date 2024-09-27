@@ -575,10 +575,10 @@ extension JSONElementEncoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case let .formatted(formatter):
-            return .init(json: .string(formatter.string(from: date)))
+        case .formatted(let fmt):
+            return .init(json: .string(fmt.string(from: date)))
 
-        case let .custom(closure):
+        case .custom(let closure):
             let depth = self.storage.count
             do {
                 try closure(date, self)
@@ -626,7 +626,7 @@ extension JSONElementEncoder {
         case .base64:
             return .init(json: .string(data.base64EncodedString()))
 
-        case let .custom(closure):
+        case .custom(let closure):
             let depth = self.storage.count
             do {
                 try closure(data, self)
@@ -861,10 +861,10 @@ fileprivate class _JSONReferencingEncoder: JSONElementEncoder {
         }
 
         switch self.reference {
-        case let .array(array, index):
+        case .array(let array, let index):
             try? array.insertElement(value, at: index)
 
-        case let .dictionary(dictionary, key):
+        case .dictionary(let dictionary, let key):
             try? dictionary.setProperty(key, value)
         }
     }
@@ -1754,7 +1754,7 @@ extension _JSONDecoder {
             if #available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *) {
                 guard let string = value.string,
                       let date = _iso8601Formatter.date(from: string) else {
-                    throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
+                    .dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
                 }
 
                 return date
@@ -1762,16 +1762,16 @@ extension _JSONDecoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case let .formatted(formatter):
+        case .formatted(let fmt):
             guard let string = value.string else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
             }
-            guard let date = formatter.date(from: string) else {
+            guard let date = fmt.date(from: string) else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Date string does not match format expected by formatter."))
             }
             return date
 
-        case let .custom(closure):
+        case .custom(let closure):
             return try closure(self)
 
         @unknown default:
@@ -1795,7 +1795,7 @@ extension _JSONDecoder {
 
             return data
 
-        case let .custom(closure):
+        case .custom(let closure):
             return try closure(self)
 
         @unknown default:

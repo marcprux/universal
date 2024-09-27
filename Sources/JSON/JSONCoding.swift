@@ -555,8 +555,7 @@ extension JSONElementEncoder {
         .init(json: .string(value))
     }
     fileprivate func box(_ date: Date) throws -> _JSONContainer {
-        let strategy = self.options.dateEncodingStrategy
-        switch strategy {
+        switch self.options.dateEncodingStrategy {
         case .deferredToDate:
             // Must be called with a surrounding with(pushedKey:) call.
             // Dates encode as single-value objects; this can't both throw and push a container, so no need to catch the error.
@@ -576,11 +575,9 @@ extension JSONElementEncoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        //case .formatted(let fmt):
-        // workaround for bug on Linux Swift 6.0 compiler: "error: 'let' binding pattern cannot appear in an expression"
-        case JSONEncoder.DateEncodingStrategy.formatted:
-            guard case JSONEncoder.DateEncodingStrategy.formatted(let fmt) = strategy else { fatalError("should never happen") }
-            return .init(json: .string(fmt.string(from: date)))
+        case .formatted: fatalError("FIXME")
+        //case .formatted(let formatter):
+            //return .init(json: .string(formatter.string(from: date)))
 
         case .custom(let closure):
             let depth = self.storage.count
@@ -1766,14 +1763,15 @@ extension _JSONDecoder {
                 fatalError("ISO8601DateFormatter is unavailable on this platform.")
             }
 
-        case JSONDecoder.DateDecodingStrategy.formatted(var fmt):
-            guard let string = value.string else {
-                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
-            }
-            guard let date = fmt.date(from: string) else {
-                throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Date string does not match format expected by formatter."))
-            }
-            return date
+        case .formatted: fatalError("FIXME")
+        //case .formatted(let formatter):
+            //guard let string = value.string else {
+                //throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
+            //}
+            //guard let date = formatter.date(from: string) else {
+                //throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Date string does not match format expected by formatter."))
+            //}
+            //return date
 
         case .custom(let closure):
             return try closure(self)

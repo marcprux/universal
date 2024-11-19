@@ -879,7 +879,7 @@ final class YAMLTests : XCTestCase {
     }
 
     func testPerformanceExample() {
-        #if os(Linux)
+        #if os(Linux) || os(Android)
         _ = try? yaml(self.exampleYaml)
         #else
         self.measure() { // stddev fails on Linux

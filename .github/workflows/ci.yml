@@ -16,7 +16,7 @@ jobs:
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
-        uses: skiptools/swift-android-action@v2
+        uses: actions/swift-android-action@v2
   macos-ios:
     runs-on: macos-latest
     steps:

@@ -13,31 +13,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: swift test
-  android:
-    # emulator fails to launch on ARM macOS with: HVF error: HV_UNSUPPORTED
-    # so we need to run on Intel macOS, which is macos-13
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-      - name: "Test Swift Package Android"
-        uses: skiptools/swift-android-action@v1
+      - name: "Test Swift Package on Linux"
+        run: swift test
+      - name: "Test Swift Package on Android"
+        uses: skiptools/swift-android-action@v2
   macos-ios:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: "Test Swift Package macOS"
+      - name: "Test Swift Package on macOS"
         run: swift test
-      - name: "Test Swift Package iOS"
+      - name: "Test Swift Package on iOS"
         run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 15" -scheme "universal-Package"
   windows:
     runs-on: windows-latest
     steps:
       - uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-5.9-release
-          tag: 5.9-RELEASE
+          branch: swift-6.0.2-release
+          tag: 6.0.2-RELEASE
       - uses: actions/checkout@v4
-      - run: swift build
       - run: swift test
 

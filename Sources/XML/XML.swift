@@ -297,7 +297,7 @@ public struct XMLNode : Hashable {
 
         var xmlData = data
         if options.contains(.tidyHTML) {
-            #if os(iOS) || os(tvOS) || os(watchOS) // XMLDocument unavailable on iOS; perhaps try CFXMLInterface?
+            #if os(iOS) || os(tvOS) || os(watchOS) || os(visionOS) // XMLDocument unavailable on iOS; perhaps try CFXMLInterface?
             throw Errors.tidyHTMLUnavailable
             #else
             // round-trip the tidied document and then re-parse

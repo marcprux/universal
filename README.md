@@ -1,10 +1,10 @@
 Universal
 =========
 
-[![Build Status](https://github.com/marcprux/universal/workflows/Universal%20CI/badge.svg?branch=main)](https://github.com/marcprux/universal/actions)
-[![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
-[![Platform](https://img.shields.io/badge/Platforms-macOS%20|%20Linux%20|%20Windows%20|%20iOS%20|%20tvOS%20|%20watchOS-lightgray.svg)](https://github.com/marcprux/universal/actions)
-[![](https://tokei.rs/b1/github/marcprux/universal)](https://github.com/marcprux/universal)
+[![Build Status](https://github.com/marcprux/universal/workflows/universal%20ci/badge.svg?branch=main)](https://github.com/marcprux/universal/actions)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmarcprux%2Funiversal%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/marcprux/universal)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmarcprux%2Funiversal%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/marcprux/universal)
+
 
 **Universal**: A tiny zero-dependency cross-platform Swift parser and decoder for JSON, XML, YAML, and property lists.
 

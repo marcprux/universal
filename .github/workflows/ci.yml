@@ -17,6 +17,8 @@ jobs:
         run: swift test
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
+        with:
+          android-api-level: 30
   macos-ios:
     runs-on: macos-latest
     steps:

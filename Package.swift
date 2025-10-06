@@ -16,7 +16,7 @@ let package = Package(
     targets: [
         .target(name: "Either"),
         .testTarget(name: "EitherTests", dependencies: ["Either"], resources: []),
-        .target(name: "XML", dependencies: ["Either"]),
+        .target(name: "XML", dependencies: ["Either"], linkerSettings: [.linkedLibrary("z", .when(platforms: [.linux, .android]))]),
         .testTarget(name: "XMLTests", dependencies: ["XML"], resources: []),
         .target(name: "YAML", dependencies: ["Either"]),
         .testTarget(name: "YAMLTests", dependencies: ["YAML"], resources: []),

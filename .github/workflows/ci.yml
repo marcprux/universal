@@ -17,6 +17,9 @@ jobs:
         run: swift test
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
+        with:
+          swift-version: nightly-main
+
   macos-ios:
     runs-on: macos-latest
     steps:

@@ -12,20 +12,19 @@ jobs:
   linux-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: "Free Disk Space"
-        run: sudo rm -rf /opt/microsoft /opt/google /opt/az /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/share/chromium /usr/local/share/powershell /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
         uses: skiptools/swift-android-action@v2
         with:
           swift-version: nightly-main
+          free-disk-space: true
 
   macos-ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"
@@ -38,6 +37,6 @@ jobs:
         with:
           branch: swift-6.1-release
           tag: 6.1-RELEASE
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: swift test
 

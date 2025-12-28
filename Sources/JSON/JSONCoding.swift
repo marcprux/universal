@@ -1925,14 +1925,6 @@ extension Encodable {
             let encoder = JSONEncoder()
             if let outputFormatting = outputFormatting {
                 encoder.outputFormatting = outputFormatting
-            } else {
-                let formatting: JSONEncoder.OutputFormatting
-                if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
-                    formatting = outputFormatting ?? [.sortedKeys, .withoutEscapingSlashes]
-                } else {
-                    formatting = outputFormatting ?? [.sortedKeys]
-                }
-                encoder.outputFormatting = formatting
             }
 
             if let dateEncodingStrategy = dateEncodingStrategy {

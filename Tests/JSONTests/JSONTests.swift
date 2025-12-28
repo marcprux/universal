@@ -82,6 +82,26 @@ final class JSONTests : XCTestCase {
         {"array":[1,null,"foo"],"bool":false,"null":null,"number":1.23,"object":{"x":"a","y":5,"z":{}},"string":"hello"}
         """)
 
+        try XCTAssertEqual(js.prettyJSON, """
+        {
+          "array" : [
+            1,
+            null,
+            "foo"
+          ],
+          "bool" : false,
+          "null" : null,
+          "number" : 1.23,
+          "object" : {
+            "x" : "a",
+            "y" : 5,
+            "z" : {
+
+            }
+          },
+          "string" : "hello"
+        }
+        """)
 
         let js2 = try JSON(fromJSON: json.utf8Data)
         XCTAssertEqual(js, js2)

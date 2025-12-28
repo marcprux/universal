@@ -1,0 +1,10 @@
+version: 1
+builder:
+  configs:
+    - documentation_targets:
+      - Either
+      - XML
+      - YAML
+      - JSON
+      - PLIST
+      - Universal

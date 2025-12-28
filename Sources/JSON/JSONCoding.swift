@@ -1872,33 +1872,37 @@ fileprivate struct _JSONKey: CodingKey {
 
 public extension Decodable {
     /// Initialized this instance from a JSON string
-    init(fromJSON json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws {
-        let decoder = decoder()
-        #if XXX && !os(Linux) && !os(Android) && !os(Windows)
-        if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
-            decoder.allowsJSON5 = allowsJSON5
-        }
-        #endif
+    init(fromJSON json: Data, decoder: JSONDecoder? = nil, allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws {
+        let decoder = decoder ?? {
+            let decoder = JSONDecoder()
+            #if XXX && !os(Linux) && !os(Android) && !os(Windows)
+            if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
+                decoder.allowsJSON5 = allowsJSON5
+            }
+            #endif
 
-        if let dateDecodingStrategy = dateDecodingStrategy {
-            decoder.dateDecodingStrategy = dateDecodingStrategy
-        }
+            if let dateDecodingStrategy = dateDecodingStrategy {
+                decoder.dateDecodingStrategy = dateDecodingStrategy
+            }
 
-        if let dataDecodingStrategy = dataDecodingStrategy {
-            decoder.dataDecodingStrategy = dataDecodingStrategy
-        }
+            if let dataDecodingStrategy = dataDecodingStrategy {
+                decoder.dataDecodingStrategy = dataDecodingStrategy
+            }
 
-        if let nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy {
-            decoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
-        }
+            if let nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy {
+                decoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
+            }
 
-        if let keyDecodingStrategy = keyDecodingStrategy {
-            decoder.keyDecodingStrategy = keyDecodingStrategy
-        }
+            if let keyDecodingStrategy = keyDecodingStrategy {
+                decoder.keyDecodingStrategy = keyDecodingStrategy
+            }
 
-        if let userInfo = userInfo {
-            decoder.userInfo = userInfo
-        }
+            if let userInfo = userInfo {
+                decoder.userInfo = userInfo
+            }
+
+            return decoder
+        }()
 
         self = try decoder.decode(Self.self, from: json)
     }
@@ -1915,38 +1919,44 @@ extension Encodable {
     ///   - keyEncodingStrategy: the strategy for encoding keys
     ///   - userInfo: additional user info to pass to the encoder
     /// - Returns: the JSON-encoded `Data`
-    @inlinable public func toJSON(encoder: @autoclosure () -> JSONEncoder = JSONEncoder(), outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Data {
-        let formatting: JSONEncoder.OutputFormatting
-        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
-            formatting = outputFormatting ?? [.sortedKeys, .withoutEscapingSlashes]
-        } else {
-            formatting = outputFormatting ?? [.sortedKeys]
-        }
+    @inlinable public func toJSON(encoder: JSONEncoder? = nil, outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Data {
 
-        let encoder = encoder()
-        //if let formatting = formatting {
-            encoder.outputFormatting = formatting
-        //}
+        let encoder = encoder ?? {
+            let encoder = JSONEncoder()
+            if let outputFormatting = outputFormatting {
+                encoder.outputFormatting = outputFormatting
+            } else {
+                let formatting: JSONEncoder.OutputFormatting
+                if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+                    formatting = outputFormatting ?? [.sortedKeys, .withoutEscapingSlashes]
+                } else {
+                    formatting = outputFormatting ?? [.sortedKeys]
+                }
+                encoder.outputFormatting = formatting
+            }
 
-        if let dateEncodingStrategy = dateEncodingStrategy {
-            encoder.dateEncodingStrategy = dateEncodingStrategy
-        }
+            if let dateEncodingStrategy = dateEncodingStrategy {
+                encoder.dateEncodingStrategy = dateEncodingStrategy
+            }
 
-        if let dataEncodingStrategy = dataEncodingStrategy {
-            encoder.dataEncodingStrategy = dataEncodingStrategy
-        }
+            if let dataEncodingStrategy = dataEncodingStrategy {
+                encoder.dataEncodingStrategy = dataEncodingStrategy
+            }
 
-        if let nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy {
-            encoder.nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy
-        }
+            if let nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy {
+                encoder.nonConformingFloatEncodingStrategy = nonConformingFloatEncodingStrategy
+            }
 
-        if let keyEncodingStrategy = keyEncodingStrategy {
-            encoder.keyEncodingStrategy = keyEncodingStrategy
-        }
+            if let keyEncodingStrategy = keyEncodingStrategy {
+                encoder.keyEncodingStrategy = keyEncodingStrategy
+            }
 
-        if let userInfo = userInfo {
-            encoder.userInfo = userInfo
-        }
+            if let userInfo = userInfo {
+                encoder.userInfo = userInfo
+            }
+
+            return encoder
+        }()
 
         let data = try encoder.encode(self)
         return data

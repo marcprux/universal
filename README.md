@@ -1,10 +1,9 @@
 Universal
 =========
 
-[![Build Status](https://github.com/marcprux/universal/workflows/universal%20ci/badge.svg?branch=main)](https://github.com/marcprux/universal/actions)
+[![Build Status](https://github.com/marcprux/universal/workflows/universal%20ci/badge.svg)](https://github.com/marcprux/universal/actions)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmarcprux%2Funiversal%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/marcprux/universal)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmarcprux%2Funiversal%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/marcprux/universal)
-
 
 **Universal**: A tiny zero-dependency cross-platform Swift parser and decoder for JSON, XML, YAML, and property lists.
 
@@ -13,12 +12,16 @@ Universal
 Add the following dependency to your `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/marcprux/universal.git", from: "5.0.5")
+.package(url: "https://github.com/marcprux/universal.git", from: "5.3.0")
 ```
 
-The package provides the modules `Either`, `JSON`, `XML`, `YAML`, `PLIST`,
+The package provides the modules 
+[`Either`](https://swiftpackageindex.com/marcprux/universal/main/documentation/either/either),
+[`JSON`](https://swiftpackageindex.com/marcprux/universal/main/documentation/json/json),
+[`XML`](https://swiftpackageindex.com/marcprux/universal/main/documentation/xml/xml),
+[`YAML`](https://swiftpackageindex.com/marcprux/universal/main/documentation/yaml/yaml),
+[`PLIST`](https://swiftpackageindex.com/marcprux/universal/main/documentation/plist/plist),
 or `Universal`, which is an umbrella module that re-exports all the other modules.
-
 
 ## Example:
 

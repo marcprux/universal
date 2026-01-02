@@ -16,9 +16,9 @@ jobs:
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"
-        uses: skiptools/swift-android-action@main
+        uses: skiptools/swift-android-action@update-623
         with:
-          swift-version: nightly-main
+          #swift-version: nightly-main
           free-disk-space: true
 
   macos-ios:

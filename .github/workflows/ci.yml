@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: skiptools/setup-skip@main
+        with:
+          install-swift-android-sdk: true
+          #swift-android-sdk-version: nightly-6.3
+      - run: skip android build
       - name: "Test Swift Package on Linux"
         run: swift test
       - name: "Test Swift Package on Android"

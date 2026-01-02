@@ -17,6 +17,7 @@ jobs:
         with:
           install-swift-android-sdk: true
           swift-android-sdk-version: nightly-6.3
+      - run: find ~/ -name swift-sdks
       - run: skip android build
       - name: "Test Swift Package on Linux"
         run: swift test

@@ -16,7 +16,7 @@ jobs:
       - uses: skiptools/actions/setup-skip@main
         with:
           install-swift-android-sdk: true
-          #swift-android-sdk-version: nightly-6.3
+          swift-android-sdk-version: nightly-6.3
       - run: skip android build
       - name: "Test Swift Package on Linux"
         run: swift test
@@ -30,6 +30,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+      - uses: skiptools/actions/setup-skip@main
+        with:
+          install-swift-android-sdk: true
+          swift-android-sdk-version: nightly-6.3
+      - run: skip android build
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"

@@ -381,7 +381,7 @@ private enum YAMLParser {
 
 private typealias Context = YAMLParser.Context
 
-private var error = YAMLParser.Context.error
+private let error = YAMLParser.Context.error
 
 private typealias ContextValue = (context: Context, value: YAML)
 private typealias ContextKey = (context: Context, key: YAML.Scalar)

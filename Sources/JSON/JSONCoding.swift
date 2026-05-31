@@ -598,7 +598,7 @@ extension JSONElementEncoder {
 
         // https://github.com/swiftlang/swift-foundation/issues/1899
         // error: pattern variable binding cannot appear in an expression
-        #if !canImport(Darwin)
+        #if canImport(Darwin)
         case let JSONEncoder.DateEncodingStrategy.formatted(formatter):
             return .init(json: .string(formatter.string(from: date)))
         #endif

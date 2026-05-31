@@ -596,7 +596,9 @@ extension JSONElementEncoder {
             // We can pop because the closure encoded something.
             return self.storage.popContainer()
 
-        #if !os(Linux) // bug with Swift 6.0 on Linux: error: pattern variable binding cannot appear in an expression
+        // https://github.com/swiftlang/swift-foundation/issues/1899
+        // error: pattern variable binding cannot appear in an expression
+        #if !canImport(Darwin)
         case let JSONEncoder.DateEncodingStrategy.formatted(formatter):
             return .init(json: .string(formatter.string(from: date)))
         #endif

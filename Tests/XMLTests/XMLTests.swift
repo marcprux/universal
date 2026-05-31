@@ -80,11 +80,7 @@ import XML
             }
         }
 
-        #expect(trim("""
-        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
-        </h1><p>Body Text
-        </p></body></html>
-        """) == trim(try XMLNode.parse(data: """
+        let parsed1 = try XMLNode.parse(data: """
         <html>
             <head>
                 <title>My Page</title>
@@ -98,14 +94,15 @@ import XML
                 </p>
             </body>
         </html>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
-
-        // tag capitalization mismatch
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
         #expect(trim("""
         <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
         </h1><p>Body Text
         </p></body></html>
-        """) == trim(try XMLNode.parse(data: """
+        """) == trim(parsed1))
+
+        // tag capitalization mismatch
+        let parsed2 = try XMLNode.parse(data: """
         <hTmL>
             <head>
                 <title>My Page</title>
@@ -119,13 +116,15 @@ import XML
                 </p>
             </body>
         </HTML>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
-
-        // tag mismatch
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
         #expect(trim("""
         <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
-        </h1>Body Text<p></p></body></html>
-        """) == trim(try XMLNode.parse(data: """
+        </h1><p>Body Text
+        </p></body></html>
+        """) == trim(parsed2))
+
+        // tag mismatch
+        let parsed3 = try XMLNode.parse(data: """
         <html>
             <head>
                 <title>My Page</title>
@@ -139,14 +138,14 @@ import XML
                 </p>
             </body>
         </html>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
-
-        // unclosed tags
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
         #expect(trim("""
         <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
-        </h1><p>Body Text
-        </p></body></html>
-        """) == trim(try XMLNode.parse(data: """
+        </h1>Body Text<p></p></body></html>
+        """) == trim(parsed3))
+
+        // unclosed tags
+        let parsed4 = try XMLNode.parse(data: """
         <html>
             <head>
                 <title>My Page</title>
@@ -156,13 +155,16 @@ import XML
                     Header
                 <p>
                     Body Text
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
-
-
-
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
         #expect(trim("""
-        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title></title></head><body>Value</body></html>
-        """) == (try XMLNode.parse(data: """
+        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
+        </h1><p>Body Text
+        </p></body></html>
+        """) == trim(parsed4))
+
+
+
+        let parsed5 = try XMLNode.parse(data: """
         <root>
             <element attr="value">
                 <child1>
@@ -171,7 +173,10 @@ import XML
                 <child2>
             </element>
         </root>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
+        #expect(trim("""
+        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title></title></head><body>Value</body></html>
+        """) == parsed5)
     }
 
     @Test func testParseXMLCrazy() throws {

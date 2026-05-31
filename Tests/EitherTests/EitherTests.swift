@@ -11,7 +11,7 @@ import Foundation
         let str = StringOrInt("ABC")
         let int = StringOrInt(12)
         #expect(str != int)
-        #expect("[\"ABC\"]" == (try String(data: JSONEncoder().encode([str]), encoding: .utf8)))
-        #expect("[12]" == (try String(data: JSONEncoder().encode([int]), encoding: .utf8)))
+        #expect(try String(data: JSONEncoder().encode([str]), encoding: .utf8) == "[\"ABC\"]")
+        #expect(try String(data: JSONEncoder().encode([int]), encoding: .utf8) == "[12]")
     }
 }

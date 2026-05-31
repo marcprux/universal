@@ -69,13 +69,13 @@ import Either
         #expect(js["array"]?[1] == .null)
         #expect(js["array"]?[2] == "foo")
 
-        #expect(try JSON.null == JSON(fromJSON: "null".utf8Data))
-        #expect(try JSON.false == JSON(fromJSON: "false".utf8Data))
-        #expect(try JSON.true == JSON(fromJSON: "true".utf8Data))
-        #expect(try 1.0 == JSON(fromJSON: "1.0".utf8Data))
-        #expect(try 1.1 == JSON(fromJSON: "1.1".utf8Data))
-        #expect(try "abc" == JSON(fromJSON: #""abc""#.utf8Data))
-        #expect(try ["abc"] == JSON(fromJSON: #"["abc"]"#.utf8Data))
+        #expect(try JSON(fromJSON: "null".utf8Data) == JSON.null)
+        #expect(try JSON(fromJSON: "false".utf8Data) == JSON.false)
+        #expect(try JSON(fromJSON: "true".utf8Data) == JSON.true)
+        #expect(try JSON(fromJSON: "1.0".utf8Data) == 1.0)
+        #expect(try JSON(fromJSON: "1.1".utf8Data) == 1.1)
+        #expect(try JSON(fromJSON: #""abc""#.utf8Data) == "abc")
+        #expect(try JSON(fromJSON: #"["abc"]"#.utf8Data) == ["abc"])
 
         let json = try js.canonicalJSON
 
@@ -190,34 +190,34 @@ import Either
 
         // MARK: Decoding
 
-        #expect("xxx" == (try Simple(json: ["str": "xxx"]).str))
-        #expect(nil == (try Simple(json: [:]).int))
-        #expect(1 == (try Simple(json: ["int": 1.2]).int))
-        #expect(1.2 == (try Simple(json: ["obj": ["x": [ "dbl": 1.2 ]]]).obj?["x"]?.dbl))
-        #expect(1.2 == (try Simple(json: ["obj": ["x": [ "dbl": 1.2 ]]]).obj?["x"]?.dbl))
+        #expect(try Simple(json: ["str": "xxx"]).str == "xxx")
+        #expect(try Simple(json: [:]).int == nil)
+        #expect(try Simple(json: ["int": 1.2]).int == 1)
+        #expect(try Simple(json: ["obj": ["x": [ "dbl": 1.2 ]]]).obj?["x"]?.dbl == 1.2)
+        #expect(try Simple(json: ["obj": ["x": [ "dbl": 1.2 ]]]).obj?["x"]?.dbl == 1.2)
 
-        #expect("https://www.example.com" == (try Simple(json: ["str": "", "url": "https://www.example.com"]).url?.absoluteString))
+        #expect(try Simple(json: ["str": "", "url": "https://www.example.com"]).url?.absoluteString == "https://www.example.com")
 
-        #expect([false, nil, true] == (try Simple(json: ["arr": [false, nil, true]]).arr))
+        #expect(try Simple(json: ["arr": [false, nil, true]]).arr == [false, nil, true])
 
         // MARK: Encoding
 
-        #expect(try ["str": "XXX"] == Simple(str: "XXX").json())
+        #expect(try Simple(str: "XXX").json() == ["str": "XXX"])
 
-        #expect(try ["url": "https://www.example.org"] == Simple(url: URL(string: "https://www.example.org")!).json())
+        #expect(try Simple(url: URL(string: "https://www.example.org")!).json() == ["url": "https://www.example.org"])
 
-        #expect(try ["date": -978307200] == Simple(date: Date(timeIntervalSince1970: 0)).json())
-        #expect(try ["date": 978307200] == Simple(date: Date(timeIntervalSinceReferenceDate: 0)).json(options: JSONEncodingOptions(dateEncodingStrategy: .secondsSince1970)))
+        #expect(try Simple(date: Date(timeIntervalSince1970: 0)).json() == ["date": -978307200])
+        #expect(try Simple(date: Date(timeIntervalSinceReferenceDate: 0)).json(options: JSONEncodingOptions(dateEncodingStrategy: .secondsSince1970)) == ["date": 978307200])
         // watchOS: Tests/JSONTests/JSONTests.swift:222:33: error: integer literal '978307200000' overflows when stored into 'JSON'
-        //#expect(try ["date": 978307200000] == Simple(date: Date(timeIntervalSinceReferenceDate: 0)).json(options: JSONEncodingOptions(dateEncodingStrategy: .millisecondsSince1970)))
-        #expect(try ["date": "2001-01-01T00:00:00Z"] == Simple(date: Date(timeIntervalSinceReferenceDate: 0)).json(options: JSONEncodingOptions(dateEncodingStrategy: .iso8601)))
+        //#expect(try Simple(date: Date(timeIntervalSinceReferenceDate: 0)).json(options: JSONEncodingOptions(dateEncodingStrategy: .millisecondsSince1970)) == ["date": 978307200000])
+        #expect(try Simple(date: Date(timeIntervalSinceReferenceDate: 0)).json(options: JSONEncodingOptions(dateEncodingStrategy: .iso8601)) == ["date": "2001-01-01T00:00:00Z"])
 
-        #expect(try ["data": "CQ=="] == Simple(data: Data([9])).json())
-        #expect(try ["data": "AQID"] == Simple(data: Data([1,2,3])).json(options: JSONEncodingOptions(dataEncodingStrategy: .base64)))
-        #expect(try ["data": 3] == Simple(data: Data([1,2,3])).json(options: JSONEncodingOptions(dataEncodingStrategy: .custom({ data, encoder in
+        #expect(try Simple(data: Data([9])).json() == ["data": "CQ=="])
+        #expect(try Simple(data: Data([1,2,3])).json(options: JSONEncodingOptions(dataEncodingStrategy: .base64)) == ["data": "AQID"])
+        #expect(try Simple(data: Data([1,2,3])).json(options: JSONEncodingOptions(dataEncodingStrategy: .custom({ data, encoder in
             // custom encoder that just converts the data into the count
             var container = encoder.singleValueContainer()
             try container.encode(data.count)
-        }))))
+        }))) == ["data": 3])
     }
 }

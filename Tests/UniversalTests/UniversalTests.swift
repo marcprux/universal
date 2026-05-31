@@ -132,49 +132,64 @@ import Universal
     @Test func testCompareFormats() throws {
 
         do {
-            try #expect(json(#""abc""#) == json(#""abc""#).json())
+            let lhs = try json(#""abc""#)
+            let rhs = try json(#""abc""#).json()
+            #expect(lhs == rhs)
         }
 
         do {
-            try #expect(json(#""abc""#) == yaml("abc").json())
-            try #expect(json(#"1"#) == yaml("1").json())
-            try #expect(json(#"1.1"#) == yaml("1.1").json())
-            try #expect(json(#"true"#) == yaml("true").json())
-            try #expect(json(#"false"#) == yaml("false").json())
-            try #expect(json(#"null"#) == yaml("null").json())
-            try #expect(json(#"[null]"#) == yaml("[null]").json())
-            try #expect(json(#"[null]"#) == yaml("- null").json())
-
-            try #expect(json(#"[1, 2]"#) == yaml("- 1\n- 2").json())
-            try #expect(json(#"["a", 2.0]"#) == yaml("- a\n- 2").json())
-            try #expect(json(#"[["q"], 2.0]"#) == yaml("- - q\n- 2.000000000000").json())
-            try #expect(json(#"[false, 2.2]"#) == yaml("- false\n- 2.2").json())
+            let cases: [(String, String)] = [
+                (#""abc""#, "abc"),
+                (#"1"#, "1"),
+                (#"1.1"#, "1.1"),
+                (#"true"#, "true"),
+                (#"false"#, "false"),
+                (#"null"#, "null"),
+                (#"[null]"#, "[null]"),
+                (#"[null]"#, "- null"),
+                (#"[1, 2]"#, "- 1\n- 2"),
+                (#"["a", 2.0]"#, "- a\n- 2"),
+                (#"[["q"], 2.0]"#, "- - q\n- 2.000000000000"),
+                (#"[false, 2.2]"#, "- false\n- 2.2"),
+            ]
+            for (jsonStr, yamlStr) in cases {
+                let lhs = try json(jsonStr)
+                let rhs = try yaml(yamlStr).json()
+                #expect(lhs == rhs)
+            }
         }
 
         do {
-            try #expect(json(#"{"node": "abc"}"#) == xml("<node>abc</node>").json())
-            try #expect(json(#"{"node": "abc"}"#) == xml("<node>abc</node>").json())
-            try #expect(json(#"{"node": "1"}"#) == xml("<node>1</node>").json())
-            try #expect(json(#"{"node": {"node": "1"}}"#) == xml("<node><node>1</node></node>").json())
-            try #expect(json(#"{"node": {"node": "2"}}"#) == xml("<node><node>2</node></node>").json())
-            try #expect(json(#"{"node": {"node": ["1", "2"]}}"#) == xml("<node><node>1</node><node>2</node></node>").json())
+            let cases: [(String, String)] = [
+                (#"{"node": "abc"}"#, "<node>abc</node>"),
+                (#"{"node": "abc"}"#, "<node>abc</node>"),
+                (#"{"node": "1"}"#, "<node>1</node>"),
+                (#"{"node": {"node": "1"}}"#, "<node><node>1</node></node>"),
+                (#"{"node": {"node": "2"}}"#, "<node><node>2</node></node>"),
+                (#"{"node": {"node": ["1", "2"]}}"#, "<node><node>1</node><node>2</node></node>"),
+            ]
+            for (jsonStr, xmlStr) in cases {
+                let lhs = try json(jsonStr)
+                let rhs = try xml(xmlStr).json()
+                #expect(lhs == rhs)
+            }
         }
     }
 
     @Test func testFluentComparisons() throws {
-        #expect(try nil == (nil as YAML).json())
-        #expect(try true == (true as YAML).json())
-        #expect(try false == (false as YAML).json())
-        #expect(try 1 == (1 as YAML).json())
-        #expect(try 1.1 == (1.1 as YAML).json())
+        #expect(try (nil as YAML).json() == nil)
+        #expect(try (true as YAML).json() == true)
+        #expect(try (false as YAML).json() == false)
+        #expect(try (1 as YAML).json() == 1)
+        #expect(try (1.1 as YAML).json() == 1.1)
 
-        #expect(try [""] == ([""] as YAML).json())
-        #expect(try [1] == ([1] as YAML).json())
-        #expect(try [1.1] == ([1.1] as YAML).json())
-        #expect(try [1.1, nil, "abc", []] == ([1.1, nil, "abc", []] as YAML).json())
-        #expect(try [1.1, nil, "abc", [nil]] == ([1.1, nil, "abc", [nil]] as YAML).json())
+        #expect(try ([""] as YAML).json() == [""])
+        #expect(try ([1] as YAML).json() == [1])
+        #expect(try ([1.1] as YAML).json() == [1.1])
+        #expect(try ([1.1, nil, "abc", []] as YAML).json() == [1.1, nil, "abc", []])
+        #expect(try ([1.1, nil, "abc", [nil]] as YAML).json() == [1.1, nil, "abc", [nil]])
 
-        #expect(try ["x": "1"] == (["x": "1"] as YAML).json())
+        #expect(try (["x": "1"] as YAML).json() == ["x": "1"])
     }
 
     @Test func testYAMLJSON() throws {
@@ -198,29 +213,31 @@ import Universal
     }
 
     @Test func testMergeJSON() throws {
-        #expect(try 2 == (1 as JSON).merged(with: 2))
-        #expect(try "Y" == ("X" as JSON).merged(with: "Y"))
-        #expect(try "Y" == (1 as JSON).merged(with: "Y"))
+        #expect(try (1 as JSON).merged(with: 2) == 2)
+        #expect(try ("X" as JSON).merged(with: "Y") == "Y")
+        #expect(try (1 as JSON).merged(with: "Y") == "Y")
 
-        #expect(try ["A": 1, "B": true] == (["A": 1] as JSON).merged(with: ["B": true]))
-        #expect(try ["A": true] == (["A": 1] as JSON).merged(with: ["A": true]))
+        #expect(try (["A": 1] as JSON).merged(with: ["B": true]) == ["A": 1, "B": true])
+        #expect(try (["A": 1] as JSON).merged(with: ["A": true]) == ["A": true])
 
-        #expect(try [1, 2, 3] == ([1] as JSON).merged(with: [2, 3]))
-        #expect(try ["A": [1, 2, 1, 2]] == (["A": [1, 2]] as JSON).merged(with: ["A": [1, 2]]))
+        #expect(try ([1] as JSON).merged(with: [2, 3]) == [1, 2, 3])
+        #expect(try (["A": [1, 2]] as JSON).merged(with: ["A": [1, 2]]) == ["A": [1, 2, 1, 2]])
     }
 
     @Test func testMergeXML() throws {
-        try #expect(XML.parse(Data("""
+        let lhs = try XML.parse(Data("""
         <abc x="1" y="z"/>
-        """.utf8)) == XML.parse(Data("""
+        """.utf8))
+        let rhs = try XML.parse(Data("""
         <abc x="1"/>
         """.utf8)).merged(with: XML.parse(Data("""
         <abc y="z"/>
-        """.utf8))))
+        """.utf8)))
+        #expect(lhs == rhs)
     }
 
     @Test func testMergeYAML() throws {
-        try #expect(YAML.parse(Data("""
+        let lhs = try YAML.parse(Data("""
         root:
             a: x
             c: d
@@ -231,7 +248,8 @@ import Universal
                 - 2
                 - dict:
                     z: q
-        """.utf8)) == YAML.parse(Data("""
+        """.utf8))
+        let rhs = try YAML.parse(Data("""
         root:
             a: b
             values:
@@ -246,7 +264,8 @@ import Universal
                 - 2
                 - dict:
                     z: q
-        """.utf8))))
+        """.utf8)))
+        #expect(lhs == rhs)
     }
 
 }

@@ -48,7 +48,7 @@ import Either
         #expect(try yaml("true  ") == .true)
         #expect(try yaml("true\n") == .true)
         #expect(try yaml("true \n") == .true)
-        #expect(try .true == yaml("\ntrue \n"))
+        #expect(try yaml("\ntrue \n") == .true)
 
         #expect(try yaml("false") == .boolean(false))
         #expect(try yaml("False").boolean == false)
@@ -61,7 +61,7 @@ import Either
         #expect(try yaml("false  ") == .false)
         #expect(try yaml("false\n") == .false)
         #expect(try yaml("false \n") == .false)
-        #expect(try .false == yaml("\nfalse \n"))
+        #expect(try yaml("\nfalse \n") == .false)
 
         let value: YAML = .true
         #expect(value == .true)

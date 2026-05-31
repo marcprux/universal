@@ -1873,39 +1873,50 @@ fileprivate struct _JSONKey: CodingKey {
     fileprivate static let `super` = _JSONKey(stringValue: "super")!
 }
 
+/// Sets `JSONDecoder.allowsJSON5`. Isolated in its own `@available`-annotated function so the
+/// availability constraint is unambiguous to the Swift compiler regardless of surrounding context.
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+private func _setAllowsJSON5(_ decoder: JSONDecoder, _ value: Bool) {
+    decoder.allowsJSON5 = value
+}
+
 public extension Decodable {
     /// Initialized this instance from a JSON string
     init(fromJSON json: Data, decoder: JSONDecoder? = nil, allowsJSON5: Bool? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws {
-        let decoder = decoder ?? {
-            let decoder = JSONDecoder()
+        let resolvedDecoder: JSONDecoder
+        if let decoder {
+            resolvedDecoder = decoder
+        } else {
+            let newDecoder = JSONDecoder()
             if let allowsJSON5 {
                 if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
-                    decoder.allowsJSON5 = allowsJSON5
+                    _setAllowsJSON5(newDecoder, allowsJSON5)
                 }
             }
 
             if let dateDecodingStrategy {
-                decoder.dateDecodingStrategy = dateDecodingStrategy
+                newDecoder.dateDecodingStrategy = dateDecodingStrategy
             }
 
             if let dataDecodingStrategy {
-                decoder.dataDecodingStrategy = dataDecodingStrategy
+                newDecoder.dataDecodingStrategy = dataDecodingStrategy
             }
 
             if let nonConformingFloatDecodingStrategy {
-                decoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
+                newDecoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
             }
 
             if let keyDecodingStrategy {
-                decoder.keyDecodingStrategy = keyDecodingStrategy
+                newDecoder.keyDecodingStrategy = keyDecodingStrategy
             }
 
             if let userInfo {
-                decoder.userInfo = userInfo
+                newDecoder.userInfo = userInfo
             }
 
-            return decoder
-        }()
+            resolvedDecoder = newDecoder
+        }
+        let decoder = resolvedDecoder
 
         self = try decoder.decode(Self.self, from: json)
     }

@@ -17,7 +17,7 @@ import class Foundation.ISO8601DateFormatter
 
 extension JSON {
     /// Parses the given `Data` into a `JSON` structure.
-    public static func parse(_ json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> JSON {
+    public static func parse(_ json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws -> JSON {
         try JSON(fromJSON: json, decoder: decoder(), allowsJSON5: allowsJSON5, dataDecodingStrategy: dataDecodingStrategy, dateDecodingStrategy: dateDecodingStrategy, nonConformingFloatDecodingStrategy: nonConformingFloatDecodingStrategy, keyDecodingStrategy: keyDecodingStrategy, userInfo: userInfo)
     }
 
@@ -596,10 +596,10 @@ extension JSONElementEncoder {
             // We can pop because the closure encoded something.
             return self.storage.popContainer()
 
-        #if !os(Linux) && swift(>=6.0) && swift(<6.1)
-        // bug with Swift 6.0 on Linux: error: pattern variable binding cannot appear in an expression
+        // https://github.com/swiftlang/swift-foundation/issues/1899
+        // error: pattern variable binding cannot appear in an expression
+        #if canImport(Darwin)
         case let JSONEncoder.DateEncodingStrategy.formatted(formatter):
-        //case .formatted(let formatter):
             return .init(json: .string(formatter.string(from: date)))
         #endif
 
@@ -1698,12 +1698,17 @@ extension _JSONDecoder: SingleValueDecodingContainer {
     }
 }
 
+/// Returns a freshly-allocated ISO8601DateFormatter configured with `.withInternetDateTime`.
+///
+/// `ISO8601DateFormatter` (like `DateFormatter`) is documented as not safe to share between
+/// threads, so we allocate a new one for each use rather than caching a shared instance.
+/// This keeps parsing free of actor isolation while remaining concurrency-safe.
 @available(macOS 10.12, iOS 10.0, watchOS 3.0, tvOS 10.0, *)
-internal var _iso8601Formatter: ISO8601DateFormatter = {
+internal var _iso8601Formatter: ISO8601DateFormatter {
     let formatter = ISO8601DateFormatter()
     formatter.formatOptions = .withInternetDateTime
     return formatter
-}()
+}
 
 
 extension _JSONDecoder {
@@ -1769,10 +1774,8 @@ extension _JSONDecoder {
         case .custom(let closure):
             return try closure(self)
 
-        #if !os(Linux) && swift(>=6.0) && swift(<6.1)
-        // bug with Swift 6.0 on Linux: error: pattern variable binding cannot appear in an expression
+        #if canImport(Darwin) // bug with Swift 6.0 on Linux: error: pattern variable binding cannot appear in an expression
         case let JSONDecoder.DateDecodingStrategy.formatted(formatter):
-        //case .formatted(let formatter):
             guard let string = value.string else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
             }
@@ -1870,39 +1873,50 @@ fileprivate struct _JSONKey: CodingKey {
     fileprivate static let `super` = _JSONKey(stringValue: "super")!
 }
 
+/// Sets `JSONDecoder.allowsJSON5`. Isolated in its own `@available`-annotated function so the
+/// availability constraint is unambiguous to the Swift compiler regardless of surrounding context.
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+private func _setAllowsJSON5(_ decoder: JSONDecoder, _ value: Bool) {
+    decoder.allowsJSON5 = value
+}
+
 public extension Decodable {
     /// Initialized this instance from a JSON string
-    init(fromJSON json: Data, decoder: JSONDecoder? = nil, allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws {
-        let decoder = decoder ?? {
-            let decoder = JSONDecoder()
-            #if XXX && !os(Linux) && !os(Android) && !os(Windows)
-            if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
-                decoder.allowsJSON5 = allowsJSON5
-            }
-            #endif
-
-            if let dateDecodingStrategy = dateDecodingStrategy {
-                decoder.dateDecodingStrategy = dateDecodingStrategy
-            }
-
-            if let dataDecodingStrategy = dataDecodingStrategy {
-                decoder.dataDecodingStrategy = dataDecodingStrategy
+    init(fromJSON json: Data, decoder: JSONDecoder? = nil, allowsJSON5: Bool? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws {
+        let resolvedDecoder: JSONDecoder
+        if let decoder {
+            resolvedDecoder = decoder
+        } else {
+            let newDecoder = JSONDecoder()
+            if let allowsJSON5 {
+                if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
+                    _setAllowsJSON5(newDecoder, allowsJSON5)
+                }
             }
 
-            if let nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy {
-                decoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
+            if let dateDecodingStrategy {
+                newDecoder.dateDecodingStrategy = dateDecodingStrategy
             }
 
-            if let keyDecodingStrategy = keyDecodingStrategy {
-                decoder.keyDecodingStrategy = keyDecodingStrategy
+            if let dataDecodingStrategy {
+                newDecoder.dataDecodingStrategy = dataDecodingStrategy
             }
 
-            if let userInfo = userInfo {
-                decoder.userInfo = userInfo
+            if let nonConformingFloatDecodingStrategy {
+                newDecoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
             }
 
-            return decoder
-        }()
+            if let keyDecodingStrategy {
+                newDecoder.keyDecodingStrategy = keyDecodingStrategy
+            }
+
+            if let userInfo {
+                newDecoder.userInfo = userInfo
+            }
+
+            resolvedDecoder = newDecoder
+        }
+        let decoder = resolvedDecoder
 
         self = try decoder.decode(Self.self, from: json)
     }
@@ -1919,7 +1933,7 @@ extension Encodable {
     ///   - keyEncodingStrategy: the strategy for encoding keys
     ///   - userInfo: additional user info to pass to the encoder
     /// - Returns: the JSON-encoded `Data`
-    @inlinable public func toJSON(encoder: JSONEncoder? = nil, outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : Any]? = nil) throws -> Data {
+    @inlinable public func toJSON(encoder: JSONEncoder? = nil, outputFormatting: JSONEncoder.OutputFormatting? = nil, dateEncodingStrategy: JSONEncoder.DateEncodingStrategy? = nil, dataEncodingStrategy: JSONEncoder.DataEncodingStrategy? = nil, nonConformingFloatEncodingStrategy: JSONEncoder.NonConformingFloatEncodingStrategy? = nil, keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws -> Data {
 
         let encoder = encoder ?? {
             let encoder = JSONEncoder()

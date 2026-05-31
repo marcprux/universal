@@ -83,14 +83,14 @@ public extension XML {
 
 /// An XML Element Document, which is an in-memory tree representation
 /// of the contents of an XML source.
-public struct XMLNode : Hashable {
+public struct XMLNode : Hashable, Sendable {
     public enum Errors : Error {
         case unknownParseError
         case tidyHTMLUnavailable
         case badElementCount(Int)
     }
 
-    public struct Entity : OptionSet {
+    public struct Entity : OptionSet, Sendable {
         /// The format's default value.
         public let rawValue: UInt
 
@@ -134,7 +134,7 @@ public struct XMLNode : Hashable {
     }
 
     /// A `Child` consists of all the data strucutres that may be contained within an XML element.
-    public enum Child : Hashable {
+    public enum Child : Hashable, Sendable {
         case element(XMLNode)
         case content(String)
         case comment(String)
@@ -279,7 +279,7 @@ public struct XMLNode : Hashable {
     }
 
     /// Options for configuring the `XMLParser`
-    public struct Options: OptionSet, Hashable {
+    public struct Options: OptionSet, Hashable, Sendable {
         public let rawValue: Int
 
         public static let resolveExternalEntities = Self(rawValue: 1 << 0)

@@ -316,7 +316,7 @@ public extension Optional {
 
 
 /// Useful extension for when a `OneOfX<A, B, …, Never>` wants to be treated as `Codable`
-extension Never : Decodable {
+extension Never : @retroactive Decodable {
     /// Throws an error, since it should never be decodable
     public init(from decoder: Decoder) throws {
         throw NeverCodableError.decodableNever
@@ -324,7 +324,7 @@ extension Never : Decodable {
 }
 
 /// Useful extension for when a `OneOfX<A, B, …, Never>` wants to be treated as `Codable`
-extension Never : Encodable {
+extension Never : @retroactive Encodable {
     /// Throws an error, since it should never be encodable
     public func encode(to encoder: Encoder) throws {
         throw NeverCodableError.encodableNever

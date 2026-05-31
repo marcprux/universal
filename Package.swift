@@ -27,5 +27,5 @@ let package = Package(
         .target(name: "Universal", dependencies: ["XML", "YAML", "JSON", "PLIST"]),
         .testTarget(name: "UniversalTests", dependencies: ["Universal"]),
         ],
-    swiftLanguageModes: [.v5]
+    swiftLanguageModes: [.v6]
 )

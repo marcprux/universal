@@ -17,7 +17,7 @@ import class Foundation.ISO8601DateFormatter
 
 extension JSON {
     /// Parses the given `Data` into a `JSON` structure.
-    public static func parse(_ json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws -> JSON {
+    public static func parse(_ json: Data, decoder: @autoclosure () -> JSONDecoder = JSONDecoder(), allowsJSON5: Bool? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws -> JSON {
         try JSON(fromJSON: json, decoder: decoder(), allowsJSON5: allowsJSON5, dataDecodingStrategy: dataDecodingStrategy, dateDecodingStrategy: dateDecodingStrategy, nonConformingFloatDecodingStrategy: nonConformingFloatDecodingStrategy, keyDecodingStrategy: keyDecodingStrategy, userInfo: userInfo)
     }
 
@@ -1774,7 +1774,7 @@ extension _JSONDecoder {
         case .custom(let closure):
             return try closure(self)
 
-        #if !os(Linux) // bug with Swift 6.0 on Linux: error: pattern variable binding cannot appear in an expression
+        #if canImport(Darwin) // bug with Swift 6.0 on Linux: error: pattern variable binding cannot appear in an expression
         case let JSONDecoder.DateDecodingStrategy.formatted(formatter):
             guard let string = value.string else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Expected date string to be ISO8601-formatted."))
@@ -1875,32 +1875,32 @@ fileprivate struct _JSONKey: CodingKey {
 
 public extension Decodable {
     /// Initialized this instance from a JSON string
-    init(fromJSON json: Data, decoder: JSONDecoder? = nil, allowsJSON5: Bool = true, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws {
+    init(fromJSON json: Data, decoder: JSONDecoder? = nil, allowsJSON5: Bool? = nil, dataDecodingStrategy: JSONDecoder.DataDecodingStrategy? = nil, dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil, nonConformingFloatDecodingStrategy: JSONDecoder.NonConformingFloatDecodingStrategy? = nil, keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil, userInfo: [CodingUserInfoKey : any Sendable]? = nil) throws {
         let decoder = decoder ?? {
             let decoder = JSONDecoder()
-            #if XXX && !os(Linux) && !os(Android) && !os(Windows)
-            if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
-                decoder.allowsJSON5 = allowsJSON5
+            if let allowsJSON5 {
+                if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
+                    decoder.allowsJSON5 = allowsJSON5
+                }
             }
-            #endif
 
-            if let dateDecodingStrategy = dateDecodingStrategy {
+            if let dateDecodingStrategy {
                 decoder.dateDecodingStrategy = dateDecodingStrategy
             }
 
-            if let dataDecodingStrategy = dataDecodingStrategy {
+            if let dataDecodingStrategy {
                 decoder.dataDecodingStrategy = dataDecodingStrategy
             }
 
-            if let nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy {
+            if let nonConformingFloatDecodingStrategy {
                 decoder.nonConformingFloatDecodingStrategy = nonConformingFloatDecodingStrategy
             }
 
-            if let keyDecodingStrategy = keyDecodingStrategy {
+            if let keyDecodingStrategy {
                 decoder.keyDecodingStrategy = keyDecodingStrategy
             }
 
-            if let userInfo = userInfo {
+            if let userInfo {
                 decoder.userInfo = userInfo
             }
 

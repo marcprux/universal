@@ -28,15 +28,15 @@ jobs:
       - name: "Test Swift Package on macOS"
         run: swift test
       - name: "Test Swift Package on iOS"
-        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 16" -scheme "universal-Package"
+        run: xcodebuild test -sdk "iphonesimulator" -destination "platform=iOS Simulator,name=iPhone 17" -scheme "universal-Package"
 
   windows:
     runs-on: windows-latest
     steps:
       - uses: compnerd/gha-setup-swift@main
         with:
-          swift-version: swift-6.2-release
-          swift-build: 6.2-RELEASE
+          swift-version: swift-6.3-release
+          swift-build: 6.3-RELEASE
       - uses: actions/checkout@v6
       - run: swift test
 

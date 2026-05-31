@@ -2,16 +2,17 @@
  Copyright (c) 2015-2023 Marc Prud'hommeaux
  */
 import Swift
-import XCTest
+import Testing
+import Foundation
 import XML
 
-final class XMLTests: XCTestCase {
+@Suite struct XMLTests {
 
     // MARK: XML Tests
 
-    private let xml = { (str: String) in try XML.parse(str.data(using: .utf8) ?? Data()) }
+    private let xml: (String) throws -> XML = { (str: String) in try XML.parse(str.data(using: .utf8) ?? Data()) }
 
-    func testParseXML() throws {
+    @Test func testParseXML() throws {
         let parsed = try xml("""
         <root>
             <element attr="value">
@@ -24,11 +25,11 @@ final class XMLTests: XCTestCase {
         """)
 
         let element = parsed.object?["root"]?.object?["element"]
-        XCTAssertEqual("Value", element?.object?["child1"]?.string?.trimmingCharacters(in: .whitespacesAndNewlines))
-        XCTAssertEqual("", element?.object?["child2"]?.string)
+        #expect("Value" == element?.object?["child1"]?.string?.trimmingCharacters(in: .whitespacesAndNewlines))
+        #expect("" == element?.object?["child2"]?.string)
     }
 
-    func testParseXMLNamespaced() throws {
+    @Test func testParseXMLNamespaced() throws {
         let doc1 = try xml("""
         <foo:root xmlns:foo="http://main/ns" xmlns:bar="http://secondary/ns">
           <foo:child bar:attr="1234">some data</foo:child>
@@ -47,18 +48,18 @@ final class XMLTests: XCTestCase {
         </root>
         """)
 
-        XCTAssertEqual(["root"], doc1.object?.keys.map({ $0 }))
-        XCTAssertEqual(["", "child"], doc1.object?.values.first?.object?.keys.sorted())
-        XCTAssertEqual(["root"], doc2.object?.keys.map({ $0 }))
-        XCTAssertEqual(["", "child"], doc2.object?.values.first?.object?.keys.sorted())
-        XCTAssertEqual(["root"], doc3.object?.keys.map({ $0 }))
-        XCTAssertEqual(["", "child"], doc3.object?.values.first?.object?.keys.sorted())
+        #expect(["root"] == doc1.object?.keys.map({ $0 }))
+        #expect(["", "child"] == doc1.object?.values.first?.object?.keys.sorted())
+        #expect(["root"] == doc2.object?.keys.map({ $0 }))
+        #expect(["", "child"] == doc2.object?.values.first?.object?.keys.sorted())
+        #expect(["root"] == doc3.object?.keys.map({ $0 }))
+        #expect(["", "child"] == doc3.object?.values.first?.object?.keys.sorted())
 
     }
 
-    func testTidyHTML() throws {
+    @Test func testTidyHTML() throws {
         #if os(iOS) || os(tvOS) || os(watchOS) // XMLDocument unavailable on iOS…
-        //XCTAssertThrowsError(try tidyHTML()) // …so the `.tidyHTML` flag should throw an error
+        //#expect(throws: (any Error).self) { try tidyHTML() } // …so the `.tidyHTML` flag should throw an error
         #elseif os(Windows)
         // Windows XML parsing doesn't seem to handle whitespace the same
         // try tidyHTML(preservesWhitespace: false) // actually, tidying doesn't seem to work at all
@@ -79,11 +80,7 @@ final class XMLTests: XCTestCase {
             }
         }
 
-        XCTAssertEqual(trim("""
-        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
-        </h1><p>Body Text
-        </p></body></html>
-        """), trim(try XMLNode.parse(data: """
+        let parsed1 = try XMLNode.parse(data: """
         <html>
             <head>
                 <title>My Page</title>
@@ -97,14 +94,15 @@ final class XMLTests: XCTestCase {
                 </p>
             </body>
         </html>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
-
-        // tag capitalization mismatch
-        XCTAssertEqual(trim("""
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
+        #expect(trim("""
         <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
         </h1><p>Body Text
         </p></body></html>
-        """), trim(try XMLNode.parse(data: """
+        """) == trim(parsed1))
+
+        // tag capitalization mismatch
+        let parsed2 = try XMLNode.parse(data: """
         <hTmL>
             <head>
                 <title>My Page</title>
@@ -118,13 +116,15 @@ final class XMLTests: XCTestCase {
                 </p>
             </body>
         </HTML>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
+        #expect(trim("""
+        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
+        </h1><p>Body Text
+        </p></body></html>
+        """) == trim(parsed2))
 
         // tag mismatch
-        XCTAssertEqual(trim("""
-        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
-        </h1>Body Text<p></p></body></html>
-        """), trim(try XMLNode.parse(data: """
+        let parsed3 = try XMLNode.parse(data: """
         <html>
             <head>
                 <title>My Page</title>
@@ -138,14 +138,14 @@ final class XMLTests: XCTestCase {
                 </p>
             </body>
         </html>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
+        #expect(trim("""
+        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
+        </h1>Body Text<p></p></body></html>
+        """) == trim(parsed3))
 
         // unclosed tags
-        XCTAssertEqual(trim("""
-        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
-        </h1><p>Body Text
-        </p></body></html>
-        """), trim(try XMLNode.parse(data: """
+        let parsed4 = try XMLNode.parse(data: """
         <html>
             <head>
                 <title>My Page</title>
@@ -155,13 +155,16 @@ final class XMLTests: XCTestCase {
                     Header
                 <p>
                     Body Text
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()))
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
+        #expect(trim("""
+        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>My Page</title></head><body><h1>Header
+        </h1><p>Body Text
+        </p></body></html>
+        """) == trim(parsed4))
 
 
 
-        XCTAssertEqual(trim("""
-        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title></title></head><body>Value</body></html>
-        """), try XMLNode.parse(data: """
+        let parsed5 = try XMLNode.parse(data: """
         <root>
             <element attr="value">
                 <child1>
@@ -170,10 +173,13 @@ final class XMLTests: XCTestCase {
                 <child2>
             </element>
         </root>
-        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString())
+        """.data(using: .utf8) ?? Data(), options: [.tidyHTML]).xmlString()
+        #expect(trim("""
+        <?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title></title></head><body>Value</body></html>
+        """) == parsed5)
     }
 
-    func testParseXMLCrazy() throws {
+    @Test func testParseXMLCrazy() throws {
         let parsed = try xml("""
         <!DOCTYPE r [ <!ENTITY y "a]>b"> ]>
         <r>
@@ -183,14 +189,14 @@ final class XMLTests: XCTestCase {
         </r>
         """)
 
-        let r = try XCTUnwrap(parsed.object?["r"])
-        XCTAssertEqual(["a"], r.object?.keys.flatMap(Array.init))
-        let a = try XCTUnwrap(r.object?["a"])
-        XCTAssertEqual(["b"], a.object?.keys.flatMap(Array.init))
-        XCTAssertEqual("a]>b>", a["b"]?.string)
+        let r = try #require(parsed.object?["r"])
+        #expect(["a"] == r.object?.keys.flatMap(Array.init))
+        let a = try #require(r.object?["a"])
+        #expect(["b"] == a.object?.keys.flatMap(Array.init))
+        #expect("a]>b>" == a["b"]?.string)
 
-//        XCTAssertEqual("Value", element?.object?["a"]?.string?.trimmingCharacters(in: .whitespacesAndNewlines))
-//        XCTAssertEqual("", element?.object?["child2"]?.string)
+//        #expect("Value" == element?.object?["a"]?.string?.trimmingCharacters(in: .whitespacesAndNewlines))
+//        #expect("" == element?.object?["child2"]?.string)
     }
 
 

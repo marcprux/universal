@@ -4,16 +4,17 @@
 //  Created by Marc Prud'hommeaux on 6/14/15.
 //
 
-import XCTest
+import Testing
+import Foundation
 import Universal
 
-class UniversalTests : XCTestCase {
-    let json = { (str: String) in try JSON.parse(str.utf8Data) }
-    let yaml = { (str: String) in try YAML.parse(str.utf8Data) }
-    let plist = { (str: String) in try PLIST.parse(str.utf8Data) }
-    let xml = { (str: String) in try XML.parse(str.utf8Data) }
+@Suite struct UniversalTests {
+    let json: (String) throws -> JSON = { (str: String) in try JSON.parse(str.utf8Data) }
+    let yaml: (String) throws -> YAML = { (str: String) in try YAML.parse(str.utf8Data) }
+    let plist: (String) throws -> PLIST = { (str: String) in try PLIST.parse(str.utf8Data) }
+    let xml: (String) throws -> XML = { (str: String) in try XML.parse(str.utf8Data) }
 
-    func testUniversalExample() throws {
+    @Test func testUniversalExample() throws {
         // JSON Parsing
         let json: JSON = try JSON.parse(Data("""
             {"parent": {"child": 1}}
@@ -55,7 +56,7 @@ class UniversalTests : XCTestCase {
         assert(xmlJSON == jsonEdit)
     }
 
-    func testDecodingExample() throws {
+    @Test func testDecodingExample() throws {
         struct Coded : Decodable, Equatable {
             let person: Person
 
@@ -128,67 +129,82 @@ class UniversalTests : XCTestCase {
 
     }
 
-    func testCompareFormats() throws {
+    @Test func testCompareFormats() throws {
 
         do {
-            try XCTAssertEqual(json(#""abc""#), json(#""abc""#).json())
+            let lhs = try json(#""abc""#)
+            let rhs = try json(#""abc""#).json()
+            #expect(lhs == rhs)
         }
 
         do {
-            try XCTAssertEqual(json(#""abc""#), yaml("abc").json())
-            try XCTAssertEqual(json(#"1"#), yaml("1").json())
-            try XCTAssertEqual(json(#"1.1"#), yaml("1.1").json())
-            try XCTAssertEqual(json(#"true"#), yaml("true").json())
-            try XCTAssertEqual(json(#"false"#), yaml("false").json())
-            try XCTAssertEqual(json(#"null"#), yaml("null").json())
-            try XCTAssertEqual(json(#"[null]"#), yaml("[null]").json())
-            try XCTAssertEqual(json(#"[null]"#), yaml("- null").json())
-
-            try XCTAssertEqual(json(#"[1, 2]"#), yaml("- 1\n- 2").json())
-            try XCTAssertEqual(json(#"["a", 2.0]"#), yaml("- a\n- 2").json())
-            try XCTAssertEqual(json(#"[["q"], 2.0]"#), yaml("- - q\n- 2.000000000000").json())
-            try XCTAssertEqual(json(#"[false, 2.2]"#), yaml("- false\n- 2.2").json())
+            let cases: [(String, String)] = [
+                (#""abc""#, "abc"),
+                (#"1"#, "1"),
+                (#"1.1"#, "1.1"),
+                (#"true"#, "true"),
+                (#"false"#, "false"),
+                (#"null"#, "null"),
+                (#"[null]"#, "[null]"),
+                (#"[null]"#, "- null"),
+                (#"[1, 2]"#, "- 1\n- 2"),
+                (#"["a", 2.0]"#, "- a\n- 2"),
+                (#"[["q"], 2.0]"#, "- - q\n- 2.000000000000"),
+                (#"[false, 2.2]"#, "- false\n- 2.2"),
+            ]
+            for (jsonStr, yamlStr) in cases {
+                let lhs = try json(jsonStr)
+                let rhs = try yaml(yamlStr).json()
+                #expect(lhs == rhs)
+            }
         }
 
         do {
-            try XCTAssertEqual(json(#"{"node": "abc"}"#), xml("<node>abc</node>").json())
-            try XCTAssertEqual(json(#"{"node": "abc"}"#), xml("<node>abc</node>").json())
-            try XCTAssertEqual(json(#"{"node": "1"}"#), xml("<node>1</node>").json())
-            try XCTAssertEqual(json(#"{"node": {"node": "1"}}"#), xml("<node><node>1</node></node>").json())
-            try XCTAssertEqual(json(#"{"node": {"node": "2"}}"#), xml("<node><node>2</node></node>").json())
-            try XCTAssertEqual(json(#"{"node": {"node": ["1", "2"]}}"#), xml("<node><node>1</node><node>2</node></node>").json())
+            let cases: [(String, String)] = [
+                (#"{"node": "abc"}"#, "<node>abc</node>"),
+                (#"{"node": "abc"}"#, "<node>abc</node>"),
+                (#"{"node": "1"}"#, "<node>1</node>"),
+                (#"{"node": {"node": "1"}}"#, "<node><node>1</node></node>"),
+                (#"{"node": {"node": "2"}}"#, "<node><node>2</node></node>"),
+                (#"{"node": {"node": ["1", "2"]}}"#, "<node><node>1</node><node>2</node></node>"),
+            ]
+            for (jsonStr, xmlStr) in cases {
+                let lhs = try json(jsonStr)
+                let rhs = try xml(xmlStr).json()
+                #expect(lhs == rhs)
+            }
         }
     }
 
-    func testFluentComparisons() throws {
-        XCTAssertEqual(nil, try (nil as YAML).json())
-        XCTAssertEqual(true, try (true as YAML).json())
-        XCTAssertEqual(false, try (false as YAML).json())
-        XCTAssertEqual(1, try (1 as YAML).json())
-        XCTAssertEqual(1.1, try (1.1 as YAML).json())
+    @Test func testFluentComparisons() throws {
+        #expect(try (nil as YAML).json() == nil)
+        #expect(try (true as YAML).json() == true)
+        #expect(try (false as YAML).json() == false)
+        #expect(try (1 as YAML).json() == 1)
+        #expect(try (1.1 as YAML).json() == 1.1)
 
-        XCTAssertEqual([""], try ([""] as YAML).json())
-        XCTAssertEqual([1], try ([1] as YAML).json())
-        XCTAssertEqual([1.1], try ([1.1] as YAML).json())
-        XCTAssertEqual([1.1, nil, "abc", []], try ([1.1, nil, "abc", []] as YAML).json())
-        XCTAssertEqual([1.1, nil, "abc", [nil]], try ([1.1, nil, "abc", [nil]] as YAML).json())
+        #expect(try ([""] as YAML).json() == [""])
+        #expect(try ([1] as YAML).json() == [1])
+        #expect(try ([1.1] as YAML).json() == [1.1])
+        #expect(try ([1.1, nil, "abc", []] as YAML).json() == [1.1, nil, "abc", []])
+        #expect(try ([1.1, nil, "abc", [nil]] as YAML).json() == [1.1, nil, "abc", [nil]])
 
-        XCTAssertEqual(["x": "1"], try (["x": "1"] as YAML).json())
+        #expect(try (["x": "1"] as YAML).json() == ["x": "1"])
     }
 
-    func testYAMLJSON() throws {
-        XCTAssertEqual(try yaml(#"x: 1"#), ["x":1])
-        XCTAssertEqual(try yaml(#"x: 1"#).json(), ["x":1])
+    @Test func testYAMLJSON() throws {
+        #expect(try yaml(#"x: 1"#) == ["x":1])
+        #expect(try yaml(#"x: 1"#).json() == ["x":1])
     }
 
-    func testDeserialize() throws {
+    @Test func testDeserialize() throws {
         struct SomeCodable : Equatable, Decodable {
             let int: Int
         }
 
         func check<T: Equatable>(_ values: T...) throws {
             for v in values {
-                XCTAssertEqual(values.first, v)
+                #expect(values.first == v)
             }
         }
 
@@ -196,30 +212,32 @@ class UniversalTests : XCTestCase {
         try check(SomeCodable(int: 1), json(#"{"int":1.1}"#).decode()) // yaml(#"{"int":1.1}"#).json().decode())
     }
 
-    func testMergeJSON() throws {
-        XCTAssertEqual(2, try (1 as JSON).merged(with: 2))
-        XCTAssertEqual("Y", try ("X" as JSON).merged(with: "Y"))
-        XCTAssertEqual("Y", try (1 as JSON).merged(with: "Y"))
+    @Test func testMergeJSON() throws {
+        #expect(try (1 as JSON).merged(with: 2) == 2)
+        #expect(try ("X" as JSON).merged(with: "Y") == "Y")
+        #expect(try (1 as JSON).merged(with: "Y") == "Y")
 
-        XCTAssertEqual(["A": 1, "B": true], try (["A": 1] as JSON).merged(with: ["B": true]))
-        XCTAssertEqual(["A": true], try (["A": 1] as JSON).merged(with: ["A": true]))
+        #expect(try (["A": 1] as JSON).merged(with: ["B": true]) == ["A": 1, "B": true])
+        #expect(try (["A": 1] as JSON).merged(with: ["A": true]) == ["A": true])
 
-        XCTAssertEqual([1, 2, 3], try ([1] as JSON).merged(with: [2, 3]))
-        XCTAssertEqual(["A": [1, 2, 1, 2]], try (["A": [1, 2]] as JSON).merged(with: ["A": [1, 2]]))
+        #expect(try ([1] as JSON).merged(with: [2, 3]) == [1, 2, 3])
+        #expect(try (["A": [1, 2]] as JSON).merged(with: ["A": [1, 2]]) == ["A": [1, 2, 1, 2]])
     }
 
-    func testMergeXML() throws {
-        try XCTAssertEqual(XML.parse(Data("""
+    @Test func testMergeXML() throws {
+        let lhs = try XML.parse(Data("""
         <abc x="1" y="z"/>
-        """.utf8)), XML.parse(Data("""
+        """.utf8))
+        let rhs = try XML.parse(Data("""
         <abc x="1"/>
         """.utf8)).merged(with: XML.parse(Data("""
         <abc y="z"/>
-        """.utf8))))
+        """.utf8)))
+        #expect(lhs == rhs)
     }
 
-    func testMergeYAML() throws {
-        try XCTAssertEqual(YAML.parse(Data("""
+    @Test func testMergeYAML() throws {
+        let lhs = try YAML.parse(Data("""
         root:
             a: x
             c: d
@@ -230,7 +248,8 @@ class UniversalTests : XCTestCase {
                 - 2
                 - dict:
                     z: q
-        """.utf8)), YAML.parse(Data("""
+        """.utf8))
+        let rhs = try YAML.parse(Data("""
         root:
             a: b
             values:
@@ -245,8 +264,8 @@ class UniversalTests : XCTestCase {
                 - 2
                 - dict:
                     z: q
-        """.utf8))))
+        """.utf8)))
+        #expect(lhs == rhs)
     }
 
 }
-

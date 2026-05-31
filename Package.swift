@@ -1,4 +1,4 @@
-// swift-tools-version:5.4
+// swift-tools-version: 6.1
 import PackageDescription
 
 let package = Package(
@@ -26,6 +26,6 @@ let package = Package(
         .testTarget(name: "PLISTTests", dependencies: ["PLIST"]),
         .target(name: "Universal", dependencies: ["XML", "YAML", "JSON", "PLIST"]),
         .testTarget(name: "UniversalTests", dependencies: ["Universal"]),
-        ]
+        ],
+    swiftLanguageModes: [.v5]
 )
-

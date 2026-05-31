@@ -14,8 +14,10 @@ import Either
     private let yaml: (String) throws -> YAML = YAML.parse(yaml:)
     private let yamlMulti: (String) throws -> [YAML] = YAML.parse(yamls:)
 
-    @Test func testIntentionalFailure() throws {
+    @Test func testIntentionalFailureOnAndroid() throws {
+        #if os(Android)
         #expect("right" == "wrong")
+        #endif
     }
 
     @Test func testNull() throws {

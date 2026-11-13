@@ -385,6 +385,9 @@ private let error = YAMLParser.Context.error
 
 private typealias ContextValue = (context: Context, value: YAML)
 private typealias ContextKey = (context: Context, key: YAML.Scalar)
+/// A partially accumulated mapping: what a block-map entry parser hands back to
+/// ``parseBlockMap``'s loop.
+private typealias ContextObject = (context: Context, map: YAML.Object)
 
 private func createContextValue(_ context: Context) -> (YAML) -> ContextValue { { value in (context, value) } }
 private func getContext(_ cv: ContextValue) -> Context { cv.context }
@@ -636,20 +639,29 @@ private func parseFlowSeq(_ context: Context) -> YAMLResult<ContextValue> {
 
 private func parseFlowSeq(_ acc: [YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
-        if peekType(context) == .closeSB {
-            return YAMLParser.lift((advance(context), .array(acc)))
+        // Iterative by design: one element per turn of the loop, not per stack
+        // frame. Recursing here cost a frame per element, so a sequence of a
+        // few hundred entries overflowed a small stack — a crash at the guard
+        // page, not an error a caller could catch. Nesting still recurses
+        // through `parseValue`, which is bounded by document depth.
+        var acc = acc
+        var context = context
+        while true {
+            if peekType(context) == .closeSB {
+                return YAMLParser.lift((advance(context), .array(acc)))
+            }
+            let cv = YAMLParser.lift(context)
+            >>- ignoreSpace
+            >>=- (acc.count == 0 ? YAMLParser.lift : expect(.comma, message: "expected comma"))
+            >>- ignoreSpace
+            >>=- parseValue
+            switch cv {
+            case .error(let e): return .error(e)
+            case .value(let (c, v)):
+                acc = appendToArray(acc)(v)
+                context = ignoreSpace(c)
+            }
         }
-        let cv = YAMLParser.lift(context)
-        >>- ignoreSpace
-        >>=- (acc.count == 0 ? YAMLParser.lift : expect(.comma, message: "expected comma"))
-        >>- ignoreSpace
-        >>=- parseValue
-        let v = cv >>- getValue
-        let c = cv
-        >>- getContext
-        >>- ignoreSpace
-        let a = appendToArray(acc) <^> v
-        return parseFlowSeq <^> a <*> c |> YAMLParser.join
     }
 }
 
@@ -661,26 +673,30 @@ private func parseFlowMap(_ context: Context) -> YAMLResult<ContextValue> {
 
 private func parseFlowMap(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
     { context in
-        if peekType(context) == .closeCB {
-            return YAMLParser.lift((advance(context), .object(acc)))
+        // One pair per turn of the loop — see `parseFlowSeq`.
+        var acc = acc
+        var context = context
+        while true {
+            if peekType(context) == .closeCB {
+                return YAMLParser.lift((advance(context), .object(acc)))
+            }
+            let ck = YAMLParser.lift(context)
+            >>- ignoreSpace
+            >>=- (acc.count == 0 ? YAMLParser.lift : expect(.comma, message: "expected comma"))
+            >>- ignoreSpace
+            >>=- parseString
+            >>=- checkKeyUniqueness(acc)
+            guard case .value(let (keyContext, k)) = ck else { return .error(ck.error!) }
+            let cv = YAMLParser.lift(keyContext)
+            >>=- expect(.colon, message: "expected colon")
+            >>=- parseValue
+            switch cv {
+            case .error(let e): return .error(e)
+            case .value(let (c, v)):
+                acc = putToMap(acc)(k)(v)
+                context = ignoreSpace(c)
+            }
         }
-        let ck = YAMLParser.lift(context)
-        >>- ignoreSpace
-        >>=- (acc.count == 0 ? YAMLParser.lift : expect(.comma, message: "expected comma"))
-        >>- ignoreSpace
-        >>=- parseString
-        >>=- checkKeyUniqueness(acc)
-        let k = ck >>- getValue
-        let cv = ck
-        >>- getContext
-        >>=- expect(.colon, message: "expected colon")
-        >>=- parseValue
-        let v = cv >>- getValue
-        let c = cv
-        >>- getContext
-        >>- ignoreSpace
-        let a = putToMap(acc) <^> k <*> v
-        return parseFlowMap <^> a <*> c |> YAMLParser.join
     }
 }
 
@@ -690,22 +706,29 @@ private func parseBlockSeq(_ context: Context) -> YAMLResult<ContextValue> {
 
 private func parseBlockSeq(_ acc: [YAML]) -> (Context) -> YAMLResult<ContextValue> {
     { context in
-        if peekType(context) != .dash {
-            return YAMLParser.lift((context, .array(acc)))
+        // One `- item` per turn of the loop — see `parseFlowSeq`. Block style
+        // overflowed exactly as flow style did; the spelling never mattered.
+        var acc = acc
+        var context = context
+        while true {
+            if peekType(context) != .dash {
+                return YAMLParser.lift((context, .array(acc)))
+            }
+            let cv = YAMLParser.lift(context)
+            >>- advance
+            >>=- expect(.indent, message: "expected indent after dash")
+            >>- ignoreSpace
+            >>=- parseValue
+            guard case .value(let (valueContext, v)) = cv else { return .error(cv.error!) }
+            let c = YAMLParser.lift(ignoreSpace(valueContext))
+            >>=- expect(.dedent, message: "expected dedent after dash indent")
+            switch c {
+            case .error(let e): return .error(e)
+            case .value(let c):
+                acc = appendToArray(acc)(v)
+                context = ignoreSpace(c)
+            }
         }
-        let cv = YAMLParser.lift(context)
-        >>- advance
-        >>=- expect(.indent, message: "expected indent after dash")
-        >>- ignoreSpace
-        >>=- parseValue
-        let v = cv >>- getValue
-        let c = cv
-        >>- getContext
-        >>- ignoreSpace
-        >>=- expect(.dedent, message: "expected dedent after dash indent")
-        >>- ignoreSpace
-        let a = appendToArray(acc) <^> v
-        return parseBlockSeq <^> a <*> c |> YAMLParser.join
     }
 }
 
@@ -715,37 +738,50 @@ private func parseBlockMap(_ context: Context) -> YAMLResult<ContextValue> {
 
 private func parseBlockMap(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
     { context in
-        switch peekType(context) {
+        // One pair per turn of the loop — see `parseFlowSeq`. The entry parsers
+        // below used to tail-call back into this function, which made a long
+        // block mapping recurse as deeply as a long sequence; they now hand the
+        // accumulated map back instead.
+        var acc = acc
+        var context = context
+        while true {
+            let entry: YAMLResult<ContextObject>
+            switch peekType(context) {
 
-        case .questionMark:
-            return parseQuestionMarkkeyValue(acc)(context)
+            case .questionMark:
+                entry = parseQuestionMarkkeyValue(acc)(context)
 
-        case .string, .stringDQ, .stringSQ:
-            return parseStringKeyValue(acc)(context)
+            case .string, .stringDQ, .stringSQ:
+                entry = parseStringKeyValue(acc)(context)
 
-        default:
-            return YAMLParser.lift((context, .object(acc)))
+            default:
+                return YAMLParser.lift((context, .object(acc)))
+            }
+            switch entry {
+            case .error(let e): return .error(e)
+            case .value(let (c, map)):
+                acc = map
+                context = c
+            }
         }
     }
 }
 
-private func parseQuestionMarkkeyValue(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
+/// Parses one `? key : value` pair and returns the map with it added, for
+/// ``parseBlockMap`` to fold into its loop.
+private func parseQuestionMarkkeyValue(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextObject> {
     { context in
         let ck = YAMLParser.lift(context)
         >>=- expect(.questionMark, message: "expected ?")
         >>=- parseValue
         >>=- checkKeyUniqueness(acc)
-        let k = ck >>- getValue
-        let cv = ck
-        >>- getContext
-        >>- ignoreSpace
+        guard case .value(let (keyContext, k)) = ck else { return .error(ck.error!) }
+        let cv = YAMLParser.lift(ignoreSpace(keyContext))
         >>=- parseColonValueOrNil
-        let v = cv >>- getValue
-        let c = cv
-        >>- getContext
-        >>- ignoreSpace
-        let a = putToMap(acc) <^> k <*> v
-        return parseBlockMap <^> a <*> c |> YAMLParser.join
+        switch cv {
+        case .error(let e): return .error(e)
+        case .value(let (c, v)): return YAMLParser.lift((ignoreSpace(c), putToMap(acc)(k)(v)))
+        }
     }
 }
 
@@ -763,22 +799,20 @@ private func parseColonValue(_ context: Context) -> YAMLResult<ContextValue> {
     >>=- parseValue
 }
 
-private func parseStringKeyValue(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextValue> {
+/// Parses one `key: value` pair and returns the map with it added, for
+/// ``parseBlockMap`` to fold into its loop.
+private func parseStringKeyValue(_ acc: YAML.Object) -> (Context) -> YAMLResult<ContextObject> {
     { context in
         let ck = YAMLParser.lift(context)
         >>=- parseString
         >>=- checkKeyUniqueness(acc)
-        let k = ck >>- getValue
-        let cv = ck
-        >>- getContext
-        >>- ignoreSpace
+        guard case .value(let (keyContext, k)) = ck else { return .error(ck.error!) }
+        let cv = YAMLParser.lift(ignoreSpace(keyContext))
         >>=- parseColonValue
-        let v = cv >>- getValue
-        let c = cv
-        >>- getContext
-        >>- ignoreSpace
-        let a = putToMap(acc) <^> k <*> v
-        return parseBlockMap <^> a <*> c |> YAMLParser.join
+        switch cv {
+        case .error(let e): return .error(e)
+        case .value(let (c, v)): return YAMLParser.lift((ignoreSpace(c), putToMap(acc)(k)(v)))
+        }
     }
 }
 
